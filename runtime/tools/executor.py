@@ -175,6 +175,12 @@ class ExecutionEngine:
     def _record_execution(self, action: dict[str, Any], result: dict[str, Any]) -> None:
         payload = {
             "timestamp": dt.datetime.now().isoformat(),
+            "authority": {
+                "classification": "operational_event",
+                "retention": "replay_only",
+                "non_authoritative": True,
+                "canonical_evidence": False,
+            },
             "action": action,
             "result": result,
             "cwd": str(self.cwd),
@@ -186,6 +192,7 @@ class ExecutionEngine:
         )
         self.memory_store.record_result(result)
         self.memory_store.append_history("action_result", payload)
-        self.memory_store.append_evidence("action_result", payload)
+        # AOIA Phase 2A containment boundary
+        # Runtime operational outputs must NEVER become canonical evidence.
         if action["action"].startswith("browser_"):
             self.memory_store.append_browser_event(payload)
