@@ -10,6 +10,6 @@ Primary ancestry preserved in this repository:
 
 ## Cross-repository references
 
-- `LSC-Research` may be cited as external research context only
-- `MHLM_MDLH` may cite AOIA stabilization and forensic analysis as case-study material
-- AOIA does not own LSC or MHLM truth claims
+- external research repositories may be cited as context only
+- analytical repositories may cite AOIA stabilization and forensic analysis as case-study material
+- AOIA does not own external science or epistemic truth claims

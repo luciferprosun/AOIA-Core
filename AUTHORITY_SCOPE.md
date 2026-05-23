@@ -15,8 +15,8 @@ Allowed:
 - provenance and contradiction control artifacts
 
 Forbidden:
-- neutrino physics as canonical source
-- MHLM theory papers as root canon
+- external scientific canon as canonical source
+- external epistemic theory papers as root canon
 - public portal/archive ownership
 - generated runtime state as equal authority to source
 

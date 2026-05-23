@@ -8,8 +8,8 @@ Allowed:
 - tests and implementation docs
 
 Not allowed as canonical authority:
-- neutrino science doctrine
-- MHLM theory papers
+- external science doctrine
+- external epistemic theory papers
 - public portal/archive ownership
 
 Rule:
