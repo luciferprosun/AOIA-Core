@@ -1,0 +1,11 @@
+[
+  {
+    "query": "network ports",
+    "static_context": [
+      "Use: podman network",
+      "Use: podman network ls",
+      "Use: podman network rm"
+    ],
+    "source": "RHCSA knowledge pack"
+  }
+]

@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "nodes": {
+    "nginx": {
+      "kind": "service",
+      "commands": [
+        "dnf install nginx",
+        "systemctl enable --now nginx",
+        "systemctl status nginx",
+        "journalctl -u nginx -b",
+        "firewall-cmd --add-service=http --permanent",
+        "firewall-cmd --reload"
+      ],
+      "related": ["dnf", "systemctl", "journalctl", "firewall-cmd", "selinux"]
+    },
+    "httpd": {
+      "kind": "service",
+      "commands": [
+        "dnf install httpd",
+        "systemctl enable --now httpd",
+        "systemctl status httpd",
+        "journalctl -u httpd -b",
+        "firewall-cmd --add-service=http --permanent",
+        "restorecon -Rv /var/www/html"
+      ],
+      "related": ["dnf", "systemctl", "journalctl", "firewall-cmd", "selinux"]
+    },
+    "ssh": {
+      "kind": "service",
+      "commands": [
+        "systemctl status sshd",
+        "journalctl -u sshd -b",
+        "ss -tulpn | grep :22",
+        "ssh -vvv user@host"
+      ],
+      "related": ["systemctl", "journalctl", "ss", "firewall-cmd", "permissions"]
+    },
+    "lvm": {
+      "kind": "storage",
+      "commands": [
+        "lsblk",
+        "pvcreate /dev/DEVICE",
+        "vgcreate VG /dev/DEVICE",
+        "lvcreate -n LV -L SIZE VG",
+        "mkfs.xfs /dev/VG/LV",
+        "mount -a"
+      ],
+      "related": ["storage", "mount", "fstab", "xfs", "ext4"]
+    },
+    "selinux": {
+      "kind": "security",
+      "commands": [
+        "getenforce",
+        "sestatus",
+        "ls -Z PATH",
+        "restorecon -Rv PATH",
+        "semanage fcontext -a -t TYPE 'PATH_REGEX'"
+      ],
+      "related": ["permissions", "audit", "services", "web"]
+    },
+    "firewall-cmd": {
+      "kind": "network_security",
+      "commands": [
+        "firewall-cmd --state",
+        "firewall-cmd --get-active-zones",
+        "firewall-cmd --list-all",
+        "firewall-cmd --add-service=SERVICE --permanent",
+        "firewall-cmd --reload"
+      ],
+      "related": ["networking", "ssh", "httpd", "nginx"]
+    }
+  }
+}

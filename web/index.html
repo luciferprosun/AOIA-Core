@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App222 Operator Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <p class="eyebrow">flAmeBornLLC</p>
+          <h1>App222</h1>
+          <p class="subtitle">Codex-style operator shell for your local runtime.</p>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Model</h2>
+            <span id="current-model-badge" class="badge">loading</span>
+          </div>
+          <label class="label" for="model-select">Active model</label>
+          <select id="model-select" class="select"></select>
+          <button id="switch-model" class="button button-primary">Switch model</button>
+          <p id="model-note" class="note"></p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Quick commands</h2>
+          </div>
+          <div class="quick-actions">
+            <button class="button button-ghost quick-action" data-prompt="/status">/status</button>
+            <button class="button button-ghost quick-action" data-prompt="/tools">/tools</button>
+            <button class="button button-ghost quick-action" data-prompt="/help">/help</button>
+            <button class="button button-ghost quick-action" data-prompt="open https://example.com">Open URL</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Runtime</h2>
+          </div>
+          <dl class="status-list">
+            <div>
+              <dt>Working directory</dt>
+              <dd id="status-cwd">-</dd>
+            </div>
+            <div>
+              <dt>Browser</dt>
+              <dd id="status-browser">-</dd>
+            </div>
+            <div>
+              <dt>Current URL</dt>
+              <dd id="status-url">-</dd>
+            </div>
+            <div>
+              <dt>Vault</dt>
+              <dd id="status-vault">-</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Operator Console</p>
+            <h2>Codex-shaped control surface</h2>
+          </div>
+          <button id="refresh-status" class="button button-ghost">Refresh status</button>
+        </header>
+
+        <section class="hero">
+          <div class="hero-card">
+            <p class="eyebrow">Session</p>
+            <h3 id="session-model">loading</h3>
+            <p id="session-summary" class="hero-copy">
+              Waiting for runtime status.
+            </p>
+          </div>
+          <div class="hero-grid">
+            <article class="metric-card">
+              <span>Tools</span>
+              <strong id="metric-tools">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>Commands</span>
+              <strong id="metric-commands">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>Recent outputs</span>
+              <strong id="metric-outputs">0</strong>
+            </article>
+          </div>
+        </section>
+
+        <section id="chat-log" class="chat-log" aria-live="polite"></section>
+
+        <form id="composer" class="composer">
+          <label class="label" for="prompt-input">Message</label>
+          <textarea
+            id="prompt-input"
+            rows="4"
+            placeholder="Ask the runtime to browse, write files, run tools, or switch context."
+          ></textarea>
+          <div class="composer-actions">
+            <span class="hint">Enter sends. Shift+Enter adds a newline.</span>
+            <button type="submit" class="button button-primary">Send</button>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <template id="message-template">
+      <article class="message">
+        <div class="message-meta">
+          <span class="message-role"></span>
+        </div>
+        <pre class="message-body"></pre>
+      </article>
+    </template>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

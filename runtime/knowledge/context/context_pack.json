@@ -1,0 +1,34 @@
+[
+  {
+    "query": "network ports",
+    "matched_keywords": [
+      "network"
+    ],
+    "matched_commands": [
+      {
+        "command": "podman network",
+        "description": "",
+        "examples": [
+          "podman network"
+        ],
+        "source_section": "Kontenery Podman"
+      },
+      {
+        "command": "podman network ls",
+        "description": "",
+        "examples": [
+          "podman network ls"
+        ],
+        "source_section": "Kontenery Podman"
+      },
+      {
+        "command": "podman network rm",
+        "description": "",
+        "examples": [
+          "podman network rm"
+        ],
+        "source_section": "Kontenery Podman"
+      }
+    ]
+  }
+]

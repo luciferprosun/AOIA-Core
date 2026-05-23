@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "depths": ["shallow", "mid", "deep"],
+  "pressure_thresholds": {
+    "shallow_max": 33,
+    "mid_max": 66
+  },
+  "runtime_policy": {
+    "load_timing": "startup_only",
+    "mutable_at_runtime": false,
+    "network_required": false
+  }
+}
+
