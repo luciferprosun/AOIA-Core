@@ -41,6 +41,15 @@ PROMPT_FILE = PROJECT_DIR / "prompts" / "system_prompt.txt"
 MAX_AGENT_STEPS = 8
 DEBUG_RAW_RESPONSE = os.getenv("AGENT_DEBUG", "0") == "1"
 MODEL_RETRY_DELAYS = (1.0, 2.0, 4.0)
+EXTERNAL_URL_RE = re.compile(r"\bhttps?://\S+", re.IGNORECASE)
+REPOSITORY_HOST_RE = re.compile(r"\b(?:github\.com|gitlab\.com)(?:/|\b)", re.IGNORECASE)
+REPOSITORY_INTENT_RE = re.compile(
+    r"\b(?:check|analy[sz]e|describe|review|inspect|sprawdz|sprawdź|przeanalizuj|opisz)\b"
+    r".*\b(?:github|gitlab|repo|repository|repozytorium|projekt)\b"
+    r"|\b(?:github|gitlab|repo|repository|repozytorium|projekt)\b"
+    r".*\b(?:check|analy[sz]e|describe|review|inspect|sprawdz|sprawdź|przeanalizuj|opisz)\b",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -105,6 +114,15 @@ def normalize_external_url(raw_url: str) -> str:
             return unquote(target[0])
 
     return raw_url
+
+
+def classify_external_review_request(user_input: str) -> str | None:
+    """Deterministically keep external links out of local RHCSA retrieval."""
+    if REPOSITORY_HOST_RE.search(user_input) or REPOSITORY_INTENT_RE.search(user_input):
+        return "external_repository_review"
+    if EXTERNAL_URL_RE.search(user_input):
+        return "external_link_review"
+    return None
 
 
 def is_quota_exhausted_error(error: Exception) -> bool:
@@ -313,6 +331,9 @@ class AgentRuntime:
         if self.handle_local_route(user_input):
             return
 
+        if self.handle_external_review_route(user_input):
+            return
+
         if self.handle_knowledge_route(user_input):
             return
 
@@ -418,6 +439,26 @@ class AgentRuntime:
             )
 
         print("\nAgent> Agent stopped after reaching the maximum step limit.")
+
+    def handle_external_review_route(self, user_input: str) -> bool:
+        """Keep external URLs and repository requests out of RHCSA retrieval."""
+        route = classify_external_review_request(user_input)
+        if route is None:
+            return False
+        message = (
+            "External repository inspection path detected. Browser inspection path available."
+            if route == "external_repository_review"
+            else "External URL detected. Browser inspection path available."
+        )
+        self.log_session_event(
+            route,
+            {
+                "user_request": user_input,
+                "routing_boundary": "no_rhcsa_local_knowledge",
+            },
+        )
+        print(f"\nAgent> {message}")
+        return True
 
     def enable_orchestrator(self, enabled: bool = True) -> None:
         self.use_orchestrator = enabled
