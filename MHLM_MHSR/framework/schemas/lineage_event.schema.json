@@ -1,0 +1,21 @@
+{
+  "schema_name": "lineage_event",
+  "version": "0.1",
+  "status": "placeholder",
+  "required_fields": [
+    "event_id",
+    "event_type",
+    "case_study",
+    "artifact_refs",
+    "timestamp"
+  ],
+  "allowed_event_types": [
+    "import",
+    "normalize",
+    "classify",
+    "synthesize",
+    "review",
+    "quarantine"
+  ],
+  "notes": "Initial placeholder only. Do not treat as final validation schema."
+}

@@ -1,0 +1,20 @@
+{
+  "schema_name": "provenance_record",
+  "version": "0.1",
+  "status": "placeholder",
+  "required_fields": [
+    "provenance_id",
+    "source_type",
+    "source_ref",
+    "case_study",
+    "artifact_ref"
+  ],
+  "allowed_source_types": [
+    "provider_export",
+    "repository_snapshot",
+    "source_document",
+    "session_export",
+    "manual_record"
+  ],
+  "notes": "Initial placeholder only. Do not treat as final validation schema."
+}

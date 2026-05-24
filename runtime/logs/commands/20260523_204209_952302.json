@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-05-23T20:42:09.952263",
+  "authority": {
+    "classification": "operational_event",
+    "retention": "replay_only",
+    "non_authoritative": true,
+    "canonical_evidence": false
+  },
+  "action": {
+    "action": "respond",
+    "message": "I am currently running on the openrouter/google/gemma-3-27b-it model.",
+    "reason": "The runtime information provides the current model being used.",
+    "confidence": "high",
+    "requires_confirmation": false,
+    "confidence_label": "high"
+  },
+  "result": {
+    "success": true,
+    "message": "I am currently running on the openrouter/google/gemma-3-27b-it model.",
+    "confidence_label": "high",
+    "stop_loop": true
+  },
+  "cwd": "/home/l/Desktop/AOIA-Core/runtime"
+}

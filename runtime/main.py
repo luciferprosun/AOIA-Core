@@ -328,10 +328,10 @@ class AgentRuntime:
             self.emit_epistemic_unknown("Epistemic kill switch is enabled.")
             return
 
-        if self.handle_local_route(user_input):
+        if self.handle_external_review_route(user_input):
             return
 
-        if self.handle_external_review_route(user_input):
+        if self.handle_local_route(user_input):
             return
 
         if self.handle_knowledge_route(user_input):
@@ -445,6 +445,54 @@ class AgentRuntime:
         route = classify_external_review_request(user_input)
         if route is None:
             return False
+
+        raw_url = extract_first_url(user_input)
+        if raw_url:
+            normalized_url = normalize_external_url(raw_url)
+            try:
+                open_result = self.executor.execute(
+                    {"action": "browser_open", "url": normalized_url},
+                    require_approval=False,
+                )
+                self.print_result(open_result)
+                if open_result.get("success"):
+                    visible_text = self.executor.execute(
+                        {"action": "browser_get_visible_text"},
+                        require_approval=False,
+                    )
+                    self.print_result(visible_text)
+                self.log_session_event(
+                    route,
+                    {
+                        "user_request": user_input,
+                        "routing_boundary": "no_rhcsa_local_knowledge",
+                        "browser_handled": True,
+                        "opened_url": normalized_url,
+                    },
+                )
+                return True
+            except Exception as error:
+                self.log_error(
+                    {
+                        "user_request": user_input,
+                        "route": route,
+                        "error": str(error),
+                        "traceback": traceback.format_exc(),
+                    }
+                )
+                self.log_session_event(
+                    route,
+                    {
+                        "user_request": user_input,
+                        "routing_boundary": "no_rhcsa_local_knowledge",
+                        "browser_handled": False,
+                        "opened_url": normalized_url,
+                        "error": str(error),
+                    },
+                )
+                print("\nAgent> External URL detected. Browser inspection path available but browser handoff failed.")
+                return True
+
         message = (
             "External repository inspection path detected. Browser inspection path available."
             if route == "external_repository_review"
@@ -455,6 +503,7 @@ class AgentRuntime:
             {
                 "user_request": user_input,
                 "routing_boundary": "no_rhcsa_local_knowledge",
+                "browser_handled": False,
             },
         )
         print(f"\nAgent> {message}")

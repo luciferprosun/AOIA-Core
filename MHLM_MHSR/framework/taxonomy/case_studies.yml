@@ -1,0 +1,9 @@
+canonical_case_studies:
+  lsc_neutrino:
+    canonical_name: "LSC neutrino scientific anomaly case study"
+    scope: "Scientific reasoning, neutrino anomaly material, LSC lineage, and related research artifacts."
+    separation_rule: "LSC is not proof of AOIA."
+  anti_hallucination_epi_app:
+    canonical_name: "AOIA anti-hallucination engineering case study"
+    scope: "Deterministic runtime, provenance boundaries, anti-hallucination engineering, and AOIA lineage."
+    separation_rule: "AOIA is not proof of LSC."

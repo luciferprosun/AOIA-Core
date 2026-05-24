@@ -59,6 +59,29 @@ class RecordingKernel:
         )
 
 
+class RecordingExecutor:
+    def __init__(self) -> None:
+        self.actions: list[dict] = []
+
+    def execute(self, action: dict, require_approval: bool = True):
+        _ = require_approval
+        self.actions.append(action)
+        if action["action"] == "browser_open":
+            return {
+                "success": True,
+                "message": f"Opened {action['url']}",
+                "current_url": action["url"],
+                "open_tabs": [action["url"]],
+            }
+        if action["action"] == "browser_get_visible_text":
+            return {
+                "success": True,
+                "message": "Read visible page text.",
+                "text": "GitHub page text",
+            }
+        raise AssertionError(f"Unexpected action: {action}")
+
+
 class RoutingBoundaryTests(unittest.TestCase):
     def test_model_question_is_not_external_review(self) -> None:
         self.assertIsNone(main.classify_external_review_request("jakim jestes modelem"))
@@ -87,14 +110,18 @@ class RoutingBoundaryTests(unittest.TestCase):
             project_dir = Path(tmp) / "project"
             project_dir.mkdir()
             runtime = main.AgentRuntime(FakeProvider(), PROMPT_TEMPLATE, project_dir)
+            executor = RecordingExecutor()
+            runtime.executor = executor
             runtime.aoia_kernel = RaisingKernel()
 
             with patch("sys.stdout", new_callable=StringIO) as fake_stdout:
                 runtime.handle_user_request("https://github.com/luciferprosun/AOIA-Core")
 
             transcript = fake_stdout.getvalue()
-            self.assertIn("External repository inspection path detected", transcript)
-            self.assertIn("Browser inspection path available", transcript)
+            self.assertEqual([action["action"] for action in executor.actions], ["browser_open", "browser_get_visible_text"])
+            self.assertIn("Opened https://github.com/luciferprosun/AOIA-Core", transcript)
+            self.assertIn("Current URL: https://github.com/luciferprosun/AOIA-Core", transcript)
+            self.assertIn("GitHub page text", transcript)
             self.assertNotIn("AOIA deterministic epistemic kernel hit", transcript)
 
     def test_repository_intent_does_not_trigger_rhcsa_kernel(self) -> None:

@@ -69,9 +69,9 @@ Preserved:
 
 ## Browser Handoff Status
 
-Browser handoff exists as a controlled runtime placeholder only.
+Browser handoff now opens the detected URL through the existing browser bridge and reads the visible page text.
 
-The patch does not open a browser, crawl a repository, fetch external pages, analyze repository contents, or create provenance records from external content.
+The patch still does not crawl a repository, perform autonomous browsing, analyze repository contents deeply, or create provenance records from external content.
 
 ## Validation
 
@@ -95,11 +95,12 @@ Expected coverage:
 - `https://github.com/luciferprosun/AOIA-Core` does not trigger RHCSA retrieval.
 - `can you check github repository` does not trigger RHCSA retrieval.
 - `can you inspect github repository` does not trigger RHCSA retrieval.
+- `https://github.com/luciferprosun/AOIA-Core` is opened via browser handoff instead of local knowledge.
 - `how to create folder in linux` still reaches the RHCSA/local knowledge path.
 
 ## Unresolved Browser Limitations
 
-- No safe browser execution policy is frozen for repository inspection.
+- No safe browser execution policy is frozen for deeper repository inspection.
 - No external-source provenance capture exists for browser content.
 - No contradiction handling exists for external repository claims.
 - No retrieval guard exists for external browser output.

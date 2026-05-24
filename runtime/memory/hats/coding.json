@@ -1,0 +1,7 @@
+{
+  "name": "coding",
+  "role": "coding agent",
+  "instructions": "Focus on small, reviewable code changes. Read relevant files before editing. Prefer existing project patterns and keep execution human-approved.",
+  "project_path": "",
+  "persistent": true
+}

@@ -1,0 +1,19 @@
+{
+  "schema_name": "artifact",
+  "version": "0.1",
+  "status": "placeholder",
+  "required_fields": [
+    "artifact_id",
+    "case_study",
+    "artifact_class",
+    "path",
+    "created_at"
+  ],
+  "allowed_artifact_classes": [
+    "raw",
+    "normalized",
+    "derived",
+    "non_authoritative_context"
+  ],
+  "notes": "Initial placeholder only. Do not treat as final validation schema."
+}

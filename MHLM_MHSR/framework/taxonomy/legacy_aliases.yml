@@ -1,0 +1,21 @@
+legacy_aliases:
+  MHLM:
+    canonical: "MHLM"
+    status: "accepted_alias"
+  MHSR:
+    canonical: "MHSR"
+    status: "accepted_alias"
+  MDLH:
+    canonical: "MHLM/MHSR adjacent legacy alias"
+    status: "review_before_merge"
+  LSC:
+    canonical: "LSC"
+    status: "canonical_case_study_alias"
+  LST:
+    canonical: "LSC"
+    status: "legacy_transitional_alias"
+
+rules:
+  - "Aliases do not merge evidence automatically."
+  - "Legacy names require provenance review before migration."
+  - "Case-study aliases must not cross AOIA/LSC boundaries without explicit review."
