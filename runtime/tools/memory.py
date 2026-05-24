@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any
 
 
+# TRANSITIONAL MEMORY MONOLITH
+# NO NEW RESPONSIBILITIES.
+# Pending future authority-layer split. Keep L0/L1/L2/L4 behavior explicit here
+# until memory authority boundaries are enforced by separate stores.
+
 @dataclass
 class RuntimePaths:
     project_dir: Path

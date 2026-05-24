@@ -1,0 +1,19 @@
+{
+  "Europe": {
+    "peak_hours": [18, 19, 20, 21, 22],
+    "off_peak_hours": [1, 2, 3, 4, 5]
+  },
+  "USA": {
+    "peak_hours": [17, 18, 19, 20, 21],
+    "off_peak_hours": [2, 3, 4, 5]
+  },
+  "Asia": {
+    "peak_hours": [19, 20, 21, 22, 23],
+    "off_peak_hours": [2, 3, 4, 5]
+  },
+  "South America": {
+    "peak_hours": [18, 19, 20, 21, 22],
+    "off_peak_hours": [1, 2, 3, 4, 5]
+  }
+}
+

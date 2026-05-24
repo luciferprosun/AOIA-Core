@@ -1,0 +1,32 @@
+{
+  "id": "systemctl-status",
+  "command": "systemctl status",
+  "description": "Shows service manager status for a unit.",
+  "category": "service",
+  "tags": [
+    "read-only",
+    "service-status"
+  ],
+  "risk": "low",
+  "os": [
+    "linux",
+    "rhel",
+    "ubuntu"
+  ],
+  "shell": [
+    "bash",
+    "sh",
+    "zsh"
+  ],
+  "examples": [
+    {
+      "input": "systemctl status sshd",
+      "expected_effect": "Prints the current status and recent logs for the sshd service."
+    }
+  ],
+  "notes": "Status inspection is low risk. Start, stop, restart, and enable operations require higher risk entries.",
+  "related_commands": [
+    "journalctl",
+    "systemctl"
+  ]
+}

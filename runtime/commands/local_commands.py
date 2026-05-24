@@ -8,17 +8,11 @@ import json
 from pathlib import Path
 
 from .base import CommandRegistry, CommandResult
-from tools.rhcsa_search import (
-    exact_command_lookup,
-    filter_by_topic,
-    grep_rhcsa,
-    library_status,
-    load_topic,
-    retrieve_examples,
-    search_by_tag,
-    search_rhcsa,
-    search_workflows,
-    suggest_related_commands,
+from retrieval.facade import (
+    linux_filter_by_topic,
+    linux_library_status,
+    linux_load_topic,
+    linux_low_level_results,
 )
 from tools.validator import validate_action
 
@@ -288,7 +282,7 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
     query = parts[1] if len(parts) > 1 else ""
 
     if command == "status":
-        status = library_status()
+        status = linux_library_status()
         lines = [
             "RHCSA local library status:",
             f"  path: {status['path']}",
@@ -325,41 +319,41 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
     if command == "search":
         if not query:
             return CommandResult(True, "Usage: /rhcsa search QUERY")
-        results = search_rhcsa(query, limit=8)
+        results = linux_low_level_results("search", query, limit=8)
         return CommandResult(True, format_rhcsa_results(results))
 
     if command == "tag":
         if not query:
             return CommandResult(True, "Usage: /rhcsa tag TAG")
-        results = search_by_tag(query, limit=8)
+        results = linux_low_level_results("tag", query, limit=8)
         return CommandResult(True, format_rhcsa_results(results))
 
     if command == "exact":
         if not query:
             return CommandResult(True, "Usage: /rhcsa exact COMMAND")
-        results = exact_command_lookup(query, limit=8)
+        results = linux_low_level_results("exact", query, limit=8)
         return CommandResult(True, format_rhcsa_results(results))
 
     if command == "grep":
         if not query:
             return CommandResult(True, "Usage: /rhcsa grep PATTERN")
-        results = grep_rhcsa(query, limit=8)
+        results = linux_low_level_results("grep", query, limit=8)
         return CommandResult(True, format_rhcsa_results(results))
 
     if command == "filter":
         if not query or " " not in query.strip():
             return CommandResult(True, "Usage: /rhcsa filter TOPIC QUERY")
         topic_name, filtered_query = query.strip().split(maxsplit=1)
-        results = filter_by_topic(topic_name, filtered_query, limit=8)
+        results = linux_filter_by_topic(topic_name, filtered_query, limit=8)
         return CommandResult(True, format_rhcsa_results(results))
 
     if command == "topic":
         if not query:
             return CommandResult(True, "Usage: /rhcsa topic TOPIC")
-        return CommandResult(True, load_topic(query) or "RHCSA topic not found.")
+        return CommandResult(True, linux_load_topic(query) or "RHCSA topic not found.")
 
     if command == "commands":
-        suggestions = suggest_related_commands(query, limit=20)
+        suggestions = linux_low_level_results("commands", query, limit=20)
         if not suggestions:
             return CommandResult(True, "No RHCSA command suggestions found.")
         lines = ["RHCSA command suggestions:"]
@@ -368,7 +362,7 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
         return CommandResult(True, "\n".join(lines))
 
     if command == "workflows":
-        workflows = search_workflows(query, limit=10)
+        workflows = linux_low_level_results("workflows", query, limit=10)
         if not workflows:
             return CommandResult(True, "No RHCSA workflows found.")
         lines = ["RHCSA workflow results:"]
@@ -378,7 +372,7 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
         return CommandResult(True, "\n".join(lines))
 
     if command == "examples":
-        examples = retrieve_examples(query, limit=10)
+        examples = linux_low_level_results("examples", query, limit=10)
         if not examples:
             return CommandResult(True, "No RHCSA examples found.")
         lines = ["RHCSA example results:"]

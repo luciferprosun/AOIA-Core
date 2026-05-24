@@ -1,0 +1,295 @@
+path,module,category,size_bytes,last_modified,description
+AOIA_CANONICAL_STRUCTURE_PLAN.md,AOIA_CANONICAL_STRUCTURE_PLAN.md,repository,2753,2026-05-23T10:44:26,AOIA Canonical Structure Plan
+AOIA_CONTAMINATION_REPORT.md,AOIA_CONTAMINATION_REPORT.md,repository,3806,2026-05-23T10:44:25,AOIA Contamination Report
+AOIA_DEPENDENCY_GRAPH.md,AOIA_DEPENDENCY_GRAPH.md,repository,2573,2026-05-23T10:44:25,AOIA Dependency Graph
+AOIA_MEMORY_ONTOLOGY.md,AOIA_MEMORY_ONTOLOGY.md,memory,4544,2026-05-23T11:11:09,AOIA Memory Ontology
+AOIA_RUNTIME_BOUNDARY_RECOMMENDATION.md,AOIA_RUNTIME_BOUNDARY_RECOMMENDATION.md,repository,2523,2026-05-23T10:53:19,AOIA Runtime Boundary Recommendation
+AOIA_RUNTIME_MAP.md,AOIA_RUNTIME_MAP.md,repository,4497,2026-05-23T10:44:25,AOIA Runtime Map
+AOIA_TRANSITIONAL_COMPONENTS.md,AOIA_TRANSITIONAL_COMPONENTS.md,repository,2908,2026-05-23T10:44:26,AOIA Transitional Components
+AUTHORITY_SCOPE.md,AUTHORITY_SCOPE.md,repository,612,2026-05-23T09:36:51,AOIA Authority Scope
+CONTRADICTION_SEMANTICS.md,CONTRADICTION_SEMANTICS.md,repository,2336,2026-05-23T11:11:10,Contradiction Semantics
+CURRENT_MEMORY_FLOW.md,CURRENT_MEMORY_FLOW.md,memory,4023,2026-05-23T11:11:08,Current Memory Flow
+FILESYSTEM_ONTOLOGY_LAYOUT.md,FILESYSTEM_ONTOLOGY_LAYOUT.md,repository,3434,2026-05-23T11:11:10,Filesystem Ontology Layout
+MEMORY_BOUNDARY_ANALYSIS.md,MEMORY_BOUNDARY_ANALYSIS.md,memory,3024,2026-05-23T11:11:09,Memory Boundary Analysis
+MEMORY_LAYER_DECOMPOSITION.md,MEMORY_LAYER_DECOMPOSITION.md,memory,3625,2026-05-23T10:53:18,Memory Layer Decomposition
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/README.md,MHLM_MHSR/case_studies,governance,740,2026-05-24T11:00:21,AOIA Anti-Hallucination Engineering Case Study
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/architecture/DEPENDENCY_BOUNDARY_ANALYSIS.md,MHLM_MHSR/case_studies,governance,2230,2026-05-24T11:43:01,Dependency Boundary Analysis
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/architecture/MEMORY_DOMAIN_SPLIT_PLAN.md,MHLM_MHSR/case_studies,memory,1870,2026-05-24T11:43:00,Memory Domain Split Plan
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/architecture/contracts/RUNTIME_SAFETY_CONTRACTS.md,MHLM_MHSR/case_studies,governance,2030,2026-05-24T11:43:01,Runtime Safety Contracts
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/architecture/enforcement/ENFORCEMENT_LAYER_DESIGN.md,MHLM_MHSR/case_studies,governance,2524,2026-05-24T11:43:00,Enforcement Layer Design
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/archive/AOIA_MASTER_LIBRARY/AOIA_Master_Library.pdf,MHLM_MHSR/case_studies,governance,272701,2026-05-24T11:00:50,Governance artifact.
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/archive/AOIA_MASTER_LIBRARY/MASTER_INDEX.md,MHLM_MHSR/case_studies,governance,4228,2026-05-24T11:02:33,AOIA Master Library Index
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/contradictions/CONTRADICTION_TAXONOMY.md,MHLM_MHSR/case_studies,governance,1889,2026-05-24T11:43:02,Contradiction Taxonomy
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/governance/GOVERNANCE_MODEL.md,MHLM_MHSR/case_studies,governance,2035,2026-05-24T11:42:59,AOIA Governance Model
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/lineage/LINEAGE_POLICY.md,MHLM_MHSR/case_studies,governance,1243,2026-05-24T11:02:39,AOIA Forensic Lineage Policy
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/prompts/PROMPT_ARCHIVE_POLICY.md,MHLM_MHSR/case_studies,governance,1176,2026-05-24T11:02:38,Prompt Archive Policy
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/provenance/PROVENANCE_MODEL_PREP.md,MHLM_MHSR/case_studies,provenance,1637,2026-05-24T11:43:02,Provenance Model Preparation
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/reports/raw_provider/claude/MANIFEST.md,MHLM_MHSR/case_studies,governance,552,2026-05-24T11:02:34,Claude Provider Manifest
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/reports/raw_provider/codex/MANIFEST.md,MHLM_MHSR/case_studies,governance,692,2026-05-24T11:02:34,Codex Provider Manifest
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/reports/raw_provider/deepseek/MANIFEST.md,MHLM_MHSR/case_studies,governance,369,2026-05-24T11:02:36,DeepSeek Provider Manifest
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/reports/raw_provider/gemini/MANIFEST.md,MHLM_MHSR/case_studies,governance,379,2026-05-24T11:02:35,Gemini Provider Manifest
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/reports/raw_provider/kimi/MANIFEST.md,MHLM_MHSR/case_studies,governance,217,2026-05-24T11:02:36,Kimi Provider Manifest
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/reports/raw_provider/unknown/MANIFEST.md,MHLM_MHSR/case_studies,governance,937,2026-05-24T11:02:37,Unknown Provider Manifest
+MHLM_MHSR/case_studies/anti_hallucination_epi_app/unclassified/UNCLASSIFIED_MANIFEST.md,MHLM_MHSR/case_studies,governance,903,2026-05-24T11:02:38,Unclassified Manifest
+MHLM_MHSR/case_studies/lsc_neutrino/README.md,MHLM_MHSR/case_studies,governance,775,2026-05-24T11:00:21,LSC Neutrino Scientific Anomaly Case Study
+MHLM_MHSR/framework/methodology/contradiction_policy.md,MHLM_MHSR/framework,governance,814,2026-05-24T11:00:24,Contradiction Policy
+MHLM_MHSR/framework/methodology/evidence_policy.md,MHLM_MHSR/framework,governance,1156,2026-05-24T08:55:56,Evidence Policy
+MHLM_MHSR/framework/methodology/inclusion_rules.md,MHLM_MHSR/framework,governance,1371,2026-05-24T11:00:25,Inclusion Rules
+MHLM_MHSR/framework/methodology/lineage_policy.md,MHLM_MHSR/framework,governance,998,2026-05-24T11:00:23,Lineage Policy
+MHLM_MHSR/framework/schemas/artifact.schema.json,MHLM_MHSR/framework,governance,389,2026-05-24T08:55:58,Governance artifact.
+MHLM_MHSR/framework/schemas/case_study_manifest.schema.json,MHLM_MHSR/framework,governance,279,2026-05-24T08:56:00,Governance artifact.
+MHLM_MHSR/framework/schemas/lineage_event.schema.json,MHLM_MHSR/framework,governance,410,2026-05-24T08:55:58,Governance artifact.
+MHLM_MHSR/framework/schemas/provenance_record.schema.json,MHLM_MHSR/framework,provenance,440,2026-05-24T08:55:59,Provenance artifact.
+MHLM_MHSR/framework/schemas/report.schema.json,MHLM_MHSR/framework,governance,373,2026-05-24T08:55:59,Governance artifact.
+MHLM_MHSR/framework/taxonomy/case_studies.yml,MHLM_MHSR/framework,configuration,518,2026-05-24T11:00:22,Configuration artifact.
+MHLM_MHSR/framework/taxonomy/legacy_aliases.yml,MHLM_MHSR/framework,configuration,569,2026-05-24T11:00:23,Configuration artifact.
+MHLM_MHSR/framework/taxonomy/model_aliases.yml,MHLM_MHSR/framework,configuration,711,2026-05-24T11:00:22,Configuration artifact.
+MUTABLE_STATE_ISOLATION_PLAN.md,MUTABLE_STATE_ISOLATION_PLAN.md,repository,3164,2026-05-23T10:53:18,Mutable State Isolation Plan
+ORCHESTRATION_REMNANT_AUDIT.md,ORCHESTRATION_REMNANT_AUDIT.md,repository,2825,2026-05-23T10:53:19,Orchestration Remnant Audit
+PROVENANCE_FOUNDATION.md,PROVENANCE_FOUNDATION.md,provenance,2349,2026-05-23T11:11:11,Provenance Foundation
+README.md,README.md,repository,8453,2026-05-22T01:09:56,flAmeBorbLLC AIOA LiGaLu
+ROADMAP.md,ROADMAP.md,repository,677,2026-05-23T09:27:43,AOIA Core Roadmap
+ROUTING_AUTHORITY_ANALYSIS.md,ROUTING_AUTHORITY_ANALYSIS.md,repository,3339,2026-05-23T10:53:17,Routing Authority Analysis
+archive/quarantine/README.md,archive/quarantine,repository,340,2026-05-23T10:14:15,AOIA Quarantine
+contradictions/README.md,contradictions/README.md,repository,305,2026-05-23T10:44:28,Contradictions
+docs/ADR/ADR-001-deterministic-routing.md,docs/ADR,docs,391,2026-05-21T19:51:46,ADR-001: Deterministic Routing
+docs/ADR/ADR-002-three-depth-model.md,docs/ADR,docs,341,2026-05-21T19:51:47,ADR-002: Three Depth Model
+docs/ADR/ADR-003-local-first-execution.md,docs/ADR,docs,417,2026-05-21T19:51:47,ADR-003: Local-First Execution
+docs/ADR/ADR-004-no-runtime-learning.md,docs/ADR,docs,347,2026-05-21T19:51:48,ADR-004: No Runtime Learning
+docs/ADR/ADR-005-fail-fast-philosophy.md,docs/ADR,docs,399,2026-05-21T19:51:48,ADR-005: Fail-Fast Philosophy
+docs/ARCHITECTURE.md,docs/ARCHITECTURE.md,docs,2180,2026-05-21T17:10:55,Architecture
+docs/CONSTRAINTS.md,docs/CONSTRAINTS.md,docs,3294,2026-05-21T19:51:45,AOIA Constraints
+docs/FULL_PROJECT_TREE.txt,docs/FULL_PROJECT_TREE.txt,docs,13263,2026-05-24T08:06:00,Docs artifact.
+docs/GIT_HISTORY_CONTINUATION_PLAN.md,docs/GIT_HISTORY_CONTINUATION_PLAN.md,docs,677,2026-05-23T09:27:45,Git History Continuation Plan
+docs/KNOWLEDGE_PACK_RULES.md,docs/KNOWLEDGE_PACK_RULES.md,docs,1924,2026-05-21T20:37:59,AOIA Knowledge Pack Rules
+docs/KNOWLEDGE_PACK_SPEC.md,docs/KNOWLEDGE_PACK_SPEC.md,docs,2131,2026-05-21T20:37:59,AOIA Knowledge Pack Specification
+docs/LINEAGE_MAP.md,docs/LINEAGE_MAP.md,docs,531,2026-05-23T09:36:52,Lineage Map
+docs/LINUX_ENGINEERING_LIBRARY.md,docs/LINUX_ENGINEERING_LIBRARY.md,docs,7900,2026-05-24T11:59:50,Linux Engineering Library
+docs/LINUX_ENGINEERING_LIBRARY_REPORT.md,docs/LINUX_ENGINEERING_LIBRARY_REPORT.md,docs,658,2026-05-24T12:10:58,Linux Engineering Library Report
+docs/NON_GOALS.md,docs/NON_GOALS.md,docs,2119,2026-05-21T19:51:45,AOIA Non-Goals
+docs/PHASE1_COMPLETE_REPORT.md,docs/PHASE1_COMPLETE_REPORT.md,docs,4355,2026-05-24T09:00:40,Phase 1 Complete Report
+docs/PHASE1_POSTCHECK.md,docs/PHASE1_POSTCHECK.md,docs,4257,2026-05-24T08:57:20,Phase 1 Postcheck
+docs/PHASE1_STRUCTURE_REPORT.md,docs/PHASE1_STRUCTURE_REPORT.md,docs,3731,2026-05-24T08:57:20,Phase 1 Structure Report
+docs/PHASE2_DUPLICATION_SCAN.md,docs/PHASE2_DUPLICATION_SCAN.md,docs,1914,2026-05-24T11:03:39,Phase 2 Duplication Scan
+docs/PHASE2_MIGRATION_REPORT.md,docs/PHASE2_MIGRATION_REPORT.md,docs,4393,2026-05-24T11:03:39,Phase 2 Migration Report
+docs/PHASE2_UNCLASSIFIED_ITEMS.md,docs/PHASE2_UNCLASSIFIED_ITEMS.md,docs,1298,2026-05-24T11:03:40,Phase 2 Unclassified Items
+docs/PHASE3_DEPENDENCY_RISKS.md,docs/PHASE3_DEPENDENCY_RISKS.md,docs,1945,2026-05-24T11:43:41,Phase 3 Dependency Risks
+docs/PHASE3_GOVERNANCE_PREP_REPORT.md,docs/PHASE3_GOVERNANCE_PREP_REPORT.md,docs,2589,2026-05-24T11:43:41,Phase 3 Governance Preparation Report
+docs/PHASE3_RUNTIME_PREP_STATUS.md,docs/PHASE3_RUNTIME_PREP_STATUS.md,docs,1964,2026-05-24T11:43:42,Phase 3 Runtime Preparation Status
+docs/PRE_PHASE1_CONFLICT_SCAN.md,docs/PRE_PHASE1_CONFLICT_SCAN.md,docs,3651,2026-05-24T08:54:28,Pre-Phase 1 Conflict Scan
+docs/README.md,docs/README.md,docs,188,2026-05-23T09:27:44,AOIA Core Docs
+docs/REPOSITORY_CONSTITUTION.md,docs/REPOSITORY_CONSTITUTION.md,docs,2448,2026-05-21T17:10:54,Repository Constitution
+docs/REPOSITORY_STATE_REPORT.md,docs/REPOSITORY_STATE_REPORT.md,docs,9947,2026-05-24T08:06:49,Repository State Report
+docs/REPO_STRUCTURE.md,docs/REPO_STRUCTURE.md,docs,1920,2026-05-21T17:10:54,Repository Structure
+docs/RHCSA_ENGINE_REVIEW.md,docs/RHCSA_ENGINE_REVIEW.md,docs,2242,2026-05-21T23:53:00,RHCSA Engine Review
+docs/RUNTIME_BOUNDARY.md,docs/RUNTIME_BOUNDARY.md,docs,345,2026-05-23T09:36:52,Runtime Boundary
+docs/TAXONOMY_NORMALIZATION_REPORT.md,docs/TAXONOMY_NORMALIZATION_REPORT.md,docs,1885,2026-05-24T11:02:32,Taxonomy Normalization Report
+docs/TEST_CONSTITUTION.md,docs/TEST_CONSTITUTION.md,docs,1105,2026-05-21T17:25:10,Test Constitution
+docs/TRANSFER_CONTENT_REPORT.txt,docs/TRANSFER_CONTENT_REPORT.txt,docs,4840,2026-05-24T08:16:50,Docs artifact.
+docs/adr/0001-keep-aoia-isolated.md,docs/adr,docs,1311,2026-05-21T17:10:57,ADR 0001: Keep AOIA Isolated Until Explicit Integration
+docs/adr/0002-minimal-deterministic-router-skeleton.md,docs/adr,docs,1101,2026-05-21T17:13:17,ADR 0002: Minimal Deterministic Router Skeleton
+docs/adr/0003-immutable-startup-configuration.md,docs/adr,docs,1086,2026-05-21T17:15:41,ADR 0003: Immutable Startup Configuration
+docs/adr/0004-stdout-only-plain-text-logging.md,docs/adr,docs,887,2026-05-21T17:17:55,ADR 0004: Stdout-Only Plain-Text Logging
+docs/adr/0005-test-constitution-determinism-first.md,docs/adr,docs,875,2026-05-21T17:25:10,"ADR 0005: Test Constitution, Determinism First"
+docs/adr/README.md,docs/adr,docs,411,2026-05-21T17:10:57,Architecture Decision Records
+docs/architecture/AOIA_MEMORY_MODEL.md,docs/architecture,memory,14412,2026-05-23T19:24:16,AOIA Memory Model
+docs/architecture/FORBIDDEN_MEMORY_FLOWS.md,docs/architecture,memory,5776,2026-05-23T19:24:17,Forbidden Memory Flows
+docs/architecture/MEMORY_LAYER_ACCESS_MATRIX.md,docs/architecture,memory,5220,2026-05-23T19:24:17,Memory Layer Access Matrix
+docs/checkpoints/2026-05-23/AOIA_DAILY_CHECKPOINT.md,docs/checkpoints,docs,10920,2026-05-23T20:36:11,AOIA Daily Checkpoint
+docs/checkpoints/2026-05-23/NEXT_ACTIONS.md,docs/checkpoints,docs,2638,2026-05-23T20:36:12,Next Actions
+docs/forensic-runtime-audit/CANONICAL_REFACTOR_PREP.md,docs/forensic-runtime-audit,docs,4669,2026-05-23T16:09:53,Canonical Refactor Prep
+docs/forensic-runtime-audit/CURRENT_RUNTIME_TOPOLOGY.md,docs/forensic-runtime-audit,docs,5954,2026-05-23T16:09:52,Current Runtime Topology
+docs/forensic-runtime-audit/MEMORY_CONTAMINATION_MAP.md,docs/forensic-runtime-audit,memory,4838,2026-05-23T16:09:52,Memory Contamination Map
+docs/forensic-runtime-audit/RUNTIME_BOUNDARY_VIOLATIONS.md,docs/forensic-runtime-audit,docs,7048,2026-05-23T16:09:53,Runtime Boundary Violations
+docs/linux-engineering/README.md,docs/linux-engineering,docs,2471,2026-05-24T16:36:42,Linux Engineering Knowledge Layer
+docs/refactor/CANONICAL_AUTHORITY_GRAPH.md,docs/refactor,docs,16925,2026-05-23T20:11:05,Canonical Authority Graph
+docs/refactor/MEMORY_AUTHORITY_BOUNDARIES.md,docs/refactor,memory,7543,2026-05-23T20:03:57,Memory Authority Boundaries
+docs/refactor/MEMORY_CONTAMINATION_GRAPH.md,docs/refactor,memory,8928,2026-05-23T20:03:57,Memory Contamination Graph
+docs/refactor/MEMORY_DEPENDENCY_GRAPH.md,docs/refactor,memory,7464,2026-05-23T20:03:56,Memory Dependency Graph
+docs/refactor/MEMORY_SPLIT_PLAN.md,docs/refactor,memory,15467,2026-05-23T20:03:56,Memory Split Plan
+docs/reports/FINAL_URL_HANDOFF_PATCH.md,docs/reports,docs,3824,2026-05-23T21:12:24,Final URL Handoff Patch
+docs/reports/PHASE_1A_GIT_VALIDATION.md,docs/reports,docs,7710,2026-05-23T19:39:05,Phase 1A Git Validation
+docs/reports/PHASE_2B_ROUTING_BOUNDARY.md,docs/reports,docs,5298,2026-05-23T21:04:29,Phase 2B Routing Boundary
+governance/README.md,governance/README.md,repository,217,2026-05-23T10:44:30,Governance
+memory/README.md,memory/README.md,memory,383,2026-05-23T10:44:29,Memory
+provenance/README.md,provenance/README.md,provenance,265,2026-05-23T10:44:27,Provenance
+reports/linux-engineering/rhcsa_existing_state_audit.md,reports/linux-engineering,reports,5591,2026-05-24T16:36:40,RHCSA/Linux Existing State Audit
+retrieval/README.md,retrieval/README.md,repository,288,2026-05-23T10:44:30,Retrieval
+runtime/adaptive_routing/aoia_config.json,runtime/adaptive_routing,runtime,258,2026-05-21T17:15:40,Runtime artifact.
+runtime/adaptive_routing/circadian_router.py,runtime/adaptive_routing,runtime,794,2026-05-21T14:17:19,Python source module.
+runtime/adaptive_routing/config_loader.py,runtime/adaptive_routing,runtime,2446,2026-05-21T17:15:41,Python source module.
+runtime/adaptive_routing/deterministic_router.py,runtime/adaptive_routing,runtime,474,2026-05-21T17:13:17,Python source module.
+runtime/adaptive_routing/dvm_research.md,runtime/adaptive_routing,runtime,4364,2026-05-21T14:17:18,Adaptive Oceanic Intelligence Architecture - DVM Foundation
+runtime/adaptive_routing/environment/environment_router.py,runtime/adaptive_routing,runtime,1135,2026-05-21T14:22:55,Python source module.
+runtime/adaptive_routing/environment/network_patterns.md,runtime/adaptive_routing,runtime,2674,2026-05-21T14:22:54,AOIA Step 2 - Environmental Network Patterns
+runtime/adaptive_routing/environment/traffic_profiles.json,runtime/adaptive_routing,runtime,388,2026-05-21T14:22:54,Runtime artifact.
+runtime/adaptive_routing/epistemic_kernel.py,runtime/adaptive_routing,runtime,12200,2026-05-23T03:34:50,Python source module.
+runtime/adaptive_routing/routing_modes.json,runtime/adaptive_routing,runtime,384,2026-05-21T14:17:18,Runtime artifact.
+runtime/adaptive_routing/stdout_logger.py,runtime/adaptive_routing,runtime,709,2026-05-21T17:17:54,Python source module.
+runtime/commands/__init__.py,runtime/commands,tooling,174,2026-05-18T19:53:29,Tooling artifact.
+runtime/commands/base.py,runtime/commands,tooling,1076,2026-05-18T19:53:29,Python source module.
+runtime/commands/local_commands.py,runtime/commands,tooling,19396,2026-05-23T00:30:02,Python source module.
+runtime/contradiction_registry.json,runtime/contradiction_registry.json,runtime,6987,2026-05-23T02:22:03,Runtime artifact.
+runtime/install.sh,runtime/install.sh,runtime,1974,2026-05-21T21:59:11,Runtime artifact.
+runtime/knowledge/README.md,runtime/knowledge,knowledge,974,2026-05-22T19:25:12,RHCSA Local Knowledge Base
+runtime/knowledge/__init__.py,runtime/knowledge,knowledge,69,2026-05-21T06:42:20,Knowledge artifact.
+runtime/knowledge/bash/README.md,runtime/knowledge,knowledge,646,2026-05-22T19:25:12,Bash
+runtime/knowledge/bash/skrypty-bash-podstawy.md,runtime/knowledge,knowledge,8809,2026-05-22T19:25:12,Skrypty bash — podstawy
+runtime/knowledge/bash/wyszukiwanie-i-filtrowanie-tekstu.md,runtime/knowledge,knowledge,10709,2026-05-22T19:25:12,Wyszukiwanie i filtrowanie tekstu
+runtime/knowledge/bash/zaawansowane-narzdzia-tekstowe.md,runtime/knowledge,knowledge,4675,2026-05-22T19:25:12,Zaawansowane narz■dzia tekstowe
+runtime/knowledge/bash/zmienne-rodowiskowe-i-powoka.md,runtime/knowledge,knowledge,12829,2026-05-22T19:25:12,Zmienne ■rodowiskowe i pow■oka
+runtime/knowledge/candidates/candidate_command_index.json,runtime/knowledge,knowledge,2037636,2026-05-24T17:39:00,Canonical command index used by local lookup.
+runtime/knowledge/candidates/candidate_commands.csv,runtime/knowledge,knowledge,750184,2026-05-24T17:39:00,Knowledge artifact.
+runtime/knowledge/canonical/rhcsa_commands.json,runtime/knowledge,knowledge,220301,2026-05-21T21:17:49,Canonical RHCSA command records.
+runtime/knowledge/command_graph.json,runtime/knowledge,knowledge,2027,2026-05-21T06:42:24,Knowledge artifact.
+runtime/knowledge/context/context_pack.json,runtime/knowledge,knowledge,692,2026-05-21T21:30:02,Knowledge artifact.
+runtime/knowledge/examples/ls-command.json,runtime/knowledge,knowledge,525,2026-05-21T20:38:00,Knowledge artifact.
+runtime/knowledge/examples/rm-recursive-force.json,runtime/knowledge,knowledge,632,2026-05-21T20:38:01,Knowledge artifact.
+runtime/knowledge/examples/systemctl-status.json,runtime/knowledge,knowledge,670,2026-05-21T20:38:01,Knowledge artifact.
+runtime/knowledge/extracted/linux_master_library_v1.md,runtime/knowledge,knowledge,797025,2026-05-24T16:35:11,Knowledge artifact.
+runtime/knowledge/extracted/linux_master_library_v1.txt,runtime/knowledge,knowledge,797025,2026-05-24T16:35:11,Knowledge artifact.
+runtime/knowledge/filesystem/README.md,runtime/knowledge,knowledge,835,2026-05-22T19:25:12,Filesystem
+runtime/knowledge/filesystem/archiwizacja-i-kompresja.md,runtime/knowledge,knowledge,8646,2026-05-22T19:25:12,Archiwizacja i kompresja
+runtime/knowledge/filesystem/edytor-vim.md,runtime/knowledge,knowledge,17661,2026-05-22T19:25:12,Edytor Vim
+runtime/knowledge/filesystem/nawigacja-po-systemie-plikow.md,runtime/knowledge,knowledge,9395,2026-05-22T19:25:12,Nawigacja po systemie plików
+runtime/knowledge/filesystem/operacje-na-plikach-i-katalogach.md,runtime/knowledge,knowledge,10273,2026-05-22T19:25:12,Operacje na plikach i katalogach
+runtime/knowledge/filesystem/przegldanie-zawartoci-plikow.md,runtime/knowledge,knowledge,2285,2026-05-22T19:25:12,Przegl■danie zawarto■ci plików
+runtime/knowledge/filesystem/wyszukiwanie-plikow.md,runtime/knowledge,knowledge,16184,2026-05-22T19:25:12,Wyszukiwanie plików
+runtime/knowledge/index/command_index.json,runtime/knowledge,knowledge,130492,2026-05-21T21:21:31,Canonical command index used by local lookup.
+runtime/knowledge/index/command_index_template.csv,runtime/knowledge,knowledge,92,2026-05-24T16:36:42,Knowledge artifact.
+runtime/knowledge/injection/injected_context.json,runtime/knowledge,knowledge,202,2026-05-21T22:16:07,Knowledge artifact.
+runtime/knowledge/lvm/README.md,runtime/knowledge,knowledge,317,2026-05-22T19:25:12,Lvm
+runtime/knowledge/lvm/lvm-logical-volume-manager.md,runtime/knowledge,knowledge,5854,2026-05-22T19:25:12,LVM — Logical Volume Manager
+runtime/knowledge/manifests/library_manifest.yaml,runtime/knowledge,knowledge,995,2026-05-24T16:36:41,Knowledge artifact.
+runtime/knowledge/networking/README.md,runtime/knowledge,knowledge,705,2026-05-22T19:25:12,Networking
+runtime/knowledge/networking/nfs-i-autofs.md,runtime/knowledge,knowledge,5447,2026-05-22T19:25:12,NFS i Autofs
+runtime/knowledge/networking/samba-i-nfs-klient.md,runtime/knowledge,knowledge,2878,2026-05-22T19:25:12,Samba i NFS (klient)
+runtime/knowledge/networking/sie-konfiguracja-i-diagnostyka.md,runtime/knowledge,knowledge,14374,2026-05-22T19:25:12,Sie■ — konfiguracja i diagnostyka
+runtime/knowledge/networking/ssh-i-dostp-zdalny.md,runtime/knowledge,knowledge,13850,2026-05-22T19:25:12,SSH i dost■p zdalny
+runtime/knowledge/networking/zapora-ogniowa-firewalld.md,runtime/knowledge,knowledge,9674,2026-05-22T19:25:12,Zapora ogniowa (firewalld)
+runtime/knowledge/parsed/rhcsa_sections.json,runtime/knowledge,knowledge,48865,2026-05-21T21:12:46,Knowledge artifact.
+runtime/knowledge/permissions/README.md,runtime/knowledge,knowledge,360,2026-05-22T19:25:12,Permissions
+runtime/knowledge/permissions/uprawnienia-i-wasno-plikow.md,runtime/knowledge,knowledge,11889,2026-05-22T19:25:12,Uprawnienia i w■asno■■ plików
+runtime/knowledge/podman/README.md,runtime/knowledge,knowledge,323,2026-05-22T19:25:12,Podman
+runtime/knowledge/podman/kontenery-podman.md,runtime/knowledge,knowledge,35613,2026-05-22T19:25:12,Kontenery Podman
+runtime/knowledge/provenance/PROVENANCE_POLICY.md,runtime/knowledge,provenance,1725,2026-05-24T16:36:41,Linux Engineering Provenance Policy
+runtime/knowledge/raw/rhcsa_raw.txt,runtime/knowledge,knowledge,198795,2026-05-21T21:08:23,Knowledge artifact.
+runtime/knowledge/reports/category_distribution.md,runtime/knowledge,knowledge,383,2026-05-24T17:39:00,Candidate Category Distribution
+runtime/knowledge/reports/deduplication_report.md,runtime/knowledge,knowledge,2753,2026-05-24T17:39:00,Candidate Deduplication Report
+runtime/knowledge/reports/parsing_quality_report.md,runtime/knowledge,knowledge,5457,2026-05-24T17:39:00,Candidate Parsing Quality Report
+runtime/knowledge/reports/retrieval_engine_report.md,runtime/knowledge,knowledge,3764,2026-05-24T16:54:02,Linux Retrieval Engine v1 Report
+runtime/knowledge/rhcsa_engine.py,runtime/knowledge,knowledge,6688,2026-05-21T06:44:33,Python source module.
+runtime/knowledge/schema/command.schema.json,runtime/knowledge,knowledge,2467,2026-05-21T20:38:00,Knowledge artifact.
+runtime/knowledge/selinux/README.md,runtime/knowledge,knowledge,307,2026-05-22T19:25:12,Selinux
+runtime/knowledge/selinux/selinux.md,runtime/knowledge,knowledge,11784,2026-05-22T19:25:12,SELinux
+runtime/knowledge/source/RHCSA_Command_Library (1).pdf,runtime/knowledge,knowledge,153760,2026-05-21T21:03:27,Knowledge artifact.
+runtime/knowledge/source/linux_master_library_v1.pdf,runtime/knowledge,knowledge,1144661,2026-05-24T16:35:06,Canonical Linux Master Library PDF source.
+runtime/knowledge/storage/README.md,runtime/knowledge,knowledge,565,2026-05-22T19:25:12,Storage
+runtime/knowledge/storage/przechowywanie-danych-dyski-i-partycje.md,runtime/knowledge,knowledge,2736,2026-05-22T19:25:12,Przechowywanie danych — dyski i partycje
+runtime/knowledge/storage/systemy-plikow-i-montowanie.md,runtime/knowledge,knowledge,6784,2026-05-22T19:25:12,Systemy plików i montowanie
+runtime/knowledge/storage/zarzdzanie-dyskami-raid.md,runtime/knowledge,knowledge,3158,2026-05-22T19:25:12,Zarz■dzanie dyskami RAID
+runtime/knowledge/systemd/README.md,runtime/knowledge,knowledge,637,2026-05-22T19:25:12,Systemd
+runtime/knowledge/systemd/boot-i-grub.md,runtime/knowledge,knowledge,9827,2026-05-22T19:25:12,Boot i GRUB
+runtime/knowledge/systemd/cron-i-harmonogramowanie-zada.md,runtime/knowledge,knowledge,8417,2026-05-22T19:25:12,Cron i harmonogramowanie zada■
+runtime/knowledge/systemd/systemd-i-zarzdzanie-usugami.md,runtime/knowledge,knowledge,20275,2026-05-22T19:25:12,Systemd i zarz■dzanie us■ugami
+runtime/knowledge/systemd/zarzdzanie-pakietami-dnf-rpm.md,runtime/knowledge,knowledge,25165,2026-05-22T19:25:12,Zarz■dzanie pakietami (DNF/RPM)
+runtime/knowledge/tools/CANONICAL_BUILDER_README.md,runtime/knowledge,knowledge,1274,2026-05-21T21:17:43,RHCSA Canonical Builder
+runtime/knowledge/tools/CONTEXT_PACK_README.md,runtime/knowledge,knowledge,1279,2026-05-21T21:29:55,RHCSA Context Pack Builder
+runtime/knowledge/tools/INDEX_BUILDER_README.md,runtime/knowledge,knowledge,1090,2026-05-21T21:21:27,RHCSA Index Builder
+runtime/knowledge/tools/INJECTION_LAYER_README.md,runtime/knowledge,knowledge,1142,2026-05-21T22:16:00,RHCSA Context Injection Layer
+runtime/knowledge/tools/README.md,runtime/knowledge,knowledge,1165,2026-05-21T21:08:18,RHCSA PDF Extraction Tool
+runtime/knowledge/tools/SECTION_PARSER_README.md,runtime/knowledge,knowledge,1187,2026-05-21T21:12:41,RHCSA Section Parser
+runtime/knowledge/tools/candidate_index_loader.py,runtime/knowledge,knowledge,17798,2026-05-24T17:38:46,Parser that builds reviewed candidate command records from extracted Linux source text.
+runtime/knowledge/tools/canonical_builder.py,runtime/knowledge,knowledge,5951,2026-05-21T21:17:42,Python source module.
+runtime/knowledge/tools/context_injector.py,runtime/knowledge,knowledge,7102,2026-05-21T22:15:59,Python source module.
+runtime/knowledge/tools/context_pack_builder.py,runtime/knowledge,knowledge,8220,2026-05-21T21:29:54,Python source module.
+runtime/knowledge/tools/index_builder.py,runtime/knowledge,knowledge,5228,2026-05-21T21:21:26,Python source module.
+runtime/knowledge/tools/markdown_kb_builder.py,runtime/knowledge,knowledge,14211,2026-05-22T19:25:04,Knowledge artifact.
+runtime/knowledge/tools/pdf_extract.py,runtime/knowledge,knowledge,3318,2026-05-21T21:08:17,Python source module.
+runtime/knowledge/tools/section_parser.py,runtime/knowledge,knowledge,6321,2026-05-21T21:12:41,Python source module.
+runtime/knowledge/troubleshooting/README.md,runtime/knowledge,knowledge,824,2026-05-22T19:25:12,Troubleshooting
+runtime/knowledge/troubleshooting/diagnostyka-i-narzdzia-systemowe.md,runtime/knowledge,knowledge,6570,2026-05-22T19:25:12,Diagnostyka i narz■dzia systemowe
+runtime/knowledge/troubleshooting/dodatkowe-narzdzia-administracyjne.md,runtime/knowledge,knowledge,10308,2026-05-22T19:25:12,Dodatkowe narz■dzia administracyjne
+runtime/knowledge/troubleshooting/informacje-o-systemie.md,runtime/knowledge,knowledge,6657,2026-05-22T19:25:12,Informacje o systemie
+runtime/knowledge/troubleshooting/logowanie-i-monitorowanie-systemu.md,runtime/knowledge,knowledge,6981,2026-05-22T19:25:12,Logowanie i monitorowanie systemu
+runtime/knowledge/troubleshooting/zarzdzanie-procesami.md,runtime/knowledge,knowledge,6250,2026-05-22T19:25:12,Zarz■dzanie procesami
+runtime/knowledge/users/README.md,runtime/knowledge,knowledge,398,2026-05-22T19:25:12,Users
+runtime/knowledge/users/zarzdzanie-grupami.md,runtime/knowledge,knowledge,1737,2026-05-22T19:25:12,Zarz■dzanie grupami
+runtime/knowledge/users/zarzdzanie-uytkownikami.md,runtime/knowledge,knowledge,16125,2026-05-22T19:25:12,Zarz■dzanie u■ytkownikami
+runtime/knowledge/validator/__init__.py,runtime/knowledge,knowledge,46,2026-05-21T20:42:35,Knowledge artifact.
+runtime/knowledge/validator/validation_report.md,runtime/knowledge,knowledge,773,2026-05-21T20:42:37,AOIA Knowledge Validator Report
+runtime/knowledge/validator/validation_rules.py,runtime/knowledge,knowledge,1353,2026-05-21T20:42:35,Python source module.
+runtime/knowledge/validator/validator.py,runtime/knowledge,knowledge,8047,2026-05-21T20:42:36,Python source module.
+runtime/main.py,runtime/main.py,runtime,43421,2026-05-23T21:11:52,Runtime coordinator and bounded agent loop.
+runtime/memory/__init__.py,runtime/memory,memory,57,2026-05-23T20:40:41,Memory artifact.
+runtime/memory/gemma_worker_memory.py,runtime/memory,memory,1328,2026-05-23T20:40:42,Python source module.
+runtime/memory/hats/coding.json,runtime/memory,memory,258,2026-05-23T20:40:53,Memory artifact.
+runtime/memory/hats/linux.json,runtime/memory,memory,273,2026-05-23T20:40:53,Memory artifact.
+runtime/memory/hats/research.json,runtime/memory,memory,254,2026-05-23T20:40:53,Memory artifact.
+runtime/memory/rhcsa_context.py,runtime/memory,memory,1423,2026-05-23T20:40:42,Python source module.
+runtime/obsidian_vault/.obsidian/app.json,runtime/obsidian_vault,runtime,68,2026-05-23T20:40:53,Runtime artifact.
+runtime/obsidian_vault/00_START_HERE.md,runtime/obsidian_vault,runtime,227,2026-05-23T20:40:53,Obsidian Vault
+runtime/obsidian_vault/Daily/2026-05-23.md,runtime/obsidian_vault,runtime,1529,2026-05-23T21:17:53,2026-05-23
+runtime/obsidian_vault/Evidence/20260523_204053_498246.md,runtime/obsidian_vault,runtime,191,2026-05-23T20:41:40,Evidence 20260523_204053_498246
+runtime/obsidian_vault/Evidence/20260523_204122_715088.md,runtime/obsidian_vault,runtime,415,2026-05-23T20:44:31,Evidence 20260523_204122_715088
+runtime/obsidian_vault/Evidence/20260523_204427_843537.md,runtime/obsidian_vault,runtime,191,2026-05-23T20:44:36,Evidence 20260523_204427_843537
+runtime/obsidian_vault/Evidence/20260523_204557_588315.md,runtime/obsidian_vault,runtime,1743,2026-05-23T21:18:01,Evidence 20260523_204557_588315
+runtime/obsidian_vault/Reasoning/20260523_204053_498246.md,runtime/obsidian_vault,runtime,492,2026-05-23T20:41:43,Reasoning 20260523_204053_498246
+runtime/obsidian_vault/Reasoning/20260523_204122_715088.md,runtime/obsidian_vault,runtime,1616,2026-05-23T20:44:31,Reasoning 20260523_204122_715088
+runtime/obsidian_vault/Reasoning/20260523_204427_843537.md,runtime/obsidian_vault,runtime,492,2026-05-23T20:44:42,Reasoning 20260523_204427_843537
+runtime/obsidian_vault/Reasoning/20260523_204557_588315.md,runtime/obsidian_vault,runtime,3615,2026-05-23T21:18:01,Reasoning 20260523_204557_588315
+runtime/orchestrator/__init__.py,runtime/orchestrator,runtime,89,2026-05-20T23:45:41,Runtime artifact.
+runtime/orchestrator/gemini_gemma.py,runtime/orchestrator,runtime,7465,2026-05-21T06:31:05,Python source module.
+runtime/orchestrator/knowledge_router.py,runtime/orchestrator,runtime,5298,2026-05-21T06:42:30,Python source module.
+runtime/project_scan.json,runtime/project_scan.json,runtime,8067,2026-05-23T20:57:24,Runtime artifact.
+runtime/prompts/system_prompt.txt,runtime/prompts,runtime,3605,2026-05-23T21:14:54,Runtime artifact.
+runtime/provenance_registry.json,runtime/provenance_registry.json,provenance,41551,2026-05-23T02:22:03,Provenance artifact.
+runtime/providers/__init__.py,runtime/providers,configuration,178,2026-05-18T21:35:57,Configuration artifact.
+runtime/providers/aureon_provider.py,runtime/providers,configuration,1212,2026-05-20T22:50:23,Python source module.
+runtime/providers/base.py,runtime/providers,configuration,380,2026-05-18T19:53:27,Python source module.
+runtime/providers/config.py,runtime/providers,configuration,11492,2026-05-21T07:34:49,Python source module.
+runtime/providers/gemini_provider.py,runtime/providers,configuration,890,2026-05-18T21:34:54,Python source module.
+runtime/providers/gemma_provider.py,runtime/providers,configuration,3858,2026-05-20T23:45:34,Python source module.
+runtime/providers/openai_compatible.py,runtime/providers,configuration,1674,2026-05-21T07:05:06,Python source module.
+runtime/requirements.txt,runtime/requirements.txt,runtime,39,2026-05-18T11:02:12,Runtime artifact.
+runtime/retrieval/__init__.py,runtime/retrieval,retrieval,38,2026-05-24T16:52:35,Retrieval artifact.
+runtime/retrieval/linux/__init__.py,runtime/retrieval,retrieval,188,2026-05-24T16:52:36,Deterministic Linux retrieval component.
+runtime/retrieval/linux/provenance_attach.py,runtime/retrieval,retrieval,2690,2026-05-24T16:52:37,Deterministic Linux retrieval component.
+runtime/retrieval/linux/query_normalizer.py,runtime/retrieval,retrieval,3874,2026-05-24T16:52:36,Deterministic Linux retrieval component.
+runtime/retrieval/linux/retrieval_engine.py,runtime/retrieval,retrieval,12165,2026-05-24T16:53:17,Deterministic Linux retrieval component.
+runtime/retrieval/linux/scoring.py,runtime/retrieval,retrieval,961,2026-05-24T16:52:37,Deterministic Linux retrieval component.
+runtime/router/__init__.py,runtime/router,runtime,91,2026-05-18T19:53:30,Runtime artifact.
+runtime/router/local_router.py,runtime/router,runtime,2954,2026-05-20T22:52:56,Python source module.
+runtime/run.sh,runtime/run.sh,runtime,397,2026-05-19T05:17:23,Runtime artifact.
+runtime/run_web.sh,runtime/run_web.sh,runtime,364,2026-05-20T15:16:16,Runtime artifact.
+runtime/state/agent_state.json,runtime/state,runtime,1366,2026-05-23T21:18:01,Runtime artifact.
+runtime/state/model_config.json,runtime/state,runtime,40,2026-05-23T20:41:02,Runtime artifact.
+runtime/state/providers.json,runtime/state,runtime,313,2026-05-23T20:40:53,Runtime artifact.
+runtime/state/token_savings_report.json,runtime/state,runtime,235,2026-05-23T20:40:53,Runtime artifact.
+runtime/tools/__init__.py,runtime/tools,tooling,50,2026-05-18T09:22:44,Tooling artifact.
+runtime/tools/browser_tools.py,runtime/tools,tooling,10150,2026-05-18T21:35:15,Python source module.
+runtime/tools/build_rhcsa_library.py,runtime/tools,tooling,40708,2026-05-21T06:30:00,Tooling artifact.
+runtime/tools/epistemic_registry.py,runtime/tools,tooling,13781,2026-05-23T02:21:58,Python source module.
+runtime/tools/executor.py,runtime/tools,tooling,8928,2026-05-23T20:21:55,Python source module.
+runtime/tools/filesystem_tools.py,runtime/tools,tooling,4101,2026-05-18T10:56:33,Python source module.
+runtime/tools/memory.py,runtime/tools,memory,10112,2026-05-23T02:25:31,Python source module.
+runtime/tools/memory_hats.py,runtime/tools,memory,4251,2026-05-20T22:51:57,Python source module.
+runtime/tools/project_scanner.py,runtime/tools,tooling,3738,2026-05-20T22:56:57,Python source module.
+runtime/tools/rhcsa_search.py,runtime/tools,tooling,22225,2026-05-23T00:30:21,Python source module.
+runtime/tools/shell_tools.py,runtime/tools,tooling,1407,2026-05-18T10:56:43,Python source module.
+runtime/tools/system_info.py,runtime/tools,tooling,1234,2026-05-18T09:22:56,Python source module.
+runtime/tools/validator.py,runtime/tools,tooling,7844,2026-05-23T02:25:31,Tooling artifact.
+runtime/tools/web_reader.py,runtime/tools,tooling,872,2026-05-18T15:35:04,Python source module.
+runtime/webapp.py,runtime/webapp.py,runtime,5272,2026-05-20T15:14:16,Python source module.
+state/model_config.json,state/model_config.json,repository,36,2026-05-23T17:25:05,Repository artifact.
+state/providers.json,state/providers.json,repository,205,2026-05-23T17:25:05,Repository artifact.
+tests/test_aoia_determinism.py,tests/test_aoia_determinism.py,tests,1992,2026-05-21T17:25:09,Python source module.
+tests/test_epistemic_kernel.py,tests/test_epistemic_kernel.py,tests,1712,2026-05-23T03:34:36,Python source module.
+tests/test_epistemic_registry.py,tests/test_epistemic_registry.py,tests,3299,2026-05-23T02:20:37,Python source module.
+tests/test_epistemic_safeguards.py,tests/test_epistemic_safeguards.py,tests,3012,2026-05-23T02:26:05,Python source module.
+tests/test_executor_containment.py,tests/test_executor_containment.py,tests,1863,2026-05-23T20:23:26,Python source module.
+tests/test_knowledge_validator.py,tests/test_knowledge_validator.py,tests,3940,2026-05-21T20:42:38,Python source module.
+tests/test_linux_retrieval.py,tests/test_linux_retrieval.py,tests,2928,2026-05-24T16:53:36,Python source module.
+tests/test_main.py,tests/test_main.py,tests,19366,2026-05-23T20:22:52,Runtime coordinator and bounded agent loop.
+tests/test_rhcsa_retrieval.py,tests/test_rhcsa_retrieval.py,tests,2446,2026-05-23T00:30:36,Python source module.
+tests/test_routing_boundary.py,tests/test_routing_boundary.py,tests,6708,2026-05-23T21:12:10,Python source module.

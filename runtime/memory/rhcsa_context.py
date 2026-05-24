@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from tools.rhcsa_search import retrieve_examples, search_commands
+from retrieval.facade import linux_low_level_results
 
 
 def inject_linux_context(query: str, max_chars: int = 6000) -> str:
@@ -29,9 +29,8 @@ def inject_linux_context(query: str, max_chars: int = 6000) -> str:
 
 
 def retrieve_command_patterns(query: str, limit: int = 8) -> list[dict[str, Any]]:
-    return search_commands(query, limit=limit)
+    return linux_low_level_results("command_search", query, limit=limit)
 
 
 def retrieve_operational_examples(query: str, limit: int = 3) -> list[dict[str, Any]]:
-    return retrieve_examples(query, limit=limit)
-
+    return linux_low_level_results("examples", query, limit=limit)

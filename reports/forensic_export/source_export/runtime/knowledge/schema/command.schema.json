@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aoia.local/schema/command.schema.json",
+  "title": "AOIA Command Knowledge Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "command",
+    "description",
+    "category",
+    "tags",
+    "risk",
+    "os",
+    "shell",
+    "examples"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "archive",
+        "diagnostic",
+        "filesystem",
+        "network",
+        "package",
+        "process",
+        "security",
+        "service",
+        "system",
+        "user"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      }
+    },
+    "risk": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "os": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "linux",
+          "rhel",
+          "ubuntu",
+          "debian",
+          "fedora",
+          "macos"
+        ]
+      }
+    },
+    "shell": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "bash",
+          "sh",
+          "zsh"
+        ]
+      }
+    },
+    "examples": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "input",
+          "expected_effect"
+        ],
+        "properties": {
+          "input": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expected_effect": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "related_commands": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9._+-]+$"
+      }
+    }
+  }
+}

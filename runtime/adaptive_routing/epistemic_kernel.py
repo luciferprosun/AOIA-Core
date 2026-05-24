@@ -7,19 +7,14 @@ from pathlib import Path
 from typing import Any
 
 from adaptive_routing.deterministic_router import select_depth
+from retrieval.facade import retrieve_linux_knowledge
+from retrieval.linux.scoring import EXACT_MATCH_SCORE, confidence_for
 from tools.epistemic_registry import (
     CONTRADICTION_REGISTRY_PATH,
     PROVENANCE_REGISTRY_PATH,
     build_contradiction_registry,
     build_provenance_registry,
     discover_knowledge_artifacts,
-)
-from tools.rhcsa_search import (
-    TOPIC_DIRECTORIES,
-    exact_command_lookup,
-    grep_rhcsa,
-    search_by_tag,
-    search_rhcsa,
 )
 
 
@@ -63,6 +58,20 @@ LINUX_OPERATIONAL_HINTS = {
     "vim",
 }
 
+TOPIC_DIRECTORIES = (
+    "filesystem",
+    "networking",
+    "users",
+    "permissions",
+    "selinux",
+    "systemd",
+    "storage",
+    "lvm",
+    "podman",
+    "bash",
+    "troubleshooting",
+)
+
 
 @dataclass(frozen=True)
 class KernelDecision:
@@ -103,14 +112,16 @@ class AOIAEpistemicKernel:
 
     def evaluate(self, user_request: str) -> KernelDecision:
         topic_filter = self._detect_topic_filter(user_request)
-        exact_results = exact_command_lookup(user_request, limit=5)
-        keyword_results = search_rhcsa(user_request, limit=6, topic_filter=topic_filter)
-        grep_results = grep_rhcsa(user_request, limit=4, topic_filter=topic_filter)
-        tag_results = search_by_tag(user_request, limit=4, topic_filter=topic_filter)
-
-        evidence = self._merge_results(exact_results, keyword_results, grep_results, tag_results)
-        confidence = self._confidence(evidence, exact_results)
-        pressure = self._pressure(user_request, evidence, exact_results, grep_results, topic_filter)
+        retrieval_response = retrieve_linux_knowledge(user_request, max_results=6, project_dir=self.project_dir)
+        evidence = self._merge_results([dict(item) for item in retrieval_response.results])
+        confidence = self._confidence(evidence, retrieval_response.confidence_score)
+        pressure = self._pressure(
+            user_request,
+            evidence,
+            retrieval_response.confidence_score,
+            retrieval_response.match_type,
+            topic_filter,
+        )
         depth = select_depth(pressure)
         contradiction_hits = self._contradiction_hits(user_request, evidence)
         manual_review_reasons = self._manual_review_reasons(confidence, contradiction_hits, evidence)
@@ -131,6 +142,8 @@ class AOIAEpistemicKernel:
             "query": user_request,
             "route": route,
             "topic_filter": topic_filter,
+            "retrieval_match_type": retrieval_response.match_type,
+            "retrieval_status": retrieval_response.status,
             "pressure": pressure,
             "depth": depth,
             "confidence": confidence,
@@ -170,8 +183,8 @@ class AOIAEpistemicKernel:
         self,
         user_request: str,
         evidence: list[dict[str, Any]],
-        exact_results: list[dict[str, Any]],
-        grep_results: list[dict[str, Any]],
+        retrieval_score: int,
+        match_type: str,
         topic_filter: str | None,
     ) -> int:
         tokens = [token for token in re.split(r"\s+", user_request.strip()) if token]
@@ -180,10 +193,8 @@ class AOIAEpistemicKernel:
             pressure += 20
         if topic_filter:
             pressure += 10
-        if exact_results:
+        if retrieval_score >= EXACT_MATCH_SCORE or match_type in {"exact", "alias", "subcommand"}:
             pressure += 20
-        elif grep_results:
-            pressure += 10
         elif evidence:
             pressure += 5
         return min(pressure, 100)
@@ -201,25 +212,20 @@ class AOIAEpistemicKernel:
                     merged[path] = enriched
         return sorted(merged.values(), key=lambda item: (-int(item.get("score", 0)), item["file_location"]))[:6]
 
-    def _confidence(self, evidence: list[dict[str, Any]], exact_results: list[dict[str, Any]]) -> str:
-        if exact_results:
-            return "high"
+    def _confidence(self, evidence: list[dict[str, Any]], retrieval_score: int) -> str:
         if not evidence:
             return "none"
-        best_score = max(int(item.get("score", 0)) for item in evidence)
-        if best_score >= 90:
-            return "high"
-        if best_score >= 35:
-            return "medium"
-        return "low"
+        return confidence_for(retrieval_score)
 
     def _enrich_evidence(self, item: dict[str, Any]) -> dict[str, Any]:
         path = str(item.get("file_location", "")).strip()
         provenance = self._provenance_by_artifact.get(path, {})
         contradictions = self._duplicate_sources.get(path, [])
+        attached_provenance = item.get("provenance") if isinstance(item.get("provenance"), dict) else {}
         return {
             **item,
             "provenance": {
+                **attached_provenance,
                 "artifact_type": provenance.get("artifact_type", ""),
                 "metadata": provenance.get("metadata", {}),
                 "references": provenance.get("references", []),

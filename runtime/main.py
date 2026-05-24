@@ -796,8 +796,8 @@ class AgentRuntime:
         kernel_decision = self.aoia_kernel.evaluate(user_input)
         self.log_reasoning_trace("aoia_kernel_decision", kernel_decision.reasoning)
         if kernel_decision.evidence:
-            self.memory_store.append_evidence(
-                "aoia_kernel_evidence",
+            self.memory_store.append_reasoning(
+                "aoia_kernel_evidence_reference",
                 {
                     "query": user_input,
                     "route": kernel_decision.route,
@@ -844,7 +844,7 @@ class AgentRuntime:
             {
                 "confidence": decision.confidence,
                 "reason": decision.reason,
-                "score": decision.hit.score if decision.hit else 0,
+                "score": getattr(decision.hit, "confidence_score", getattr(decision.hit, "score", 0)) if decision.hit else 0,
             },
         )
         return True

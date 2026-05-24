@@ -1,0 +1,23 @@
+library_name: Linux Engineering Knowledge Library
+version: 1.0.0
+canonical_source: runtime/knowledge/source/linux_master_library_v1.pdf
+canonical_source_sha256: 7eab9450dd15cc5e1607c29d9fe3b19c4cf9854bb702f113534b6ec34a34dc03
+legacy_source:
+  path: runtime/knowledge/source/RHCSA_Command_Library (1).pdf
+  sha256: b8092eeabbfd80489d9e5ce8b49ba4d822aa83cc360da0a8f3c76276ac21d6b7
+scope:
+  - RHCSA
+  - RHCE
+  - Linux administration
+  - Linux engineering
+status: canonical master
+deterministic_retrieval: planned
+provenance_tracking: enabled
+update_policy: append-only, deduplicate, versioned
+target_future_size: 10000+ commands
+storage_decision: reused existing runtime/knowledge structure; no parallel knowledge/linux-engineering tree created
+extracted_text:
+  txt: runtime/knowledge/extracted/linux_master_library_v1.txt
+  md: runtime/knowledge/extracted/linux_master_library_v1.md
+index_template: runtime/knowledge/index/command_index_template.csv
+notes: imported safely after repository audit

@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-05-24T18:25:09",
+  "commit": "04adfbdb5a6b34d2969d67ac7e84c704c8e0915a",
+  "status": "## main...origin/main [ahead 1]",
+  "manifest_file_count": 294,
+  "source_export_file_count": 291,
+  "chunked_markdown_files": [
+    "docs_and_governance.md",
+    "knowledge_layer.md",
+    "memory_architecture.md",
+    "provenance_system.md",
+    "retrieval_system.md",
+    "runtime_core.md",
+    "tests_and_validation.md",
+    "tooling_and_execution.md"
+  ],
+  "validation_status": "ok",
+  "pdfs": [
+    "forensic_full_snapshot.pdf",
+    "architecture_and_runtime.pdf",
+    "retrieval_and_knowledge_layer.pdf",
+    "memory_and_provenance.pdf"
+  ],
+  "total_export_size": "17M"
+}

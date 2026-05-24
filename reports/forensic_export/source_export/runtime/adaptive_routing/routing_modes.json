@@ -1,0 +1,13 @@
+{
+  "deep_mode": {
+    "description": "local/cache-first mode",
+    "token_usage": "minimal",
+    "routing_intent": "conserve energy and reduce external reasoning during peak pressure"
+  },
+  "surface_mode": {
+    "description": "high reasoning mode",
+    "token_usage": "high",
+    "routing_intent": "use broader reasoning when pressure is lower or exploration is acceptable"
+  }
+}
+

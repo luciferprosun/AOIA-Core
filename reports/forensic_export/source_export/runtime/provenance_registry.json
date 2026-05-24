@@ -1,0 +1,1403 @@
+{
+  "generated_at": "2026-05-23T02:22:03.840007",
+  "root": "knowledge",
+  "artifact_count": 62,
+  "records": [
+    {
+      "artifact": "knowledge/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "knowledge"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json",
+        "knowledge/parsed/rhcsa_sections.json"
+      ],
+      "command_count": 0,
+      "content_hash": "5b8c73e1184b61b7b2ee474ce4f2fd1c9c41e8cf84e2b5c482a4362f5aa111e8"
+    },
+    {
+      "artifact": "knowledge/bash/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "bash"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "0ede11b4fdc0359f45642cfee4539d007637090815fafcd97470ce86c2ef0a17"
+    },
+    {
+      "artifact": "knowledge/bash/skrypty-bash-podstawy.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Skrypty bash — podstawy",
+        "topic": "bash",
+        "source_section": "Skrypty bash — podstawy",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "bash",
+          "break",
+          "chmod",
+          "continue",
+          "do",
+          "done",
+          "echo",
+          "else",
+          "esac",
+          "fi",
+          "linux",
+          "mktemp",
+          "rhcsa",
+          "skrypty-bash-podstawy",
+          "then"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 25,
+      "content_hash": "bf38c89257112f90f7305bd52aa576bcde2f82b72306da2a2195d640ce4e83e9"
+    },
+    {
+      "artifact": "knowledge/bash/wyszukiwanie-i-filtrowanie-tekstu.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Wyszukiwanie i filtrowanie tekstu",
+        "topic": "bash",
+        "source_section": "Wyszukiwanie i filtrowanie tekstu",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "awk",
+          "bash",
+          "file",
+          "grep",
+          "linux",
+          "rhcsa",
+          "wyszukiwanie-i-filtrowanie-tekstu"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 30,
+      "content_hash": "9576ba68147d6541d1eb97b947142c584dbe0c43c895f8a40883f4f5b60ad789"
+    },
+    {
+      "artifact": "knowledge/bash/zaawansowane-narzdzia-tekstowe.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zaawansowane narz■dzia tekstowe",
+        "topic": "bash",
+        "source_section": "Zaawansowane narz■dzia tekstowe",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "bash",
+          "cat",
+          "date",
+          "echo",
+          "gpg",
+          "hwclock",
+          "linux",
+          "rhcsa",
+          "zaawansowane-narzdzia-tekstowe"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 11,
+      "content_hash": "1d52cff9b59f7ae03ba50c11e67dc77fa955a2a5ccd383225d79782bbd4f51a0"
+    },
+    {
+      "artifact": "knowledge/bash/zmienne-rodowiskowe-i-powoka.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zmienne ■rodowiskowe i pow■oka",
+        "topic": "bash",
+        "source_section": "Zmienne ■rodowiskowe i pow■oka",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "alias",
+          "bash",
+          "cat",
+          "complete",
+          "ctrl+r",
+          "echo",
+          "env",
+          "false",
+          "hash",
+          "history",
+          "linux",
+          "ls",
+          "printenv",
+          "rhcsa",
+          "set",
+          "source",
+          "true",
+          "zmienne-rodowiskowe-i-powoka"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 35,
+      "content_hash": "9cf79632f711d2cc0a8cc6a8ba2cf86b724d4fbfae8bd9ee812994cfc19102cc"
+    },
+    {
+      "artifact": "knowledge/canonical/rhcsa_commands.json",
+      "artifact_type": "json_index",
+      "metadata": {
+        "id": "rhcsa_commands",
+        "category": "canonical",
+        "risk": "",
+        "tags": []
+      },
+      "references": [],
+      "command_count": 940,
+      "content_hash": "637a4ae1d03ba9b04e41cf1a566be97d88994bf9f3cfe0c5520b2e41bac73c85"
+    },
+    {
+      "artifact": "knowledge/command_graph.json",
+      "artifact_type": "json_document",
+      "metadata": {
+        "id": "command_graph",
+        "category": "",
+        "risk": "",
+        "tags": []
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "ee66ed8e6af4795feb86dde840fe4fdd36a4bfea66e95a44be3fca850592f842"
+    },
+    {
+      "artifact": "knowledge/context/context_pack.json",
+      "artifact_type": "json_index",
+      "metadata": {
+        "id": "context_pack",
+        "category": "context",
+        "risk": "",
+        "tags": []
+      },
+      "references": [],
+      "command_count": 3,
+      "content_hash": "fc6464e3cc23407afec3dd8256798c3672058276a6144ef2ccbbcb8b7b0107cf"
+    },
+    {
+      "artifact": "knowledge/examples/ls-command.json",
+      "artifact_type": "json_example",
+      "metadata": {
+        "id": "ls-command",
+        "category": "filesystem",
+        "risk": "low",
+        "tags": [
+          "directory-listing",
+          "read-only"
+        ]
+      },
+      "references": [],
+      "command_count": 2,
+      "content_hash": "42d4bc928ee4ef2c15a961c8d17885ea917bbd64be0ce498e30865e215d1a176"
+    },
+    {
+      "artifact": "knowledge/examples/rm-recursive-force.json",
+      "artifact_type": "json_example",
+      "metadata": {
+        "id": "rm-recursive-force",
+        "category": "filesystem",
+        "risk": "critical",
+        "tags": [
+          "destructive",
+          "recursive-delete"
+        ]
+      },
+      "references": [],
+      "command_count": 2,
+      "content_hash": "ff6400c227c917e4fdcb7cf211c175861563dff1536e35bad6bee66be7bd25d0"
+    },
+    {
+      "artifact": "knowledge/examples/systemctl-status.json",
+      "artifact_type": "json_example",
+      "metadata": {
+        "id": "systemctl-status",
+        "category": "service",
+        "risk": "low",
+        "tags": [
+          "read-only",
+          "service-status"
+        ]
+      },
+      "references": [],
+      "command_count": 2,
+      "content_hash": "dd0ed5761bd48c9a90cba7600bb807f8d0c25762a1610d4caa63285e05da41c4"
+    },
+    {
+      "artifact": "knowledge/filesystem/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "filesystem"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "b1a3251dfdc7d1d80808a1bd92625bf9405b4e75bb428808ccad82e9e91d2958"
+    },
+    {
+      "artifact": "knowledge/filesystem/archiwizacja-i-kompresja.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Archiwizacja i kompresja",
+        "topic": "filesystem",
+        "source_section": "Archiwizacja i kompresja",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "archive.tar.bz2",
+          "archive.tar.gz",
+          "archive.tar.xz",
+          "archiwizacja-i-kompresja",
+          "filesystem",
+          "find",
+          "linux",
+          "newfile",
+          "rhcsa",
+          "tar"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 23,
+      "content_hash": "a1790486b17e69965fe65b0933634e69a0002b6fedac27fb65363e31031a5380"
+    },
+    {
+      "artifact": "knowledge/filesystem/edytor-vim.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Edytor Vim",
+        "topic": "filesystem",
+        "source_section": "Edytor Vim",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "a",
+          "b",
+          "cat",
+          "cc",
+          "ctrl+b",
+          "ctrl+d",
+          "ctrl+f",
+          "ctrl+r",
+          "ctrl+u",
+          "ctrl+v",
+          "cw",
+          "d",
+          "d0",
+          "dd",
+          "dw",
+          "e",
+          "edytor-vim",
+          "esc",
+          "filesystem",
+          "g",
+          "gg",
+          "gt",
+          "gu",
+          "i",
+          "linux",
+          "n",
+          "o",
+          "p",
+          "q",
+          "qa",
+          "r",
+          "rhcsa",
+          "u",
+          "v",
+          "vim",
+          "x",
+          "yy",
+          "zq",
+          "zz"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 60,
+      "content_hash": "b63bad518761f1a624ab831eb5877d0ceca6169fe5282b5653a56de7dea7b7af"
+    },
+    {
+      "artifact": "knowledge/filesystem/nawigacja-po-systemie-plikow.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Nawigacja po systemie plików",
+        "topic": "filesystem",
+        "source_section": "Nawigacja po systemie plików",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "basename",
+          "cd",
+          "dirname",
+          "dirs",
+          "echo",
+          "filesystem",
+          "linux",
+          "ls",
+          "nawigacja-po-systemie-plikow",
+          "popd",
+          "pwd",
+          "rhcsa",
+          "tree"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 26,
+      "content_hash": "bb5e3365bd9e1565634f053e56fc9f561829809fbd72419a9e0f2712b86ea554"
+    },
+    {
+      "artifact": "knowledge/filesystem/operacje-na-plikach-i-katalogach.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Operacje na plikach i katalogach",
+        "topic": "filesystem",
+        "source_section": "Operacje na plikach i katalogach",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cp",
+          "filesystem",
+          "linux",
+          "mkdir",
+          "nadpisaniem",
+          "operacje-na-plikach-i-katalogach",
+          "rhcsa",
+          "rm",
+          "rsync",
+          "touch"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 27,
+      "content_hash": "a3c2d08d8401ec6f6ba8c7ef0963cc79cca5615df5a0e142cded335993901156"
+    },
+    {
+      "artifact": "knowledge/filesystem/przegldanie-zawartoci-plikow.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Przegl■danie zawarto■ci plików",
+        "topic": "filesystem",
+        "source_section": "Przegl■danie zawarto■ci plików",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "filesystem",
+          "linux",
+          "przegldanie-zawartoci-plikow",
+          "rhcsa"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 4,
+      "content_hash": "3bee5e9ad124d446843c13e8d9d7ac0c8c9a0b6f86d62264a85a8389b1c2f83c"
+    },
+    {
+      "artifact": "knowledge/filesystem/wyszukiwanie-plikow.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Wyszukiwanie plików",
+        "topic": "filesystem",
+        "source_section": "Wyszukiwanie plików",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "filesystem",
+          "find",
+          "linux",
+          "reference_file",
+          "rhcsa",
+          "updatedb",
+          "wyszukiwanie-plikow"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 47,
+      "content_hash": "415130ede8a660f67260b6e32f617c649e5a2153b2cde99d43a13235f611e427"
+    },
+    {
+      "artifact": "knowledge/index/command_index.json",
+      "artifact_type": "json_document",
+      "metadata": {
+        "id": [
+          "id"
+        ],
+        "category": "",
+        "risk": "",
+        "tags": []
+      },
+      "references": [],
+      "command_count": 1,
+      "content_hash": "055d70472f22deebb929a659c9c3321df3eb4d1298aae3dc837dcbed1d1e66fe"
+    },
+    {
+      "artifact": "knowledge/injection/injected_context.json",
+      "artifact_type": "json_index",
+      "metadata": {
+        "id": "injected_context",
+        "category": "injection",
+        "risk": "",
+        "tags": []
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "66cf4fd7c08590cefe6af64ddb9ed90581e7b9999d76b3ff606168ad28e7e1c6"
+    },
+    {
+      "artifact": "knowledge/lvm/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "lvm"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "42a87388664e11e3a511741820ab50239feff10f0ca47922a8f1115ba8989137"
+    },
+    {
+      "artifact": "knowledge/lvm/lvm-logical-volume-manager.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "LVM — Logical Volume Manager",
+        "topic": "lvm",
+        "source_section": "LVM — Logical Volume Manager",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "linux",
+          "lvdisplay",
+          "lvm",
+          "lvm-logical-volume-manager",
+          "lvmdiskscan",
+          "lvremove",
+          "lvs",
+          "lvscan",
+          "newname",
+          "pvdisplay",
+          "pvs",
+          "pvscan",
+          "rhcsa",
+          "vgdisplay",
+          "vgs",
+          "vgscan"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 15,
+      "content_hash": "8a630a9fcd450aaaba99cf21d247bb8aa74367630aaf797726368d31f66a9b6c"
+    },
+    {
+      "artifact": "knowledge/networking/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "networking"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "e2b83637740505d7107bee7223adacf117942644575865ca887f04e64b9f88b8"
+    },
+    {
+      "artifact": "knowledge/networking/nfs-i-autofs.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "NFS i Autofs",
+        "topic": "networking",
+        "source_section": "NFS i Autofs",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "exportfs",
+          "firewall-cmd",
+          "linux",
+          "ls",
+          "mount",
+          "networking",
+          "nfs-i-autofs",
+          "nfs-server",
+          "nfsstat",
+          "rhcsa"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 14,
+      "content_hash": "d0119593a840d2d52ffbf85d70dc1e22e6a1b0702c35b660fa491898fccba574"
+    },
+    {
+      "artifact": "knowledge/networking/samba-i-nfs-klient.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Samba i NFS (klient)",
+        "topic": "networking",
+        "source_section": "Samba i NFS (klient)",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "grep",
+          "linux",
+          "mount",
+          "networking",
+          "rhcsa",
+          "samba-i-nfs-klient",
+          "smbclient",
+          "testparm"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 6,
+      "content_hash": "bae608de9b12eed297e23d6f89c47f0163c977e2677b2e3996a029b7bf16c29b"
+    },
+    {
+      "artifact": "knowledge/networking/sie-konfiguracja-i-diagnostyka.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Sie■ — konfiguracja i diagnostyka",
+        "topic": "networking",
+        "source_section": "Sie■ — konfiguracja i diagnostyka",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "curl",
+          "established",
+          "hostname",
+          "ip",
+          "linux",
+          "networking",
+          "nmcli",
+          "nmtui",
+          "pid",
+          "procesami",
+          "rhcsa",
+          "sie-konfiguracja-i-diagnostyka"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 37,
+      "content_hash": "2251c1dbbc3d074414c34582bfaf5aebdffdfb2f9dd91630bb158ae81f5faeb6"
+    },
+    {
+      "artifact": "knowledge/networking/ssh-i-dostp-zdalny.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "SSH i dost■p zdalny",
+        "topic": "networking",
+        "source_section": "SSH i dost■p zdalny",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "chmod",
+          "ed25519",
+          "horized_keys",
+          "linux",
+          "networking",
+          "rhcsa",
+          "rsync",
+          "scp",
+          "ssh",
+          "ssh-add",
+          "ssh-copy-id",
+          "ssh-i-dostp-zdalny"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 39,
+      "content_hash": "099ff2ae2228859628c3501f394ebf676057276e130b0839dd145cc76e2447e4"
+    },
+    {
+      "artifact": "knowledge/networking/zapora-ogniowa-firewalld.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zapora ogniowa (firewalld)",
+        "topic": "networking",
+        "source_section": "Zapora ogniowa (firewalld)",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "firewall-cmd",
+          "firewalld",
+          "linux",
+          "networking",
+          "rhcsa",
+          "zapora-ogniowa-firewalld"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 25,
+      "content_hash": "ed795b68cd50a2da83e7c750a3b232bc04804c40724b649c4129b8f6f963910e"
+    },
+    {
+      "artifact": "knowledge/parsed/rhcsa_sections.json",
+      "artifact_type": "json_index",
+      "metadata": {
+        "id": "rhcsa_sections",
+        "category": "parsed",
+        "risk": "",
+        "tags": []
+      },
+      "references": [],
+      "command_count": 940,
+      "content_hash": "03615be0cd88162c1758d3fd6028d19aaa64efca7898298895b0c1f669fda9f6"
+    },
+    {
+      "artifact": "knowledge/permissions/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "permissions"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "1bc493d9869441a987d4800ef93c0b84b2ea006d2b6b571d6a439f6d3ecbbcfe"
+    },
+    {
+      "artifact": "knowledge/permissions/uprawnienia-i-wasno-plikow.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Uprawnienia i w■asno■■ plików",
+        "topic": "permissions",
+        "source_section": "Uprawnienia i w■asno■■ plików",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "chmod",
+          "chown",
+          "find",
+          "katalogu",
+          "linux",
+          "ls",
+          "permissions",
+          "rhcsa",
+          "umask",
+          "uprawnienia-i-wasno-plikow"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 31,
+      "content_hash": "9a2ccb62ebe795c2ad4765e378879c95715a3d073d25ab19a529aeb3c4a47361"
+    },
+    {
+      "artifact": "knowledge/podman/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "podman"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "affea5c5d83a9cc8577d0e347d412b53a00bb780d3783e958b872cb577fe75a4"
+    },
+    {
+      "artifact": "knowledge/podman/kontenery-podman.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Kontenery Podman",
+        "topic": "podman",
+        "source_section": "Kontenery Podman",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "container",
+          "dst:tag",
+          "file.tar",
+          "image",
+          "image:tag",
+          "kontenery-podman",
+          "linux",
+          "podman",
+          "rhcsa"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 109,
+      "content_hash": "35b2138379678d249cf29b77051382ce981ebbc9257697ec6d8a8ac998b8d891"
+    },
+    {
+      "artifact": "knowledge/schema/command.schema.json",
+      "artifact_type": "json_document",
+      "metadata": {
+        "id": "command.schema",
+        "category": "",
+        "risk": "",
+        "tags": []
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "8af744dada5d8a7d863cf2980e657109f998a9fcb0faa90e2bc052e9d2e49f24"
+    },
+    {
+      "artifact": "knowledge/selinux/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "selinux"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "7db0c2e67b2046063a1c1d8fb95fda8ee26b4efdd8b705cb466da521bfccd736"
+    },
+    {
+      "artifact": "knowledge/selinux/selinux.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "SELinux",
+        "topic": "selinux",
+        "source_section": "SELinux",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "getenforce",
+          "grep",
+          "httpd_sys_content_t",
+          "journalctl",
+          "linux",
+          "ls",
+          "matchpathcon",
+          "restorecon",
+          "rhcsa",
+          "selinux",
+          "semanage",
+          "sestatus",
+          "setsebool",
+          "touch"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 36,
+      "content_hash": "1cbbde7010c41440aa1651de04fb76ef60a288e2242260de2f379700f06c12c9"
+    },
+    {
+      "artifact": "knowledge/storage/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "storage"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "a2a042efa09df4588bb2cc15d97504b8b31d6e6bb377eb889fa64efba0de2a96"
+    },
+    {
+      "artifact": "knowledge/storage/przechowywanie-danych-dyski-i-partycje.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Przechowywanie danych — dyski i partycje",
+        "topic": "storage",
+        "source_section": "Przechowywanie danych — dyski i partycje",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "blkid",
+          "linux",
+          "lsblk",
+          "partprobe",
+          "print",
+          "przechowywanie-danych-dyski-i-partycje",
+          "rhcsa",
+          "storage"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 5,
+      "content_hash": "e7d4aee0363e0d1a978e04bc1733d302605062c8388c550472291d08c20b7855"
+    },
+    {
+      "artifact": "knowledge/storage/systemy-plikow-i-montowanie.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Systemy plików i montowanie",
+        "topic": "storage",
+        "source_section": "Systemy plików i montowanie",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "findmnt",
+          "linux",
+          "montowania",
+          "mount",
+          "rhcsa",
+          "storage",
+          "systemy-plikow-i-montowanie"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 17,
+      "content_hash": "58c842ba2f67f0931b8e3998d65af8b05c42021084fd4aac2ea29cb96b4c0f7d"
+    },
+    {
+      "artifact": "knowledge/storage/zarzdzanie-dyskami-raid.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zarz■dzanie dyskami RAID",
+        "topic": "storage",
+        "source_section": "Zarz■dzanie dyskami RAID",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "linux",
+          "mdadm",
+          "rhcsa",
+          "storage",
+          "zarzdzanie-dyskami-raid"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 7,
+      "content_hash": "1c55fcd6b1352a3c08567657b63c6033b9baf0b6eae05677377d2e4c196e713a"
+    },
+    {
+      "artifact": "knowledge/systemd/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "systemd"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "b5f461f9c876c01cb3a1db42829f3d51ae87535d811a785431e0bf662d981635"
+    },
+    {
+      "artifact": "knowledge/systemd/boot-i-grub.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Boot i GRUB",
+        "topic": "systemd",
+        "source_section": "Boot i GRUB",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "boot-i-grub",
+          "cat",
+          "dnf",
+          "echo",
+          "grub",
+          "grub2-install",
+          "grub2-set-default",
+          "halt",
+          "insmod",
+          "kernel",
+          "linux",
+          "ls",
+          "lsmod",
+          "poweroff",
+          "reboot",
+          "rhcsa",
+          "rpm",
+          "sync",
+          "sysctl",
+          "systemctl",
+          "systemd"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 29,
+      "content_hash": "cf875b0cd42f80c340ca9d661dbaee281a71e584a0108a63d8c2824ab33f2ceb"
+    },
+    {
+      "artifact": "knowledge/systemd/cron-i-harmonogramowanie-zada.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Cron i harmonogramowanie zada■",
+        "topic": "systemd",
+        "source_section": "Cron i harmonogramowanie zada■",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "atq",
+          "batch",
+          "cat",
+          "cron-i-harmonogramowanie-zada",
+          "linux",
+          "list-timers",
+          "ls",
+          "myapp.timer",
+          "rhcsa",
+          "run-parts",
+          "systemd",
+          "systemd-run",
+          "timer-name.timer"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 21,
+      "content_hash": "f4bbb4d0e10d95f42772864ce1d8c846d495d6587203c819baf80f896c94fe7d"
+    },
+    {
+      "artifact": "knowledge/systemd/systemd-i-zarzdzanie-usugami.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Systemd i zarz■dzanie us■ugami",
+        "topic": "systemd",
+        "source_section": "Systemd i zarz■dzanie us■ugami",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "daemon-reexec",
+          "daemon-reload",
+          "emergency.target",
+          "get-default",
+          "hostnamectl",
+          "journalctl",
+          "linux",
+          "list-dependencies",
+          "list-unit-files",
+          "localectl",
+          "loginctl",
+          "rescue.target",
+          "rhcsa",
+          "service",
+          "set-default",
+          "systemctl",
+          "systemd",
+          "systemd-analyze",
+          "systemd-i-zarzdzanie-usugami",
+          "timedatectl"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 54,
+      "content_hash": "a168c358e68695f79003d8531d35470237c96f101f5707abc03d831748e5b907"
+    },
+    {
+      "artifact": "knowledge/systemd/zarzdzanie-pakietami-dnf-rpm.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zarz■dzanie pakietami (DNF/RPM)",
+        "topic": "systemd",
+        "source_section": "Zarz■dzanie pakietami (DNF/RPM)",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "aktualizacjami",
+          "dnf",
+          "linux",
+          "package",
+          "rhcsa",
+          "rpm",
+          "subscription-manager",
+          "systemd",
+          "zarzdzanie-pakietami-dnf-rpm"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 70,
+      "content_hash": "6adcd793530a2a432ab7f90c80ee099ee814d382f17367cc1b2d90e233643ba4"
+    },
+    {
+      "artifact": "knowledge/tools/CANONICAL_BUILDER_README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "CANONICAL_BUILDER_README",
+        "topic": "tools"
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "26a7397b2a2ba425b49af4787183cc0ed1c6474f2a227d4a242faf9cf66edab6"
+    },
+    {
+      "artifact": "knowledge/tools/CONTEXT_PACK_README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "CONTEXT_PACK_README",
+        "topic": "tools"
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "aacc55273625a3baca980426a834a8e1eaf7fad9102d6221a32e12a13c3ccd49"
+    },
+    {
+      "artifact": "knowledge/tools/INDEX_BUILDER_README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "INDEX_BUILDER_README",
+        "topic": "tools"
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "3e4481d439c3192634d8ce63a162c0d85baeac2c222cebe8754c747eda2c0d36"
+    },
+    {
+      "artifact": "knowledge/tools/INJECTION_LAYER_README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "INJECTION_LAYER_README",
+        "topic": "tools"
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "f5695bb07f06bcb800487fb1c06a383cddb2412e9d3cf3eb08016b92da73fc38"
+    },
+    {
+      "artifact": "knowledge/tools/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "tools"
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "fe489096261209a2a4ac1bd99a8c6c5c7ba8b4c520d964e87a354c16cc7599c2"
+    },
+    {
+      "artifact": "knowledge/tools/SECTION_PARSER_README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "SECTION_PARSER_README",
+        "topic": "tools"
+      },
+      "references": [
+        "knowledge/parsed/rhcsa_sections.json"
+      ],
+      "command_count": 0,
+      "content_hash": "af990c3f853e9839f97eaa2ee234e6b41b62b8f797f450c4206db4ff9ef40a68"
+    },
+    {
+      "artifact": "knowledge/troubleshooting/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "troubleshooting"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "b90c3dc0c1134dc6e85523fd5836970e3863d6aeb5213feff1ac818f039a1a56"
+    },
+    {
+      "artifact": "knowledge/troubleshooting/diagnostyka-i-narzdzia-systemowe.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Diagnostyka i narz■dzia systemowe",
+        "topic": "troubleshooting",
+        "source_section": "Diagnostyka i narz■dzia systemowe",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "bonnie++",
+          "cat",
+          "cmd",
+          "diagnostyka-i-narzdzia-systemowe",
+          "fio",
+          "ip",
+          "kdump",
+          "linux",
+          "rhcsa",
+          "troubleshooting",
+          "valgrind"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 15,
+      "content_hash": "7aa0f052225cde7a95ee97763db4e5b5c9dcce30d28974f986ee23bbd4214faf"
+    },
+    {
+      "artifact": "knowledge/troubleshooting/dodatkowe-narzdzia-administracyjne.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Dodatkowe narz■dzia administracyjne",
+        "topic": "troubleshooting",
+        "source_section": "Dodatkowe narz■dzia administracyjne",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "alternatives",
+          "authselect",
+          "bash",
+          "cat",
+          "dodatkowe-narzdzia-administracyjne",
+          "fips-mode-setup",
+          "ip",
+          "linux",
+          "ls",
+          "memory:mygroup",
+          "mygroup",
+          "ntsysv",
+          "rhcsa",
+          "scap-workbench",
+          "systemd-cgls",
+          "systemd-cgtop",
+          "troubleshooting",
+          "update-alternatives",
+          "update-crypto-polici",
+          "wireshark"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 24,
+      "content_hash": "b795b3136e658e380c3d1cf2c6f8c79369ef9156bfbbcd2311d6052dd97d7b0f"
+    },
+    {
+      "artifact": "knowledge/troubleshooting/informacje-o-systemie.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Informacje o systemie",
+        "topic": "troubleshooting",
+        "source_section": "Informacje o systemie",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "baseboard",
+          "cat",
+          "informacje-o-systemie",
+          "iostat",
+          "linux",
+          "lscpu",
+          "lshw",
+          "lsmem",
+          "lsnuma",
+          "lspci",
+          "lsusb",
+          "nproc",
+          "rhcsa",
+          "sensors",
+          "sensors-detect",
+          "troubleshooting",
+          "vmstat"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 17,
+      "content_hash": "a3a850b66b574e6148e931685a71f07226d2547d22d25045bd7a483f7cda265e"
+    },
+    {
+      "artifact": "knowledge/troubleshooting/logowanie-i-monitorowanie-systemu.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Logowanie i monitorowanie systemu",
+        "topic": "troubleshooting",
+        "source_section": "Logowanie i monitorowanie systemu",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "aureport",
+          "cat",
+          "dmesg",
+          "grep",
+          "journalctl",
+          "linux",
+          "logowanie-i-monitorowanie-systemu",
+          "ls",
+          "rhcsa",
+          "troubleshooting",
+          "udit.log"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 16,
+      "content_hash": "bf8236778fe0e41f0f12b1e0d0d03100d2fa5d37e0d789753b773bc1138a4643"
+    },
+    {
+      "artifact": "knowledge/troubleshooting/zarzdzanie-procesami.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zarz■dzanie procesami",
+        "topic": "troubleshooting",
+        "source_section": "Zarz■dzanie procesami",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "ctrl+c",
+          "ctrl+d",
+          "ctrl+z",
+          "htop",
+          "jobs",
+          "linux",
+          "lsof",
+          "ps",
+          "pstree",
+          "rhcsa",
+          "top",
+          "troubleshooting",
+          "uptime",
+          "wait",
+          "zarzdzanie-procesami"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 16,
+      "content_hash": "152c55739440bf1044828cd7e32a24d55e721f087f371fcdf000d4e642f3cfa1"
+    },
+    {
+      "artifact": "knowledge/users/README.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "README",
+        "topic": "users"
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 0,
+      "content_hash": "dd521b7f7a4da905c14814ffa4884519c7bd373de2808a538e5ad82498aca364"
+    },
+    {
+      "artifact": "knowledge/users/zarzdzanie-grupami.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zarz■dzanie grupami",
+        "topic": "users",
+        "source_section": "Zarz■dzanie grupami",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "group",
+          "linux",
+          "rhcsa",
+          "usermod",
+          "users",
+          "zarzdzanie-grupami"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 3,
+      "content_hash": "4ab3e9e0eeea2b2099f33862557dd003696bc7c781688fa0ef1a3040bba5c7b3"
+    },
+    {
+      "artifact": "knowledge/users/zarzdzanie-uytkownikami.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "Zarz■dzanie u■ytkownikami",
+        "topic": "users",
+        "source_section": "Zarz■dzanie u■ytkownikami",
+        "source_pdf": "knowledge/source/RHCSA_Command_Library (1).pdf",
+        "generated_from": "knowledge/canonical/rhcsa_commands.json",
+        "tags": [
+          "cat",
+          "dniach",
+          "grpck",
+          "id",
+          "last",
+          "lastb",
+          "lastlog",
+          "linux",
+          "lslogins",
+          "pwck",
+          "rhcsa",
+          "user",
+          "useradd",
+          "usermod",
+          "users",
+          "vigr",
+          "vipw",
+          "visudo",
+          "w",
+          "who",
+          "whoami",
+          "zalogowanego",
+          "zarzdzanie-uytkownikami"
+        ]
+      },
+      "references": [
+        "knowledge/canonical/rhcsa_commands.json"
+      ],
+      "command_count": 46,
+      "content_hash": "c3474eb64d5f661160cb9aed5b2f0b9449d9a5f4cdb76fe0f792616637c086d0"
+    },
+    {
+      "artifact": "knowledge/validator/validation_report.md",
+      "artifact_type": "markdown",
+      "metadata": {
+        "title": "validation_report",
+        "topic": "validator"
+      },
+      "references": [],
+      "command_count": 0,
+      "content_hash": "7f8800f37b822121f9a6d840c26e81abc891ab471bfa90923080d6b296c63ea9"
+    }
+  ]
+}

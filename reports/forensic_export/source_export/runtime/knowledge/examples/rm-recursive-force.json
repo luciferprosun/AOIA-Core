@@ -1,0 +1,31 @@
+{
+  "id": "rm-recursive-force",
+  "command": "rm -rf",
+  "description": "Removes files or directories recursively without prompting.",
+  "category": "filesystem",
+  "tags": [
+    "destructive",
+    "recursive-delete"
+  ],
+  "risk": "critical",
+  "os": [
+    "linux",
+    "macos"
+  ],
+  "shell": [
+    "bash",
+    "sh",
+    "zsh"
+  ],
+  "examples": [
+    {
+      "input": "rm -rf build/",
+      "expected_effect": "Deletes the build directory and its contents if the path exists."
+    }
+  ],
+  "notes": "Critical risk because incorrect paths can cause irreversible data loss.",
+  "related_commands": [
+    "rmdir",
+    "trash"
+  ]
+}

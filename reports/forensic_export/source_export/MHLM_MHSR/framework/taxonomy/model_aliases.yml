@@ -1,0 +1,18 @@
+canonical_terms:
+  MHLM:
+    canonical: "MHLM"
+    note: "Framework naming retained as canonical alias."
+  MHSR:
+    canonical: "MHSR"
+    note: "Framework naming retained as canonical alias."
+  MDLH:
+    canonical: "MDLH"
+    note: "Legacy or adjacent alias; keep mapped but do not merge automatically."
+  LSC:
+    canonical: "LSC neutrino scientific anomaly case study"
+    note: "Canonical active label for scientific anomaly materials."
+  LST:
+    canonical: "LSC neutrino scientific anomaly case study"
+    status: "legacy_alias"
+    note: "Legacy transitional alias retained for lookup only; active taxonomy uses LSC/lsc_neutrino."
+    note: "Canonical case-study label for scientific anomaly materials."

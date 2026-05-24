@@ -1,0 +1,171 @@
+AOIA-Core transfer content report
+Generated: 2026-05-24
+Repository path: /home/l/Desktop/AOIA-Core
+Target archive: /home/l/Desktop/FULL_RESEARCH_TRANSFER.zip
+
+Purpose
+-------
+Create a balanced repository transfer snapshot for external architecture and
+epistemic-framework review while preserving important project, research,
+lineage, documentation, prompt, config, source, and small dataset content.
+
+Important finding
+-----------------
+The repository is 212 MB on disk, but most of that size is local/generated
+environment data:
+
+- runtime/.venv: 206 MB
+- .git: 2.3 MB
+- runtime logs: 112 KB
+- Python __pycache__ folders: approximately 456 KB total
+
+After excluding only the requested transfer-noise categories, the actual
+transferable repository content is approximately 1.81 MB before compression.
+The final ZIP may therefore be much smaller than tens of MB because the
+remaining repository is mostly text: Markdown, Python, JSON, JSONL, shell
+scripts, and one small PDF.
+
+Included top-level content
+--------------------------
+Approximate included size per top-level entry after transfer exclusions:
+
+- runtime: 1.517 MB, 154 files
+- docs: 0.178 MB, 43 files
+- tests: 0.042 MB, 9 files
+- web: 0.014 MB, 3 files
+- README.md: 0.008 MB
+- AOIA_RUNTIME_MAP.md: 0.004 MB
+- AOIA_MEMORY_ONTOLOGY.md: 0.004 MB
+- AOIA_CONTAMINATION_REPORT.md: 0.004 MB
+- CURRENT_MEMORY_FLOW.md: 0.004 MB
+- ROUTING_AUTHORITY_ANALYSIS.md: 0.003 MB
+- ORCHESTRATION_REMNANT_AUDIT.md: 0.003 MB
+- MUTABLE_STATE_ISOLATION_PLAN.md: 0.003 MB
+- MEMORY_LAYER_DECOMPOSITION.md: 0.003 MB
+- MEMORY_BOUNDARY_ANALYSIS.md: 0.003 MB
+- FILESYSTEM_ONTOLOGY_LAYOUT.md: 0.003 MB
+- AOIA_TRANSITIONAL_COMPONENTS.md: 0.003 MB
+- AOIA_CANONICAL_STRUCTURE_PLAN.md: 0.003 MB
+- PROVENANCE_FOUNDATION.md: 0.002 MB
+- CONTRADICTION_SEMANTICS.md: 0.002 MB
+- AOIA_RUNTIME_BOUNDARY_RECOMMENDATION.md: 0.002 MB
+- AOIA_DEPENDENCY_GRAPH.md: 0.002 MB
+- ROADMAP.md: 0.001 MB
+- LICENSE: 0.001 MB
+- AUTHORITY_SCOPE.md: 0.001 MB
+- state: included
+- retrieval: included
+- provenance: included
+- memory: included
+- governance: included
+- contradictions: included
+- archive: included
+- .gitignore: included
+
+Included source folders
+-----------------------
+- runtime/
+- runtime/adaptive_routing/
+- runtime/adaptive_routing/environment/
+- runtime/commands/
+- runtime/knowledge/
+- runtime/knowledge/tools/
+- runtime/memory/
+- runtime/orchestrator/
+- runtime/providers/
+- runtime/router/
+- runtime/tools/
+- tests/
+- web/
+
+Included documentation and report areas
+---------------------------------------
+- root architecture Markdown files
+- docs/
+- docs/ADR/
+- docs/adr/
+- docs/architecture/
+- docs/checkpoints/
+- docs/forensic-runtime-audit/
+- docs/refactor/
+- docs/reports/
+- archive/quarantine/
+- governance/
+- memory/
+- provenance/
+- retrieval/
+- contradictions/
+
+Included prompts/config/state/research artifacts
+------------------------------------------------
+- runtime/prompts/system_prompt.txt
+- runtime/adaptive_routing/*.json
+- runtime/adaptive_routing/dvm_research.md
+- runtime/adaptive_routing/environment/*
+- runtime/knowledge/**/*
+- runtime/knowledge/source/RHCSA_Command_Library (1).pdf
+- runtime/obsidian_vault/**/*
+- runtime/memory/*.jsonl
+- runtime/state/*.json
+- state/*.json
+- runtime/project_scan.json
+- runtime/provenance_registry.json
+- runtime/contradiction_registry.json
+
+Included file-type summary
+--------------------------
+- Python source files: present
+- Markdown docs/reports/architecture notes: present
+- JSON configs/datasets/state files: present
+- JSONL memory/session/lineage files: present
+- shell scripts: present
+- prompts: present
+- PDF source artifact: present
+- web files: present
+
+Excluded folders and artifacts
+------------------------------
+Excluded by policy:
+
+- .git
+- runtime/.venv
+- node_modules
+- __pycache__
+- .pytest_cache
+- .cache
+- cache
+- build
+- dist
+- runtime/logs
+- *.pyc
+- .DS_Store
+
+Excluded folder sizes observed
+------------------------------
+- runtime/.venv: 206 MB
+- .git: 2.3 MB
+- runtime/logs: 112 KB
+- runtime/tools/__pycache__: 156 KB
+- tests/__pycache__: 60 KB
+- runtime/__pycache__: 52 KB
+- runtime/commands/__pycache__: 40 KB
+- runtime/providers/__pycache__: 40 KB
+- runtime/orchestrator/__pycache__: 32 KB
+- runtime/adaptive_routing/__pycache__: 24 KB
+- runtime/knowledge/__pycache__: 20 KB
+- runtime/memory/__pycache__: 16 KB
+- runtime/router/__pycache__: 16 KB
+
+Large file scan
+---------------
+No transferable files larger than 20 MB were found outside excluded folders.
+
+Largest included non-source artifact:
+
+- runtime/knowledge/source/RHCSA_Command_Library (1).pdf: 153,760 bytes
+
+Archive expectation
+-------------------
+The final ZIP is expected to remain small because the included content is
+small and highly compressible. A small final archive does not indicate missing
+project content in this repository if the verification checks pass.

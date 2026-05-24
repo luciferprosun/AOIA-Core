@@ -1,0 +1,19 @@
+{
+  "schema_name": "report",
+  "version": "0.1",
+  "status": "placeholder",
+  "required_fields": [
+    "report_id",
+    "case_study",
+    "report_class",
+    "input_refs",
+    "path"
+  ],
+  "allowed_report_classes": [
+    "raw_provider",
+    "normalized",
+    "synthesis",
+    "review"
+  ],
+  "notes": "Initial placeholder only. Do not treat as final validation schema."
+}

@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+"""INTERNAL LOW-LEVEL SEARCH API.
+
+Do not call directly from coordinators, routers, kernels, or runtime paths.
+Use runtime.retrieval.facade instead.
+"""
+
 import argparse
 import json
 import re
@@ -9,6 +15,14 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+
+from retrieval.linux.scoring import (
+    EXAMPLE_EXACT_MATCH_SCORE,
+    EXAMPLE_TAG_MATCH_SCORE,
+    EXACT_MATCH_SCORE,
+    GREP_MATCH_UNIT_SCORE,
+    TAG_MATCH_SCORE,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -324,13 +338,13 @@ def search_by_tag(tag: str, limit: int = 20, topic_filter: str | None = None) ->
         if not _topic_filter_match(topic_filter, module.topic):
             continue
         if normalized_tag in {_normalize_text(item) for item in module.tags}:
-            results.append(_module_result(module, 50, tag))
+            results.append(_module_result(module, TAG_MATCH_SCORE, tag))
 
     for entry in _example_index():
         if topic_filter and _normalize_text(topic_filter) != _normalize_text(entry.category):
             continue
         if normalized_tag in {_normalize_text(item) for item in entry.tags}:
-            results.append(_example_result(entry, 45))
+            results.append(_example_result(entry, EXAMPLE_TAG_MATCH_SCORE))
 
     return sorted(results, key=lambda item: (-item["score"], item["file_location"]))[:limit]
 
@@ -345,12 +359,12 @@ def exact_command_lookup(command: str, limit: int = 20) -> list[dict[str, Any]]:
     for module in _module_index():
         for candidate in module.commands:
             if _normalized_command(candidate) == normalized_query:
-                results.append(_module_result(module, 100, candidate))
+                results.append(_module_result(module, EXACT_MATCH_SCORE, candidate))
                 break
 
     for entry in _example_index():
         if _normalized_command(entry.command) == normalized_query:
-            results.append(_example_result(entry, 95))
+            results.append(_example_result(entry, EXAMPLE_EXACT_MATCH_SCORE))
 
     deduped: dict[str, dict[str, Any]] = {}
     for result in results:
@@ -371,7 +385,7 @@ def grep_rhcsa(pattern: str, limit: int = 20, topic_filter: str | None = None) -
             continue
         match_count = module.content.lower().count(lowered)
         if match_count:
-            result = _module_result(module, match_count * 10, pattern)
+            result = _module_result(module, match_count * GREP_MATCH_UNIT_SCORE, pattern)
             result["match_count"] = match_count
             results.append(result)
 

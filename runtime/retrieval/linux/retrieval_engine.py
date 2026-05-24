@@ -6,6 +6,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from retrieval.linux.graph_loader import load_command_graph
 from retrieval.linux.provenance_attach import attach_provenance
 from retrieval.linux.query_normalizer import command_key, normalize_query, normalize_text
 from retrieval.linux.scoring import (
@@ -292,12 +293,7 @@ class LinuxRetrievalEngine:
 
     @cached_property
     def command_graph(self) -> dict[str, Any]:
-        path = KNOWLEDGE_ROOT / "command_graph.json"
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return {"version": 1, "nodes": {}}
-        return payload if isinstance(payload, dict) else {"version": 1, "nodes": {}}
+        return load_command_graph(self.project_dir)
 
     @staticmethod
     def _command_record_result(record: dict[str, Any]) -> dict[str, Any]:

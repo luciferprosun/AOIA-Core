@@ -1,0 +1,7069 @@
+{
+  "$": [
+    "$",
+    "$#",
+    "$@",
+    "TMPFILE=$(mktemp)",
+    "VAR=$(command)",
+    "echo $!",
+    "echo $#",
+    "echo $((RANDOM %",
+    "echo $@",
+    "echo ${#ARRAY[@]}"
+  ],
+  "$$": [
+    "$$",
+    "echo $$"
+  ],
+  "$*": [
+    "echo $*"
+  ],
+  "$0": [
+    "$0",
+    "echo $0"
+  ],
+  "$1": [
+    "awk '{print $1}'",
+    "awk '{sum+=$1}",
+    "awk -F: '{print $1}'"
+  ],
+  "$?": [
+    "$?",
+    "echo $?"
+  ],
+  "$bash_version": [
+    "echo $BASH_VERSION"
+  ],
+  "$histfile": [
+    "echo $HISTFILE"
+  ],
+  "$histfilesize": [
+    "echo $HISTFILESIZE"
+  ],
+  "$histsize": [
+    "echo $HISTSIZE"
+  ],
+  "$home": [
+    "echo $HOME"
+  ],
+  "$nf": [
+    "awk '{print $NF}'"
+  ],
+  "$oldpwd": [
+    "echo $OLDPWD"
+  ],
+  "$path": [
+    "echo $PATH"
+  ],
+  "$ps1": [
+    "echo $PS1"
+  ],
+  "$pwd": [
+    "echo $PWD"
+  ],
+  "$shell": [
+    "echo $SHELL"
+  ],
+  "$var": [
+    "echo \"Value: $VAR\""
+  ],
+  "$variable": [
+    "echo $VARIABLE"
+  ],
+  "${array": [
+    "echo ${ARRAY[0]}",
+    "echo ${ARRAY[@]}"
+  ],
+  "${map": [
+    "echo ${MAP[k1]}"
+  ],
+  "*": [
+    "*",
+    "echo '3.14 * 2' | bc"
+  ],
+  "*.log": [
+    "find . -name '*.log'"
+  ],
+  "*.py": [
+    "find . -name '*.py'"
+  ],
+  "*.tmp": [
+    "find . -name '*.tmp'"
+  ],
+  "*.txt": [
+    "find . -name '*.txt'"
+  ],
+  "*/": [
+    "ls -d */"
+  ],
+  "+/pattern": [
+    "vim +/pattern"
+  ],
+  "+1": [
+    "find . -links +1"
+  ],
+  "+10": [
+    "vim +10 file.txt"
+  ],
+  "+100m": [
+    "find . -size +100M"
+  ],
+  "+1g": [
+    "find . -size +1G"
+  ],
+  "+30": [
+    "find . -mtime +30"
+  ],
+  "+7": [
+    "find /tmp -mtime +7"
+  ],
+  "+t": [
+    "chmod +t dir"
+  ],
+  "+x": [
+    "chmod +x script.sh"
+  ],
+  "-": [
+    "cd -",
+    "tar -czf - /path |"
+  ],
+  "--add-f": [
+    "firewall-cmd --add-f"
+  ],
+  "--add-p": [
+    "firewall-cmd --add-p"
+  ],
+  "--add-port": [
+    "--add-port=8080/tcp"
+  ],
+  "--add-r": [
+    "firewall-cmd --add-r"
+  ],
+  "--add-s": [
+    "firewall-cmd --add-s"
+  ],
+  "--add-service": [
+    "--add-service=http",
+    "--add-service=https"
+  ],
+  "--backup": [
+    "cp --backup src dst"
+  ],
+  "--cap-add": [
+    "podman run --cap-add"
+  ],
+  "--changelog": [
+    "rpm -q --changelog"
+  ],
+  "--color": [
+    "ls --color=auto"
+  ],
+  "--complete-reload": [
+    "--complete-reload"
+  ],
+  "--cpus": [
+    "podman run --cpus"
+  ],
+  "--delete": [
+    "rsync --delete src/",
+    "tar --delete -f"
+  ],
+  "--disk-usage": [
+    "--disk-usage"
+  ],
+  "--exclude-vcs": [
+    "tar --exclude-vcs"
+  ],
+  "--filename": [
+    "--filename=/tmp/test"
+  ],
+  "--format": [
+    "podman ps --format"
+  ],
+  "--get-active-zones": [
+    "--get-active-zones"
+  ],
+  "--get-default-zone": [
+    "--get-default-zone"
+  ],
+  "--get-zones": [
+    "--get-zones"
+  ],
+  "--import": [
+    "rpm --import"
+  ],
+  "--leak-check": [
+    "--leak-check=full"
+  ],
+  "--level": [
+    "--level=err,warn"
+  ],
+  "--list-all": [
+    "--list-all"
+  ],
+  "--list-ports": [
+    "--list-ports"
+  ],
+  "--list-rich-rules": [
+    "--list-rich-rules"
+  ],
+  "--list-services": [
+    "--list-services"
+  ],
+  "--list-tags": [
+    "--list-tags"
+  ],
+  "--memory": [
+    "podman run --memory"
+  ],
+  "--name": [
+    "podman run --name"
+  ],
+  "--network": [
+    "podman run --network"
+  ],
+  "--newer-mtime": [
+    "--newer-mtime='2023-"
+  ],
+  "--pod": [
+    "podman run --pod"
+  ],
+  "--raid-devices": [
+    "--raid-devices=2"
+  ],
+  "--remov": [
+    "firewall-cmd --remov"
+  ],
+  "--restart": [
+    "--restart=always",
+    "podman run --restart"
+  ],
+  "--rm": [
+    "podman run --rm"
+  ],
+  "--runti": [
+    "firewall-cmd --runti"
+  ],
+  "--scan": [
+    "--scan"
+  ],
+  "--scripts": [
+    "rpm -q --scripts",
+    "rpm -qp --scripts"
+  ],
+  "--set-d": [
+    "firewall-cmd --set-d"
+  ],
+  "--since": [
+    "journalctl --since"
+  ],
+  "--state": [
+    "firewall-cmd --state"
+  ],
+  "--tail": [
+    "podman logs --tail"
+  ],
+  "--target": [
+    "--target=x86_64-efi"
+  ],
+  "--type": [
+    "--type=service"
+  ],
+  "--until": [
+    "journalctl --until"
+  ],
+  "--user": [
+    "systemctl --user"
+  ],
+  "--vacuum-size": [
+    "--vacuum-size=500M"
+  ],
+  "--version": [
+    "podman --version"
+  ],
+  "--zone": [
+    "--zone=drop",
+    "--zone=public"
+  ],
+  "-1": [
+    "find . -atime -1",
+    "find . -ctime -1",
+    "journalctl -b -1"
+  ],
+  "-1000": [
+    "find . -perm -1000"
+  ],
+  "-10k": [
+    "find . -size -10k"
+  ],
+  "-20": [
+    "ls /etc | head -20"
+  ],
+  "-2000": [
+    "find . -perm -2000",
+    "find / -perm -2000"
+  ],
+  "-4000": [
+    "find . -perm -4000",
+    "find / -perm -4000"
+  ],
+  "-6": [
+    "ip -6 addr show",
+    "ip -6 route show"
+  ],
+  "-60": [
+    "find . -mmin -60"
+  ],
+  "-644": [
+    "find . -perm -644"
+  ],
+  "-7": [
+    "find . -mtime -7"
+  ],
+  "-a": [
+    "-a",
+    "cat -A file.txt",
+    "cp -a src/ dst/",
+    "grep -A 3 'pattern'",
+    "mount -a",
+    "podman images -a",
+    "podman ps -a",
+    "podman rm -a",
+    "podman rmi -a",
+    "semanage fcontext -a",
+    "semanage login -a -s",
+    "semanage port -a -t",
+    "ssh -A user@host"
+  ],
+  "-ag": [
+    "usermod -aG docker",
+    "usermod -aG group",
+    "usermod -aG wheel"
+  ],
+  "-alh": [
+    "alias ll='ls -alh'"
+  ],
+  "-atime": [
+    "find . -atime -1"
+  ],
+  "-av": [
+    "rsync -av src/ dst/"
+  ],
+  "-avz": [
+    "rsync -avz",
+    "rsync -avz -e ssh",
+    "rsync -avz src/"
+  ],
+  "-b": [
+    "grep -B 3 'pattern'",
+    "journalctl -b",
+    "journalctl -b -1"
+  ],
+  "-c": [
+    "grep -C 3 'pattern'",
+    "grep -c 'pattern'",
+    "useradd -c 'Imi■",
+    "usermod -c 'Nowy"
+  ],
+  "-ctime": [
+    "find . -ctime -1"
+  ],
+  "-cvf": [
+    "tar -cvf archive.tar"
+  ],
+  "-cvjf": [
+    "tar -cvJf",
+    "tar -cvjf"
+  ],
+  "-cvzf": [
+    "tar -cvzf"
+  ],
+  "-czf": [
+    "tar -czf - /path |",
+    "tar -czf arch.tar.gz"
+  ],
+  "-d": [
+    "ls -d */",
+    "podman run -d image",
+    "semanage fcontext -d",
+    "semanage port -d -t",
+    "ssh -D 1080",
+    "touch -d",
+    "useradd -d",
+    "usermod -d /new/home",
+    "vim -d file1 file2"
+  ],
+  "-dz": [
+    "ls -dZ dir/"
+  ],
+  "-e": [
+    "grep -E 'pat1|pat2'",
+    "podman run -e",
+    "rpm -e package",
+    "rsync -avz -e ssh",
+    "useradd -e",
+    "usermod -e",
+    "usermod -e '' user"
+  ],
+  "-empty": [
+    "find . -empty"
+  ],
+  "-f": [
+    "awk -F: '{print $1}'",
+    "grep -F 'literal'",
+    "journalctl -f",
+    "journalctl -f -u",
+    "podman build -f",
+    "podman inspect -f",
+    "podman logs -f",
+    "podman rm -f",
+    "podman rmi -f image",
+    "restorecon -F /path/",
+    "rm -f file.txt",
+    "ssh -N -f -L",
+    "tar --delete -f",
+    "useradd -f 30 user"
+  ],
+  "-fvh": [
+    "rpm -Fvh package.rpm"
+  ],
+  "-g": [
+    "useradd -G g1,g2",
+    "useradd -g group",
+    "usermod -G g1,g2",
+    "usermod -g group"
+  ],
+  "-gid": [
+    "find . -gid 1000"
+  ],
+  "-group": [
+    "find . -group"
+  ],
+  "-i": [
+    "cp -i src dst",
+    "grep -i 'pattern'",
+    "ls -i",
+    "podman load -i",
+    "rm -i file",
+    "ssh -i"
+  ],
+  "-iname": [
+    "find . -iname"
+  ],
+  "-inum": [
+    "find / -inum 12345"
+  ],
+  "-it": [
+    "podman exec -it",
+    "podman run -it image"
+  ],
+  "-ivh": [
+    "rpm -ivh package.rpm"
+  ],
+  "-j": [
+    "ssh -J jumphost"
+  ],
+  "-k": [
+    "journalctl -k",
+    "rpm -K package.rpm"
+  ],
+  "-l": [
+    "grep -l 'pattern'",
+    "ls -l",
+    "ls /proc | wc -l",
+    "semanage boolean -l",
+    "semanage fcontext -l",
+    "semanage login -l",
+    "semanage port -l",
+    "semanage port -l |",
+    "semanage user -l",
+    "ssh -L",
+    "ssh -N -f -L",
+    "usermod -L user",
+    "usermod -l newname"
+  ],
+  "-la": [
+    "ls -la"
+  ],
+  "-lh": [
+    "ls -lh"
+  ],
+  "-links": [
+    "find . -links +1"
+  ],
+  "-ls": [
+    "ls -lS"
+  ],
+  "-lt": [
+    "ls -lt"
+  ],
+  "-m": [
+    "grep -m 5 'pattern'",
+    "mkdir -m 755 dirname",
+    "semanage fcontext -m",
+    "semanage port -m -t",
+    "useradd -M user",
+    "useradd -m -s",
+    "useradd -m username"
+  ],
+  "-maxdepth": [
+    "find . -maxdepth 2"
+  ],
+  "-mindepth": [
+    "find . -mindepth 2"
+  ],
+  "-mmin": [
+    "find . -mmin -60"
+  ],
+  "-mount": [
+    "find . -mount -name"
+  ],
+  "-mtime": [
+    "find . -mtime +30",
+    "find . -mtime -7",
+    "find /tmp -mtime +7"
+  ],
+  "-n": [
+    "cat -n file.txt",
+    "grep -n 'pattern'",
+    "journalctl -n 50",
+    "rsync -n src/ dst/",
+    "ssh -N -f -L",
+    "useradd -N user"
+  ],
+  "-name": [
+    "find . ! -name",
+    "find . -mount -name",
+    "find . -name",
+    "find . -name '*.log'",
+    "find . -name '*.py'",
+    "find . -name '*.tmp'",
+    "find . -name '*.txt'",
+    "find . -type f -name",
+    "find . -xdev -name",
+    "find / -name",
+    "find / -type d -name",
+    "find / -type f -name"
+  ],
+  "-newer": [
+    "find . -newer",
+    "find . -type f -newer"
+  ],
+  "-nogroup": [
+    "find . -nogroup"
+  ],
+  "-nouser": [
+    "find . -nouser"
+  ],
+  "-o": [
+    "grep -o 'pattern'",
+    "journalctl -o",
+    "journalctl -o json",
+    "mount -o",
+    "mount -o remount,ro",
+    "mount -o remount,rw",
+    "mount -o ro",
+    "mount -o ro,soft",
+    "mount -o rw,noexec",
+    "podman save image -o",
+    "ssh -o",
+    "ssh -o BatchMode=yes",
+    "ssh -o PasswordAuthe",
+    "ssh -o PreferredAuth",
+    "ssh -o StrictHostKey"
+  ],
+  "-o+w": [
+    "find / -perm -o+w"
+  ],
+  "-p": [
+    "cp -p src dst",
+    "grep -P '\\d+' file",
+    "journalctl -p",
+    "journalctl -p err",
+    "mkdir -p a/b/c",
+    "podman run -p",
+    "setsebool -P",
+    "setsebool -P httpd_c",
+    "setsebool -P samba_e",
+    "ssh -p 2222",
+    "systemctl show -p"
+  ],
+  "-perm": [
+    "find . -perm -1000",
+    "find . -perm -2000",
+    "find . -perm -4000",
+    "find . -perm -644",
+    "find . -perm /644",
+    "find . -perm 644",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w"
+  ],
+  "-print": [
+    "find /path -print |"
+  ],
+  "-q": [
+    "grep -q 'pattern'",
+    "podman ps -q",
+    "rpm -q --changelog",
+    "rpm -q --scripts"
+  ],
+  "-qa": [
+    "podman ps -qa",
+    "rpm -qa",
+    "rpm -qa kernel"
+  ],
+  "-qc": [
+    "rpm -qc package"
+  ],
+  "-qd": [
+    "rpm -qd package"
+  ],
+  "-qf": [
+    "rpm -qf"
+  ],
+  "-qi": [
+    "rpm -qi package"
+  ],
+  "-qip": [
+    "rpm -qip package.rpm"
+  ],
+  "-ql": [
+    "rpm -ql package"
+  ],
+  "-qp": [
+    "rpm -qp --scripts"
+  ],
+  "-qr": [
+    "rpm -qR package"
+  ],
+  "-r": [
+    "chmod -R 755 dir/",
+    "chown -R user:group",
+    "cp -r src/ dst/",
+    "grep -r 'pattern'",
+    "ls -R",
+    "restorecon -R",
+    "rm -r dir/",
+    "ssh -R",
+    "useradd -r sysuser",
+    "vim -R file.txt"
+  ],
+  "-rf": [
+    "rm -rf dir/"
+  ],
+  "-rv": [
+    "restorecon -Rv"
+  ],
+  "-rvf": [
+    "tar -rvf archive.tar"
+  ],
+  "-s": [
+    "ip -s link show eth0",
+    "podman kill -s",
+    "semanage login -a -s",
+    "useradd -m -s",
+    "usermod -s /bin/zsh"
+  ],
+  "-size": [
+    "find . -size +100M",
+    "find . -size +1G",
+    "find . -size -10k",
+    "find . -size 512c"
+  ],
+  "-t": [
+    "-t",
+    "journalctl -t",
+    "mount -t cifs",
+    "mount -t ext4",
+    "mount -t nfs",
+    "mount -t nfs4",
+    "mount -t xfs",
+    "mount | column -t",
+    "podman build -t",
+    "podman stop -t 0",
+    "semanage port -a -t",
+    "semanage port -d -t",
+    "semanage port -m -t",
+    "ssh -t user@host",
+    "touch -t"
+  ],
+  "-tvf": [
+    "tar -tvf archive.tar"
+  ],
+  "-tvzf": [
+    "tar -tvzf"
+  ],
+  "-type": [
+    "find . -type f -name",
+    "find . -type f -newer",
+    "find / -type b",
+    "find / -type c",
+    "find / -type d -name",
+    "find / -type f -name",
+    "find / -type l"
+  ],
+  "-u": [
+    "cp -u src dst",
+    "journalctl -f -u",
+    "journalctl -u",
+    "journalctl -u sshd",
+    "podman exec -u root",
+    "podman run -u user",
+    "useradd -u 1500 user",
+    "usermod -U user",
+    "usermod -u 1600 user",
+    "vim -u NONE file.txt"
+  ],
+  "-uid": [
+    "find . -uid 1000"
+  ],
+  "-user": [
+    "find . -user"
+  ],
+  "-uvf": [
+    "tar -uvf archive.tar"
+  ],
+  "-uvh": [
+    "rpm -Uvh package.rpm"
+  ],
+  "-v": [
+    "awk -v FS=':'",
+    "cp -v src dst",
+    "grep -v 'pattern'",
+    "mkdir -v dirname",
+    "podman run -v",
+    "rm -v file",
+    "rpm -V package",
+    "ssh -v user@host"
+  ],
+  "-va": [
+    "rpm -Va"
+  ],
+  "-vvv": [
+    "ssh -vvv user@host"
+  ],
+  "-w": [
+    "grep -w 'word' file"
+  ],
+  "-x": [
+    "ssh -X user@host"
+  ],
+  "-xdev": [
+    "find . -xdev -name"
+  ],
+  "-xe": [
+    "journalctl -xe"
+  ],
+  "-xvf": [
+    "tar -xvf archive.tar"
+  ],
+  "-xvjf": [
+    "tar -xvJf",
+    "tar -xvjf"
+  ],
+  "-xvzf": [
+    "tar -xvzf"
+  ],
+  "-y": [
+    "dnf install -y"
+  ],
+  "-z": [
+    "ls -Z dir/",
+    "ls -Z file"
+  ],
+  "/": [
+    "cd /",
+    "find / -inum 12345",
+    "find / -name",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w",
+    "find / -type b",
+    "find / -type c",
+    "find / -type d -name",
+    "find / -type f -name",
+    "find / -type l"
+  ],
+  "/.autorelabel": [
+    "touch /.autorelabel"
+  ],
+  "//server": [
+    "//server"
+  ],
+  "/644": [
+    "find . -perm /644"
+  ],
+  "/bin/bash": [
+    "/bin/bash"
+  ],
+  "/bin/zsh": [
+    "usermod -s /bin/zsh"
+  ],
+  "/boot/": [
+    "ls /boot/"
+  ],
+  "/boot/grub2/": [
+    "ls /boot/grub2/"
+  ],
+  "/boot/grub2/grub.cfg": [
+    "/boot/grub2/grub.cfg"
+  ],
+  "/boot/initramfs*": [
+    "/boot/initramfs*"
+  ],
+  "/container": [
+    "/host:/container"
+  ],
+  "/dev/md0": [
+    "/dev/md0"
+  ],
+  "/dev/null": [
+    "1>/dev/null",
+    "2>/dev/null"
+  ],
+  "/dev/sdb": [
+    "/dev/sdb"
+  ],
+  "/dev/sdb1": [
+    "/dev/sdb1",
+    "mount /dev/sdb1 /mnt"
+  ],
+  "/dev/sdc": [
+    "/dev/sdc"
+  ],
+  "/dev/sdd": [
+    "/dev/sdd"
+  ],
+  "/dir": [
+    "/dir"
+  ],
+  "/etc": [
+    "ls /etc | head -20"
+  ],
+  "/etc/anacrontab": [
+    "cat /etc/anacrontab"
+  ],
+  "/etc/at.allow": [
+    "cat /etc/at.allow"
+  ],
+  "/etc/at.deny": [
+    "cat /etc/at.deny"
+  ],
+  "/etc/audit/audit": [
+    "cat /etc/audit/audit"
+  ],
+  "/etc/auto.master": [
+    "cat /etc/auto.master"
+  ],
+  "/etc/auto.misc": [
+    "cat /etc/auto.misc"
+  ],
+  "/etc/bashrc": [
+    "cat /etc/bashrc"
+  ],
+  "/etc/chrony.conf": [
+    "cat /etc/chrony.conf"
+  ],
+  "/etc/containers/": [
+    "cat /etc/containers/"
+  ],
+  "/etc/cron.allow": [
+    "cat /etc/cron.allow"
+  ],
+  "/etc/cron.d/": [
+    "ls /etc/cron.d/"
+  ],
+  "/etc/cron.daily": [
+    "/etc/cron.daily"
+  ],
+  "/etc/cron.daily/": [
+    "ls /etc/cron.daily/"
+  ],
+  "/etc/cron.deny": [
+    "cat /etc/cron.deny"
+  ],
+  "/etc/cron.hourly/": [
+    "ls /etc/cron.hourly/"
+  ],
+  "/etc/cron.weekly/": [
+    "ls /etc/cron.weekly/"
+  ],
+  "/etc/crontab": [
+    "cat /etc/crontab"
+  ],
+  "/etc/crypto-poli": [
+    "cat /etc/crypto-poli"
+  ],
+  "/etc/exports": [
+    "cat /etc/exports"
+  ],
+  "/etc/fstab": [
+    "cat /etc/fstab",
+    "cat /etc/fstab |"
+  ],
+  "/etc/group": [
+    "cat /etc/group"
+  ],
+  "/etc/gshadow": [
+    "cat /etc/gshadow"
+  ],
+  "/etc/hostname": [
+    "cat /etc/hostname"
+  ],
+  "/etc/hosts": [
+    "cat /etc/hosts"
+  ],
+  "/etc/kdump.conf": [
+    "cat /etc/kdump.conf"
+  ],
+  "/etc/logrotate.d/": [
+    "ls /etc/logrotate.d/"
+  ],
+  "/etc/mdadm.conf": [
+    "cat /etc/mdadm.conf"
+  ],
+  "/etc/modprobe.d/": [
+    "cat /etc/modprobe.d/"
+  ],
+  "/etc/os-release": [
+    "cat /etc/os-release"
+  ],
+  "/etc/passwd": [
+    "cat /etc/passwd"
+  ],
+  "/etc/profile": [
+    "cat /etc/profile"
+  ],
+  "/etc/profile.d/": [
+    "ls /etc/profile.d/"
+  ],
+  "/etc/resolv.conf": [
+    "cat /etc/resolv.conf"
+  ],
+  "/etc/selinux/config": [
+    "/etc/selinux/config"
+  ],
+  "/etc/shadow": [
+    "cat /etc/shadow"
+  ],
+  "/etc/sysconfig/n": [
+    "cat /etc/sysconfig/n"
+  ],
+  "/etc/sysctl.conf": [
+    "cat /etc/sysctl.conf"
+  ],
+  "/etc/sysctl.d/": [
+    "cat /etc/sysctl.d/"
+  ],
+  "/etc/systemd/sys": [
+    "cat /etc/systemd/sys"
+  ],
+  "/host": [
+    "/host:/container"
+  ],
+  "/mnt": [
+    "/mnt",
+    "mount /dev/sdb1 /mnt",
+    "mount UUID=xxx /mnt"
+  ],
+  "/mnt/nfs/share": [
+    "ls /mnt/nfs/share"
+  ],
+  "/new/home": [
+    "usermod -d /new/home"
+  ],
+  "/path": [
+    "find /path -print |",
+    "tar -czf - /path |"
+  ],
+  "/path/": [
+    "restorecon -F /path/"
+  ],
+  "/path/to/dir": [
+    "cd /path/to/dir"
+  ],
+  "/path/to/file": [
+    "/path/to/file"
+  ],
+  "/pattern": [
+    "/pattern"
+  ],
+  "/pattern/": [
+    "awk '/pattern/' file"
+  ],
+  "/proc": [
+    "ls /proc | wc -l"
+  ],
+  "/proc/cmdline": [
+    "cat /proc/cmdline"
+  ],
+  "/proc/cpuinfo": [
+    "cat /proc/cpuinfo"
+  ],
+  "/proc/loadavg": [
+    "cat /proc/loadavg"
+  ],
+  "/proc/mdstat": [
+    "cat /proc/mdstat"
+  ],
+  "/proc/meminfo": [
+    "cat /proc/meminfo"
+  ],
+  "/proc/mounts": [
+    "cat /proc/mounts"
+  ],
+  "/proc/net/tcp": [
+    "cat /proc/net/tcp"
+  ],
+  "/proc/net/udp": [
+    "cat /proc/net/udp"
+  ],
+  "/proc/pid/limits": [
+    "cat /proc/PID/limits"
+  ],
+  "/proc/pid/maps": [
+    "cat /proc/PID/maps"
+  ],
+  "/proc/pid/status": [
+    "cat /proc/PID/status"
+  ],
+  "/proc/sys/kernel": [
+    "cat /proc/sys/kernel"
+  ],
+  "/proc/sys/net/nf": [
+    "cat /proc/sys/net/nf"
+  ],
+  "/proc/uptime": [
+    "cat /proc/uptime"
+  ],
+  "/proc/version": [
+    "cat /proc/version"
+  ],
+  "/script.sh": [
+    "./script.sh"
+  ],
+  "/share": [
+    "server:/share"
+  ],
+  "/sys/block/sda/q": [
+    "cat /sys/block/sda/q"
+  ],
+  "/sys/class/dmi/i": [
+    "cat /sys/class/dmi/i"
+  ],
+  "/sys/fs/cgroup/": [
+    "ls /sys/fs/cgroup/"
+  ],
+  "/sys/fs/cgroup/m": [
+    "cat /sys/fs/cgroup/m"
+  ],
+  "/tmp": [
+    "find /tmp -mtime +7"
+  ],
+  "/tmp/cap.pcap": [
+    "/tmp/cap.pcap"
+  ],
+  "/tmp/test": [
+    "--filename=/tmp/test"
+  ],
+  "/var/l": [
+    "grep 'denied' /var/l"
+  ],
+  "/var/log/audit/a": [
+    "cat /var/log/audit/a"
+  ],
+  "/var/log/cron": [
+    "cat /var/log/cron"
+  ],
+  "/var/log/maillog": [
+    "cat /var/log/maillog"
+  ],
+  "/var/log/messages": [
+    "/var/log/messages"
+  ],
+  "/var/log/sa/sadd": [
+    "/var/log/sa/saDD"
+  ],
+  "/var/log/secure": [
+    "cat /var/log/secure"
+  ],
+  "/var/spool/cron/": [
+    "cat /var/spool/cron/"
+  ],
+  "0": [
+    "0",
+    "echo ${ARRAY[0]}",
+    "podman stop -t 0"
+  ],
+  "1": [
+    "1>/dev/null"
+  ],
+  "1..5": [
+    "echo {1..5}"
+  ],
+  "10": [
+    "ConnectTimeout=10"
+  ],
+  "100": [
+    "100))"
+  ],
+  "1000": [
+    "count=1000",
+    "find . -gid 1000",
+    "find . -uid 1000"
+  ],
+  "1080": [
+    "ssh -D 1080"
+  ],
+  "10g": [
+    "10G"
+  ],
+  "12345": [
+    "find / -inum 12345"
+  ],
+  "1500": [
+    "useradd -u 1500 user"
+  ],
+  "1600": [
+    "usermod -u 1600 user"
+  ],
+  "1755": [
+    "chmod 1755 dir"
+  ],
+  "2": [
+    "--raid-devices=2",
+    "2>/dev/null",
+    "echo '3.14 * 2' | bc",
+    "find . -maxdepth 2",
+    "find . -mindepth 2"
+  ],
+  "2023-": [
+    "--newer-mtime='2023-"
+  ],
+  "2222": [
+    "ssh -p 2222"
+  ],
+  "2755": [
+    "chmod 2755 dir"
+  ],
+  "3": [
+    "grep -A 3 'pattern'",
+    "grep -B 3 'pattern'",
+    "grep -C 3 'pattern'"
+  ],
+  "3.14": [
+    "echo '3.14 * 2' | bc"
+  ],
+  "30": [
+    "useradd -f 30 user"
+  ],
+  "32": [
+    "32"
+  ],
+  "4096": [
+    "4096"
+  ],
+  "4755": [
+    "chmod 4755 file"
+  ],
+  "5": [
+    "awk 'NR==5' file",
+    "awk 'NR>=5 &&",
+    "dnf history info 5",
+    "dnf history redo 5",
+    "dnf history undo 5",
+    "grep -m 5 'pattern'"
+  ],
+  "50": [
+    "journalctl -n 50"
+  ],
+  "500m": [
+    "--vacuum-size=500M"
+  ],
+  "512c": [
+    "find . -size 512c"
+  ],
+  "512m": [
+    "t_in_bytes=512M"
+  ],
+  "5dd": [
+    "5dd"
+  ],
+  "5yy": [
+    "5yy"
+  ],
+  "600": [
+    "chmod 600 file",
+    "chmod 600 ~/.ssh/aut"
+  ],
+  "644": [
+    "chmod 644 file",
+    "find . -perm 644"
+  ],
+  "700": [
+    "chmod 700 ~/.ssh/"
+  ],
+  "755": [
+    "chmod -R 755 dir/",
+    "chmod 755 file",
+    "mkdir -m 755 dirname"
+  ],
+  "777": [
+    "chmod 777 file"
+  ],
+  "8.8.8.8": [
+    "ip route get 8.8.8.8"
+  ],
+  "80": [
+    "8080:localhost:80"
+  ],
+  "8080": [
+    "8080:localhost:80"
+  ],
+  "8080/tcp": [
+    "--add-port=8080/tcp",
+    "e-port=8080/tcp"
+  ],
+  "9000": [
+    "9000"
+  ],
+  "?pattern": [
+    "?pattern"
+  ],
+  "a": [
+    "A",
+    "a",
+    "echo {a,b,c}.log",
+    "w■a■ciciel)",
+    "w■a■ciciela"
+  ],
+  "a+r": [
+    "chmod a+r file"
+  ],
+  "a/b/c": [
+    "mkdir -p a/b/c"
+  ],
+  "accepted": [
+    "grep 'Accepted'"
+  ],
+  "access.redhat.com/u": [
+    ".access.redhat.com/u"
+  ],
+  "add": [
+    "ip addr add",
+    "ip netns add myns",
+    "ip route add",
+    "ip route add default",
+    "nmcli connection add"
+  ],
+  "addr": [
+    "ip -6 addr show",
+    "ip addr",
+    "ip addr add",
+    "ip addr del",
+    "ip addr show",
+    "ip addr show eth0"
+  ],
+  "administracyjne": [
+    "--zone=drop",
+    "/tmp/cap.pcap",
+    "alternatives",
+    "authselect",
+    "bash",
+    "cat /etc/crypto-poli",
+    "cat /sys/fs/cgroup/m",
+    "emory/mygroup/memory",
+    "fips-mode-setup",
+    "ip netns add myns",
+    "ip netns delete myns",
+    "ip netns exec myns",
+    "ip netns list",
+    "ls /sys/fs/cgroup/",
+    "memory:mygroup",
+    "mygroup",
+    "ntsysv",
+    "scap-workbench",
+    "systemd-cgls",
+    "systemd-cgtop",
+    "t_in_bytes=512M",
+    "update-alternatives",
+    "update-crypto-polici",
+    "wireshark"
+  ],
+  "aktualizacjami": [
+    "aktualizacjami"
+  ],
+  "alias": [
+    "alias",
+    "alias ll='ls -alh'"
+  ],
+  "all": [
+    "dnf clean all",
+    "dnf repolist all",
+    "ip neigh flush all"
+  ],
+  "alternatives": [
+    "alternatives"
+  ],
+  "always": [
+    "--restart=always"
+  ],
+  "arch.tar.gz": [
+    "tar -czf arch.tar.gz"
+  ],
+  "archive.tar": [
+    "tar -cvf archive.tar",
+    "tar -rvf archive.tar",
+    "tar -tvf archive.tar",
+    "tar -uvf archive.tar",
+    "tar -xvf archive.tar"
+  ],
+  "archive.tar.bz2": [
+    "archive.tar.bz2"
+  ],
+  "archive.tar.gz": [
+    "archive.tar.gz"
+  ],
+  "archive.tar.xz": [
+    "archive.tar.xz"
+  ],
+  "archiwizacja": [
+    "--newer-mtime='2023-",
+    "archive.tar.bz2",
+    "archive.tar.gz",
+    "archive.tar.xz",
+    "find /path -print |",
+    "newfile",
+    "tar",
+    "tar --delete -f",
+    "tar --exclude-vcs",
+    "tar -cvJf",
+    "tar -cvf archive.tar",
+    "tar -cvjf",
+    "tar -cvzf",
+    "tar -czf - /path |",
+    "tar -czf arch.tar.gz",
+    "tar -rvf archive.tar",
+    "tar -tvf archive.tar",
+    "tar -tvzf",
+    "tar -uvf archive.tar",
+    "tar -xvJf",
+    "tar -xvf archive.tar",
+    "tar -xvjf",
+    "tar -xvzf"
+  ],
+  "array": [
+    "echo ${#ARRAY[@]}"
+  ],
+  "array+": [
+    "ARRAY+=('e')"
+  ],
+  "asno": [
+    "chmod",
+    "chmod +t dir",
+    "chmod -R 755 dir/",
+    "chmod 1755 dir",
+    "chmod 2755 dir",
+    "chmod 4755 file",
+    "chmod 600 file",
+    "chmod 644 file",
+    "chmod 755 file",
+    "chmod 777 file",
+    "chmod a+r file",
+    "chmod g+s dir",
+    "chmod g-w file",
+    "chmod o-r file",
+    "chmod u+s file",
+    "chmod u+x file",
+    "chmod u=rwx,g=rx,o=r",
+    "chown",
+    "chown -R user:group",
+    "chown :group file",
+    "chown user file",
+    "chown user:group",
+    "dir/",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w",
+    "katalogu",
+    "ls -Z file",
+    "umask",
+    "w■a■ciciel)",
+    "w■a■ciciela"
+  ],
+  "atq": [
+    "atq"
+  ],
+  "aureport": [
+    "aureport"
+  ],
+  "authselect": [
+    "authselect"
+  ],
+  "auto": [
+    "ls --color=auto"
+  ],
+  "autofs": [
+    "cat /etc/auto.master",
+    "cat /etc/auto.misc",
+    "cat /etc/exports",
+    "exportfs",
+    "firewall-cmd --add-s",
+    "ls /mnt/nfs/share",
+    "mount -o",
+    "mount -o ro,soft",
+    "mount -t nfs",
+    "mount -t nfs4",
+    "nfs-server",
+    "nfsstat",
+    "nosuid,noexec",
+    "server:/share"
+  ],
+  "autoremove": [
+    "dnf autoremove"
+  ],
+  "available": [
+    "dnf list available"
+  ],
+  "awk": [
+    "awk '/pattern/' file",
+    "awk 'END{print NR}'",
+    "awk 'NR==5' file",
+    "awk 'NR>=5 &&",
+    "awk '{print $1}'",
+    "awk '{print $NF}'",
+    "awk '{print NF}'",
+    "awk '{sum+=$1}",
+    "awk -F: '{print $1}'",
+    "awk -v FS=':'"
+  ],
+  "b": [
+    "b",
+    "echo {a,b,c}.log",
+    "find / -type b"
+  ],
+  "baseboard": [
+    "baseboard"
+  ],
+  "basename": [
+    "basename"
+  ],
+  "bash": [
+    "$#",
+    "$$",
+    "$0",
+    "$?",
+    "$@",
+    "./script.sh",
+    "1>/dev/null",
+    "2>/dev/null",
+    "ARRAY+=('e')",
+    "TMPFILE=$(mktemp)",
+    "VAR=$(command)",
+    "VAR='value'",
+    "bash",
+    "break",
+    "chmod +x script.sh",
+    "continue",
+    "do",
+    "done",
+    "echo \"Value: $VAR\"",
+    "echo ${MAP[k1]}",
+    "else",
+    "esac",
+    "fi",
+    "mktemp",
+    "then",
+    "}"
+  ],
+  "batch": [
+    "batch"
+  ],
+  "batchmode": [
+    "ssh -o BatchMode=yes"
+  ],
+  "bc": [
+    "echo '3.14 * 2' | bc"
+  ],
+  "blkid": [
+    "blkid"
+  ],
+  "bonnie++": [
+    "bonnie++"
+  ],
+  "boolean": [
+    "semanage boolean -l"
+  ],
+  "boot": [
+    "--target=x86_64-efi",
+    "/boot/grub2/grub.cfg",
+    "/boot/initramfs*",
+    "GRUB",
+    "cat /etc/modprobe.d/",
+    "cat /etc/sysctl.conf",
+    "cat /etc/sysctl.d/",
+    "cat /proc/cmdline",
+    "cat /proc/sys/kernel",
+    "cat /proc/version",
+    "dnf install kernel",
+    "dnf remove",
+    "echo 'module_name' >",
+    "echo 'net.ipv4.ip_fo",
+    "grub2-install",
+    "grub2-set-default",
+    "halt",
+    "insmod",
+    "kernel",
+    "ls /boot/",
+    "ls /boot/grub2/",
+    "lsmod",
+    "poweroff",
+    "reboot",
+    "rpm -qa kernel",
+    "sync",
+    "sysctl",
+    "systemctl emergency",
+    "systemctl rescue"
+  ],
+  "break": [
+    "break"
+  ],
+  "build": [
+    "podman build",
+    "podman build -f",
+    "podman build -t"
+  ],
+  "c": [
+    "find / -type c"
+  ],
+  "c$": [
+    "c$"
+  ],
+  "cat": [
+    "cat",
+    "cat -A file.txt",
+    "cat -n file.txt",
+    "cat /etc/anacrontab",
+    "cat /etc/at.allow",
+    "cat /etc/at.deny",
+    "cat /etc/audit/audit",
+    "cat /etc/auto.master",
+    "cat /etc/auto.misc",
+    "cat /etc/bashrc",
+    "cat /etc/chrony.conf",
+    "cat /etc/containers/",
+    "cat /etc/cron.allow",
+    "cat /etc/cron.deny",
+    "cat /etc/crontab",
+    "cat /etc/crypto-poli",
+    "cat /etc/exports",
+    "cat /etc/fstab",
+    "cat /etc/fstab |",
+    "cat /etc/group",
+    "cat /etc/gshadow",
+    "cat /etc/hostname",
+    "cat /etc/hosts",
+    "cat /etc/kdump.conf",
+    "cat /etc/mdadm.conf",
+    "cat /etc/modprobe.d/",
+    "cat /etc/os-release",
+    "cat /etc/passwd",
+    "cat /etc/profile",
+    "cat /etc/resolv.conf",
+    "cat /etc/shadow",
+    "cat /etc/sysconfig/n",
+    "cat /etc/sysctl.conf",
+    "cat /etc/sysctl.d/",
+    "cat /etc/systemd/sys",
+    "cat /proc/PID/limits",
+    "cat /proc/PID/maps",
+    "cat /proc/PID/status",
+    "cat /proc/cmdline",
+    "cat /proc/cpuinfo",
+    "cat /proc/loadavg",
+    "cat /proc/mdstat",
+    "cat /proc/meminfo",
+    "cat /proc/mounts",
+    "cat /proc/net/tcp",
+    "cat /proc/net/udp",
+    "cat /proc/sys/kernel",
+    "cat /proc/sys/net/nf",
+    "cat /proc/uptime",
+    "cat /proc/version",
+    "cat /sys/block/sda/q",
+    "cat /sys/class/dmi/i",
+    "cat /sys/fs/cgroup/m",
+    "cat /var/log/audit/a",
+    "cat /var/log/cron",
+    "cat /var/log/maillog",
+    "cat /var/log/secure",
+    "cat /var/spool/cron/",
+    "cat Containerfile",
+    "cat file.txt",
+    "cat file1 file2",
+    "cat ~/.bash_logout",
+    "cat ~/.bash_profile",
+    "cat ~/.bashrc",
+    "cat ~/.ssh/config",
+    "cat ~/.vimrc",
+    "systemctl cat"
+  ],
+  "cc": [
+    "cc"
+  ],
+  "cd": [
+    "cd -",
+    "cd /",
+    "cd /path/to/dir",
+    "cd ~"
+  ],
+  "check-update": [
+    "dnf check-update"
+  ],
+  "checking": [
+    "Checking=no"
+  ],
+  "chmod": [
+    "chmod",
+    "chmod +t dir",
+    "chmod +x script.sh",
+    "chmod -R 755 dir/",
+    "chmod 1755 dir",
+    "chmod 2755 dir",
+    "chmod 4755 file",
+    "chmod 600 file",
+    "chmod 600 ~/.ssh/aut",
+    "chmod 644 file",
+    "chmod 700 ~/.ssh/",
+    "chmod 755 file",
+    "chmod 777 file",
+    "chmod a+r file",
+    "chmod g+s dir",
+    "chmod g-w file",
+    "chmod o-r file",
+    "chmod u+s file",
+    "chmod u+x file",
+    "chmod u=rwx,g=rx,o=r"
+  ],
+  "chown": [
+    "chown",
+    "chown -R user:group",
+    "chown :group file",
+    "chown user file",
+    "chown user:group"
+  ],
+  "ci": [
+    "cat -A file.txt",
+    "cat -n file.txt",
+    "cat file.txt",
+    "cat file1 file2"
+  ],
+  "ciciel": [
+    "w■a■ciciel)"
+  ],
+  "ciciela": [
+    "w■a■ciciela"
+  ],
+  "cifs": [
+    "grep cifs",
+    "mount -t cifs"
+  ],
+  "clean": [
+    "dnf clean all",
+    "dnf clean metadata",
+    "dnf clean packages"
+  ],
+  "cmd": [
+    "cmd"
+  ],
+  "column": [
+    "mount | column -t"
+  ],
+  "command": [
+    "VAR=$(command)"
+  ],
+  "commit": [
+    "podman commit"
+  ],
+  "complete": [
+    "complete"
+  ],
+  "config-manager": [
+    "dnf config-manager"
+  ],
+  "connection": [
+    "nmcli connection",
+    "nmcli connection add",
+    "nmcli connection up"
+  ],
+  "connecttimeout": [
+    "ConnectTimeout=10"
+  ],
+  "container": [
+    "container",
+    "podman container",
+    "podman rm container",
+    "podman top container"
+  ],
+  "containerfile": [
+    "cat Containerfile"
+  ],
+  "continue": [
+    "continue"
+  ],
+  "count": [
+    "count=1000"
+  ],
+  "cp": [
+    "cp --backup src dst",
+    "cp -a src/ dst/",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -r src/ dst/",
+    "cp -u src dst",
+    "cp -v src dst",
+    "cp source dest",
+    "podman cp",
+    "podman cp src"
+  ],
+  "create": [
+    "podman pod create",
+    "podman volume create"
+  ],
+  "cron": [
+    "/etc/cron.daily",
+    "atq",
+    "batch",
+    "cat /etc/anacrontab",
+    "cat /etc/at.allow",
+    "cat /etc/at.deny",
+    "cat /etc/cron.allow",
+    "cat /etc/cron.deny",
+    "cat /etc/crontab",
+    "cat /etc/systemd/sys",
+    "cat /var/spool/cron/",
+    "list-timers",
+    "ls /etc/cron.d/",
+    "ls /etc/cron.daily/",
+    "ls /etc/cron.hourly/",
+    "ls /etc/cron.weekly/",
+    "myapp.timer",
+    "run-parts",
+    "systemd-run",
+    "tem/myapp.timer",
+    "timer-name.timer"
+  ],
+  "ctrl+b": [
+    "Ctrl+b"
+  ],
+  "ctrl+c": [
+    "Ctrl+C"
+  ],
+  "ctrl+d": [
+    "Ctrl+D",
+    "Ctrl+d"
+  ],
+  "ctrl+f": [
+    "Ctrl+f"
+  ],
+  "ctrl+r": [
+    "Ctrl+R",
+    "Ctrl+r"
+  ],
+  "ctrl+u": [
+    "Ctrl+u"
+  ],
+  "ctrl+v": [
+    "Ctrl+v"
+  ],
+  "ctrl+z": [
+    "Ctrl+Z"
+  ],
+  "curl": [
+    "curl"
+  ],
+  "cw": [
+    "cw"
+  ],
+  "czona": [
+    "w■■czona"
+  ],
+  "c}.log": [
+    "echo {a,b,c}.log"
+  ],
+  "d": [
+    "D",
+    "find / -type d -name"
+  ],
+  "d$": [
+    "d$"
+  ],
+  "d+": [
+    "grep -P '\\d+' file"
+  ],
+  "d0": [
+    "d0"
+  ],
+  "daemon-reexec": [
+    "daemon-reexec"
+  ],
+  "daemon-reload": [
+    "daemon-reload"
+  ],
+  "danie": [
+    "cat -A file.txt",
+    "cat -n file.txt",
+    "cat file.txt",
+    "cat file1 file2"
+  ],
+  "danych": [
+    "blkid",
+    "dysków",
+    "lsblk",
+    "partprobe",
+    "print"
+  ],
+  "date": [
+    "date"
+  ],
+  "dd": [
+    "dd"
+  ],
+  "default": [
+    "ip route add default",
+    "ip route del default"
+  ],
+  "del": [
+    "ip addr del",
+    "ip route del",
+    "ip route del default"
+  ],
+  "delete": [
+    "ip netns delete myns"
+  ],
+  "denied": [
+    "grep 'denied' /var/l"
+  ],
+  "dest": [
+    "cp source dest"
+  ],
+  "device": [
+    "nmcli device show",
+    "nmcli device status"
+  ],
+  "df": [
+    "podman system df"
+  ],
+  "diagnostyka": [
+    "--filename=/tmp/test",
+    "--leak-check=full",
+    "/var/log/sa/saDD",
+    "9000",
+    "PID",
+    "bonnie++",
+    "cat /etc/hostname",
+    "cat /etc/hosts",
+    "cat /etc/kdump.conf",
+    "cat /etc/resolv.conf",
+    "cat /etc/sysconfig/n",
+    "cat /proc/PID/limits",
+    "cat /proc/net/tcp",
+    "cat /proc/net/udp",
+    "cat /proc/sys/net/nf",
+    "cmd",
+    "count=1000",
+    "curl",
+    "established",
+    "fio",
+    "hostname",
+    "ip -6 addr show",
+    "ip -6 route show",
+    "ip -s link show eth0",
+    "ip addr",
+    "ip addr add",
+    "ip addr del",
+    "ip addr show",
+    "ip addr show eth0",
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up",
+    "ip link show",
+    "ip neigh flush all",
+    "ip neigh show",
+    "ip route add",
+    "ip route add default",
+    "ip route del",
+    "ip route del default",
+    "ip route get 8.8.8.8",
+    "ip route show",
+    "kdump",
+    "nmcli connection",
+    "nmcli connection add",
+    "nmcli connection up",
+    "nmcli device show",
+    "nmcli device status",
+    "nmcli general",
+    "nmcli radio wifi off",
+    "nmtui",
+    "procesami",
+    "valgrind"
+  ],
+  "diff": [
+    "podman diff"
+  ],
+  "dir": [
+    "chmod +t dir",
+    "chmod 1755 dir",
+    "chmod 2755 dir",
+    "chmod g+s dir"
+  ],
+  "dir/": [
+    "chmod -R 755 dir/",
+    "dir/",
+    "ls -Z dir/",
+    "ls -dZ dir/",
+    "rm -r dir/",
+    "rm -rf dir/"
+  ],
+  "dirname": [
+    "dirname",
+    "mkdir -m 755 dirname",
+    "mkdir -v dirname",
+    "mkdir dirname"
+  ],
+  "dirs": [
+    "dirs"
+  ],
+  "disable": [
+    "dnf module disable",
+    "systemctl disable"
+  ],
+  "distro-sync": [
+    "dnf distro-sync"
+  ],
+  "dmesg": [
+    "dmesg"
+  ],
+  "dnf": [
+    "dnf autoremove",
+    "dnf check-update",
+    "dnf clean all",
+    "dnf clean metadata",
+    "dnf clean packages",
+    "dnf config-manager",
+    "dnf distro-sync",
+    "dnf downgrade",
+    "dnf erase package",
+    "dnf groupinfo 'Group",
+    "dnf groupinstall",
+    "dnf grouplist",
+    "dnf groupremove",
+    "dnf history",
+    "dnf history info 5",
+    "dnf history redo 5",
+    "dnf history rollback",
+    "dnf history undo 5",
+    "dnf info package",
+    "dnf install -y",
+    "dnf install kernel",
+    "dnf install package",
+    "dnf list available",
+    "dnf list extras",
+    "dnf list installed",
+    "dnf list obsoletes",
+    "dnf list updates",
+    "dnf makecache",
+    "dnf module disable",
+    "dnf module enable",
+    "dnf module info",
+    "dnf module install m",
+    "dnf module list",
+    "dnf module reset",
+    "dnf provides",
+    "dnf reinstall",
+    "dnf remove",
+    "dnf remove package",
+    "dnf repoinfo repo-id",
+    "dnf repolist",
+    "dnf repolist all",
+    "dnf search keyword",
+    "dnf security update",
+    "dnf update",
+    "dnf update package",
+    "dnf updateinfo list",
+    "dnf upgrade",
+    "dnf upgrade-minimal",
+    "dnf whatprovides"
+  ],
+  "dnf/rpm": [
+    "Name'",
+    "aktualizacjami",
+    "dnf autoremove",
+    "dnf check-update",
+    "dnf clean all",
+    "dnf clean metadata",
+    "dnf clean packages",
+    "dnf config-manager",
+    "dnf distro-sync",
+    "dnf downgrade",
+    "dnf erase package",
+    "dnf groupinfo 'Group",
+    "dnf groupinstall",
+    "dnf grouplist",
+    "dnf groupremove",
+    "dnf history",
+    "dnf history info 5",
+    "dnf history redo 5",
+    "dnf history rollback",
+    "dnf history undo 5",
+    "dnf info package",
+    "dnf install -y",
+    "dnf install package",
+    "dnf list available",
+    "dnf list extras",
+    "dnf list installed",
+    "dnf list obsoletes",
+    "dnf list updates",
+    "dnf makecache",
+    "dnf module disable",
+    "dnf module enable",
+    "dnf module info",
+    "dnf module install m",
+    "dnf module list",
+    "dnf module reset",
+    "dnf provides",
+    "dnf reinstall",
+    "dnf remove package",
+    "dnf repoinfo repo-id",
+    "dnf repolist",
+    "dnf repolist all",
+    "dnf search keyword",
+    "dnf security update",
+    "dnf update",
+    "dnf update package",
+    "dnf updateinfo list",
+    "dnf upgrade",
+    "dnf upgrade-minimal",
+    "dnf whatprovides",
+    "package",
+    "rpm --import",
+    "rpm -Fvh package.rpm",
+    "rpm -K package.rpm",
+    "rpm -Uvh package.rpm",
+    "rpm -V package",
+    "rpm -Va",
+    "rpm -e package",
+    "rpm -ivh package.rpm",
+    "rpm -q --changelog",
+    "rpm -q --scripts",
+    "rpm -qR package",
+    "rpm -qa",
+    "rpm -qc package",
+    "rpm -qd package",
+    "rpm -qf",
+    "rpm -qi package",
+    "rpm -qip package.rpm",
+    "rpm -ql package",
+    "rpm -qp --scripts",
+    "subscription-manager"
+  ],
+  "dniach": [
+    "dniach"
+  ],
+  "do": [
+    "do"
+  ],
+  "docker": [
+    "usermod -aG docker"
+  ],
+  "dodatkowe": [
+    "--zone=drop",
+    "/tmp/cap.pcap",
+    "alternatives",
+    "authselect",
+    "bash",
+    "cat /etc/crypto-poli",
+    "cat /sys/fs/cgroup/m",
+    "emory/mygroup/memory",
+    "fips-mode-setup",
+    "ip netns add myns",
+    "ip netns delete myns",
+    "ip netns exec myns",
+    "ip netns list",
+    "ls /sys/fs/cgroup/",
+    "memory:mygroup",
+    "mygroup",
+    "ntsysv",
+    "scap-workbench",
+    "systemd-cgls",
+    "systemd-cgtop",
+    "t_in_bytes=512M",
+    "update-alternatives",
+    "update-crypto-polici",
+    "wireshark"
+  ],
+  "done": [
+    "done"
+  ],
+  "dost": [
+    "4096",
+    "8080:localhost:80",
+    "Checking=no",
+    "ConnectTimeout=10",
+    "cat ~/.ssh/config",
+    "chmod 600 ~/.ssh/aut",
+    "chmod 700 ~/.ssh/",
+    "ed25519",
+    "horized_keys",
+    "ntication=no",
+    "rsync -avz",
+    "rsync -avz -e ssh",
+    "scp",
+    "ssh -A user@host",
+    "ssh -D 1080",
+    "ssh -J jumphost",
+    "ssh -L",
+    "ssh -N -f -L",
+    "ssh -R",
+    "ssh -X user@host",
+    "ssh -i",
+    "ssh -o",
+    "ssh -o BatchMode=yes",
+    "ssh -o PasswordAuthe",
+    "ssh -o PreferredAuth",
+    "ssh -o StrictHostKey",
+    "ssh -p 2222",
+    "ssh -t user@host",
+    "ssh -v user@host",
+    "ssh -vvv user@host",
+    "ssh user@hostname",
+    "ssh-add",
+    "ssh-copy-id",
+    "user@host",
+    "user@hostname",
+    "~/.ssh/id_rsa",
+    "~/.ssh/id_rsa.pub",
+    "~/.ssh/key.pem",
+    "~/.ssh/mykey"
+  ],
+  "down": [
+    "ip link set eth0 down"
+  ],
+  "downgrade": [
+    "dnf downgrade"
+  ],
+  "drop": [
+    "--zone=drop"
+  ],
+  "dst": [
+    "cp --backup src dst",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -u src dst",
+    "cp -v src dst",
+    "dst:tag"
+  ],
+  "dst/": [
+    "cp -a src/ dst/",
+    "cp -r src/ dst/",
+    "rsync -av src/ dst/",
+    "rsync -n src/ dst/"
+  ],
+  "dw": [
+    "dw"
+  ],
+  "dyskami": [
+    "--raid-devices=2",
+    "--scan",
+    "/dev/md0",
+    "/dev/sdd",
+    "cat /etc/mdadm.conf",
+    "cat /proc/mdstat",
+    "mdadm"
+  ],
+  "dyski": [
+    "blkid",
+    "dysków",
+    "lsblk",
+    "partprobe",
+    "print"
+  ],
+  "dysków": [
+    "dysków"
+  ],
+  "dzanie": [
+    "--raid-devices=2",
+    "--scan",
+    "--type=service",
+    "--vacuum-size=500M",
+    "/dev/md0",
+    "/dev/sdd",
+    "Ctrl+C",
+    "Ctrl+D",
+    "Ctrl+Z",
+    "Name'",
+    "aktualizacjami",
+    "cat /etc/group",
+    "cat /etc/gshadow",
+    "cat /etc/mdadm.conf",
+    "cat /etc/passwd",
+    "cat /etc/shadow",
+    "cat /proc/PID/maps",
+    "cat /proc/PID/status",
+    "cat /proc/loadavg",
+    "cat /proc/mdstat",
+    "cat /proc/meminfo",
+    "daemon-reexec",
+    "daemon-reload",
+    "dnf autoremove",
+    "dnf check-update",
+    "dnf clean all",
+    "dnf clean metadata",
+    "dnf clean packages",
+    "dnf config-manager",
+    "dnf distro-sync",
+    "dnf downgrade",
+    "dnf erase package",
+    "dnf groupinfo 'Group",
+    "dnf groupinstall",
+    "dnf grouplist",
+    "dnf groupremove",
+    "dnf history",
+    "dnf history info 5",
+    "dnf history redo 5",
+    "dnf history rollback",
+    "dnf history undo 5",
+    "dnf info package",
+    "dnf install -y",
+    "dnf install package",
+    "dnf list available",
+    "dnf list extras",
+    "dnf list installed",
+    "dnf list obsoletes",
+    "dnf list updates",
+    "dnf makecache",
+    "dnf module disable",
+    "dnf module enable",
+    "dnf module info",
+    "dnf module install m",
+    "dnf module list",
+    "dnf module reset",
+    "dnf provides",
+    "dnf reinstall",
+    "dnf remove package",
+    "dnf repoinfo repo-id",
+    "dnf repolist",
+    "dnf repolist all",
+    "dnf search keyword",
+    "dnf security update",
+    "dnf update",
+    "dnf update package",
+    "dnf updateinfo list",
+    "dnf upgrade",
+    "dnf upgrade-minimal",
+    "dnf whatprovides",
+    "dniach",
+    "emergency.target",
+    "get-default",
+    "group",
+    "grpck",
+    "hostnamectl",
+    "htop",
+    "id",
+    "jobs",
+    "journalctl",
+    "journalctl --since",
+    "journalctl --until",
+    "journalctl -b",
+    "journalctl -b -1",
+    "journalctl -f",
+    "journalctl -f -u",
+    "journalctl -k",
+    "journalctl -n 50",
+    "journalctl -o json",
+    "journalctl -p",
+    "journalctl -p err",
+    "journalctl -u",
+    "last",
+    "lastb",
+    "lastlog",
+    "list-dependencies",
+    "list-unit-files",
+    "localectl",
+    "loginctl",
+    "lslogins",
+    "lsof",
+    "mdadm",
+    "package",
+    "ps",
+    "pstree",
+    "pwck",
+    "rescue.target",
+    "rpm --import",
+    "rpm -Fvh package.rpm",
+    "rpm -K package.rpm",
+    "rpm -Uvh package.rpm",
+    "rpm -V package",
+    "rpm -Va",
+    "rpm -e package",
+    "rpm -ivh package.rpm",
+    "rpm -q --changelog",
+    "rpm -q --scripts",
+    "rpm -qR package",
+    "rpm -qa",
+    "rpm -qc package",
+    "rpm -qd package",
+    "rpm -qf",
+    "rpm -qi package",
+    "rpm -qip package.rpm",
+    "rpm -ql package",
+    "rpm -qp --scripts",
+    "service",
+    "set-default",
+    "subscription-manager",
+    "systemctl",
+    "systemctl --user",
+    "systemctl cat",
+    "systemctl disable",
+    "systemctl edit",
+    "systemctl enable",
+    "systemctl halt",
+    "systemctl hibernate",
+    "systemctl is-active",
+    "systemctl is-enabled",
+    "systemctl is-failed",
+    "systemctl isolate",
+    "systemctl list-units",
+    "systemctl mask",
+    "systemctl poweroff",
+    "systemctl reboot",
+    "systemctl reload",
+    "systemctl restart",
+    "systemctl show",
+    "systemctl show -p",
+    "systemctl start",
+    "systemctl status",
+    "systemctl stop",
+    "systemctl suspend",
+    "systemctl unmask",
+    "systemd-analyze",
+    "timedatectl",
+    "top",
+    "trwa■e)",
+    "uptime",
+    "user",
+    "useradd -G g1,g2",
+    "useradd -M user",
+    "useradd -N user",
+    "useradd -c 'Imi■",
+    "useradd -d",
+    "useradd -e",
+    "useradd -f 30 user",
+    "useradd -g group",
+    "useradd -m -s",
+    "useradd -m username",
+    "useradd -r sysuser",
+    "useradd -u 1500 user",
+    "useradd username",
+    "usermod -G g1,g2",
+    "usermod -L user",
+    "usermod -U user",
+    "usermod -aG docker",
+    "usermod -aG group",
+    "usermod -aG wheel",
+    "usermod -c 'Nowy",
+    "usermod -d /new/home",
+    "usermod -e",
+    "usermod -e '' user",
+    "usermod -g group",
+    "usermod -l newname",
+    "usermod -s /bin/zsh",
+    "usermod -u 1600 user",
+    "u■ytkownika",
+    "vigr",
+    "vipw",
+    "visudo",
+    "w",
+    "wait",
+    "who",
+    "whoami",
+    "zalogowanego"
+  ],
+  "dzia": [
+    "--filename=/tmp/test",
+    "--leak-check=full",
+    "--zone=drop",
+    "/tmp/cap.pcap",
+    "/var/log/sa/saDD",
+    "100))",
+    "32",
+    "alternatives",
+    "authselect",
+    "bash",
+    "bonnie++",
+    "cat /etc/chrony.conf",
+    "cat /etc/crypto-poli",
+    "cat /etc/kdump.conf",
+    "cat /proc/PID/limits",
+    "cat /proc/net/tcp",
+    "cat /proc/net/udp",
+    "cat /proc/sys/net/nf",
+    "cat /sys/fs/cgroup/m",
+    "cmd",
+    "count=1000",
+    "date",
+    "echo $((RANDOM %",
+    "echo '3.14 * 2' | bc",
+    "echo file{1..3}.txt",
+    "echo {1..5}",
+    "echo {a,b,c}.log",
+    "emory/mygroup/memory",
+    "fio",
+    "fips-mode-setup",
+    "gpg",
+    "hwclock",
+    "ip -s link show eth0",
+    "ip netns add myns",
+    "ip netns delete myns",
+    "ip netns exec myns",
+    "ip netns list",
+    "kdump",
+    "ls /sys/fs/cgroup/",
+    "memory:mygroup",
+    "mygroup",
+    "ntsysv",
+    "scap-workbench",
+    "systemd-cgls",
+    "systemd-cgtop",
+    "t_in_bytes=512M",
+    "update-alternatives",
+    "update-crypto-polici",
+    "valgrind",
+    "wireshark"
+  ],
+  "e": [
+    "ARRAY+=('e')",
+    "e",
+    "trwa■e)"
+  ],
+  "e-port": [
+    "e-port=8080/tcp"
+  ],
+  "e-service": [
+    "e-service=http"
+  ],
+  "echo": [
+    "echo \"Value: $VAR\"",
+    "echo $!",
+    "echo $#",
+    "echo $$",
+    "echo $((RANDOM %",
+    "echo $*",
+    "echo $0",
+    "echo $?",
+    "echo $@",
+    "echo $BASH_VERSION",
+    "echo $HISTFILE",
+    "echo $HISTFILESIZE",
+    "echo $HISTSIZE",
+    "echo $HOME",
+    "echo $OLDPWD",
+    "echo $PATH",
+    "echo $PS1",
+    "echo $PWD",
+    "echo $SHELL",
+    "echo $VARIABLE",
+    "echo ${#ARRAY[@]}",
+    "echo ${ARRAY[0]}",
+    "echo ${ARRAY[@]}",
+    "echo ${MAP[k1]}",
+    "echo '3.14 * 2' | bc",
+    "echo 'module_name' >",
+    "echo 'net.ipv4.ip_fo",
+    "echo file{1..3}.txt",
+    "echo {1..5}",
+    "echo {a,b,c}.log"
+  ],
+  "ed25519": [
+    "ed25519"
+  ],
+  "edit": [
+    "systemctl edit"
+  ],
+  "edytor": [
+    "$",
+    "*",
+    "/pattern",
+    "0",
+    "10G",
+    "5dd",
+    "5yy",
+    "?pattern",
+    "A",
+    "Ctrl+b",
+    "Ctrl+d",
+    "Ctrl+f",
+    "Ctrl+r",
+    "Ctrl+u",
+    "Ctrl+v",
+    "D",
+    "Esc",
+    "G",
+    "I",
+    "N",
+    "O",
+    "P",
+    "R",
+    "V",
+    "X",
+    "ZQ",
+    "ZZ",
+    "a",
+    "b",
+    "c$",
+    "cat ~/.vimrc",
+    "cc",
+    "cw",
+    "d$",
+    "d0",
+    "dd",
+    "dw",
+    "e",
+    "gT",
+    "gU",
+    "gg",
+    "gt",
+    "gu",
+    "i",
+    "n",
+    "o",
+    "p",
+    "q",
+    "qa",
+    "r",
+    "u",
+    "v",
+    "vim +/pattern",
+    "vim +10 file.txt",
+    "vim -R file.txt",
+    "vim -d file1 file2",
+    "vim -u NONE file.txt",
+    "vim file.txt",
+    "x",
+    "yy"
+  ],
+  "efault-zone": [
+    "efault-zone=trusted"
+  ],
+  "else": [
+    "else"
+  ],
+  "emergency": [
+    "systemctl emergency"
+  ],
+  "emergency.target": [
+    "emergency.target"
+  ],
+  "emory/mygroup/memory": [
+    "emory/mygroup/memory"
+  ],
+  "enable": [
+    "dnf module enable",
+    "systemctl enable"
+  ],
+  "end{print": [
+    "awk 'END{print NR}'"
+  ],
+  "env": [
+    "env"
+  ],
+  "erase": [
+    "dnf erase package"
+  ],
+  "err": [
+    "--level=err,warn",
+    "journalctl -p err"
+  ],
+  "esac": [
+    "esac"
+  ],
+  "esc": [
+    "Esc"
+  ],
+  "established": [
+    "established"
+  ],
+  "eth0": [
+    "ip -s link show eth0",
+    "ip addr show eth0",
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up"
+  ],
+  "exec": [
+    "ip netns exec myns",
+    "podman exec",
+    "podman exec -it",
+    "podman exec -u root"
+  ],
+  "exportfs": [
+    "exportfs"
+  ],
+  "ext4": [
+    "mount -t ext4"
+  ],
+  "extras": [
+    "dnf list extras"
+  ],
+  "f": [
+    "find . -type f -name",
+    "find . -type f -newer",
+    "find / -type f -name"
+  ],
+  "failed": [
+    "grep 'Failed"
+  ],
+  "false": [
+    "false"
+  ],
+  "fcontext": [
+    "semanage fcontext -a",
+    "semanage fcontext -d",
+    "semanage fcontext -l",
+    "semanage fcontext -m"
+  ],
+  "fi": [
+    "fi"
+  ],
+  "file": [
+    "awk '/pattern/' file",
+    "awk 'NR==5' file",
+    "chmod 4755 file",
+    "chmod 600 file",
+    "chmod 644 file",
+    "chmod 755 file",
+    "chmod 777 file",
+    "chmod a+r file",
+    "chmod g-w file",
+    "chmod o-r file",
+    "chmod u+s file",
+    "chmod u+x file",
+    "chown :group file",
+    "chown user file",
+    "file",
+    "grep 'pattern' file",
+    "grep -P '\\d+' file",
+    "grep -w 'word' file",
+    "ls -Z file",
+    "rm -i file",
+    "rm -v file"
+  ],
+  "file.tar": [
+    "file.tar"
+  ],
+  "file.txt": [
+    "cat -A file.txt",
+    "cat -n file.txt",
+    "cat file.txt",
+    "rm -f file.txt",
+    "rm file.txt",
+    "touch file.txt",
+    "vim +10 file.txt",
+    "vim -R file.txt",
+    "vim -u NONE file.txt",
+    "vim file.txt"
+  ],
+  "file1": [
+    "cat file1 file2",
+    "vim -d file1 file2"
+  ],
+  "file2": [
+    "cat file1 file2",
+    "vim -d file1 file2"
+  ],
+  "file{1..3}.txt": [
+    "echo file{1..3}.txt"
+  ],
+  "filtrowanie": [
+    "/dir",
+    "awk '/pattern/' file",
+    "awk 'END{print NR}'",
+    "awk 'NR==5' file",
+    "awk 'NR>=5 &&",
+    "awk '{print $1}'",
+    "awk '{print $NF}'",
+    "awk '{print NF}'",
+    "awk '{sum+=$1}",
+    "awk -F: '{print $1}'",
+    "awk -v FS=':'",
+    "file",
+    "grep",
+    "grep 'pattern' file",
+    "grep -A 3 'pattern'",
+    "grep -B 3 'pattern'",
+    "grep -C 3 'pattern'",
+    "grep -E 'pat1|pat2'",
+    "grep -F 'literal'",
+    "grep -P '\\d+' file",
+    "grep -c 'pattern'",
+    "grep -i 'pattern'",
+    "grep -l 'pattern'",
+    "grep -m 5 'pattern'",
+    "grep -n 'pattern'",
+    "grep -o 'pattern'",
+    "grep -q 'pattern'",
+    "grep -r 'pattern'",
+    "grep -v 'pattern'",
+    "grep -w 'word' file"
+  ],
+  "find": [
+    "find . ! -name",
+    "find . -atime -1",
+    "find . -ctime -1",
+    "find . -empty",
+    "find . -gid 1000",
+    "find . -group",
+    "find . -iname",
+    "find . -links +1",
+    "find . -maxdepth 2",
+    "find . -mindepth 2",
+    "find . -mmin -60",
+    "find . -mount -name",
+    "find . -mtime +30",
+    "find . -mtime -7",
+    "find . -name",
+    "find . -name '*.log'",
+    "find . -name '*.py'",
+    "find . -name '*.tmp'",
+    "find . -name '*.txt'",
+    "find . -newer",
+    "find . -nogroup",
+    "find . -nouser",
+    "find . -perm -1000",
+    "find . -perm -2000",
+    "find . -perm -4000",
+    "find . -perm -644",
+    "find . -perm /644",
+    "find . -perm 644",
+    "find . -size +100M",
+    "find . -size +1G",
+    "find . -size -10k",
+    "find . -size 512c",
+    "find . -type f -name",
+    "find . -type f -newer",
+    "find . -uid 1000",
+    "find . -user",
+    "find . -xdev -name",
+    "find / -inum 12345",
+    "find / -name",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w",
+    "find / -type b",
+    "find / -type c",
+    "find / -type d -name",
+    "find / -type f -name",
+    "find / -type l",
+    "find /path -print |",
+    "find /tmp -mtime +7"
+  ],
+  "findmnt": [
+    "findmnt"
+  ],
+  "fio": [
+    "fio"
+  ],
+  "fips-mode-setup": [
+    "fips-mode-setup"
+  ],
+  "firewall-cmd": [
+    "firewall-cmd",
+    "firewall-cmd --add-f",
+    "firewall-cmd --add-p",
+    "firewall-cmd --add-r",
+    "firewall-cmd --add-s",
+    "firewall-cmd --remov",
+    "firewall-cmd --runti",
+    "firewall-cmd --set-d",
+    "firewall-cmd --state"
+  ],
+  "firewalld": [
+    "--add-port=8080/tcp",
+    "--add-service=http",
+    "--add-service=https",
+    "--complete-reload",
+    "--get-active-zones",
+    "--get-default-zone",
+    "--get-zones",
+    "--list-all",
+    "--list-ports",
+    "--list-rich-rules",
+    "--list-services",
+    "--zone=public",
+    "e-port=8080/tcp",
+    "e-service=http",
+    "efault-zone=trusted",
+    "firewall-cmd",
+    "firewall-cmd --add-f",
+    "firewall-cmd --add-p",
+    "firewall-cmd --add-r",
+    "firewall-cmd --remov",
+    "firewall-cmd --runti",
+    "firewall-cmd --set-d",
+    "firewall-cmd --state",
+    "firewalld",
+    "w■■czona"
+  ],
+  "flush": [
+    "ip neigh flush all"
+  ],
+  "fs": [
+    "awk -v FS=':'"
+  ],
+  "full": [
+    "--leak-check=full"
+  ],
+  "g": [
+    "G",
+    "chmod u=rwx,g=rx,o=r"
+  ],
+  "g+s": [
+    "chmod g+s dir"
+  ],
+  "g-w": [
+    "chmod g-w file"
+  ],
+  "g1": [
+    "useradd -G g1,g2",
+    "usermod -G g1,g2"
+  ],
+  "g2": [
+    "useradd -G g1,g2",
+    "usermod -G g1,g2"
+  ],
+  "general": [
+    "nmcli general"
+  ],
+  "generate": [
+    "podman generate",
+    "podman generate kube"
+  ],
+  "get": [
+    "ip route get 8.8.8.8"
+  ],
+  "get-default": [
+    "get-default"
+  ],
+  "getenforce": [
+    "getenforce"
+  ],
+  "gg": [
+    "gg"
+  ],
+  "gpg": [
+    "gpg"
+  ],
+  "grep": [
+    "grep",
+    "grep 'Accepted'",
+    "grep 'Failed",
+    "grep 'denied' /var/l",
+    "grep 'pattern' file",
+    "grep -A 3 'pattern'",
+    "grep -B 3 'pattern'",
+    "grep -C 3 'pattern'",
+    "grep -E 'pat1|pat2'",
+    "grep -F 'literal'",
+    "grep -P '\\d+' file",
+    "grep -c 'pattern'",
+    "grep -i 'pattern'",
+    "grep -l 'pattern'",
+    "grep -m 5 'pattern'",
+    "grep -n 'pattern'",
+    "grep -o 'pattern'",
+    "grep -q 'pattern'",
+    "grep -r 'pattern'",
+    "grep -v 'pattern'",
+    "grep -w 'word' file",
+    "grep cifs"
+  ],
+  "group": [
+    "chown -R user:group",
+    "chown :group file",
+    "chown user:group",
+    "dnf groupinfo 'Group",
+    "group",
+    "useradd -g group",
+    "usermod -aG group",
+    "usermod -g group"
+  ],
+  "groupinfo": [
+    "dnf groupinfo 'Group"
+  ],
+  "groupinstall": [
+    "dnf groupinstall"
+  ],
+  "grouplist": [
+    "dnf grouplist"
+  ],
+  "groupremove": [
+    "dnf groupremove"
+  ],
+  "grpck": [
+    "grpck"
+  ],
+  "grub": [
+    "--target=x86_64-efi",
+    "/boot/grub2/grub.cfg",
+    "/boot/initramfs*",
+    "GRUB",
+    "cat /etc/modprobe.d/",
+    "cat /etc/sysctl.conf",
+    "cat /etc/sysctl.d/",
+    "cat /proc/cmdline",
+    "cat /proc/sys/kernel",
+    "cat /proc/version",
+    "dnf install kernel",
+    "dnf remove",
+    "echo 'module_name' >",
+    "echo 'net.ipv4.ip_fo",
+    "grub2-install",
+    "grub2-set-default",
+    "halt",
+    "insmod",
+    "kernel",
+    "ls /boot/",
+    "ls /boot/grub2/",
+    "lsmod",
+    "poweroff",
+    "reboot",
+    "rpm -qa kernel",
+    "sync",
+    "sysctl",
+    "systemctl emergency",
+    "systemctl rescue"
+  ],
+  "grub2-install": [
+    "grub2-install"
+  ],
+  "grub2-set-default": [
+    "grub2-set-default"
+  ],
+  "grupami": [
+    "group",
+    "usermod -aG docker",
+    "usermod -aG wheel"
+  ],
+  "gt": [
+    "gT",
+    "gt"
+  ],
+  "gu": [
+    "gU",
+    "gu"
+  ],
+  "halt": [
+    "halt",
+    "systemctl halt"
+  ],
+  "harmonogramowanie": [
+    "/etc/cron.daily",
+    "atq",
+    "batch",
+    "cat /etc/anacrontab",
+    "cat /etc/at.allow",
+    "cat /etc/at.deny",
+    "cat /etc/cron.allow",
+    "cat /etc/cron.deny",
+    "cat /etc/crontab",
+    "cat /etc/systemd/sys",
+    "cat /var/spool/cron/",
+    "list-timers",
+    "ls /etc/cron.d/",
+    "ls /etc/cron.daily/",
+    "ls /etc/cron.hourly/",
+    "ls /etc/cron.weekly/",
+    "myapp.timer",
+    "run-parts",
+    "systemd-run",
+    "tem/myapp.timer",
+    "timer-name.timer"
+  ],
+  "hash": [
+    "hash"
+  ],
+  "head": [
+    "ls /etc | head -20"
+  ],
+  "hibernate": [
+    "systemctl hibernate"
+  ],
+  "history": [
+    "dnf history",
+    "dnf history info 5",
+    "dnf history redo 5",
+    "dnf history rollback",
+    "dnf history undo 5",
+    "history",
+    "podman image history"
+  ],
+  "horized_keys": [
+    "horized_keys"
+  ],
+  "host": [
+    "ssh -A user@host",
+    "ssh -X user@host",
+    "ssh -t user@host",
+    "ssh -v user@host",
+    "ssh -vvv user@host",
+    "user@host"
+  ],
+  "hostname": [
+    "hostname",
+    "ssh user@hostname",
+    "user@hostname"
+  ],
+  "hostnamectl": [
+    "hostnamectl"
+  ],
+  "htop": [
+    "htop"
+  ],
+  "http": [
+    "--add-service=http",
+    "e-service=http"
+  ],
+  "httpd_c": [
+    "setsebool -P httpd_c"
+  ],
+  "httpd_can_": [
+    "setsebool httpd_can_"
+  ],
+  "httpd_sys_content_t": [
+    "httpd_sys_content_t"
+  ],
+  "https": [
+    "--add-service=https"
+  ],
+  "hwclock": [
+    "hwclock"
+  ],
+  "i": [
+    "--disk-usage",
+    "--filename=/tmp/test",
+    "--leak-check=full",
+    "--level=err,warn",
+    "--newer-mtime='2023-",
+    "--target=x86_64-efi",
+    "--type=service",
+    "--vacuum-size=500M",
+    "//server",
+    "/boot/grub2/grub.cfg",
+    "/boot/initramfs*",
+    "/dev/sdb1",
+    "/dir",
+    "/etc/cron.daily",
+    "/mnt",
+    "/var/log/messages",
+    "/var/log/sa/saDD",
+    "4096",
+    "8080:localhost:80",
+    "9000",
+    "Checking=no",
+    "ConnectTimeout=10",
+    "Ctrl+R",
+    "GRUB",
+    "I",
+    "PID",
+    "alias",
+    "alias ll='ls -alh'",
+    "archive.tar.bz2",
+    "archive.tar.gz",
+    "archive.tar.xz",
+    "atq",
+    "aureport",
+    "awk '/pattern/' file",
+    "awk 'END{print NR}'",
+    "awk 'NR==5' file",
+    "awk 'NR>=5 &&",
+    "awk '{print $1}'",
+    "awk '{print $NF}'",
+    "awk '{print NF}'",
+    "awk '{sum+=$1}",
+    "awk -F: '{print $1}'",
+    "awk -v FS=':'",
+    "batch",
+    "blkid",
+    "bonnie++",
+    "cat /etc/anacrontab",
+    "cat /etc/at.allow",
+    "cat /etc/at.deny",
+    "cat /etc/audit/audit",
+    "cat /etc/auto.master",
+    "cat /etc/auto.misc",
+    "cat /etc/bashrc",
+    "cat /etc/cron.allow",
+    "cat /etc/cron.deny",
+    "cat /etc/crontab",
+    "cat /etc/exports",
+    "cat /etc/fstab",
+    "cat /etc/fstab |",
+    "cat /etc/hostname",
+    "cat /etc/hosts",
+    "cat /etc/kdump.conf",
+    "cat /etc/modprobe.d/",
+    "cat /etc/profile",
+    "cat /etc/resolv.conf",
+    "cat /etc/sysconfig/n",
+    "cat /etc/sysctl.conf",
+    "cat /etc/sysctl.d/",
+    "cat /etc/systemd/sys",
+    "cat /proc/PID/limits",
+    "cat /proc/cmdline",
+    "cat /proc/mounts",
+    "cat /proc/net/tcp",
+    "cat /proc/net/udp",
+    "cat /proc/sys/kernel",
+    "cat /proc/sys/net/nf",
+    "cat /proc/version",
+    "cat /var/log/cron",
+    "cat /var/log/maillog",
+    "cat /var/log/secure",
+    "cat /var/spool/cron/",
+    "cat ~/.bash_logout",
+    "cat ~/.bash_profile",
+    "cat ~/.bashrc",
+    "cat ~/.ssh/config",
+    "chmod",
+    "chmod +t dir",
+    "chmod -R 755 dir/",
+    "chmod 1755 dir",
+    "chmod 2755 dir",
+    "chmod 4755 file",
+    "chmod 600 file",
+    "chmod 600 ~/.ssh/aut",
+    "chmod 644 file",
+    "chmod 700 ~/.ssh/",
+    "chmod 755 file",
+    "chmod 777 file",
+    "chmod a+r file",
+    "chmod g+s dir",
+    "chmod g-w file",
+    "chmod o-r file",
+    "chmod u+s file",
+    "chmod u+x file",
+    "chmod u=rwx,g=rx,o=r",
+    "chown",
+    "chown -R user:group",
+    "chown :group file",
+    "chown user file",
+    "chown user:group",
+    "cmd",
+    "complete",
+    "count=1000",
+    "cp --backup src dst",
+    "cp -a src/ dst/",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -r src/ dst/",
+    "cp -u src dst",
+    "cp -v src dst",
+    "cp source dest",
+    "curl",
+    "daemon-reexec",
+    "daemon-reload",
+    "dir/",
+    "dmesg",
+    "dnf install kernel",
+    "dnf remove",
+    "dysków",
+    "echo $!",
+    "echo $#",
+    "echo $$",
+    "echo $*",
+    "echo $0",
+    "echo $?",
+    "echo $@",
+    "echo $BASH_VERSION",
+    "echo $HISTFILE",
+    "echo $HISTFILESIZE",
+    "echo $HISTSIZE",
+    "echo $PS1",
+    "echo $SHELL",
+    "echo $VARIABLE",
+    "echo ${#ARRAY[@]}",
+    "echo ${ARRAY[0]}",
+    "echo ${ARRAY[@]}",
+    "echo 'module_name' >",
+    "echo 'net.ipv4.ip_fo",
+    "ed25519",
+    "emergency.target",
+    "env",
+    "established",
+    "exportfs",
+    "false",
+    "file",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w",
+    "find /path -print |",
+    "findmnt",
+    "fio",
+    "firewall-cmd --add-s",
+    "get-default",
+    "grep",
+    "grep 'Accepted'",
+    "grep 'Failed",
+    "grep 'pattern' file",
+    "grep -A 3 'pattern'",
+    "grep -B 3 'pattern'",
+    "grep -C 3 'pattern'",
+    "grep -E 'pat1|pat2'",
+    "grep -F 'literal'",
+    "grep -P '\\d+' file",
+    "grep -c 'pattern'",
+    "grep -i 'pattern'",
+    "grep -l 'pattern'",
+    "grep -m 5 'pattern'",
+    "grep -n 'pattern'",
+    "grep -o 'pattern'",
+    "grep -q 'pattern'",
+    "grep -r 'pattern'",
+    "grep -v 'pattern'",
+    "grep -w 'word' file",
+    "grep cifs",
+    "grub2-install",
+    "grub2-set-default",
+    "halt",
+    "hash",
+    "history",
+    "horized_keys",
+    "hostname",
+    "hostnamectl",
+    "i",
+    "insmod",
+    "ip -6 addr show",
+    "ip -6 route show",
+    "ip -s link show eth0",
+    "ip addr",
+    "ip addr add",
+    "ip addr del",
+    "ip addr show",
+    "ip addr show eth0",
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up",
+    "ip link show",
+    "ip neigh flush all",
+    "ip neigh show",
+    "ip route add",
+    "ip route add default",
+    "ip route del",
+    "ip route del default",
+    "ip route get 8.8.8.8",
+    "ip route show",
+    "journalctl",
+    "journalctl --since",
+    "journalctl --until",
+    "journalctl -b",
+    "journalctl -b -1",
+    "journalctl -f",
+    "journalctl -f -u",
+    "journalctl -k",
+    "journalctl -n 50",
+    "journalctl -o",
+    "journalctl -o json",
+    "journalctl -p",
+    "journalctl -p err",
+    "journalctl -u",
+    "journalctl -u sshd",
+    "journalctl -xe",
+    "katalogu",
+    "kdump",
+    "kernel",
+    "list-dependencies",
+    "list-timers",
+    "list-unit-files",
+    "localectl",
+    "loginctl",
+    "ls -Z file",
+    "ls /boot/",
+    "ls /boot/grub2/",
+    "ls /etc/cron.d/",
+    "ls /etc/cron.daily/",
+    "ls /etc/cron.hourly/",
+    "ls /etc/cron.weekly/",
+    "ls /etc/logrotate.d/",
+    "ls /etc/profile.d/",
+    "ls /mnt/nfs/share",
+    "lsblk",
+    "lsmod",
+    "mkdir -m 755 dirname",
+    "mkdir -p a/b/c",
+    "mkdir -v dirname",
+    "mkdir dirname",
+    "montowania",
+    "mount -a",
+    "mount -o",
+    "mount -o remount,ro",
+    "mount -o remount,rw",
+    "mount -o ro",
+    "mount -o ro,soft",
+    "mount -o rw,noexec",
+    "mount -t cifs",
+    "mount -t ext4",
+    "mount -t nfs",
+    "mount -t nfs4",
+    "mount -t xfs",
+    "mount /dev/sdb1 /mnt",
+    "mount LABEL=mylabel",
+    "mount UUID=xxx /mnt",
+    "mount | column -t",
+    "myapp.timer",
+    "nadpisaniem",
+    "newfile",
+    "nfs-server",
+    "nfsstat",
+    "nmcli connection",
+    "nmcli connection add",
+    "nmcli connection up",
+    "nmcli device show",
+    "nmcli device status",
+    "nmcli general",
+    "nmcli radio wifi off",
+    "nmtui",
+    "nosuid,noexec",
+    "ntication=no",
+    "partprobe",
+    "poweroff",
+    "print",
+    "printenv",
+    "procesami",
+    "reboot",
+    "rescue.target",
+    "rm -f file.txt",
+    "rm -i file",
+    "rm -r dir/",
+    "rm -rf dir/",
+    "rm -v file",
+    "rm file.txt",
+    "rpm -qa kernel",
+    "rsync",
+    "rsync --delete src/",
+    "rsync -av src/ dst/",
+    "rsync -avz",
+    "rsync -avz -e ssh",
+    "rsync -avz src/",
+    "rsync -n src/ dst/",
+    "run-parts",
+    "scp",
+    "server:/share",
+    "service",
+    "set",
+    "set-default",
+    "smbclient",
+    "source",
+    "ssh -A user@host",
+    "ssh -D 1080",
+    "ssh -J jumphost",
+    "ssh -L",
+    "ssh -N -f -L",
+    "ssh -R",
+    "ssh -X user@host",
+    "ssh -i",
+    "ssh -o",
+    "ssh -o BatchMode=yes",
+    "ssh -o PasswordAuthe",
+    "ssh -o PreferredAuth",
+    "ssh -o StrictHostKey",
+    "ssh -p 2222",
+    "ssh -t user@host",
+    "ssh -v user@host",
+    "ssh -vvv user@host",
+    "ssh user@hostname",
+    "ssh-add",
+    "ssh-copy-id",
+    "sync",
+    "sysctl",
+    "systemctl",
+    "systemctl --user",
+    "systemctl cat",
+    "systemctl disable",
+    "systemctl edit",
+    "systemctl emergency",
+    "systemctl enable",
+    "systemctl halt",
+    "systemctl hibernate",
+    "systemctl is-active",
+    "systemctl is-enabled",
+    "systemctl is-failed",
+    "systemctl isolate",
+    "systemctl list-units",
+    "systemctl mask",
+    "systemctl poweroff",
+    "systemctl reboot",
+    "systemctl reload",
+    "systemctl rescue",
+    "systemctl restart",
+    "systemctl show",
+    "systemctl show -p",
+    "systemctl start",
+    "systemctl status",
+    "systemctl stop",
+    "systemctl suspend",
+    "systemctl unmask",
+    "systemd-analyze",
+    "systemd-run",
+    "tar",
+    "tar --delete -f",
+    "tar --exclude-vcs",
+    "tar -cvJf",
+    "tar -cvf archive.tar",
+    "tar -cvjf",
+    "tar -cvzf",
+    "tar -czf - /path |",
+    "tar -czf arch.tar.gz",
+    "tar -rvf archive.tar",
+    "tar -tvf archive.tar",
+    "tar -tvzf",
+    "tar -uvf archive.tar",
+    "tar -xvJf",
+    "tar -xvf archive.tar",
+    "tar -xvjf",
+    "tar -xvzf",
+    "tem/myapp.timer",
+    "testparm",
+    "timedatectl",
+    "timer-name.timer",
+    "touch -d",
+    "touch -t",
+    "touch file.txt",
+    "true",
+    "udit.log",
+    "umask",
+    "user@host",
+    "user@hostname",
+    "valgrind",
+    "w■a■ciciel)",
+    "w■a■ciciela",
+    "~/.ssh/id_rsa",
+    "~/.ssh/id_rsa.pub",
+    "~/.ssh/key.pem",
+    "~/.ssh/mykey"
+  ],
+  "id": [
+    "id"
+  ],
+  "image": [
+    "image",
+    "image:tag",
+    "podman image history",
+    "podman image inspect",
+    "podman image prune",
+    "podman rmi -f image",
+    "podman rmi image",
+    "podman run -d image",
+    "podman run -it image",
+    "podman run image",
+    "podman save image -o"
+  ],
+  "images": [
+    "podman images",
+    "podman images -a"
+  ],
+  "imi": [
+    "useradd -c 'Imi■"
+  ],
+  "info": [
+    "dnf history info 5",
+    "dnf info package",
+    "dnf module info",
+    "podman info"
+  ],
+  "informacje": [
+    "baseboard",
+    "cat /etc/os-release",
+    "cat /proc/cpuinfo",
+    "cat /proc/uptime",
+    "cat /sys/block/sda/q",
+    "cat /sys/class/dmi/i",
+    "iostat",
+    "lscpu",
+    "lshw",
+    "lsmem",
+    "lsnuma",
+    "lspci",
+    "lsusb",
+    "nproc",
+    "sensors",
+    "sensors-detect",
+    "vmstat"
+  ],
+  "init": [
+    "podman machine init"
+  ],
+  "insmod": [
+    "insmod"
+  ],
+  "inspect": [
+    "podman image inspect",
+    "podman inspect",
+    "podman inspect -f",
+    "podman pod inspect"
+  ],
+  "install": [
+    "dnf install -y",
+    "dnf install kernel",
+    "dnf install package",
+    "dnf module install m"
+  ],
+  "installed": [
+    "dnf list installed"
+  ],
+  "iostat": [
+    "iostat"
+  ],
+  "ip": [
+    "ip -6 addr show",
+    "ip -6 route show",
+    "ip -s link show eth0",
+    "ip addr",
+    "ip addr add",
+    "ip addr del",
+    "ip addr show",
+    "ip addr show eth0",
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up",
+    "ip link show",
+    "ip neigh flush all",
+    "ip neigh show",
+    "ip netns add myns",
+    "ip netns delete myns",
+    "ip netns exec myns",
+    "ip netns list",
+    "ip route add",
+    "ip route add default",
+    "ip route del",
+    "ip route del default",
+    "ip route get 8.8.8.8",
+    "ip route show"
+  ],
+  "is-active": [
+    "systemctl is-active"
+  ],
+  "is-enabled": [
+    "systemctl is-enabled"
+  ],
+  "is-failed": [
+    "systemctl is-failed"
+  ],
+  "isolate": [
+    "systemctl isolate"
+  ],
+  "jobs": [
+    "jobs"
+  ],
+  "journalctl": [
+    "journalctl",
+    "journalctl --since",
+    "journalctl --until",
+    "journalctl -b",
+    "journalctl -b -1",
+    "journalctl -f",
+    "journalctl -f -u",
+    "journalctl -k",
+    "journalctl -n 50",
+    "journalctl -o",
+    "journalctl -o json",
+    "journalctl -p",
+    "journalctl -p err",
+    "journalctl -t",
+    "journalctl -u",
+    "journalctl -u sshd",
+    "journalctl -xe"
+  ],
+  "json": [
+    "journalctl -o json"
+  ],
+  "jumphost": [
+    "ssh -J jumphost"
+  ],
+  "k1": [
+    "echo ${MAP[k1]}"
+  ],
+  "katalogach": [
+    "cp --backup src dst",
+    "cp -a src/ dst/",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -r src/ dst/",
+    "cp -u src dst",
+    "cp -v src dst",
+    "cp source dest",
+    "mkdir -m 755 dirname",
+    "mkdir -p a/b/c",
+    "mkdir -v dirname",
+    "mkdir dirname",
+    "nadpisaniem",
+    "rm -f file.txt",
+    "rm -i file",
+    "rm -r dir/",
+    "rm -rf dir/",
+    "rm -v file",
+    "rm file.txt",
+    "rsync",
+    "rsync --delete src/",
+    "rsync -av src/ dst/",
+    "rsync -avz src/",
+    "rsync -n src/ dst/",
+    "touch -d",
+    "touch -t",
+    "touch file.txt"
+  ],
+  "katalogu": [
+    "katalogu"
+  ],
+  "kdump": [
+    "kdump"
+  ],
+  "kernel": [
+    "dnf install kernel",
+    "kernel",
+    "rpm -qa kernel"
+  ],
+  "keyword": [
+    "dnf search keyword"
+  ],
+  "kill": [
+    "podman kill",
+    "podman kill -s"
+  ],
+  "klient": [
+    "//server",
+    "cat /etc/fstab |",
+    "grep cifs",
+    "mount -t cifs",
+    "smbclient",
+    "testparm"
+  ],
+  "kompresja": [
+    "--newer-mtime='2023-",
+    "archive.tar.bz2",
+    "archive.tar.gz",
+    "archive.tar.xz",
+    "find /path -print |",
+    "newfile",
+    "tar",
+    "tar --delete -f",
+    "tar --exclude-vcs",
+    "tar -cvJf",
+    "tar -cvf archive.tar",
+    "tar -cvjf",
+    "tar -cvzf",
+    "tar -czf - /path |",
+    "tar -czf arch.tar.gz",
+    "tar -rvf archive.tar",
+    "tar -tvf archive.tar",
+    "tar -tvzf",
+    "tar -uvf archive.tar",
+    "tar -xvJf",
+    "tar -xvf archive.tar",
+    "tar -xvjf",
+    "tar -xvzf"
+  ],
+  "konfiguracja": [
+    "9000",
+    "PID",
+    "cat /etc/hostname",
+    "cat /etc/hosts",
+    "cat /etc/resolv.conf",
+    "cat /etc/sysconfig/n",
+    "curl",
+    "established",
+    "hostname",
+    "ip -6 addr show",
+    "ip -6 route show",
+    "ip addr",
+    "ip addr add",
+    "ip addr del",
+    "ip addr show",
+    "ip addr show eth0",
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up",
+    "ip link show",
+    "ip neigh flush all",
+    "ip neigh show",
+    "ip route add",
+    "ip route add default",
+    "ip route del",
+    "ip route del default",
+    "ip route get 8.8.8.8",
+    "ip route show",
+    "nmcli connection",
+    "nmcli connection add",
+    "nmcli connection up",
+    "nmcli device show",
+    "nmcli device status",
+    "nmcli general",
+    "nmcli radio wifi off",
+    "nmtui",
+    "procesami"
+  ],
+  "kontenery": [
+    "--list-tags",
+    "--restart=always",
+    "-a",
+    ".access.redhat.com/u",
+    "/bin/bash",
+    "/host:/container",
+    "cat /etc/containers/",
+    "cat Containerfile",
+    "container",
+    "dst:tag",
+    "file.tar",
+    "image",
+    "image:tag",
+    "podman --version",
+    "podman build",
+    "podman build -f",
+    "podman build -t",
+    "podman commit",
+    "podman container",
+    "podman cp",
+    "podman cp src",
+    "podman diff",
+    "podman exec",
+    "podman exec -it",
+    "podman exec -u root",
+    "podman generate",
+    "podman generate kube",
+    "podman image history",
+    "podman image inspect",
+    "podman image prune",
+    "podman images",
+    "podman images -a",
+    "podman info",
+    "podman inspect",
+    "podman inspect -f",
+    "podman kill",
+    "podman kill -s",
+    "podman load -i",
+    "podman login",
+    "podman logout",
+    "podman logs",
+    "podman logs --tail",
+    "podman logs -f",
+    "podman machine init",
+    "podman machine start",
+    "podman network",
+    "podman network ls",
+    "podman network rm",
+    "podman pause",
+    "podman play kube",
+    "podman pod create",
+    "podman pod inspect",
+    "podman pod ls",
+    "podman pod rm mypod",
+    "podman pod start",
+    "podman pod stats",
+    "podman pod stop",
+    "podman port",
+    "podman ps",
+    "podman ps --format",
+    "podman ps -a",
+    "podman ps -q",
+    "podman ps -qa",
+    "podman pull",
+    "podman pull registry",
+    "podman push",
+    "podman rename",
+    "podman restart",
+    "podman rm -a",
+    "podman rm -f",
+    "podman rm container",
+    "podman rmi -a",
+    "podman rmi -f image",
+    "podman rmi image",
+    "podman run",
+    "podman run --cap-add",
+    "podman run --cpus",
+    "podman run --memory",
+    "podman run --name",
+    "podman run --network",
+    "podman run --pod",
+    "podman run --restart",
+    "podman run --rm",
+    "podman run -d image",
+    "podman run -e",
+    "podman run -it image",
+    "podman run -p",
+    "podman run -u user",
+    "podman run -v",
+    "podman run image",
+    "podman save image -o",
+    "podman search",
+    "podman search nginx",
+    "podman start",
+    "podman stats",
+    "podman stop",
+    "podman stop -t 0",
+    "podman system df",
+    "podman system prune",
+    "podman system reset",
+    "podman tag src:tag",
+    "podman top container",
+    "podman unpause",
+    "podman unshare",
+    "podman volume",
+    "podman volume create",
+    "podman volume ls",
+    "podman volume prune",
+    "podman volume rm"
+  ],
+  "kube": [
+    "podman generate kube",
+    "podman play kube"
+  ],
+  "l": [
+    "find / -type l"
+  ],
+  "label": [
+    "mount LABEL=mylabel"
+  ],
+  "last": [
+    "last"
+  ],
+  "lastb": [
+    "lastb"
+  ],
+  "lastlog": [
+    "lastlog"
+  ],
+  "link": [
+    "ip -s link show eth0",
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up",
+    "ip link show"
+  ],
+  "list": [
+    "dnf list available",
+    "dnf list extras",
+    "dnf list installed",
+    "dnf list obsoletes",
+    "dnf list updates",
+    "dnf module list",
+    "dnf updateinfo list",
+    "ip netns list"
+  ],
+  "list-dependencies": [
+    "list-dependencies"
+  ],
+  "list-timers": [
+    "list-timers"
+  ],
+  "list-unit-files": [
+    "list-unit-files"
+  ],
+  "list-units": [
+    "systemctl list-units"
+  ],
+  "literal": [
+    "grep -F 'literal'"
+  ],
+  "ll": [
+    "alias ll='ls -alh'"
+  ],
+  "load": [
+    "podman load -i"
+  ],
+  "localectl": [
+    "localectl"
+  ],
+  "localhost": [
+    "8080:localhost:80"
+  ],
+  "logical": [
+    "/dev/sdb",
+    "/dev/sdc",
+    "lvdisplay",
+    "lvmdiskscan",
+    "lvremove",
+    "lvs",
+    "lvscan",
+    "newname",
+    "partycji)",
+    "pvdisplay",
+    "pvs",
+    "pvscan",
+    "vgdisplay",
+    "vgs",
+    "vgscan"
+  ],
+  "login": [
+    "podman login",
+    "semanage login -a -s",
+    "semanage login -l"
+  ],
+  "loginctl": [
+    "loginctl"
+  ],
+  "logout": [
+    "podman logout"
+  ],
+  "logowanie": [
+    "--disk-usage",
+    "--level=err,warn",
+    "/var/log/messages",
+    "aureport",
+    "cat /etc/audit/audit",
+    "cat /var/log/cron",
+    "cat /var/log/maillog",
+    "cat /var/log/secure",
+    "dmesg",
+    "grep 'Accepted'",
+    "grep 'Failed",
+    "journalctl -o",
+    "journalctl -u sshd",
+    "journalctl -xe",
+    "ls /etc/logrotate.d/",
+    "udit.log"
+  ],
+  "logs": [
+    "podman logs",
+    "podman logs --tail",
+    "podman logs -f"
+  ],
+  "ls": [
+    "alias ll='ls -alh'",
+    "ls",
+    "ls --color=auto",
+    "ls -R",
+    "ls -Z dir/",
+    "ls -Z file",
+    "ls -d */",
+    "ls -dZ dir/",
+    "ls -i",
+    "ls -l",
+    "ls -lS",
+    "ls -la",
+    "ls -lh",
+    "ls -lt",
+    "ls /boot/",
+    "ls /boot/grub2/",
+    "ls /etc | head -20",
+    "ls /etc/cron.d/",
+    "ls /etc/cron.daily/",
+    "ls /etc/cron.hourly/",
+    "ls /etc/cron.weekly/",
+    "ls /etc/logrotate.d/",
+    "ls /etc/profile.d/",
+    "ls /mnt/nfs/share",
+    "ls /proc | wc -l",
+    "ls /sys/fs/cgroup/",
+    "podman network ls",
+    "podman pod ls",
+    "podman volume ls"
+  ],
+  "lsblk": [
+    "lsblk"
+  ],
+  "lscpu": [
+    "lscpu"
+  ],
+  "lshw": [
+    "lshw"
+  ],
+  "lslogins": [
+    "lslogins"
+  ],
+  "lsmem": [
+    "lsmem"
+  ],
+  "lsmod": [
+    "lsmod"
+  ],
+  "lsnuma": [
+    "lsnuma"
+  ],
+  "lsof": [
+    "lsof"
+  ],
+  "lspci": [
+    "lspci"
+  ],
+  "lsusb": [
+    "lsusb"
+  ],
+  "lvdisplay": [
+    "lvdisplay"
+  ],
+  "lvm": [
+    "/dev/sdb",
+    "/dev/sdc",
+    "lvdisplay",
+    "lvmdiskscan",
+    "lvremove",
+    "lvs",
+    "lvscan",
+    "newname",
+    "partycji)",
+    "pvdisplay",
+    "pvs",
+    "pvscan",
+    "vgdisplay",
+    "vgs",
+    "vgscan"
+  ],
+  "lvmdiskscan": [
+    "lvmdiskscan"
+  ],
+  "lvremove": [
+    "lvremove"
+  ],
+  "lvs": [
+    "lvs"
+  ],
+  "lvscan": [
+    "lvscan"
+  ],
+  "m": [
+    "dnf module install m"
+  ],
+  "machine": [
+    "podman machine init",
+    "podman machine start"
+  ],
+  "makecache": [
+    "dnf makecache"
+  ],
+  "manager": [
+    "/dev/sdb",
+    "/dev/sdc",
+    "lvdisplay",
+    "lvmdiskscan",
+    "lvremove",
+    "lvs",
+    "lvscan",
+    "newname",
+    "partycji)",
+    "pvdisplay",
+    "pvs",
+    "pvscan",
+    "vgdisplay",
+    "vgs",
+    "vgscan"
+  ],
+  "mask": [
+    "systemctl mask"
+  ],
+  "matchpathcon": [
+    "matchpathcon"
+  ],
+  "mdadm": [
+    "mdadm"
+  ],
+  "memory": [
+    "memory:mygroup"
+  ],
+  "metadata": [
+    "dnf clean metadata"
+  ],
+  "mkdir": [
+    "mkdir -m 755 dirname",
+    "mkdir -p a/b/c",
+    "mkdir -v dirname",
+    "mkdir dirname"
+  ],
+  "mktemp": [
+    "TMPFILE=$(mktemp)",
+    "mktemp"
+  ],
+  "module": [
+    "dnf module disable",
+    "dnf module enable",
+    "dnf module info",
+    "dnf module install m",
+    "dnf module list",
+    "dnf module reset"
+  ],
+  "module_name": [
+    "echo 'module_name' >"
+  ],
+  "monitorowanie": [
+    "--disk-usage",
+    "--level=err,warn",
+    "/var/log/messages",
+    "aureport",
+    "cat /etc/audit/audit",
+    "cat /var/log/cron",
+    "cat /var/log/maillog",
+    "cat /var/log/secure",
+    "dmesg",
+    "grep 'Accepted'",
+    "grep 'Failed",
+    "journalctl -o",
+    "journalctl -u sshd",
+    "journalctl -xe",
+    "ls /etc/logrotate.d/",
+    "udit.log"
+  ],
+  "montowania": [
+    "montowania"
+  ],
+  "montowanie": [
+    "/dev/sdb1",
+    "/mnt",
+    "cat /etc/fstab",
+    "cat /proc/mounts",
+    "findmnt",
+    "montowania",
+    "mount -a",
+    "mount -o remount,ro",
+    "mount -o remount,rw",
+    "mount -o ro",
+    "mount -o rw,noexec",
+    "mount -t ext4",
+    "mount -t xfs",
+    "mount /dev/sdb1 /mnt",
+    "mount LABEL=mylabel",
+    "mount UUID=xxx /mnt",
+    "mount | column -t"
+  ],
+  "mount": [
+    "mount -a",
+    "mount -o",
+    "mount -o remount,ro",
+    "mount -o remount,rw",
+    "mount -o ro",
+    "mount -o ro,soft",
+    "mount -o rw,noexec",
+    "mount -t cifs",
+    "mount -t ext4",
+    "mount -t nfs",
+    "mount -t nfs4",
+    "mount -t xfs",
+    "mount /dev/sdb1 /mnt",
+    "mount LABEL=mylabel",
+    "mount UUID=xxx /mnt",
+    "mount | column -t"
+  ],
+  "mtu": [
+    "ip link set eth0 mtu"
+  ],
+  "myapp.timer": [
+    "myapp.timer"
+  ],
+  "mygroup": [
+    "memory:mygroup",
+    "mygroup"
+  ],
+  "mylabel": [
+    "mount LABEL=mylabel"
+  ],
+  "myns": [
+    "ip netns add myns",
+    "ip netns delete myns",
+    "ip netns exec myns"
+  ],
+  "mypod": [
+    "podman pod rm mypod"
+  ],
+  "n": [
+    "N",
+    "n"
+  ],
+  "na": [
+    "cp --backup src dst",
+    "cp -a src/ dst/",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -r src/ dst/",
+    "cp -u src dst",
+    "cp -v src dst",
+    "cp source dest",
+    "mkdir -m 755 dirname",
+    "mkdir -p a/b/c",
+    "mkdir -v dirname",
+    "mkdir dirname",
+    "nadpisaniem",
+    "rm -f file.txt",
+    "rm -i file",
+    "rm -r dir/",
+    "rm -rf dir/",
+    "rm -v file",
+    "rm file.txt",
+    "rsync",
+    "rsync --delete src/",
+    "rsync -av src/ dst/",
+    "rsync -avz src/",
+    "rsync -n src/ dst/",
+    "touch -d",
+    "touch -t",
+    "touch file.txt"
+  ],
+  "nadpisaniem": [
+    "nadpisaniem"
+  ],
+  "name": [
+    "Name'"
+  ],
+  "narz": [
+    "--filename=/tmp/test",
+    "--leak-check=full",
+    "--zone=drop",
+    "/tmp/cap.pcap",
+    "/var/log/sa/saDD",
+    "100))",
+    "32",
+    "alternatives",
+    "authselect",
+    "bash",
+    "bonnie++",
+    "cat /etc/chrony.conf",
+    "cat /etc/crypto-poli",
+    "cat /etc/kdump.conf",
+    "cat /proc/PID/limits",
+    "cat /proc/net/tcp",
+    "cat /proc/net/udp",
+    "cat /proc/sys/net/nf",
+    "cat /sys/fs/cgroup/m",
+    "cmd",
+    "count=1000",
+    "date",
+    "echo $((RANDOM %",
+    "echo '3.14 * 2' | bc",
+    "echo file{1..3}.txt",
+    "echo {1..5}",
+    "echo {a,b,c}.log",
+    "emory/mygroup/memory",
+    "fio",
+    "fips-mode-setup",
+    "gpg",
+    "hwclock",
+    "ip -s link show eth0",
+    "ip netns add myns",
+    "ip netns delete myns",
+    "ip netns exec myns",
+    "ip netns list",
+    "kdump",
+    "ls /sys/fs/cgroup/",
+    "memory:mygroup",
+    "mygroup",
+    "ntsysv",
+    "scap-workbench",
+    "systemd-cgls",
+    "systemd-cgtop",
+    "t_in_bytes=512M",
+    "update-alternatives",
+    "update-crypto-polici",
+    "valgrind",
+    "wireshark"
+  ],
+  "nawigacja": [
+    "basename",
+    "cd -",
+    "cd /",
+    "cd /path/to/dir",
+    "cd ~",
+    "dirname",
+    "dirs",
+    "echo $HOME",
+    "echo $OLDPWD",
+    "echo $PATH",
+    "echo $PWD",
+    "ls",
+    "ls --color=auto",
+    "ls -R",
+    "ls -d */",
+    "ls -i",
+    "ls -l",
+    "ls -lS",
+    "ls -la",
+    "ls -lh",
+    "ls -lt",
+    "ls /etc | head -20",
+    "ls /proc | wc -l",
+    "popd",
+    "pwd",
+    "tree"
+  ],
+  "neigh": [
+    "ip neigh flush all",
+    "ip neigh show"
+  ],
+  "net.ipv4.ip_fo": [
+    "echo 'net.ipv4.ip_fo"
+  ],
+  "netns": [
+    "ip netns add myns",
+    "ip netns delete myns",
+    "ip netns exec myns",
+    "ip netns list"
+  ],
+  "network": [
+    "podman network",
+    "podman network ls",
+    "podman network rm"
+  ],
+  "newfile": [
+    "newfile"
+  ],
+  "newname": [
+    "newname",
+    "usermod -l newname"
+  ],
+  "nf": [
+    "awk '{print NF}'"
+  ],
+  "nfs": [
+    "//server",
+    "cat /etc/auto.master",
+    "cat /etc/auto.misc",
+    "cat /etc/exports",
+    "cat /etc/fstab |",
+    "exportfs",
+    "firewall-cmd --add-s",
+    "grep cifs",
+    "ls /mnt/nfs/share",
+    "mount -o",
+    "mount -o ro,soft",
+    "mount -t cifs",
+    "mount -t nfs",
+    "mount -t nfs4",
+    "nfs-server",
+    "nfsstat",
+    "nosuid,noexec",
+    "server:/share",
+    "smbclient",
+    "testparm"
+  ],
+  "nfs-server": [
+    "nfs-server"
+  ],
+  "nfs4": [
+    "mount -t nfs4"
+  ],
+  "nfsstat": [
+    "nfsstat"
+  ],
+  "nginx": [
+    "podman search nginx"
+  ],
+  "nmcli": [
+    "nmcli connection",
+    "nmcli connection add",
+    "nmcli connection up",
+    "nmcli device show",
+    "nmcli device status",
+    "nmcli general",
+    "nmcli radio wifi off"
+  ],
+  "nmtui": [
+    "nmtui"
+  ],
+  "no": [
+    "Checking=no",
+    "ntication=no"
+  ],
+  "noexec": [
+    "mount -o rw,noexec",
+    "nosuid,noexec"
+  ],
+  "none": [
+    "vim -u NONE file.txt"
+  ],
+  "nosuid": [
+    "nosuid,noexec"
+  ],
+  "nowy": [
+    "usermod -c 'Nowy"
+  ],
+  "nproc": [
+    "nproc"
+  ],
+  "nr": [
+    "awk 'END{print NR}'",
+    "awk 'NR==5' file",
+    "awk 'NR>=5 &&"
+  ],
+  "ntication": [
+    "ntication=no"
+  ],
+  "ntsysv": [
+    "ntsysv"
+  ],
+  "o": [
+    "O",
+    "baseboard",
+    "cat /etc/os-release",
+    "cat /proc/cpuinfo",
+    "cat /proc/uptime",
+    "cat /sys/block/sda/q",
+    "cat /sys/class/dmi/i",
+    "chmod u=rwx,g=rx,o=r",
+    "iostat",
+    "lscpu",
+    "lshw",
+    "lsmem",
+    "lsnuma",
+    "lspci",
+    "lsusb",
+    "nproc",
+    "o",
+    "sensors",
+    "sensors-detect",
+    "vmstat"
+  ],
+  "o-r": [
+    "chmod o-r file"
+  ],
+  "obsoletes": [
+    "dnf list obsoletes"
+  ],
+  "off": [
+    "nmcli radio wifi off"
+  ],
+  "ogniowa": [
+    "--add-port=8080/tcp",
+    "--add-service=http",
+    "--add-service=https",
+    "--complete-reload",
+    "--get-active-zones",
+    "--get-default-zone",
+    "--get-zones",
+    "--list-all",
+    "--list-ports",
+    "--list-rich-rules",
+    "--list-services",
+    "--zone=public",
+    "e-port=8080/tcp",
+    "e-service=http",
+    "efault-zone=trusted",
+    "firewall-cmd",
+    "firewall-cmd --add-f",
+    "firewall-cmd --add-p",
+    "firewall-cmd --add-r",
+    "firewall-cmd --remov",
+    "firewall-cmd --runti",
+    "firewall-cmd --set-d",
+    "firewall-cmd --state",
+    "firewalld",
+    "w■■czona"
+  ],
+  "oka": [
+    "Ctrl+R",
+    "alias",
+    "alias ll='ls -alh'",
+    "cat /etc/bashrc",
+    "cat /etc/profile",
+    "cat ~/.bash_logout",
+    "cat ~/.bash_profile",
+    "cat ~/.bashrc",
+    "complete",
+    "echo $!",
+    "echo $#",
+    "echo $$",
+    "echo $*",
+    "echo $0",
+    "echo $?",
+    "echo $@",
+    "echo $BASH_VERSION",
+    "echo $HISTFILE",
+    "echo $HISTFILESIZE",
+    "echo $HISTSIZE",
+    "echo $PS1",
+    "echo $SHELL",
+    "echo $VARIABLE",
+    "echo ${#ARRAY[@]}",
+    "echo ${ARRAY[0]}",
+    "echo ${ARRAY[@]}",
+    "env",
+    "false",
+    "hash",
+    "history",
+    "ls /etc/profile.d/",
+    "printenv",
+    "set",
+    "source",
+    "true"
+  ],
+  "operacje": [
+    "cp --backup src dst",
+    "cp -a src/ dst/",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -r src/ dst/",
+    "cp -u src dst",
+    "cp -v src dst",
+    "cp source dest",
+    "mkdir -m 755 dirname",
+    "mkdir -p a/b/c",
+    "mkdir -v dirname",
+    "mkdir dirname",
+    "nadpisaniem",
+    "rm -f file.txt",
+    "rm -i file",
+    "rm -r dir/",
+    "rm -rf dir/",
+    "rm -v file",
+    "rm file.txt",
+    "rsync",
+    "rsync --delete src/",
+    "rsync -av src/ dst/",
+    "rsync -avz src/",
+    "rsync -n src/ dst/",
+    "touch -d",
+    "touch -t",
+    "touch file.txt"
+  ],
+  "p": [
+    "4096",
+    "8080:localhost:80",
+    "Checking=no",
+    "ConnectTimeout=10",
+    "P",
+    "cat ~/.ssh/config",
+    "chmod 600 ~/.ssh/aut",
+    "chmod 700 ~/.ssh/",
+    "ed25519",
+    "horized_keys",
+    "ntication=no",
+    "p",
+    "rsync -avz",
+    "rsync -avz -e ssh",
+    "scp",
+    "ssh -A user@host",
+    "ssh -D 1080",
+    "ssh -J jumphost",
+    "ssh -L",
+    "ssh -N -f -L",
+    "ssh -R",
+    "ssh -X user@host",
+    "ssh -i",
+    "ssh -o",
+    "ssh -o BatchMode=yes",
+    "ssh -o PasswordAuthe",
+    "ssh -o PreferredAuth",
+    "ssh -o StrictHostKey",
+    "ssh -p 2222",
+    "ssh -t user@host",
+    "ssh -v user@host",
+    "ssh -vvv user@host",
+    "ssh user@hostname",
+    "ssh-add",
+    "ssh-copy-id",
+    "user@host",
+    "user@hostname",
+    "~/.ssh/id_rsa",
+    "~/.ssh/id_rsa.pub",
+    "~/.ssh/key.pem",
+    "~/.ssh/mykey"
+  ],
+  "package": [
+    "dnf erase package",
+    "dnf info package",
+    "dnf install package",
+    "dnf remove package",
+    "dnf update package",
+    "package",
+    "rpm -V package",
+    "rpm -e package",
+    "rpm -qR package",
+    "rpm -qc package",
+    "rpm -qd package",
+    "rpm -qi package",
+    "rpm -ql package"
+  ],
+  "package.rpm": [
+    "rpm -Fvh package.rpm",
+    "rpm -K package.rpm",
+    "rpm -Uvh package.rpm",
+    "rpm -ivh package.rpm",
+    "rpm -qip package.rpm"
+  ],
+  "packages": [
+    "dnf clean packages"
+  ],
+  "pakietami": [
+    "Name'",
+    "aktualizacjami",
+    "dnf autoremove",
+    "dnf check-update",
+    "dnf clean all",
+    "dnf clean metadata",
+    "dnf clean packages",
+    "dnf config-manager",
+    "dnf distro-sync",
+    "dnf downgrade",
+    "dnf erase package",
+    "dnf groupinfo 'Group",
+    "dnf groupinstall",
+    "dnf grouplist",
+    "dnf groupremove",
+    "dnf history",
+    "dnf history info 5",
+    "dnf history redo 5",
+    "dnf history rollback",
+    "dnf history undo 5",
+    "dnf info package",
+    "dnf install -y",
+    "dnf install package",
+    "dnf list available",
+    "dnf list extras",
+    "dnf list installed",
+    "dnf list obsoletes",
+    "dnf list updates",
+    "dnf makecache",
+    "dnf module disable",
+    "dnf module enable",
+    "dnf module info",
+    "dnf module install m",
+    "dnf module list",
+    "dnf module reset",
+    "dnf provides",
+    "dnf reinstall",
+    "dnf remove package",
+    "dnf repoinfo repo-id",
+    "dnf repolist",
+    "dnf repolist all",
+    "dnf search keyword",
+    "dnf security update",
+    "dnf update",
+    "dnf update package",
+    "dnf updateinfo list",
+    "dnf upgrade",
+    "dnf upgrade-minimal",
+    "dnf whatprovides",
+    "package",
+    "rpm --import",
+    "rpm -Fvh package.rpm",
+    "rpm -K package.rpm",
+    "rpm -Uvh package.rpm",
+    "rpm -V package",
+    "rpm -Va",
+    "rpm -e package",
+    "rpm -ivh package.rpm",
+    "rpm -q --changelog",
+    "rpm -q --scripts",
+    "rpm -qR package",
+    "rpm -qa",
+    "rpm -qc package",
+    "rpm -qd package",
+    "rpm -qf",
+    "rpm -qi package",
+    "rpm -qip package.rpm",
+    "rpm -ql package",
+    "rpm -qp --scripts",
+    "subscription-manager"
+  ],
+  "partprobe": [
+    "partprobe"
+  ],
+  "partycje": [
+    "blkid",
+    "dysków",
+    "lsblk",
+    "partprobe",
+    "print"
+  ],
+  "partycji": [
+    "partycji)"
+  ],
+  "passwordauthe": [
+    "ssh -o PasswordAuthe"
+  ],
+  "pat1": [
+    "grep -E 'pat1|pat2'"
+  ],
+  "pat2": [
+    "grep -E 'pat1|pat2'"
+  ],
+  "pattern": [
+    "grep 'pattern' file",
+    "grep -A 3 'pattern'",
+    "grep -B 3 'pattern'",
+    "grep -C 3 'pattern'",
+    "grep -c 'pattern'",
+    "grep -i 'pattern'",
+    "grep -l 'pattern'",
+    "grep -m 5 'pattern'",
+    "grep -n 'pattern'",
+    "grep -o 'pattern'",
+    "grep -q 'pattern'",
+    "grep -r 'pattern'",
+    "grep -v 'pattern'"
+  ],
+  "pause": [
+    "podman pause"
+  ],
+  "pid": [
+    "PID"
+  ],
+  "play": [
+    "podman play kube"
+  ],
+  "plikach": [
+    "cp --backup src dst",
+    "cp -a src/ dst/",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -r src/ dst/",
+    "cp -u src dst",
+    "cp -v src dst",
+    "cp source dest",
+    "mkdir -m 755 dirname",
+    "mkdir -p a/b/c",
+    "mkdir -v dirname",
+    "mkdir dirname",
+    "nadpisaniem",
+    "rm -f file.txt",
+    "rm -i file",
+    "rm -r dir/",
+    "rm -rf dir/",
+    "rm -v file",
+    "rm file.txt",
+    "rsync",
+    "rsync --delete src/",
+    "rsync -av src/ dst/",
+    "rsync -avz src/",
+    "rsync -n src/ dst/",
+    "touch -d",
+    "touch -t",
+    "touch file.txt"
+  ],
+  "plików": [
+    "/dev/sdb1",
+    "/mnt",
+    "basename",
+    "cat -A file.txt",
+    "cat -n file.txt",
+    "cat /etc/fstab",
+    "cat /proc/mounts",
+    "cat file.txt",
+    "cat file1 file2",
+    "cd -",
+    "cd /",
+    "cd /path/to/dir",
+    "cd ~",
+    "chmod",
+    "chmod +t dir",
+    "chmod -R 755 dir/",
+    "chmod 1755 dir",
+    "chmod 2755 dir",
+    "chmod 4755 file",
+    "chmod 600 file",
+    "chmod 644 file",
+    "chmod 755 file",
+    "chmod 777 file",
+    "chmod a+r file",
+    "chmod g+s dir",
+    "chmod g-w file",
+    "chmod o-r file",
+    "chmod u+s file",
+    "chmod u+x file",
+    "chmod u=rwx,g=rx,o=r",
+    "chown",
+    "chown -R user:group",
+    "chown :group file",
+    "chown user file",
+    "chown user:group",
+    "dir/",
+    "dirname",
+    "dirs",
+    "echo $HOME",
+    "echo $OLDPWD",
+    "echo $PATH",
+    "echo $PWD",
+    "find . ! -name",
+    "find . -atime -1",
+    "find . -ctime -1",
+    "find . -empty",
+    "find . -gid 1000",
+    "find . -group",
+    "find . -iname",
+    "find . -links +1",
+    "find . -maxdepth 2",
+    "find . -mindepth 2",
+    "find . -mmin -60",
+    "find . -mount -name",
+    "find . -mtime +30",
+    "find . -mtime -7",
+    "find . -name",
+    "find . -name '*.log'",
+    "find . -name '*.py'",
+    "find . -name '*.tmp'",
+    "find . -name '*.txt'",
+    "find . -newer",
+    "find . -nogroup",
+    "find . -nouser",
+    "find . -perm -1000",
+    "find . -perm -2000",
+    "find . -perm -4000",
+    "find . -perm -644",
+    "find . -perm /644",
+    "find . -perm 644",
+    "find . -size +100M",
+    "find . -size +1G",
+    "find . -size -10k",
+    "find . -size 512c",
+    "find . -type f -name",
+    "find . -type f -newer",
+    "find . -uid 1000",
+    "find . -user",
+    "find . -xdev -name",
+    "find / -inum 12345",
+    "find / -name",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w",
+    "find / -type b",
+    "find / -type c",
+    "find / -type d -name",
+    "find / -type f -name",
+    "find / -type l",
+    "find /tmp -mtime +7",
+    "findmnt",
+    "katalogu",
+    "ls",
+    "ls --color=auto",
+    "ls -R",
+    "ls -Z file",
+    "ls -d */",
+    "ls -i",
+    "ls -l",
+    "ls -lS",
+    "ls -la",
+    "ls -lh",
+    "ls -lt",
+    "ls /etc | head -20",
+    "ls /proc | wc -l",
+    "montowania",
+    "mount -a",
+    "mount -o remount,ro",
+    "mount -o remount,rw",
+    "mount -o ro",
+    "mount -o rw,noexec",
+    "mount -t ext4",
+    "mount -t xfs",
+    "mount /dev/sdb1 /mnt",
+    "mount LABEL=mylabel",
+    "mount UUID=xxx /mnt",
+    "mount | column -t",
+    "popd",
+    "pwd",
+    "reference_file",
+    "tree",
+    "umask",
+    "updatedb",
+    "w■a■ciciel)",
+    "w■a■ciciela"
+  ],
+  "po": [
+    "basename",
+    "cd -",
+    "cd /",
+    "cd /path/to/dir",
+    "cd ~",
+    "dirname",
+    "dirs",
+    "echo $HOME",
+    "echo $OLDPWD",
+    "echo $PATH",
+    "echo $PWD",
+    "ls",
+    "ls --color=auto",
+    "ls -R",
+    "ls -d */",
+    "ls -i",
+    "ls -l",
+    "ls -lS",
+    "ls -la",
+    "ls -lh",
+    "ls -lt",
+    "ls /etc | head -20",
+    "ls /proc | wc -l",
+    "popd",
+    "pwd",
+    "tree"
+  ],
+  "pod": [
+    "podman pod create",
+    "podman pod inspect",
+    "podman pod ls",
+    "podman pod rm mypod",
+    "podman pod start",
+    "podman pod stats",
+    "podman pod stop"
+  ],
+  "podman": [
+    "--list-tags",
+    "--restart=always",
+    "-a",
+    ".access.redhat.com/u",
+    "/bin/bash",
+    "/host:/container",
+    "cat /etc/containers/",
+    "cat Containerfile",
+    "container",
+    "dst:tag",
+    "file.tar",
+    "image",
+    "image:tag",
+    "podman --version",
+    "podman build",
+    "podman build -f",
+    "podman build -t",
+    "podman commit",
+    "podman container",
+    "podman cp",
+    "podman cp src",
+    "podman diff",
+    "podman exec",
+    "podman exec -it",
+    "podman exec -u root",
+    "podman generate",
+    "podman generate kube",
+    "podman image history",
+    "podman image inspect",
+    "podman image prune",
+    "podman images",
+    "podman images -a",
+    "podman info",
+    "podman inspect",
+    "podman inspect -f",
+    "podman kill",
+    "podman kill -s",
+    "podman load -i",
+    "podman login",
+    "podman logout",
+    "podman logs",
+    "podman logs --tail",
+    "podman logs -f",
+    "podman machine init",
+    "podman machine start",
+    "podman network",
+    "podman network ls",
+    "podman network rm",
+    "podman pause",
+    "podman play kube",
+    "podman pod create",
+    "podman pod inspect",
+    "podman pod ls",
+    "podman pod rm mypod",
+    "podman pod start",
+    "podman pod stats",
+    "podman pod stop",
+    "podman port",
+    "podman ps",
+    "podman ps --format",
+    "podman ps -a",
+    "podman ps -q",
+    "podman ps -qa",
+    "podman pull",
+    "podman pull registry",
+    "podman push",
+    "podman rename",
+    "podman restart",
+    "podman rm -a",
+    "podman rm -f",
+    "podman rm container",
+    "podman rmi -a",
+    "podman rmi -f image",
+    "podman rmi image",
+    "podman run",
+    "podman run --cap-add",
+    "podman run --cpus",
+    "podman run --memory",
+    "podman run --name",
+    "podman run --network",
+    "podman run --pod",
+    "podman run --restart",
+    "podman run --rm",
+    "podman run -d image",
+    "podman run -e",
+    "podman run -it image",
+    "podman run -p",
+    "podman run -u user",
+    "podman run -v",
+    "podman run image",
+    "podman save image -o",
+    "podman search",
+    "podman search nginx",
+    "podman start",
+    "podman stats",
+    "podman stop",
+    "podman stop -t 0",
+    "podman system df",
+    "podman system prune",
+    "podman system reset",
+    "podman tag src:tag",
+    "podman top container",
+    "podman unpause",
+    "podman unshare",
+    "podman volume",
+    "podman volume create",
+    "podman volume ls",
+    "podman volume prune",
+    "podman volume rm"
+  ],
+  "podstawy": [
+    "$#",
+    "$$",
+    "$0",
+    "$?",
+    "$@",
+    "./script.sh",
+    "1>/dev/null",
+    "2>/dev/null",
+    "ARRAY+=('e')",
+    "TMPFILE=$(mktemp)",
+    "VAR=$(command)",
+    "VAR='value'",
+    "break",
+    "chmod +x script.sh",
+    "continue",
+    "do",
+    "done",
+    "echo \"Value: $VAR\"",
+    "echo ${MAP[k1]}",
+    "else",
+    "esac",
+    "fi",
+    "mktemp",
+    "then",
+    "}"
+  ],
+  "popd": [
+    "popd"
+  ],
+  "port": [
+    "podman port",
+    "semanage port -a -t",
+    "semanage port -d -t",
+    "semanage port -l",
+    "semanage port -l |",
+    "semanage port -m -t"
+  ],
+  "pow": [
+    "Ctrl+R",
+    "alias",
+    "alias ll='ls -alh'",
+    "cat /etc/bashrc",
+    "cat /etc/profile",
+    "cat ~/.bash_logout",
+    "cat ~/.bash_profile",
+    "cat ~/.bashrc",
+    "complete",
+    "echo $!",
+    "echo $#",
+    "echo $$",
+    "echo $*",
+    "echo $0",
+    "echo $?",
+    "echo $@",
+    "echo $BASH_VERSION",
+    "echo $HISTFILE",
+    "echo $HISTFILESIZE",
+    "echo $HISTSIZE",
+    "echo $PS1",
+    "echo $SHELL",
+    "echo $VARIABLE",
+    "echo ${#ARRAY[@]}",
+    "echo ${ARRAY[0]}",
+    "echo ${ARRAY[@]}",
+    "env",
+    "false",
+    "hash",
+    "history",
+    "ls /etc/profile.d/",
+    "printenv",
+    "set",
+    "source",
+    "true"
+  ],
+  "poweroff": [
+    "poweroff",
+    "systemctl poweroff"
+  ],
+  "preferredauth": [
+    "ssh -o PreferredAuth"
+  ],
+  "print": [
+    "awk '{print $1}'",
+    "awk '{print $NF}'",
+    "awk '{print NF}'",
+    "awk -F: '{print $1}'",
+    "print"
+  ],
+  "printenv": [
+    "printenv"
+  ],
+  "procesami": [
+    "Ctrl+C",
+    "Ctrl+D",
+    "Ctrl+Z",
+    "cat /proc/PID/maps",
+    "cat /proc/PID/status",
+    "cat /proc/loadavg",
+    "cat /proc/meminfo",
+    "htop",
+    "jobs",
+    "lsof",
+    "procesami",
+    "ps",
+    "pstree",
+    "top",
+    "uptime",
+    "u■ytkownika",
+    "wait"
+  ],
+  "provides": [
+    "dnf provides"
+  ],
+  "prune": [
+    "podman image prune",
+    "podman system prune",
+    "podman volume prune"
+  ],
+  "przechowywanie": [
+    "blkid",
+    "dysków",
+    "lsblk",
+    "partprobe",
+    "print"
+  ],
+  "przegl": [
+    "cat -A file.txt",
+    "cat -n file.txt",
+    "cat file.txt",
+    "cat file1 file2"
+  ],
+  "ps": [
+    "podman ps",
+    "podman ps --format",
+    "podman ps -a",
+    "podman ps -q",
+    "podman ps -qa",
+    "ps"
+  ],
+  "pstree": [
+    "pstree"
+  ],
+  "public": [
+    "--zone=public"
+  ],
+  "pull": [
+    "podman pull",
+    "podman pull registry"
+  ],
+  "push": [
+    "podman push"
+  ],
+  "pvdisplay": [
+    "pvdisplay"
+  ],
+  "pvs": [
+    "pvs"
+  ],
+  "pvscan": [
+    "pvscan"
+  ],
+  "pwck": [
+    "pwck"
+  ],
+  "pwd": [
+    "pwd"
+  ],
+  "q": [
+    "q"
+  ],
+  "qa": [
+    "qa"
+  ],
+  "r": [
+    "R",
+    "chmod u=rwx,g=rx,o=r",
+    "r"
+  ],
+  "radio": [
+    "nmcli radio wifi off"
+  ],
+  "raid": [
+    "--raid-devices=2",
+    "--scan",
+    "/dev/md0",
+    "/dev/sdd",
+    "cat /etc/mdadm.conf",
+    "cat /proc/mdstat",
+    "mdadm"
+  ],
+  "random": [
+    "echo $((RANDOM %"
+  ],
+  "reboot": [
+    "reboot",
+    "systemctl reboot"
+  ],
+  "redo": [
+    "dnf history redo 5"
+  ],
+  "reference_file": [
+    "reference_file"
+  ],
+  "registry": [
+    "podman pull registry"
+  ],
+  "reinstall": [
+    "dnf reinstall"
+  ],
+  "reload": [
+    "systemctl reload"
+  ],
+  "remount": [
+    "mount -o remount,ro",
+    "mount -o remount,rw"
+  ],
+  "remove": [
+    "dnf remove",
+    "dnf remove package"
+  ],
+  "rename": [
+    "podman rename"
+  ],
+  "repo-id": [
+    "dnf repoinfo repo-id"
+  ],
+  "repoinfo": [
+    "dnf repoinfo repo-id"
+  ],
+  "repolist": [
+    "dnf repolist",
+    "dnf repolist all"
+  ],
+  "rescue": [
+    "systemctl rescue"
+  ],
+  "rescue.target": [
+    "rescue.target"
+  ],
+  "reset": [
+    "dnf module reset",
+    "podman system reset"
+  ],
+  "restart": [
+    "podman restart",
+    "systemctl restart"
+  ],
+  "restorecon": [
+    "restorecon",
+    "restorecon -F /path/",
+    "restorecon -R",
+    "restorecon -Rv"
+  ],
+  "rm": [
+    "podman network rm",
+    "podman pod rm mypod",
+    "podman rm -a",
+    "podman rm -f",
+    "podman rm container",
+    "podman volume rm",
+    "rm -f file.txt",
+    "rm -i file",
+    "rm -r dir/",
+    "rm -rf dir/",
+    "rm -v file",
+    "rm file.txt"
+  ],
+  "rmi": [
+    "podman rmi -a",
+    "podman rmi -f image",
+    "podman rmi image"
+  ],
+  "ro": [
+    "mount -o remount,ro",
+    "mount -o ro",
+    "mount -o ro,soft"
+  ],
+  "rodowiskowe": [
+    "Ctrl+R",
+    "alias",
+    "alias ll='ls -alh'",
+    "cat /etc/bashrc",
+    "cat /etc/profile",
+    "cat ~/.bash_logout",
+    "cat ~/.bash_profile",
+    "cat ~/.bashrc",
+    "complete",
+    "echo $!",
+    "echo $#",
+    "echo $$",
+    "echo $*",
+    "echo $0",
+    "echo $?",
+    "echo $@",
+    "echo $BASH_VERSION",
+    "echo $HISTFILE",
+    "echo $HISTFILESIZE",
+    "echo $HISTSIZE",
+    "echo $PS1",
+    "echo $SHELL",
+    "echo $VARIABLE",
+    "echo ${#ARRAY[@]}",
+    "echo ${ARRAY[0]}",
+    "echo ${ARRAY[@]}",
+    "env",
+    "false",
+    "hash",
+    "history",
+    "ls /etc/profile.d/",
+    "printenv",
+    "set",
+    "source",
+    "true"
+  ],
+  "rollback": [
+    "dnf history rollback"
+  ],
+  "root": [
+    "podman exec -u root"
+  ],
+  "route": [
+    "ip -6 route show",
+    "ip route add",
+    "ip route add default",
+    "ip route del",
+    "ip route del default",
+    "ip route get 8.8.8.8",
+    "ip route show"
+  ],
+  "rpm": [
+    "rpm --import",
+    "rpm -Fvh package.rpm",
+    "rpm -K package.rpm",
+    "rpm -Uvh package.rpm",
+    "rpm -V package",
+    "rpm -Va",
+    "rpm -e package",
+    "rpm -ivh package.rpm",
+    "rpm -q --changelog",
+    "rpm -q --scripts",
+    "rpm -qR package",
+    "rpm -qa",
+    "rpm -qa kernel",
+    "rpm -qc package",
+    "rpm -qd package",
+    "rpm -qf",
+    "rpm -qi package",
+    "rpm -qip package.rpm",
+    "rpm -ql package",
+    "rpm -qp --scripts"
+  ],
+  "rsync": [
+    "rsync",
+    "rsync --delete src/",
+    "rsync -av src/ dst/",
+    "rsync -avz",
+    "rsync -avz -e ssh",
+    "rsync -avz src/",
+    "rsync -n src/ dst/"
+  ],
+  "run": [
+    "podman run",
+    "podman run --cap-add",
+    "podman run --cpus",
+    "podman run --memory",
+    "podman run --name",
+    "podman run --network",
+    "podman run --pod",
+    "podman run --restart",
+    "podman run --rm",
+    "podman run -d image",
+    "podman run -e",
+    "podman run -it image",
+    "podman run -p",
+    "podman run -u user",
+    "podman run -v",
+    "podman run image"
+  ],
+  "run-parts": [
+    "run-parts"
+  ],
+  "rw": [
+    "mount -o remount,rw",
+    "mount -o rw,noexec"
+  ],
+  "rwx": [
+    "chmod u=rwx,g=rx,o=r"
+  ],
+  "rx": [
+    "chmod u=rwx,g=rx,o=r"
+  ],
+  "samba": [
+    "//server",
+    "cat /etc/fstab |",
+    "grep cifs",
+    "mount -t cifs",
+    "smbclient",
+    "testparm"
+  ],
+  "samba_e": [
+    "setsebool -P samba_e"
+  ],
+  "save": [
+    "podman save image -o"
+  ],
+  "scap-workbench": [
+    "scap-workbench"
+  ],
+  "scp": [
+    "scp"
+  ],
+  "script.sh": [
+    "chmod +x script.sh"
+  ],
+  "search": [
+    "dnf search keyword",
+    "podman search",
+    "podman search nginx"
+  ],
+  "security": [
+    "dnf security update"
+  ],
+  "selinux": [
+    "-t",
+    "/etc/selinux/config",
+    "/path/to/file",
+    "SELinux",
+    "cat",
+    "cat /var/log/audit/a",
+    "getenforce",
+    "grep 'denied' /var/l",
+    "httpd_sys_content_t",
+    "journalctl -t",
+    "ls -Z dir/",
+    "ls -dZ dir/",
+    "matchpathcon",
+    "restorecon",
+    "restorecon -F /path/",
+    "restorecon -R",
+    "restorecon -Rv",
+    "semanage boolean -l",
+    "semanage fcontext -a",
+    "semanage fcontext -d",
+    "semanage fcontext -l",
+    "semanage fcontext -m",
+    "semanage login -a -s",
+    "semanage login -l",
+    "semanage port -a -t",
+    "semanage port -d -t",
+    "semanage port -l",
+    "semanage port -l |",
+    "semanage port -m -t",
+    "semanage user -l",
+    "sestatus",
+    "setsebool -P",
+    "setsebool -P httpd_c",
+    "setsebool -P samba_e",
+    "setsebool httpd_can_",
+    "touch /.autorelabel"
+  ],
+  "semanage": [
+    "semanage boolean -l",
+    "semanage fcontext -a",
+    "semanage fcontext -d",
+    "semanage fcontext -l",
+    "semanage fcontext -m",
+    "semanage login -a -s",
+    "semanage login -l",
+    "semanage port -a -t",
+    "semanage port -d -t",
+    "semanage port -l",
+    "semanage port -l |",
+    "semanage port -m -t",
+    "semanage user -l"
+  ],
+  "sensors": [
+    "sensors"
+  ],
+  "sensors-detect": [
+    "sensors-detect"
+  ],
+  "server": [
+    "server:/share"
+  ],
+  "service": [
+    "--type=service",
+    "service"
+  ],
+  "sestatus": [
+    "sestatus"
+  ],
+  "set": [
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up",
+    "set"
+  ],
+  "set-default": [
+    "set-default"
+  ],
+  "setsebool": [
+    "setsebool -P",
+    "setsebool -P httpd_c",
+    "setsebool -P samba_e",
+    "setsebool httpd_can_"
+  ],
+  "show": [
+    "ip -6 addr show",
+    "ip -6 route show",
+    "ip -s link show eth0",
+    "ip addr show",
+    "ip addr show eth0",
+    "ip link show",
+    "ip neigh show",
+    "ip route show",
+    "nmcli device show",
+    "systemctl show",
+    "systemctl show -p"
+  ],
+  "sie": [
+    "9000",
+    "PID",
+    "cat /etc/hostname",
+    "cat /etc/hosts",
+    "cat /etc/resolv.conf",
+    "cat /etc/sysconfig/n",
+    "curl",
+    "established",
+    "hostname",
+    "ip -6 addr show",
+    "ip -6 route show",
+    "ip addr",
+    "ip addr add",
+    "ip addr del",
+    "ip addr show",
+    "ip addr show eth0",
+    "ip link set eth0 down",
+    "ip link set eth0 mtu",
+    "ip link set eth0 up",
+    "ip link show",
+    "ip neigh flush all",
+    "ip neigh show",
+    "ip route add",
+    "ip route add default",
+    "ip route del",
+    "ip route del default",
+    "ip route get 8.8.8.8",
+    "ip route show",
+    "nmcli connection",
+    "nmcli connection add",
+    "nmcli connection up",
+    "nmcli device show",
+    "nmcli device status",
+    "nmcli general",
+    "nmcli radio wifi off",
+    "nmtui",
+    "procesami"
+  ],
+  "skrypty": [
+    "$#",
+    "$$",
+    "$0",
+    "$?",
+    "$@",
+    "./script.sh",
+    "1>/dev/null",
+    "2>/dev/null",
+    "ARRAY+=('e')",
+    "TMPFILE=$(mktemp)",
+    "VAR=$(command)",
+    "VAR='value'",
+    "break",
+    "chmod +x script.sh",
+    "continue",
+    "do",
+    "done",
+    "echo \"Value: $VAR\"",
+    "echo ${MAP[k1]}",
+    "else",
+    "esac",
+    "fi",
+    "mktemp",
+    "then",
+    "}"
+  ],
+  "smbclient": [
+    "smbclient"
+  ],
+  "soft": [
+    "mount -o ro,soft"
+  ],
+  "source": [
+    "cp source dest",
+    "source"
+  ],
+  "src": [
+    "cp --backup src dst",
+    "cp -i src dst",
+    "cp -p src dst",
+    "cp -u src dst",
+    "cp -v src dst",
+    "podman cp src",
+    "podman tag src:tag"
+  ],
+  "src/": [
+    "cp -a src/ dst/",
+    "cp -r src/ dst/",
+    "rsync --delete src/",
+    "rsync -av src/ dst/",
+    "rsync -avz src/",
+    "rsync -n src/ dst/"
+  ],
+  "ssh": [
+    "4096",
+    "8080:localhost:80",
+    "Checking=no",
+    "ConnectTimeout=10",
+    "cat ~/.ssh/config",
+    "chmod 600 ~/.ssh/aut",
+    "chmod 700 ~/.ssh/",
+    "ed25519",
+    "horized_keys",
+    "ntication=no",
+    "rsync -avz",
+    "rsync -avz -e ssh",
+    "scp",
+    "ssh -A user@host",
+    "ssh -D 1080",
+    "ssh -J jumphost",
+    "ssh -L",
+    "ssh -N -f -L",
+    "ssh -R",
+    "ssh -X user@host",
+    "ssh -i",
+    "ssh -o",
+    "ssh -o BatchMode=yes",
+    "ssh -o PasswordAuthe",
+    "ssh -o PreferredAuth",
+    "ssh -o StrictHostKey",
+    "ssh -p 2222",
+    "ssh -t user@host",
+    "ssh -v user@host",
+    "ssh -vvv user@host",
+    "ssh user@hostname",
+    "ssh-add",
+    "ssh-copy-id",
+    "user@host",
+    "user@hostname",
+    "~/.ssh/id_rsa",
+    "~/.ssh/id_rsa.pub",
+    "~/.ssh/key.pem",
+    "~/.ssh/mykey"
+  ],
+  "ssh-add": [
+    "ssh-add"
+  ],
+  "ssh-copy-id": [
+    "ssh-copy-id"
+  ],
+  "sshd": [
+    "journalctl -u sshd"
+  ],
+  "start": [
+    "podman machine start",
+    "podman pod start",
+    "podman start",
+    "systemctl start"
+  ],
+  "stats": [
+    "podman pod stats",
+    "podman stats"
+  ],
+  "status": [
+    "nmcli device status",
+    "systemctl status"
+  ],
+  "stop": [
+    "podman pod stop",
+    "podman stop",
+    "podman stop -t 0",
+    "systemctl stop"
+  ],
+  "stricthostkey": [
+    "ssh -o StrictHostKey"
+  ],
+  "subscription-manager": [
+    "subscription-manager"
+  ],
+  "sum+": [
+    "awk '{sum+=$1}"
+  ],
+  "suspend": [
+    "systemctl suspend"
+  ],
+  "sync": [
+    "sync"
+  ],
+  "sysctl": [
+    "sysctl"
+  ],
+  "system": [
+    "podman system df",
+    "podman system prune",
+    "podman system reset"
+  ],
+  "systemctl": [
+    "systemctl",
+    "systemctl --user",
+    "systemctl cat",
+    "systemctl disable",
+    "systemctl edit",
+    "systemctl emergency",
+    "systemctl enable",
+    "systemctl halt",
+    "systemctl hibernate",
+    "systemctl is-active",
+    "systemctl is-enabled",
+    "systemctl is-failed",
+    "systemctl isolate",
+    "systemctl list-units",
+    "systemctl mask",
+    "systemctl poweroff",
+    "systemctl reboot",
+    "systemctl reload",
+    "systemctl rescue",
+    "systemctl restart",
+    "systemctl show",
+    "systemctl show -p",
+    "systemctl start",
+    "systemctl status",
+    "systemctl stop",
+    "systemctl suspend",
+    "systemctl unmask"
+  ],
+  "systemd": [
+    "--type=service",
+    "--vacuum-size=500M",
+    "daemon-reexec",
+    "daemon-reload",
+    "emergency.target",
+    "get-default",
+    "hostnamectl",
+    "journalctl",
+    "journalctl --since",
+    "journalctl --until",
+    "journalctl -b",
+    "journalctl -b -1",
+    "journalctl -f",
+    "journalctl -f -u",
+    "journalctl -k",
+    "journalctl -n 50",
+    "journalctl -o json",
+    "journalctl -p",
+    "journalctl -p err",
+    "journalctl -u",
+    "list-dependencies",
+    "list-unit-files",
+    "localectl",
+    "loginctl",
+    "rescue.target",
+    "service",
+    "set-default",
+    "systemctl",
+    "systemctl --user",
+    "systemctl cat",
+    "systemctl disable",
+    "systemctl edit",
+    "systemctl enable",
+    "systemctl halt",
+    "systemctl hibernate",
+    "systemctl is-active",
+    "systemctl is-enabled",
+    "systemctl is-failed",
+    "systemctl isolate",
+    "systemctl list-units",
+    "systemctl mask",
+    "systemctl poweroff",
+    "systemctl reboot",
+    "systemctl reload",
+    "systemctl restart",
+    "systemctl show",
+    "systemctl show -p",
+    "systemctl start",
+    "systemctl status",
+    "systemctl stop",
+    "systemctl suspend",
+    "systemctl unmask",
+    "systemd-analyze",
+    "timedatectl"
+  ],
+  "systemd-analyze": [
+    "systemd-analyze"
+  ],
+  "systemd-cgls": [
+    "systemd-cgls"
+  ],
+  "systemd-cgtop": [
+    "systemd-cgtop"
+  ],
+  "systemd-run": [
+    "systemd-run"
+  ],
+  "systemie": [
+    "baseboard",
+    "basename",
+    "cat /etc/os-release",
+    "cat /proc/cpuinfo",
+    "cat /proc/uptime",
+    "cat /sys/block/sda/q",
+    "cat /sys/class/dmi/i",
+    "cd -",
+    "cd /",
+    "cd /path/to/dir",
+    "cd ~",
+    "dirname",
+    "dirs",
+    "echo $HOME",
+    "echo $OLDPWD",
+    "echo $PATH",
+    "echo $PWD",
+    "iostat",
+    "ls",
+    "ls --color=auto",
+    "ls -R",
+    "ls -d */",
+    "ls -i",
+    "ls -l",
+    "ls -lS",
+    "ls -la",
+    "ls -lh",
+    "ls -lt",
+    "ls /etc | head -20",
+    "ls /proc | wc -l",
+    "lscpu",
+    "lshw",
+    "lsmem",
+    "lsnuma",
+    "lspci",
+    "lsusb",
+    "nproc",
+    "popd",
+    "pwd",
+    "sensors",
+    "sensors-detect",
+    "tree",
+    "vmstat"
+  ],
+  "systemowe": [
+    "--filename=/tmp/test",
+    "--leak-check=full",
+    "/var/log/sa/saDD",
+    "bonnie++",
+    "cat /etc/kdump.conf",
+    "cat /proc/PID/limits",
+    "cat /proc/net/tcp",
+    "cat /proc/net/udp",
+    "cat /proc/sys/net/nf",
+    "cmd",
+    "count=1000",
+    "fio",
+    "ip -s link show eth0",
+    "kdump",
+    "valgrind"
+  ],
+  "systemu": [
+    "--disk-usage",
+    "--level=err,warn",
+    "/var/log/messages",
+    "aureport",
+    "cat /etc/audit/audit",
+    "cat /var/log/cron",
+    "cat /var/log/maillog",
+    "cat /var/log/secure",
+    "dmesg",
+    "grep 'Accepted'",
+    "grep 'Failed",
+    "journalctl -o",
+    "journalctl -u sshd",
+    "journalctl -xe",
+    "ls /etc/logrotate.d/",
+    "udit.log"
+  ],
+  "systemy": [
+    "/dev/sdb1",
+    "/mnt",
+    "cat /etc/fstab",
+    "cat /proc/mounts",
+    "findmnt",
+    "montowania",
+    "mount -a",
+    "mount -o remount,ro",
+    "mount -o remount,rw",
+    "mount -o ro",
+    "mount -o rw,noexec",
+    "mount -t ext4",
+    "mount -t xfs",
+    "mount /dev/sdb1 /mnt",
+    "mount LABEL=mylabel",
+    "mount UUID=xxx /mnt",
+    "mount | column -t"
+  ],
+  "sysuser": [
+    "useradd -r sysuser"
+  ],
+  "t_in_bytes": [
+    "t_in_bytes=512M"
+  ],
+  "tag": [
+    "dst:tag",
+    "image:tag",
+    "podman tag src:tag"
+  ],
+  "tar": [
+    "tar",
+    "tar --delete -f",
+    "tar --exclude-vcs",
+    "tar -cvJf",
+    "tar -cvf archive.tar",
+    "tar -cvjf",
+    "tar -cvzf",
+    "tar -czf - /path |",
+    "tar -czf arch.tar.gz",
+    "tar -rvf archive.tar",
+    "tar -tvf archive.tar",
+    "tar -tvzf",
+    "tar -uvf archive.tar",
+    "tar -xvJf",
+    "tar -xvf archive.tar",
+    "tar -xvjf",
+    "tar -xvzf"
+  ],
+  "tekstowe": [
+    "100))",
+    "32",
+    "cat /etc/chrony.conf",
+    "date",
+    "echo $((RANDOM %",
+    "echo '3.14 * 2' | bc",
+    "echo file{1..3}.txt",
+    "echo {1..5}",
+    "echo {a,b,c}.log",
+    "gpg",
+    "hwclock"
+  ],
+  "tekstu": [
+    "/dir",
+    "awk '/pattern/' file",
+    "awk 'END{print NR}'",
+    "awk 'NR==5' file",
+    "awk 'NR>=5 &&",
+    "awk '{print $1}'",
+    "awk '{print $NF}'",
+    "awk '{print NF}'",
+    "awk '{sum+=$1}",
+    "awk -F: '{print $1}'",
+    "awk -v FS=':'",
+    "file",
+    "grep",
+    "grep 'pattern' file",
+    "grep -A 3 'pattern'",
+    "grep -B 3 'pattern'",
+    "grep -C 3 'pattern'",
+    "grep -E 'pat1|pat2'",
+    "grep -F 'literal'",
+    "grep -P '\\d+' file",
+    "grep -c 'pattern'",
+    "grep -i 'pattern'",
+    "grep -l 'pattern'",
+    "grep -m 5 'pattern'",
+    "grep -n 'pattern'",
+    "grep -o 'pattern'",
+    "grep -q 'pattern'",
+    "grep -r 'pattern'",
+    "grep -v 'pattern'",
+    "grep -w 'word' file"
+  ],
+  "tem/myapp.timer": [
+    "tem/myapp.timer"
+  ],
+  "testparm": [
+    "testparm"
+  ],
+  "then": [
+    "then"
+  ],
+  "timedatectl": [
+    "timedatectl"
+  ],
+  "timer-name.timer": [
+    "timer-name.timer"
+  ],
+  "tmpfile": [
+    "TMPFILE=$(mktemp)"
+  ],
+  "top": [
+    "podman top container",
+    "top"
+  ],
+  "touch": [
+    "touch -d",
+    "touch -t",
+    "touch /.autorelabel",
+    "touch file.txt"
+  ],
+  "tree": [
+    "tree"
+  ],
+  "true": [
+    "true"
+  ],
+  "trusted": [
+    "efault-zone=trusted"
+  ],
+  "trwa": [
+    "trwa■e)"
+  ],
+  "u": [
+    "cat /etc/group",
+    "cat /etc/gshadow",
+    "cat /etc/passwd",
+    "cat /etc/shadow",
+    "chmod u=rwx,g=rx,o=r",
+    "dniach",
+    "grpck",
+    "id",
+    "last",
+    "lastb",
+    "lastlog",
+    "lslogins",
+    "pwck",
+    "trwa■e)",
+    "u",
+    "user",
+    "useradd -G g1,g2",
+    "useradd -M user",
+    "useradd -N user",
+    "useradd -c 'Imi■",
+    "useradd -d",
+    "useradd -e",
+    "useradd -f 30 user",
+    "useradd -g group",
+    "useradd -m -s",
+    "useradd -m username",
+    "useradd -r sysuser",
+    "useradd -u 1500 user",
+    "useradd username",
+    "usermod -G g1,g2",
+    "usermod -L user",
+    "usermod -U user",
+    "usermod -aG group",
+    "usermod -c 'Nowy",
+    "usermod -d /new/home",
+    "usermod -e",
+    "usermod -e '' user",
+    "usermod -g group",
+    "usermod -l newname",
+    "usermod -s /bin/zsh",
+    "usermod -u 1600 user",
+    "u■ytkownika",
+    "vigr",
+    "vipw",
+    "visudo",
+    "w",
+    "who",
+    "whoami",
+    "zalogowanego"
+  ],
+  "u+s": [
+    "chmod u+s file"
+  ],
+  "u+x": [
+    "chmod u+x file"
+  ],
+  "udit.log": [
+    "udit.log"
+  ],
+  "ugami": [
+    "--type=service",
+    "--vacuum-size=500M",
+    "daemon-reexec",
+    "daemon-reload",
+    "emergency.target",
+    "get-default",
+    "hostnamectl",
+    "journalctl",
+    "journalctl --since",
+    "journalctl --until",
+    "journalctl -b",
+    "journalctl -b -1",
+    "journalctl -f",
+    "journalctl -f -u",
+    "journalctl -k",
+    "journalctl -n 50",
+    "journalctl -o json",
+    "journalctl -p",
+    "journalctl -p err",
+    "journalctl -u",
+    "list-dependencies",
+    "list-unit-files",
+    "localectl",
+    "loginctl",
+    "rescue.target",
+    "service",
+    "set-default",
+    "systemctl",
+    "systemctl --user",
+    "systemctl cat",
+    "systemctl disable",
+    "systemctl edit",
+    "systemctl enable",
+    "systemctl halt",
+    "systemctl hibernate",
+    "systemctl is-active",
+    "systemctl is-enabled",
+    "systemctl is-failed",
+    "systemctl isolate",
+    "systemctl list-units",
+    "systemctl mask",
+    "systemctl poweroff",
+    "systemctl reboot",
+    "systemctl reload",
+    "systemctl restart",
+    "systemctl show",
+    "systemctl show -p",
+    "systemctl start",
+    "systemctl status",
+    "systemctl stop",
+    "systemctl suspend",
+    "systemctl unmask",
+    "systemd-analyze",
+    "timedatectl"
+  ],
+  "umask": [
+    "umask"
+  ],
+  "undo": [
+    "dnf history undo 5"
+  ],
+  "unmask": [
+    "systemctl unmask"
+  ],
+  "unpause": [
+    "podman unpause"
+  ],
+  "unshare": [
+    "podman unshare"
+  ],
+  "up": [
+    "ip link set eth0 up",
+    "nmcli connection up"
+  ],
+  "update": [
+    "dnf security update",
+    "dnf update",
+    "dnf update package"
+  ],
+  "update-alternatives": [
+    "update-alternatives"
+  ],
+  "update-crypto-polici": [
+    "update-crypto-polici"
+  ],
+  "updatedb": [
+    "updatedb"
+  ],
+  "updateinfo": [
+    "dnf updateinfo list"
+  ],
+  "updates": [
+    "dnf list updates"
+  ],
+  "upgrade": [
+    "dnf upgrade"
+  ],
+  "upgrade-minimal": [
+    "dnf upgrade-minimal"
+  ],
+  "uprawnienia": [
+    "chmod",
+    "chmod +t dir",
+    "chmod -R 755 dir/",
+    "chmod 1755 dir",
+    "chmod 2755 dir",
+    "chmod 4755 file",
+    "chmod 600 file",
+    "chmod 644 file",
+    "chmod 755 file",
+    "chmod 777 file",
+    "chmod a+r file",
+    "chmod g+s dir",
+    "chmod g-w file",
+    "chmod o-r file",
+    "chmod u+s file",
+    "chmod u+x file",
+    "chmod u=rwx,g=rx,o=r",
+    "chown",
+    "chown -R user:group",
+    "chown :group file",
+    "chown user file",
+    "chown user:group",
+    "dir/",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w",
+    "katalogu",
+    "ls -Z file",
+    "umask",
+    "w■a■ciciel)",
+    "w■a■ciciela"
+  ],
+  "uptime": [
+    "uptime"
+  ],
+  "us": [
+    "--type=service",
+    "--vacuum-size=500M",
+    "daemon-reexec",
+    "daemon-reload",
+    "emergency.target",
+    "get-default",
+    "hostnamectl",
+    "journalctl",
+    "journalctl --since",
+    "journalctl --until",
+    "journalctl -b",
+    "journalctl -b -1",
+    "journalctl -f",
+    "journalctl -f -u",
+    "journalctl -k",
+    "journalctl -n 50",
+    "journalctl -o json",
+    "journalctl -p",
+    "journalctl -p err",
+    "journalctl -u",
+    "list-dependencies",
+    "list-unit-files",
+    "localectl",
+    "loginctl",
+    "rescue.target",
+    "service",
+    "set-default",
+    "systemctl",
+    "systemctl --user",
+    "systemctl cat",
+    "systemctl disable",
+    "systemctl edit",
+    "systemctl enable",
+    "systemctl halt",
+    "systemctl hibernate",
+    "systemctl is-active",
+    "systemctl is-enabled",
+    "systemctl is-failed",
+    "systemctl isolate",
+    "systemctl list-units",
+    "systemctl mask",
+    "systemctl poweroff",
+    "systemctl reboot",
+    "systemctl reload",
+    "systemctl restart",
+    "systemctl show",
+    "systemctl show -p",
+    "systemctl start",
+    "systemctl status",
+    "systemctl stop",
+    "systemctl suspend",
+    "systemctl unmask",
+    "systemd-analyze",
+    "timedatectl"
+  ],
+  "user": [
+    "chown -R user:group",
+    "chown user file",
+    "chown user:group",
+    "podman run -u user",
+    "semanage user -l",
+    "ssh -A user@host",
+    "ssh -X user@host",
+    "ssh -t user@host",
+    "ssh -v user@host",
+    "ssh -vvv user@host",
+    "ssh user@hostname",
+    "user",
+    "user@host",
+    "user@hostname",
+    "useradd -M user",
+    "useradd -N user",
+    "useradd -f 30 user",
+    "useradd -u 1500 user",
+    "usermod -L user",
+    "usermod -U user",
+    "usermod -e '' user",
+    "usermod -u 1600 user"
+  ],
+  "useradd": [
+    "useradd -G g1,g2",
+    "useradd -M user",
+    "useradd -N user",
+    "useradd -c 'Imi■",
+    "useradd -d",
+    "useradd -e",
+    "useradd -f 30 user",
+    "useradd -g group",
+    "useradd -m -s",
+    "useradd -m username",
+    "useradd -r sysuser",
+    "useradd -u 1500 user",
+    "useradd username"
+  ],
+  "usermod": [
+    "usermod -G g1,g2",
+    "usermod -L user",
+    "usermod -U user",
+    "usermod -aG docker",
+    "usermod -aG group",
+    "usermod -aG wheel",
+    "usermod -c 'Nowy",
+    "usermod -d /new/home",
+    "usermod -e",
+    "usermod -e '' user",
+    "usermod -g group",
+    "usermod -l newname",
+    "usermod -s /bin/zsh",
+    "usermod -u 1600 user"
+  ],
+  "username": [
+    "useradd -m username",
+    "useradd username"
+  ],
+  "uuid": [
+    "mount UUID=xxx /mnt"
+  ],
+  "v": [
+    "V",
+    "v"
+  ],
+  "valgrind": [
+    "valgrind"
+  ],
+  "value": [
+    "VAR='value'",
+    "echo \"Value: $VAR\""
+  ],
+  "var": [
+    "VAR=$(command)",
+    "VAR='value'"
+  ],
+  "vgdisplay": [
+    "vgdisplay"
+  ],
+  "vgs": [
+    "vgs"
+  ],
+  "vgscan": [
+    "vgscan"
+  ],
+  "vigr": [
+    "vigr"
+  ],
+  "vim": [
+    "$",
+    "*",
+    "/pattern",
+    "0",
+    "10G",
+    "5dd",
+    "5yy",
+    "?pattern",
+    "A",
+    "Ctrl+b",
+    "Ctrl+d",
+    "Ctrl+f",
+    "Ctrl+r",
+    "Ctrl+u",
+    "Ctrl+v",
+    "D",
+    "Esc",
+    "G",
+    "I",
+    "N",
+    "O",
+    "P",
+    "R",
+    "V",
+    "X",
+    "ZQ",
+    "ZZ",
+    "a",
+    "b",
+    "c$",
+    "cat ~/.vimrc",
+    "cc",
+    "cw",
+    "d$",
+    "d0",
+    "dd",
+    "dw",
+    "e",
+    "gT",
+    "gU",
+    "gg",
+    "gt",
+    "gu",
+    "i",
+    "n",
+    "o",
+    "p",
+    "q",
+    "qa",
+    "r",
+    "u",
+    "v",
+    "vim +/pattern",
+    "vim +10 file.txt",
+    "vim -R file.txt",
+    "vim -d file1 file2",
+    "vim -u NONE file.txt",
+    "vim file.txt",
+    "x",
+    "yy"
+  ],
+  "vipw": [
+    "vipw"
+  ],
+  "visudo": [
+    "visudo"
+  ],
+  "vmstat": [
+    "vmstat"
+  ],
+  "volume": [
+    "/dev/sdb",
+    "/dev/sdc",
+    "lvdisplay",
+    "lvmdiskscan",
+    "lvremove",
+    "lvs",
+    "lvscan",
+    "newname",
+    "partycji)",
+    "podman volume",
+    "podman volume create",
+    "podman volume ls",
+    "podman volume prune",
+    "podman volume rm",
+    "pvdisplay",
+    "pvs",
+    "pvscan",
+    "vgdisplay",
+    "vgs",
+    "vgscan"
+  ],
+  "w": [
+    "chmod",
+    "chmod +t dir",
+    "chmod -R 755 dir/",
+    "chmod 1755 dir",
+    "chmod 2755 dir",
+    "chmod 4755 file",
+    "chmod 600 file",
+    "chmod 644 file",
+    "chmod 755 file",
+    "chmod 777 file",
+    "chmod a+r file",
+    "chmod g+s dir",
+    "chmod g-w file",
+    "chmod o-r file",
+    "chmod u+s file",
+    "chmod u+x file",
+    "chmod u=rwx,g=rx,o=r",
+    "chown",
+    "chown -R user:group",
+    "chown :group file",
+    "chown user file",
+    "chown user:group",
+    "dir/",
+    "find / -perm -2000",
+    "find / -perm -4000",
+    "find / -perm -o+w",
+    "katalogu",
+    "ls -Z file",
+    "umask",
+    "w",
+    "w■a■ciciel)",
+    "w■a■ciciela",
+    "w■■czona"
+  ],
+  "wait": [
+    "wait"
+  ],
+  "warn": [
+    "--level=err,warn"
+  ],
+  "wc": [
+    "ls /proc | wc -l"
+  ],
+  "whatprovides": [
+    "dnf whatprovides"
+  ],
+  "wheel": [
+    "usermod -aG wheel"
+  ],
+  "who": [
+    "who"
+  ],
+  "whoami": [
+    "whoami"
+  ],
+  "wifi": [
+    "nmcli radio wifi off"
+  ],
+  "wireshark": [
+    "wireshark"
+  ],
+  "word": [
+    "grep -w 'word' file"
+  ],
+  "wyszukiwanie": [
+    "/dir",
+    "awk '/pattern/' file",
+    "awk 'END{print NR}'",
+    "awk 'NR==5' file",
+    "awk 'NR>=5 &&",
+    "awk '{print $1}'",
+    "awk '{print $NF}'",
+    "awk '{print NF}'",
+    "awk '{sum+=$1}",
+    "awk -F: '{print $1}'",
+    "awk -v FS=':'",
+    "file",
+    "find . ! -name",
+    "find . -atime -1",
+    "find . -ctime -1",
+    "find . -empty",
+    "find . -gid 1000",
+    "find . -group",
+    "find . -iname",
+    "find . -links +1",
+    "find . -maxdepth 2",
+    "find . -mindepth 2",
+    "find . -mmin -60",
+    "find . -mount -name",
+    "find . -mtime +30",
+    "find . -mtime -7",
+    "find . -name",
+    "find . -name '*.log'",
+    "find . -name '*.py'",
+    "find . -name '*.tmp'",
+    "find . -name '*.txt'",
+    "find . -newer",
+    "find . -nogroup",
+    "find . -nouser",
+    "find . -perm -1000",
+    "find . -perm -2000",
+    "find . -perm -4000",
+    "find . -perm -644",
+    "find . -perm /644",
+    "find . -perm 644",
+    "find . -size +100M",
+    "find . -size +1G",
+    "find . -size -10k",
+    "find . -size 512c",
+    "find . -type f -name",
+    "find . -type f -newer",
+    "find . -uid 1000",
+    "find . -user",
+    "find . -xdev -name",
+    "find / -inum 12345",
+    "find / -name",
+    "find / -type b",
+    "find / -type c",
+    "find / -type d -name",
+    "find / -type f -name",
+    "find / -type l",
+    "find /tmp -mtime +7",
+    "grep",
+    "grep 'pattern' file",
+    "grep -A 3 'pattern'",
+    "grep -B 3 'pattern'",
+    "grep -C 3 'pattern'",
+    "grep -E 'pat1|pat2'",
+    "grep -F 'literal'",
+    "grep -P '\\d+' file",
+    "grep -c 'pattern'",
+    "grep -i 'pattern'",
+    "grep -l 'pattern'",
+    "grep -m 5 'pattern'",
+    "grep -n 'pattern'",
+    "grep -o 'pattern'",
+    "grep -q 'pattern'",
+    "grep -r 'pattern'",
+    "grep -v 'pattern'",
+    "grep -w 'word' file",
+    "reference_file",
+    "updatedb"
+  ],
+  "x": [
+    "X",
+    "x"
+  ],
+  "x86_64-efi": [
+    "--target=x86_64-efi"
+  ],
+  "xfs": [
+    "mount -t xfs"
+  ],
+  "xxx": [
+    "mount UUID=xxx /mnt"
+  ],
+  "yes": [
+    "ssh -o BatchMode=yes"
+  ],
+  "ytkownika": [
+    "u■ytkownika"
+  ],
+  "ytkownikami": [
+    "cat /etc/group",
+    "cat /etc/gshadow",
+    "cat /etc/passwd",
+    "cat /etc/shadow",
+    "dniach",
+    "grpck",
+    "id",
+    "last",
+    "lastb",
+    "lastlog",
+    "lslogins",
+    "pwck",
+    "trwa■e)",
+    "user",
+    "useradd -G g1,g2",
+    "useradd -M user",
+    "useradd -N user",
+    "useradd -c 'Imi■",
+    "useradd -d",
+    "useradd -e",
+    "useradd -f 30 user",
+    "useradd -g group",
+    "useradd -m -s",
+    "useradd -m username",
+    "useradd -r sysuser",
+    "useradd -u 1500 user",
+    "useradd username",
+    "usermod -G g1,g2",
+    "usermod -L user",
+    "usermod -U user",
+    "usermod -aG group",
+    "usermod -c 'Nowy",
+    "usermod -d /new/home",
+    "usermod -e",
+    "usermod -e '' user",
+    "usermod -g group",
+    "usermod -l newname",
+    "usermod -s /bin/zsh",
+    "usermod -u 1600 user",
+    "vigr",
+    "vipw",
+    "visudo",
+    "w",
+    "who",
+    "whoami",
+    "zalogowanego"
+  ],
+  "yy": [
+    "yy"
+  ],
+  "zaawansowane": [
+    "100))",
+    "32",
+    "cat /etc/chrony.conf",
+    "date",
+    "echo $((RANDOM %",
+    "echo '3.14 * 2' | bc",
+    "echo file{1..3}.txt",
+    "echo {1..5}",
+    "echo {a,b,c}.log",
+    "gpg",
+    "hwclock"
+  ],
+  "zada": [
+    "/etc/cron.daily",
+    "atq",
+    "batch",
+    "cat /etc/anacrontab",
+    "cat /etc/at.allow",
+    "cat /etc/at.deny",
+    "cat /etc/cron.allow",
+    "cat /etc/cron.deny",
+    "cat /etc/crontab",
+    "cat /etc/systemd/sys",
+    "cat /var/spool/cron/",
+    "list-timers",
+    "ls /etc/cron.d/",
+    "ls /etc/cron.daily/",
+    "ls /etc/cron.hourly/",
+    "ls /etc/cron.weekly/",
+    "myapp.timer",
+    "run-parts",
+    "systemd-run",
+    "tem/myapp.timer",
+    "timer-name.timer"
+  ],
+  "zalogowanego": [
+    "zalogowanego"
+  ],
+  "zapora": [
+    "--add-port=8080/tcp",
+    "--add-service=http",
+    "--add-service=https",
+    "--complete-reload",
+    "--get-active-zones",
+    "--get-default-zone",
+    "--get-zones",
+    "--list-all",
+    "--list-ports",
+    "--list-rich-rules",
+    "--list-services",
+    "--zone=public",
+    "e-port=8080/tcp",
+    "e-service=http",
+    "efault-zone=trusted",
+    "firewall-cmd",
+    "firewall-cmd --add-f",
+    "firewall-cmd --add-p",
+    "firewall-cmd --add-r",
+    "firewall-cmd --remov",
+    "firewall-cmd --runti",
+    "firewall-cmd --set-d",
+    "firewall-cmd --state",
+    "firewalld",
+    "w■■czona"
+  ],
+  "zarz": [
+    "--raid-devices=2",
+    "--scan",
+    "--type=service",
+    "--vacuum-size=500M",
+    "/dev/md0",
+    "/dev/sdd",
+    "Ctrl+C",
+    "Ctrl+D",
+    "Ctrl+Z",
+    "Name'",
+    "aktualizacjami",
+    "cat /etc/group",
+    "cat /etc/gshadow",
+    "cat /etc/mdadm.conf",
+    "cat /etc/passwd",
+    "cat /etc/shadow",
+    "cat /proc/PID/maps",
+    "cat /proc/PID/status",
+    "cat /proc/loadavg",
+    "cat /proc/mdstat",
+    "cat /proc/meminfo",
+    "daemon-reexec",
+    "daemon-reload",
+    "dnf autoremove",
+    "dnf check-update",
+    "dnf clean all",
+    "dnf clean metadata",
+    "dnf clean packages",
+    "dnf config-manager",
+    "dnf distro-sync",
+    "dnf downgrade",
+    "dnf erase package",
+    "dnf groupinfo 'Group",
+    "dnf groupinstall",
+    "dnf grouplist",
+    "dnf groupremove",
+    "dnf history",
+    "dnf history info 5",
+    "dnf history redo 5",
+    "dnf history rollback",
+    "dnf history undo 5",
+    "dnf info package",
+    "dnf install -y",
+    "dnf install package",
+    "dnf list available",
+    "dnf list extras",
+    "dnf list installed",
+    "dnf list obsoletes",
+    "dnf list updates",
+    "dnf makecache",
+    "dnf module disable",
+    "dnf module enable",
+    "dnf module info",
+    "dnf module install m",
+    "dnf module list",
+    "dnf module reset",
+    "dnf provides",
+    "dnf reinstall",
+    "dnf remove package",
+    "dnf repoinfo repo-id",
+    "dnf repolist",
+    "dnf repolist all",
+    "dnf search keyword",
+    "dnf security update",
+    "dnf update",
+    "dnf update package",
+    "dnf updateinfo list",
+    "dnf upgrade",
+    "dnf upgrade-minimal",
+    "dnf whatprovides",
+    "dniach",
+    "emergency.target",
+    "get-default",
+    "group",
+    "grpck",
+    "hostnamectl",
+    "htop",
+    "id",
+    "jobs",
+    "journalctl",
+    "journalctl --since",
+    "journalctl --until",
+    "journalctl -b",
+    "journalctl -b -1",
+    "journalctl -f",
+    "journalctl -f -u",
+    "journalctl -k",
+    "journalctl -n 50",
+    "journalctl -o json",
+    "journalctl -p",
+    "journalctl -p err",
+    "journalctl -u",
+    "last",
+    "lastb",
+    "lastlog",
+    "list-dependencies",
+    "list-unit-files",
+    "localectl",
+    "loginctl",
+    "lslogins",
+    "lsof",
+    "mdadm",
+    "package",
+    "ps",
+    "pstree",
+    "pwck",
+    "rescue.target",
+    "rpm --import",
+    "rpm -Fvh package.rpm",
+    "rpm -K package.rpm",
+    "rpm -Uvh package.rpm",
+    "rpm -V package",
+    "rpm -Va",
+    "rpm -e package",
+    "rpm -ivh package.rpm",
+    "rpm -q --changelog",
+    "rpm -q --scripts",
+    "rpm -qR package",
+    "rpm -qa",
+    "rpm -qc package",
+    "rpm -qd package",
+    "rpm -qf",
+    "rpm -qi package",
+    "rpm -qip package.rpm",
+    "rpm -ql package",
+    "rpm -qp --scripts",
+    "service",
+    "set-default",
+    "subscription-manager",
+    "systemctl",
+    "systemctl --user",
+    "systemctl cat",
+    "systemctl disable",
+    "systemctl edit",
+    "systemctl enable",
+    "systemctl halt",
+    "systemctl hibernate",
+    "systemctl is-active",
+    "systemctl is-enabled",
+    "systemctl is-failed",
+    "systemctl isolate",
+    "systemctl list-units",
+    "systemctl mask",
+    "systemctl poweroff",
+    "systemctl reboot",
+    "systemctl reload",
+    "systemctl restart",
+    "systemctl show",
+    "systemctl show -p",
+    "systemctl start",
+    "systemctl status",
+    "systemctl stop",
+    "systemctl suspend",
+    "systemctl unmask",
+    "systemd-analyze",
+    "timedatectl",
+    "top",
+    "trwa■e)",
+    "uptime",
+    "user",
+    "useradd -G g1,g2",
+    "useradd -M user",
+    "useradd -N user",
+    "useradd -c 'Imi■",
+    "useradd -d",
+    "useradd -e",
+    "useradd -f 30 user",
+    "useradd -g group",
+    "useradd -m -s",
+    "useradd -m username",
+    "useradd -r sysuser",
+    "useradd -u 1500 user",
+    "useradd username",
+    "usermod -G g1,g2",
+    "usermod -L user",
+    "usermod -U user",
+    "usermod -aG docker",
+    "usermod -aG group",
+    "usermod -aG wheel",
+    "usermod -c 'Nowy",
+    "usermod -d /new/home",
+    "usermod -e",
+    "usermod -e '' user",
+    "usermod -g group",
+    "usermod -l newname",
+    "usermod -s /bin/zsh",
+    "usermod -u 1600 user",
+    "u■ytkownika",
+    "vigr",
+    "vipw",
+    "visudo",
+    "w",
+    "wait",
+    "who",
+    "whoami",
+    "zalogowanego"
+  ],
+  "zawarto": [
+    "cat -A file.txt",
+    "cat -n file.txt",
+    "cat file.txt",
+    "cat file1 file2"
+  ],
+  "zdalny": [
+    "4096",
+    "8080:localhost:80",
+    "Checking=no",
+    "ConnectTimeout=10",
+    "cat ~/.ssh/config",
+    "chmod 600 ~/.ssh/aut",
+    "chmod 700 ~/.ssh/",
+    "ed25519",
+    "horized_keys",
+    "ntication=no",
+    "rsync -avz",
+    "rsync -avz -e ssh",
+    "scp",
+    "ssh -A user@host",
+    "ssh -D 1080",
+    "ssh -J jumphost",
+    "ssh -L",
+    "ssh -N -f -L",
+    "ssh -R",
+    "ssh -X user@host",
+    "ssh -i",
+    "ssh -o",
+    "ssh -o BatchMode=yes",
+    "ssh -o PasswordAuthe",
+    "ssh -o PreferredAuth",
+    "ssh -o StrictHostKey",
+    "ssh -p 2222",
+    "ssh -t user@host",
+    "ssh -v user@host",
+    "ssh -vvv user@host",
+    "ssh user@hostname",
+    "ssh-add",
+    "ssh-copy-id",
+    "user@host",
+    "user@hostname",
+    "~/.ssh/id_rsa",
+    "~/.ssh/id_rsa.pub",
+    "~/.ssh/key.pem",
+    "~/.ssh/mykey"
+  ],
+  "zmienne": [
+    "Ctrl+R",
+    "alias",
+    "alias ll='ls -alh'",
+    "cat /etc/bashrc",
+    "cat /etc/profile",
+    "cat ~/.bash_logout",
+    "cat ~/.bash_profile",
+    "cat ~/.bashrc",
+    "complete",
+    "echo $!",
+    "echo $#",
+    "echo $$",
+    "echo $*",
+    "echo $0",
+    "echo $?",
+    "echo $@",
+    "echo $BASH_VERSION",
+    "echo $HISTFILE",
+    "echo $HISTFILESIZE",
+    "echo $HISTSIZE",
+    "echo $PS1",
+    "echo $SHELL",
+    "echo $VARIABLE",
+    "echo ${#ARRAY[@]}",
+    "echo ${ARRAY[0]}",
+    "echo ${ARRAY[@]}",
+    "env",
+    "false",
+    "hash",
+    "history",
+    "ls /etc/profile.d/",
+    "printenv",
+    "set",
+    "source",
+    "true"
+  ],
+  "zq": [
+    "ZQ"
+  ],
+  "zz": [
+    "ZZ"
+  ],
+  "~": [
+    "cd ~"
+  ],
+  "~/.bash_logout": [
+    "cat ~/.bash_logout"
+  ],
+  "~/.bash_profile": [
+    "cat ~/.bash_profile"
+  ],
+  "~/.bashrc": [
+    "cat ~/.bashrc"
+  ],
+  "~/.ssh/": [
+    "chmod 700 ~/.ssh/"
+  ],
+  "~/.ssh/aut": [
+    "chmod 600 ~/.ssh/aut"
+  ],
+  "~/.ssh/config": [
+    "cat ~/.ssh/config"
+  ],
+  "~/.ssh/id_rsa": [
+    "~/.ssh/id_rsa"
+  ],
+  "~/.ssh/id_rsa.pub": [
+    "~/.ssh/id_rsa.pub"
+  ],
+  "~/.ssh/key.pem": [
+    "~/.ssh/key.pem"
+  ],
+  "~/.ssh/mykey": [
+    "~/.ssh/mykey"
+  ],
+  "~/.vimrc": [
+    "cat ~/.vimrc"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema_name": "case_study_manifest",
+  "version": "0.1",
+  "status": "placeholder",
+  "required_fields": [
+    "case_study_id",
+    "canonical_name",
+    "scope",
+    "prohibited_claims"
+  ],
+  "notes": "Initial placeholder only. Do not treat as final validation schema."
+}

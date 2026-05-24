@@ -1,0 +1,31 @@
+{
+  "id": "ls-command",
+  "command": "ls",
+  "description": "Lists directory contents.",
+  "category": "filesystem",
+  "tags": [
+    "directory-listing",
+    "read-only"
+  ],
+  "risk": "low",
+  "os": [
+    "linux",
+    "macos"
+  ],
+  "shell": [
+    "bash",
+    "sh",
+    "zsh"
+  ],
+  "examples": [
+    {
+      "input": "ls -la",
+      "expected_effect": "Prints detailed directory contents including hidden entries."
+    }
+  ],
+  "notes": "Read-only inspection command.",
+  "related_commands": [
+    "find",
+    "stat"
+  ]
+}

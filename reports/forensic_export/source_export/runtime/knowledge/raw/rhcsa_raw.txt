@@ -1,0 +1,3661 @@
+RHCSA COMMAND LIBRARY                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+                                        RHCSA
+                             COMMAND LIBRARY
+                           Kompletna biblioteka komend Linux
+                            Red Hat Certified System Administrator — RHEL 8/9
+
+
+
+
+             2056+                                33                              RHEL 8/9
+                 komend                     sekcji tematycznych                       kompatybilno■■
+
+
+
+                          Przygotowane dla kandydatów na egzamin RHCSA EX200
+
+
+
+
+Biblioteka komend RHCSA                                                                                     Strona 1
+RHCSA COMMAND LIBRARY                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+Spis Tre■ci
+#      Sekcja                                                                             Komend
+
+1      ■ Nawigacja po systemie plików                                                        39
+
+2      ■ Operacje na plikach i katalogach                                                    43
+
+3      ■■ Przegl■danie zawarto■ci plików                                                     37
+
+4      ■ Wyszukiwanie i filtrowanie tekstu                                                   71
+
+5      ■ Uprawnienia i w■asno■■ plików                                                       42
+
+6      ■ Zarz■dzanie u■ytkownikami                                                           79
+
+7      ■ Zarz■dzanie grupami                                                                 16
+
+8      ■■ Zarz■dzanie procesami                                                              75
+
+9      ■ Systemd i zarz■dzanie us■ugami                                                      74
+
+10     ■ Zarz■dzanie pakietami (DNF/RPM)                                                     81
+
+11     ■ Sie■ — konfiguracja i diagnostyka                                                   111
+
+12     ■ Zapora ogniowa (firewalld)                                                          47
+
+13     ■■ SELinux                                                                            64
+
+14     ■ Przechowywanie danych — dyski i partycje                                            49
+
+15     ■ LVM — Logical Volume Manager                                                        59
+
+16     ■■ Systemy plików i montowanie                                                        67
+
+17     ■■ Archiwizacja i kompresja                                                           54
+
+18     ■ SSH i dost■p zdalny                                                                 56
+
+19     ■ Cron i harmonogramowanie zada■                                                      50
+
+20     ■ Logowanie i monitorowanie systemu                                                   68
+
+21     ■ Boot i GRUB                                                                         69
+
+22     ■ NFS i Autofs                                                                        35
+
+23     ■ Kontenery Podman                                                                    114
+
+24     ■ Informacje o systemie                                                               60
+
+25     ■ Zmienne ■rodowiskowe i pow■oka                                                      80
+
+26     ■ Wyszukiwanie plików                                                                 57
+
+27     ✏■ Edytor Vim                                                                         115
+
+28     ■ Diagnostyka i narz■dzia systemowe                                                   61
+
+29     ■ Skrypty bash — podstawy                                                             104
+
+
+
+
+Biblioteka komend RHCSA                                                                     Strona 2
+RHCSA COMMAND LIBRARY                           RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+30     ■ Zaawansowane narz■dzia tekstowe                                                 68
+
+31     ■ Zarz■dzanie dyskami RAID                                                        20
+
+32     ■■ Samba i NFS (klient)                                                           18
+
+33     ■■ Dodatkowe narz■dzia administracyjne                                            73
+
+
+
+
+Biblioteka komend RHCSA                                                                 Strona 3
+RHCSA COMMAND LIBRARY                                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+■ 1. Nawigacja po systemie plików                                                                                     39 komend
+
+
+pwd                       Wy■wietl bie■■cy katalog roboczy         tree                       Wy■wietl struktur■ katalogów jako
+                                                                                              drzewo
+
+ls                        Lista plików w katalogu                  tree -L 2                  Drzewo z ograniczeniem g■■boko■ci
+                                                                                              do 2
+
+ls -l                     Lista szczegó■owa (uprawnienia,          tree -a                    Drzewo z ukrytymi plikami
+                          w■a■ciciel, rozmiar)
+
+ls -la                    Lista szczegó■owa z ukrytymi plikami     tree -d                    Poka■ tylko katalogi w drzewie
+
+ls -lh                    Lista z rozmiarem w formacie czytelnym   file /path/to/file         Okre■l typ pliku
+                          dla cz■owieka
+
+ls -lt                    Sortuj pliki wed■ug czasu modyfikacji    stat /path/to/file         Szczegó■owe informacje o pliku
+                                                                                              (i-w■ze■, czas)
+
+ls -lS                    Sortuj pliki wed■ug rozmiaru             readlink -f /path          Wy■wietl pe■n■ ■cie■k■
+                                                                                              (rozwi■zuj■c dowi■zania)
+
+ls -R                     Rekurencyjna lista podkatalogów          realpath /path             Wy■wietl bezwzgl■dn■ ■cie■k■ do
+                                                                                              pliku
+
+ls -d */                  Wy■wietl tylko katalogi                  basename                   Wytnij nazw■ pliku ze ■cie■ki
+                                                                   /path/to/file
+
+ls -i                     Wy■wietl numery i-w■z■ów                 dirname                    Wytnij katalog ze ■cie■ki
+                                                                   /path/to/file
+
+ls --color=auto           Kolorowe wyj■cie ls                      which command              Wy■wietl pe■n■ ■cie■k■ do
+                                                                                              wykonywalnego polecenia
+
+cd /path/to/dir           Zmie■ katalog na podany                  whereis command            Znajd■ plik binarny, ■ród■o i man dla
+                                                                                              polecenia
+
+cd ~                      Przejd■ do katalogu domowego             type command               Poka■ jak pow■oka interpretuje
+                                                                                              polecenie
+
+cd -                      Przejd■ do poprzedniego katalogu         echo $PATH                 Wy■wietl zmienn■ PATH
+
+cd ..                     Przejd■ o jeden poziom wy■ej             echo $HOME                 Wy■wietl katalog domowy u■ytkownika
+
+cd ../..                  Przejd■ dwa poziomy wy■ej                echo $PWD                  Wy■wietl bie■■cy katalog roboczy
+
+cd /                      Przejd■ do katalogu g■ównego             echo $OLDPWD               Wy■wietl poprzedni katalog roboczy
+
+pushd /path               Zapisz bie■■cy katalog i przejd■ do      ls /etc | head -20         Pierwsze 20 plików z /etc
+                          podanego
+
+popd                      Wró■ do zapisanego katalogu (ze          ls /proc | wc -l           Policz pliki w /proc
+                          stosu)
+
+dirs                      Wy■wietl stos katalogów (pushd/popd)
+
+
+
+
+■ 2. Operacje na plikach i katalogach                                                                                 43 komend
+
+
+touch file.txt            Utwórz pusty plik lub zaktualizuj jego   mkdir dirname              Utwórz nowy katalog
+                          czas
+
+touch -t                  Ustaw czas pliku na konkretn■ dat■       mkdir -p a/b/c             Utwórz katalog z ca■■ ■cie■k■
+202301011200 file                                                                             nadrz■dn■
+
+touch -d                  Ustaw czas pliku na podan■ dat■          mkdir -m 755 dirname       Utwórz katalog z podanymi
+'2023-01-01' file                                                                             uprawnieniami
+
+cp source dest            Kopiuj plik                              mkdir -v dirname           Tryb gadatliwy przy tworzeniu katalogu
+
+cp -r src/ dst/           Kopiuj katalog rekurencyjnie             rmdir dirname              Usu■ pusty katalog
+
+
+
+
+Biblioteka komend RHCSA                                                                                                        Strona 4
+RHCSA COMMAND LIBRARY                                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+cp -p src dst             Kopiuj z zachowaniem uprawnie■ i         rmdir -p a/b/c             Usu■ pusty katalog i jego puste rodzice
+                          czasu
+
+cp -a src/ dst/           Kopiuj archiwum (zachowaj wszystkie      ln file link               Utwórz twarde dowi■zanie
+                          atrybuty)
+
+cp -i src dst             Pytaj przed nadpisaniem                  ln -s target link          Utwórz symboliczne dowi■zanie
+
+cp -u src dst             Kopiuj tylko gdy ■ród■o jest nowsze      ln -sf target link         Wymu■ nadpisanie dowi■zania
+                                                                                              symbolicznego
+
+cp -v src dst             Tryb gadatliwy — poka■ kopiowane         unlink file                Usu■ dowi■zanie do pliku
+                          pliki
+
+cp --backup src dst       Utwórz kopi■ zapasow■ przed              install -m 644 src         Kopiuj plik i ustaw uprawnienia
+                          nadpisaniem                              dst
+
+mv source dest            Przenie■ lub zmie■ nazw■ pliku           install -d /path/dir       Utwórz katalog poleceniem install
+
+mv -i src dst             Pytaj przed nadpisaniem przy             rsync -av src/ dst/        Synchronizuj pliki (lokalne)
+                          przenoszeniu
+
+mv -u src dst             Przenie■ tylko je■li ■ród■o nowsze       rsync -avz src/            Synchronizuj pliki przez SSH
+                                                                   user@host:dst/
+
+mv -v src dst             Tryb gadatliwy przy przenoszeniu         rsync --delete src/        Usu■ pliki w dst których nie ma w src
+                                                                   dst/
+
+mv -n src dst             Nie nadpisuj istniej■cych plików         rsync -n src/ dst/         Suchy przebieg rsync (podgl■d zmian)
+
+rm file.txt               Usu■ plik                                rsync                      Synchronizuj z wykluczeniem wzorca
+                                                                   --exclude='*.log'
+                                                                   src/ dst/
+
+rm -f file.txt            Wymu■ usuni■cie (bez pytania)            shred -u file              Bezpieczne usuni■cie pliku
+                                                                                              (nadpisanie)
+
+rm -r dir/                Usu■ katalog rekurencyjnie               truncate -s 0 file         Wytrzyj zawarto■■ pliku (zostaw pusty)
+
+rm -rf dir/               Wymu■ rekurencyjne usuni■cie             fallocate -l 1G file       Utwórz plik o podanym rozmiarze
+                          katalogu
+
+rm -i file                Pytaj przed ka■dym usuni■ciem            dd if=/dev/zero            Utwórz plik 10MB zerami
+                                                                   of=file bs=1M
+                                                                   count=10
+
+rm -v file                Tryb gadatliwy — poka■ usuwane pliki
+
+
+
+
+■■ 3. Przegl■danie zawarto■ci plików                                                                                   37 komend
+
+
+cat file.txt              Wy■wietl zawarto■■ pliku                 wc -l file.txt             Policz linie w pliku
+
+cat -n file.txt           Wy■wietl z numerami linii                wc -w file.txt             Policz s■owa w pliku
+
+cat -A file.txt           Poka■ znaki specjalne (CR, tabulatory)   wc -c file.txt             Policz bajty w pliku
+
+cat file1 file2           Po■■cz i wy■wietl dwa pliki              wc -m file.txt             Policz znaki w pliku
+
+tac file.txt              Wy■wietl plik w odwrotnej kolejno■ci     od -x file                 Zrzut hex pliku binarnego
+                          linii
+
+less file.txt             Przegl■daj plik stronicami (q —          hexdump -C file            Zrzut hex z kolumn■ ASCII
+                          wyj■cie)
+
+less +G file.txt          Otwórz less na ko■cu pliku               xxd file                   Interaktywny podgl■d hex
+
+less +/pattern file       Otwórz less i szukaj wzorca              strings file               Wyodr■bnij czytelne ■a■cuchy z pliku
+                                                                                              binarnego
+
+more file.txt             Przegl■daj plik stronicami (przód)       nl file.txt                Numeruj linie pliku
+
+head file.txt             Pierwsze 10 linii pliku                  nl -ba file.txt            Numeruj wszystkie linie (w tym puste)
+
+
+
+
+Biblioteka komend RHCSA                                                                                                         Strona 5
+RHCSA COMMAND LIBRARY                                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+head -n 20 file.txt       Pierwsze 20 linii pliku                   fold -w 80 file.txt       Zawijaj linie do 80 znaków
+
+head -c 100 file.txt      Pierwsze 100 bajtów pliku                 fmt -w 72 file.txt        Formatuj tekst do 72 znaków
+                                                                                              szeroko■ci
+
+tail file.txt             Ostatnie 10 linii pliku                   col -x file.txt           Usu■ znaki steruj■ce ruchu kursora
+
+tail -n 20 file.txt       Ostatnie 20 linii pliku                   expand file.txt           Zamie■ tabulatory na spacje
+
+tail -f file.txt          ■led■ plik na bie■■co (logi)              unexpand file.txt         Zamie■ spacje na tabulatory
+
+tail -F file.txt          ■led■ plik (nawet gdy zostanie            column -t file.txt        Wyrównaj kolumny tabelaryczne
+                          obrócony)
+
+tail -c 200 file.txt      Ostatnie 200 bajtów pliku                 pr file.txt               Sformatuj plik do druku (strony,
+                                                                                              nag■ówki)
+
+tail -n +5 file.txt       Wy■wietl od 5. linii do ko■ca             rev file.txt              Odwró■ ka■d■ lini■ pliku
+
+wc file.txt               Liczba linii, s■ów i bajtów w pliku
+
+
+
+
+■ 4. Wyszukiwanie i filtrowanie tekstu                                                                                     71 komend
+
+
+grep 'pattern' file       Szukaj wzorca w pliku                     sed '5,10d' file          Usu■ linie 5-10
+
+grep -i 'pattern'         Szukaj bez rozró■niania wielko■ci liter   sed '/pattern/d'          Usu■ linie pasuj■ce do wzorca
+file                                                                file
+
+grep -r 'pattern'         Rekurencyjne szukanie w katalogu          sed 's/^/prefix/'         Dodaj prefix do ka■dej linii
+/dir                                                                file
+
+grep -v 'pattern'         Wiersze NIE pasuj■ce do wzorca            sed 's/$/ suffix/'        Dodaj suffix do ka■dej linii
+file                                                                file
+
+grep -n 'pattern'         Poka■ numery linii pasuj■cych wierszy     sed '/^$/d' file          Usu■ puste linie
+file
+
+grep -c 'pattern'         Policz linie pasuj■ce do wzorca           sed -n                    Wydrukuj blok mi■dzy wzorcami
+file                                                                '/start/,/end/p'
+                                                                    file
+
+grep -l 'pattern'         Wylistuj pliki zawieraj■ce wzorzec        sed '1d' file             Usu■ pierwsz■ lini■
+/dir/*
+
+grep -w 'word' file       Szukaj ca■ych s■ów                        sed '$d' file             Usu■ ostatni■ lini■
+
+grep -A 3 'pattern'       Poka■ 3 linie po dopasowaniu              sort file.txt             Sortuj linie alfabetycznie
+file
+
+grep -B 3 'pattern'       Poka■ 3 linie przed dopasowaniem          sort -n file.txt          Sortuj numerycznie
+file
+
+grep -C 3 'pattern'       Poka■ 3 linie wokó■ dopasowania           sort -r file.txt          Sortuj odwrotnie
+file
+
+grep -E 'pat1|pat2'       Szukaj rozszerzonego wyra■enia            sort -k2 file.txt         Sortuj po 2. kolumnie
+file                      regularnego
+
+grep -P '\d+' file        Szukaj wyra■e■ regularnych Perl           sort -t: -k3 -n           Sortuj /etc/passwd po UID
+                          (PCRE)                                    /etc/passwd
+
+grep -o 'pattern'         Wy■wietl tylko dopasowane fragmenty       sort -u file.txt          Sortuj i usu■ duplikaty
+file
+
+grep -m 5 'pattern'       Zatrzymaj po 5 dopasowaniach              sort -h file.txt          Sortuj rozmiary czytelne dla cz■owieka
+file
+
+grep -q 'pattern'         Cichy tryb (tylko kod wyj■cia)            uniq file.txt             Usu■ s■siaduj■ce duplikaty
+file
+
+grep -F 'literal'         Szukaj dos■ownego tekstu (bez regex)      uniq -c file.txt          Policz powtórzenia
+file
+
+
+
+
+Biblioteka komend RHCSA                                                                                                          Strona 6
+RHCSA COMMAND LIBRARY                                                            RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+grep                      Szukaj tylko w plikach .conf          uniq -d file.txt           Poka■ tylko duplikaty
+--include='*.conf'
+-r 'pat' /
+
+grep                      Pomi■ pliki .log przy szukaniu        uniq -u file.txt           Poka■ tylko unikalne linie
+--exclude='*.log' -r
+'pat' /
+
+egrep 'pat1|pat2'         Skrót dla grep -E                     cut -d: -f1                Wytnij pole 1 z separatorem :
+file                                                            /etc/passwd
+
+fgrep 'literal' file      Skrót dla grep -F                     cut -c1-10 file.txt        Wytnij znaki 1-10 z ka■dej linii
+
+awk '{print $1}'          Wydrukuj pierwsze pole ka■dej linii   cut -f2,4 file.tsv         Wytnij pola 2 i 4 (TSV)
+file
+
+awk -F: '{print $1}'      Pola z separatorem :                  paste file1 file2          Scal pliki kolumnami
+/etc/passwd
+
+awk 'NR==5' file          Wydrukuj 5. lini■ pliku               paste -d, file1            Scal z separatorem ,
+                                                                file2
+
+awk 'NR>=5 &&             Linie od 5 do 10                      join file1 file2           Z■■cz pliki po wspólnym polu
+NR<=10' file
+
+awk '/pattern/' file      Wydrukuj linie pasuj■ce do wzorca     comm file1 file2           Porównaj dwa posortowane pliki
+
+awk '{sum+=$1}            Sumuj pierwsz■ kolumn■                diff file1 file2           Poka■ ró■nice mi■dzy plikami
+END{print sum}' file
+
+awk '{print NF}'          Policz pola w ka■dej linii            diff -u file1 file2        Ró■nice w formacie unified (patch)
+file
+
+awk 'END{print NR}'       Policz linie w pliku                  diff -r dir1/ dir2/        Porównaj katalogi rekurencyjnie
+file
+
+awk '{print $NF}'         Wydrukuj ostatnie pole ka■dej linii   tr 'a-z' 'A-Z'             Zamie■ ma■e litery na du■e
+file
+
+awk -v FS=':'             Ustaw separator w awk                 tr -d ' '                  Usu■ znaki CR (DOS -> Unix)
+'{print $1}' file
+
+sed 's/old/new/'          Zamie■ pierwsze wyst■pienie w         tr -s ' '                  Usu■ powtarzaj■ce si■ spacje
+file                      ka■dej linii
+
+sed 's/old/new/g'         Zamie■ wszystkie wyst■pienia          tr -dc 'a-zA-Z0-9'         Zostaw tylko alfanumeryczne
+file
+
+sed -i 's/old/new/g'      Zamie■ w pliku (edycja w miejscu)     tee output.txt             Kopiuj stdin do pliku i stdout
+file
+
+sed -i.bak                Edycja z kopi■ zapasow■ .bak          tee -a output.txt          Do■■cz do pliku (nie nadpisuj)
+'s/old/new/g' file
+
+sed -n '5,10p' file       Wydrukuj linie 5-10
+
+
+
+
+■ 5. Uprawnienia i w■asno■■ plików                                                                                   42 komend
+
+
+chmod 755 file            Ustaw uprawnienia rwxr-xr-x           chown                      Skopiuj w■a■ciciela z innego pliku
+                                                                --reference=ref file
+
+chmod 644 file            Ustaw uprawnienia rw-r--r--           chgrp group file           Zmie■ grup■ pliku
+
+chmod 600 file            Ustaw uprawnienia rw------- (tylko    chgrp -R group dir/        Rekurencyjnie zmie■ grup■
+                          w■a■ciciel)
+
+chmod 777 file            Ustaw pe■ne uprawnienia               umask                      Wy■wietl bie■■c■ mask■ uprawnie■
+                          (niebezpieczne)
+
+chmod u+x file            Dodaj prawo wykonania dla             umask 022                  Ustaw mask■ uprawnie■ (pliki 644,
+                          w■a■ciciela                                                      katalogi 755)
+
+
+
+
+Biblioteka komend RHCSA                                                                                                       Strona 7
+RHCSA COMMAND LIBRARY                                                              RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+chmod g-w file            Usu■ prawo zapisu dla grupy             umask 027                  Ustaw mask■ (pliki 640, katalogi 750)
+
+chmod o-r file            Usu■ prawo odczytu dla innych           umask -S                   Wy■wietl mask■ w formacie
+                                                                                             symbolicznym
+
+chmod a+r file            Dodaj prawo odczytu dla wszystkich      getfacl file               Wy■wietl rozszerzone ACL pliku
+
+chmod u=rwx,g=rx,o=r      Ustaw konkretne uprawnienia             setfacl -m                 Dodaj ACL dla u■ytkownika
+file                      symboliczne                             u:user:rwx file
+
+chmod -R 755 dir/         Rekurencyjnie ustaw uprawnienia w       setfacl -m                 Dodaj ACL dla grupy
+                          katalogu                                g:group:rx file
+
+chmod                     Skopiuj uprawnienia z innego pliku      setfacl -m o::r file       Ustaw ACL dla innych
+--reference=ref file
+
+chmod 4755 file           Ustaw bit SUID (uruchom jako            setfacl -x u:user          Usu■ ACL dla u■ytkownika
+                          w■a■ciciel)                             file
+
+chmod 2755 dir            Ustaw bit SGID (nowe pliki dziedzicz■   setfacl -b file            Usu■ wszystkie ACL z pliku
+                          grup■)
+
+chmod 1755 dir            Ustaw sticky bit (tylko w■a■ciciel      setfacl -R -m              Rekurencyjnie ustaw ACL
+                          mo■e usuwa■)                            u:user:rX dir/
+
+chmod +t dir              Ustaw sticky bit na katalogu            setfacl -d -m              Ustaw domy■lne ACL dla katalogu
+                                                                  u:user:rwx dir/
+
+chmod u+s file            Ustaw SUID na pliku                     getfacl dir1 |             Kopiuj ACL mi■dzy katalogami
+                                                                  setfacl --set-file=-
+                                                                  dir2
+
+chmod g+s dir             Ustaw SGID na katalogu                  ls -Z file                 Poka■ kontekst SELinux pliku
+
+chown user file           Zmie■ w■a■ciciela pliku                 stat -c '%A %U %G'         Wy■wietl uprawnienia, w■a■ciciela,
+                                                                  file                       grup■
+
+chown user:group          Zmie■ w■a■ciciela i grup■               find / -perm -4000         Znajd■ pliki z bitem SUID
+file                                                              2>/dev/null
+
+chown :group file         Zmie■ tylko grup■ pliku                 find / -perm -2000         Znajd■ pliki z bitem SGID
+                                                                  2>/dev/null
+
+chown -R user:group       Rekurencyjnie zmie■ w■a■ciciela         find / -perm -o+w          Znajd■ pliki zapisywalne przez innych
+dir/                                                              2>/dev/null
+
+
+
+
+■ 6. Zarz■dzanie u■ytkownikami                                                                                      79 komend
+
+
+useradd username          Utwórz nowego u■ytkownika               chage -M 90 user           Ustaw max wa■no■■ has■a na 90 dni
+
+useradd -m username       Utwórz u■ytkownika z katalogiem         chage -m 7 user            Ustaw min wa■no■■ has■a na 7 dni
+                          domowym
+
+useradd -m -s             Utwórz z pow■ok■ bash                   chage -W 14 user           Ostrze■enie 14 dni przed
+/bin/bash user                                                                               wyga■ni■ciem
+
+useradd -u 1500 user      Utwórz z konkretnym UID                 chage -I 30 user           Nieaktywno■■ 30 dni po wyga■ni■ciu
+
+useradd -g group          Utwórz z podstawow■ grup■               chage -E 2025-12-31        Ustaw dat■ wyga■ni■cia konta
+user                                                              user
+
+useradd -G g1,g2          Utwórz z dodatkowymi grupami            chage -E -1 user           Usu■ wyga■ni■cie konta
+user                                                                                         (bezterminowe)
+
+useradd -d                Utwórz z niestandardowym katalogiem     chage -d 0 user            Wymu■ zmian■ has■a przy
+/home/custom user         domowym                                                            nast■pnym logowaniu
+
+useradd -c 'Imi■          Utwórz z komentarzem (GECOS)            id user                    Wy■wietl UID, GID i grupy
+Nazwisko' user                                                                               u■ytkownika
+
+useradd -e                Utwórz z dat■ wyga■ni■cia konta         id                         Wy■wietl UID, GID bie■■cego
+2024-12-31 user                                                                              u■ytkownika
+
+
+
+
+Biblioteka komend RHCSA                                                                                                     Strona 8
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+useradd -f 30 user        Ustaw nieaktywno■■ konta po 30         whoami                     Wy■wietl bie■■c■ nazw■
+                          dniach                                                            u■ytkownika
+
+useradd -r sysuser        Utwórz konto systemowe                 who                        Kto jest zalogowany w systemie
+
+useradd -M user           Nie twórz katalogu domowego            w                          Kto jest zalogowany i co robi
+
+useradd -N user           Nie twórz grupy o nazwie u■ytkownika   last                       Historia logowa■ u■ytkowników
+
+usermod -l newname        Zmie■ nazw■ u■ytkownika                lastlog                    Ostatnie logowanie ka■dego
+user                                                                                        u■ytkownika
+
+usermod -d /new/home      Zmie■ katalog domowy                   lastb                      Nieudane próby logowania
+user
+
+usermod -d /new/home      Zmie■ i przenie■ katalog domowy        finger user                Informacje o u■ytkowniku
+-m user
+
+usermod -s /bin/zsh       Zmie■ pow■ok■ logowania                su - user                  Prze■■cz na innego u■ytkownika
+user                                                                                        (pe■ne ■rodowisko)
+
+usermod -u 1600 user      Zmie■ UID u■ytkownika                  su -c 'cmd' user           Wykonaj polecenie jako inny
+                                                                                            u■ytkownik
+
+usermod -g group          Zmie■ podstawow■ grup■                 sudo command               Wykonaj polecenie z prawami root
+user
+
+usermod -G g1,g2          Ustaw dodatkowe grupy (zast■p)         sudo -u user command       Wykonaj polecenie jako konkretny
+user                                                                                        u■ytkownik
+
+usermod -aG group         Dodaj do dodatkowej grupy              sudo -i                    Interaktywna pow■oka root (sudo)
+user
+
+usermod -c 'Nowy          Zmie■ komentarz GECOS                  sudo -l                    Wy■wietl dozwolone polecenia sudo
+komentarz' user
+
+usermod -e                Zmie■ dat■ wyga■ni■cia                 sudo -k                    Uniewa■nij token sudo (wyloguj)
+2025-01-01 user
+
+usermod -L user           Zablokuj konto u■ytkownika             visudo                     Edytuj bezpiecznie plik sudoers
+
+usermod -U user           Odblokuj konto u■ytkownika             cat /etc/passwd            Wy■wietl plik passwd (wszyscy
+                                                                                            u■ytkownicy)
+
+usermod -e '' user        Usu■ dat■ wyga■ni■cia (konto           cat /etc/shadow            Wy■wietl plik shadow (has■a —
+                          trwa■e)                                                           wymaga root)
+
+userdel user              Usu■ u■ytkownika (zachowaj katalog     cat /etc/group             Wy■wietl plik z grupami
+                          domowy)
+
+userdel -r user           Usu■ u■ytkownika i jego katalog        cat /etc/gshadow           Wy■wietl plik gshadow
+                          domowy
+
+userdel -f user           Wymu■ usuni■cie nawet                  getent passwd user         Pobierz wpis u■ytkownika (te■ z
+                          zalogowanego                                                      LDAP/NIS)
+
+passwd user               Zmie■ has■o u■ytkownika                getent group               Pobierz wpis grupy
+                                                                 groupname
+
+passwd -l user            Zablokuj has■o u■ytkownika             vipw                       Bezpiecznie edytuj /etc/passwd
+
+passwd -u user            Odblokuj has■o u■ytkownika             vigr                       Bezpiecznie edytuj /etc/group
+
+passwd -d user            Usu■ has■o (konto bez has■a)           pwck                       Sprawd■ spójno■■ pliku /etc/passwd
+
+passwd -e user            Wymu■ zmian■ has■a przy                grpck                      Sprawd■ spójno■■ pliku /etc/group
+                          nast■pnym logowaniu
+
+passwd -n 7 user          Min. 7 dni mi■dzy zmianami has■a       newgrp group               Zmie■ bie■■c■ grup■ w sesji
+
+passwd -x 90 user         Max. 90 dni wa■no■ci has■a             sg group -c 'cmd'          Wykonaj polecenie z uprawnieniami
+                                                                                            grupy
+
+passwd -w 14 user         Ostrze■enie 14 dni przed               groups user                Wy■wietl grupy u■ytkownika
+                          wyga■ni■ciem
+
+
+
+
+Biblioteka komend RHCSA                                                                                                       Strona 9
+RHCSA COMMAND LIBRARY                                                            RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+passwd -i 10 user         Konto nieaktywne 10 dni po             lslogins                  Lista kont u■ytkowników w systemie
+                          wyga■ni■ciu
+
+passwd --status user      Wy■wietl status has■a u■ytkownika      lslogins -u               Lista tylko kont u■ytkowników (nie
+                                                                                           system)
+
+chage -l user             Wy■wietl informacje o wyga■ni■ciu
+                          has■a
+
+
+
+
+■ 7. Zarz■dzanie grupami                                                                                            16 komend
+
+
+groupadd groupname        Utwórz now■ grup■                      gpasswd -A user           Ustaw administratora grupy
+                                                                 group
+
+groupadd -g 1500          Utwórz grup■ z konkretnym GID          gpasswd -M u1,u2          Ustaw list■ cz■onków grupy
+group                                                            group
+
+groupadd -r sysgroup      Utwórz grup■ systemow■                 gpasswd -r group          Usu■ has■o grupy
+
+groupmod -n newname       Zmie■ nazw■ grupy                      gpasswd group             Ustaw has■o grupy
+group
+
+groupmod -g 1600          Zmie■ GID grupy                        usermod -aG wheel         Dodaj do grupy wheel (sudo)
+group                                                            user
+
+groupdel groupname        Usu■ grup■                             usermod -aG docker        Dodaj do grupy docker
+                                                                 user
+
+gpasswd -a user           Dodaj u■ytkownika do grupy             getent group group        Wy■wietl informacje o grupie
+group
+
+gpasswd -d user           Usu■ u■ytkownika z grupy               lid -g group              Lista cz■onków grupy (package:
+group                                                                                      libuser)
+
+
+
+
+■■ 8. Zarz■dzanie procesami                                                                                         75 komend
+
+
+ps                        Wy■wietl procesy bie■■cej pow■oki      Ctrl+Z                    Wstrzymaj bie■■cy proces
+
+ps aux                    Wszystkie procesy wszystkich           Ctrl+C                    Zako■cz bie■■cy proces
+                          u■ytkowników
+
+ps -ef                    Pe■ne informacje o procesach (format   Ctrl+D                    Wy■lij EOF / wyloguj z pow■oki
+                          BSD)
+
+ps -u user                Procesy konkretnego u■ytkownika        wait                      Czekaj na zako■czenie zada■ w tle
+
+ps --forest               Poka■ procesy jako drzewo              wait PID                  Czekaj na zako■czenie konkretnego
+                                                                                           procesu
+
+ps -p PID                 Informacje o konkretnym procesie       nice -n 10 command        Uruchom komend■ z ni■szym
+                                                                                           priorytetem (niceness)
+
+ps -o pid,ppid,cmd,%      Wybrane kolumny wyj■cia ps             nice -n -10 command       Uruchom z wy■szym priorytetem (root)
+mem,%cpu
+
+ps aux --sort=-%cpu       Sortuj procesy po u■yciu CPU           renice -n 5 -p PID        Zmie■ priorytet dzia■aj■cego procesu
+
+ps aux --sort=-%mem       Sortuj procesy po u■yciu pami■ci       renice -n 5 -u user       Zmie■ priorytet procesów u■ytkownika
+
+ps -eo pid,user,cmd       Znajd■ procesy SSH                     ionice -c 3 command       Uruchom z klas■ I/O idle
+| grep ssh
+
+pstree                    Wy■wietl drzewo procesów               ionice -c 2 -n 0          Uruchom z klas■ I/O best-effort/wysoki
+                                                                 command
+
+pstree -p                 Drzewo procesów z PID-ami              lsof                      Lista otwartych plików
+
+pstree -u                 Drzewo procesów z w■a■cicielami        lsof -u user              Otwarte pliki u■ytkownika
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 10
+RHCSA COMMAND LIBRARY                                                            RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+top                       Interaktywny monitor procesów         lsof -p PID                Otwarte pliki procesu
+
+top -u user               Monitor procesów konkretnego          lsof /path/to/file         Które procesy maj■ otwarty plik
+                          u■ytkownika
+
+top -p PID                Monitoruj konkretny proces            lsof -i :80                Procesy nas■uchuj■ce na porcie 80
+
+top -bn1                  Jednorazowy (batch) zrzut stanu       lsof -i tcp                Wszystkie po■■czenia TCP
+                          procesów
+
+htop                      Ulepszony interaktywny monitor        lsof -i udp                Wszystkie po■■czenia UDP
+                          (wymaga instalacji)
+
+kill PID                  Wy■lij sygna■ SIGTERM do procesu      lsof +D /dir               Otwarte pliki w katalogu
+
+kill -9 PID               Wymu■ zako■czenie procesu             fuser /path/to/file        Poka■ procesy u■ywaj■ce pliku
+                          (SIGKILL)
+
+kill -15 PID              Wy■lij SIGTERM (domy■lny kill)        fuser -k                   Zako■cz procesy u■ywaj■ce pliku
+                                                                /path/to/file
+
+kill -HUP PID             Prze■aduj konfiguracj■ procesu        fuser -v                   Gadatliwy tryb fuser
+                          (SIGHUP)                              /path/to/file
+
+kill -STOP PID            Wstrzymaj proces                      strace command             ■led■ wywo■ania systemowe
+                                                                                           programu
+
+kill -CONT PID            Wznów wstrzymany proces               strace -p PID              ■led■ wywo■ania dzia■aj■cego
+                                                                                           procesu
+
+killall procname          Zako■cz procesy po nazwie             ltrace command             ■led■ wywo■ania bibliotek
+
+killall -9 procname       Wymu■ zako■czenie po nazwie           time command               Zmierz czas wykonania polecenia
+
+pkill procname            Wy■lij sygna■ do procesów po nazwie   timeout 10 command         Uruchom komend■ z limitem 10
+                                                                                           sekund
+
+pkill -u user             Zako■cz wszystkie procesy             watch -n 2 'ps aux'        Od■wie■aj wyj■cie co 2 sekundy
+                          u■ytkownika
+
+pkill -9 -u user          Wymu■ zako■czenie procesów            vmstat 1                   Statystyki maszyny wirtualnej co
+                          u■ytkownika                                                      sekund■
+
+pidof procname            Znajd■ PID procesu po nazwie          vmstat -s                  Podsumowanie statystyk systemu
+
+pgrep procname            Znajd■ PID po nazwie (wzorzec)        uptime                     Czas dzia■ania systemu i load average
+
+pgrep -u user             PID-y procesów u■ytkownika            free -h                    U■ycie pami■ci RAM i swap
+
+pgrep -l procname         PID i nazwa pasuj■cych procesów       free -m                    U■ycie pami■ci w megabajtach
+
+jobs                      Lista zada■ w tle bie■■cej pow■oki    cat /proc/PID/status       Status procesu z /proc
+
+bg %1                     Wy■lij zatrzymane zadanie w t■o       cat /proc/PID/maps         Mapy pami■ci procesu
+
+fg %1                     Przywró■ zadanie z t■a na pierwszy    cat /proc/loadavg          Load average systemu
+                          plan
+
+nohup command &           Uruchom komend■ odporn■ na            cat /proc/meminfo          Szczegó■owe informacje o pami■ci
+                          hangup
+
+command &                 Uruchom komend■ w tle
+
+
+
+
+■ 9. Systemd i zarz■dzanie us■ugami                                                                                   74 komend
+
+
+systemctl status          Status us■ugi                         systemctl show             W■a■ciwo■ci jednostki systemd
+service                                                         service
+
+systemctl start           Uruchom us■ug■                        systemctl show -p          Konkretna w■a■ciwo■■
+service                                                         ActiveState service
+
+systemctl stop            Zatrzymaj us■ug■                      systemd-analyze            Czas uruchamiania systemu
+service
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 11
+RHCSA COMMAND LIBRARY                                                              RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+systemctl restart         Zrestartuj us■ug■                        systemd-analyze           Czas uruchamiania ka■dej us■ugi
+service                                                            blame
+
+systemctl reload          Prze■aduj konfiguracj■ us■ugi            systemd-analyze           Krytyczna ■cie■ka uruchamiania
+service                                                            critical-chain
+
+systemctl enable          W■■cz us■ug■ do autostartu               systemd-analyze plot      Wykres czasu uruchamiania
+service                                                            > boot.svg
+
+systemctl disable         Wy■■cz us■ug■ z autostartu               journalctl                Wy■wietl wszystkie logi systemd
+service
+
+systemctl enable          W■■cz i natychmiast uruchom              journalctl -u             Logi konkretnej us■ugi
+--now service                                                      service
+
+systemctl disable         Wy■■cz i natychmiast zatrzymaj           journalctl -f             ■led■ logi na bie■■co (follow)
+--now service
+
+systemctl is-active       Sprawd■ czy us■uga jest aktywna          journalctl -f -u          ■led■ logi konkretnej us■ugi
+service                                                            service
+
+systemctl is-enabled      Sprawd■ czy us■uga jest w■■czona         journalctl -n 50          Ostatnie 50 wpisów dziennika
+service
+
+systemctl is-failed       Sprawd■ czy us■uga zawiod■a              journalctl --since        Logi z ostatniej godziny
+service                                                            '1 hour ago'
+
+systemctl list-units      Lista wszystkich aktywnych jednostek     journalctl --since        Logi od podanej daty
+                                                                   '2023-01-01'
+
+systemctl list-units      Lista aktywnych us■ug                    journalctl --until        Logi do podanej daty
+--type=service                                                     '2023-01-02'
+
+systemctl list-units      Lista zawiesionych us■ug                 journalctl -p err         Logi tylko o priorytecie error i wy■ej
+--state=failed
+
+systemctl                 Lista plików jednostek i ich stan        journalctl -p             Logi w zakresie priorytetów
+list-unit-files                                                    warning..err
+
+systemctl                 Pliki jednostek us■ug                    journalctl -b             Logi bie■■cego uruchomienia
+list-unit-files
+--type=service
+
+systemctl                 Zale■no■ci us■ugi                        journalctl -b -1          Logi poprzedniego uruchomienia
+list-dependencies
+service
+
+systemctl                 Co zale■y od tej us■ugi                  journalctl                Lista poprzednich uruchomie■
+list-dependencies                                                  --list-boots
+--reverse service
+
+systemctl mask            Zamaskuj us■ug■ (uniemo■liw              journalctl -k             Tylko logi j■dra systemu (dmesg)
+service                   uruchomienie)
+
+systemctl unmask          Odmaskuj us■ug■                          journalctl -o json        Wyj■cie w formacie JSON
+service
+
+systemctl                 Prze■aduj pliki konfiguracyjne systemd   journalctl                Miejsce zajmowane przez dziennik
+daemon-reload                                                      --disk-usage
+
+systemctl                 Uruchom ponownie mened■era               journalctl                Ogranicz dziennik do 500MB
+daemon-reexec             systemd                                  --vacuum-size=500M
+
+systemctl                 Pobierz domy■lny cel (target)            journalctl                Usu■ logi starsze ni■ 2 tygodnie
+get-default                                                        --vacuum-time=2w
+
+systemctl                 Ustaw domy■lny cel (tryb tekstowy)       systemctl --user          Status us■ugi w trybie u■ytkownika
+set-default                                                        status service
+multi-user.target
+
+systemctl                 Ustaw domy■lny cel (tryb graficzny)      loginctl                  Lista aktywnych sesji
+set-default                                                        list-sessions
+graphical.target
+
+
+
+
+Biblioteka komend RHCSA                                                                                                       Strona 12
+RHCSA COMMAND LIBRARY                                                                RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+systemctl isolate         Prze■■cz natychmiast do trybu             loginctl list-users        Lista zalogowanych u■ytkowników
+rescue.target             awaryjnego
+
+systemctl isolate         Prze■■cz do trybu awaryjnego              loginctl                   Szczegó■y sesji
+emergency.target                                                    show-session ID
+
+systemctl isolate         Prze■■cz do trybu tekstowego              hostnamectl                Wy■wietl i zarz■dzaj nazw■ hosta
+multi-user.target
+
+systemctl poweroff        Wy■■cz system                             hostnamectl                Ustaw now■ nazw■ hosta
+                                                                    set-hostname
+                                                                    newhostname
+
+systemctl reboot          Zrestartuj system                         timedatectl                Wy■wietl ustawienia czasu i strefy
+
+systemctl halt            Zatrzymaj system                          timedatectl                Ustaw stref■ czasow■
+                                                                    set-timezone
+                                                                    Europe/Warsaw
+
+systemctl suspend         Wstrzymaj system                          timedatectl set-ntp        W■■cz synchronizacj■ czasu NTP
+                                                                    true
+
+systemctl hibernate       U■pij system (hibernate)                  timedatectl                Lista dost■pnych stref czasowych
+                                                                    list-timezones
+
+systemctl cat             Poka■ plik unit us■ugi                    localectl                  Wy■wietl ustawienia lokalizacji
+service
+
+systemctl edit            Edytuj override us■ugi                    localectl set-locale       Ustaw lokalizacj■ systemu
+service                                                             LANG=pl_PL.UTF-8
+
+systemctl edit            Edytuj pe■ny plik unit                    localectl set-keymap       Ustaw map■ klawiatury
+--full service                                                      pl
+
+
+
+
+■ 10. Zarz■dzanie pakietami (DNF/RPM)                                                                                   81 komend
+
+
+dnf install package       Zainstaluj pakiet                         dnf check-update           Sprawd■ dost■pne aktualizacje
+
+dnf install -y            Zainstaluj bez pytania o potwierdzenie    dnf security update        Zainstaluj tylko aktualizacje
+package                                                                                        bezpiecze■stwa
+
+dnf remove package        Usu■ pakiet                               dnf updateinfo list        Lista aktualizacji bezpiecze■stwa
+                                                                    security
+
+dnf erase package         Usu■ pakiet (alias remove)                dnf updateinfo list        Lista poprawek b■■dów
+                                                                    bugfix
+
+dnf update                Zaktualizuj wszystkie pakiety             dnf distro-sync            Synchronizuj z repozytorium dystrybucji
+
+dnf update package        Zaktualizuj konkretny pakiet              dnf module list            Lista modu■ów DNF
+
+dnf upgrade               Zaktualizuj (dopuszcza obsoletes)         dnf module enable          W■■cz strumie■ modu■u
+                                                                    module:stream
+
+dnf upgrade-minimal       Minimalna aktualizacja (tylko security)   dnf module disable         Wy■■cz strumie■ modu■u
+                                                                    module:stream
+
+dnf downgrade             Cofnij pakiet do poprzedniej wersji       dnf module install m       Zainstaluj profil modu■u
+package                                                             odule:stream/profile
+
+dnf reinstall             Zainstaluj pakiet ponownie                dnf module reset           Zresetuj stan modu■u
+package                                                             module
+
+dnf autoremove            Usu■ niepotrzebne pakiety                 dnf module info            Informacje o module
+                                                                    module
+
+dnf clean all             Wyczy■■ cache DNF                         rpm -qa                    Lista wszystkich zainstalowanych
+                                                                                               pakietów RPM
+
+dnf clean packages        Wyczy■■ tylko cache pakietów              rpm -qi package            Informacje o zainstalowanym pakiecie
+
+dnf clean metadata        Wyczy■■ cache metadanych                  rpm -ql package            Lista plików pakietu
+
+
+
+
+Biblioteka komend RHCSA                                                                                                          Strona 13
+RHCSA COMMAND LIBRARY                                                           RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+dnf makecache             Od■wie■ cache metadanych             rpm -qd package            Lista dokumentacji pakietu
+
+dnf search keyword        Szukaj pakietu po s■owie kluczowym   rpm -qc package            Lista plików konfiguracyjnych pakietu
+
+dnf info package          Informacje o pakiecie                rpm -qf                    Który pakiet dostarcza ten plik
+                                                               /path/to/file
+
+dnf list installed        Lista zainstalowanych pakietów       rpm -qR package            Zale■no■ci pakietu
+
+dnf list available        Lista dost■pnych pakietów            rpm -q --scripts           Skrypty pre/post pakietu
+                                                               package
+
+dnf list updates          Lista pakietów z dost■pnymi          rpm -q --changelog         Historia zmian pakietu
+                          aktualizacjami                       package
+
+dnf list extras           Pakiety spoza repozytoriów           rpm -ivh package.rpm       Zainstaluj pakiet RPM
+
+dnf list obsoletes        Przestarza■e pakiety                 rpm -Uvh package.rpm       Zaktualizuj lub zainstaluj pakiet RPM
+
+dnf provides              Który pakiet dostarcza plik          rpm -Fvh package.rpm       Zaktualizuj tylko je■li zainstalowany
+/path/to/file
+
+dnf provides              Który pakiet dostarcza komend■       rpm -e package             Usu■ pakiet RPM
+'*/command'
+
+dnf whatprovides          Alias dla dnf provides               rpm -V package             Zweryfikuj integralno■■ pakietu
+command
+
+dnf repolist              Lista w■■czonych repozytoriów        rpm -Va                    Zweryfikuj wszystkie zainstalowane
+                                                                                          pakiety
+
+dnf repolist all          Lista wszystkich repozytoriów        rpm --import               Importuj klucz GPG
+                                                               /path/to/key.gpg
+
+dnf repolist              Lista wy■■czonych repozytoriów       rpm -K package.rpm         Sprawd■ podpis pakietu RPM
+disabled
+
+dnf repoinfo repo-id      Szczegó■y repozytorium               rpm2cpio pkg.rpm |         Wyodr■bnij zawarto■■ pakietu RPM
+                                                               cpio -idmv
+
+dnf config-manager        W■■cz repozytorium                   rpm -qp --scripts          Skrypty niezainstalowanego pakietu
+--enable repo                                                  package.rpm
+
+dnf config-manager        Wy■■cz repozytorium                  rpm -qip package.rpm       Informacje o niezainstalowanym
+--disable repo                                                                            pakiecie
+
+dnf config-manager        Dodaj repozytorium z URL             rpmquery -a                Alias dla rpm -qa
+--add-repo URL
+
+dnf grouplist             Lista grup pakietów                  subscription-manager       Zarejestruj system w RHSM
+                                                               register
+
+dnf groupinstall          Zainstaluj grup■ pakietów            subscription-manager       Lista dost■pnych subskrypcji
+'Group Name'                                                   list --available
+
+dnf groupremove           Usu■ grup■ pakietów                  subscription-manager       Automatycznie pod■■cz subskrypcje
+'Group Name'                                                   attach --auto
+
+dnf groupinfo 'Group      Informacje o grupie pakietów         subscription-manager       Status subskrypcji systemu
+Name'                                                          status
+
+dnf history               Historia transakcji DNF              subscription-manager       Lista dost■pnych repozytoriów RHSM
+                                                               repos --list
+
+dnf history info 5        Szczegó■y transakcji numer 5         subscription-manager       W■■cz repozytorium RHSM
+                                                               repos --enable repo
+
+dnf history undo 5        Cofnij transakcj■ numer 5            yum install package        Zainstaluj (kompatybilno■■ wsteczna)
+
+dnf history redo 5        Ponów transakcj■ numer 5             yum update                 Aktualizuj (kompatybilno■■ wsteczna)
+
+dnf history rollback      Cofnij do stanu po transakcji 3
+3
+
+
+
+
+Biblioteka komend RHCSA                                                                                                     Strona 14
+RHCSA COMMAND LIBRARY                                                          RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+■ 11. Sie■ — konfiguracja i diagnostyka                                                                           111 komend
+
+
+ip addr                   Wy■wietl adresy IP interfejsów         curl -O http://examp    Pobierz plik
+                                                                 le.com/file
+
+ip addr show              Szczegó■y adresów IP                   curl -o output.html     Pobierz z podan■ nazw■
+                                                                 http://example.com
+
+ip addr show eth0         Adresy IP konkretnego interfejsu       curl -u user:pass       Uwierzytelnienie Basic
+                                                                 http://example.com
+
+ip addr add               Dodaj adres IP do interfejsu           curl -k                 Pomi■ weryfikacj■ certyfikatu SSL
+192.168.1.10/24 dev                                              https://example.com
+eth0
+
+ip addr del               Usu■ adres IP z interfejsu             curl -L                 Pod■■aj za przekierowaniami
+192.168.1.10/24 dev                                              http://example.com
+eth0
+
+ip link show              Wy■wietl stan interfejsów sieciowych   curl -X POST -d         Wy■lij ■■danie POST
+                                                                 'data' URL
+
+ip link set eth0 up       W■■cz interfejs sieciowy               curl -H                 Dodaj nag■ówek HTTP
+                                                                 'Content-Type:
+                                                                 application/json'
+                                                                 URL
+
+ip link set eth0 down     Wy■■cz interfejs sieciowy              curl                    Limit czasu po■■czenia 5 sekund
+                                                                 --connect-timeout 5
+                                                                 URL
+
+ip link set eth0 mtu      Zmie■ MTU interfejsu                   wget http://example.    Pobierz plik poleceniem wget
+9000                                                             com/file
+
+ip route show             Wy■wietl tablic■ routingu              wget -r                 Rekurencyjne pobieranie strony
+                                                                 http://example.com
+
+ip route add default      Dodaj bram■ domy■ln■                   wget -c http://examp    Wznawiaj przerwan■ sesj■
+via 192.168.1.1                                                  le.com/file
+
+ip route add              Dodaj tras■ statyczn■                  wget -q                 Cichy tryb wget
+10.0.0.0/8 via                                                   http://example.com
+192.168.1.1
+
+ip route del default      Usu■ bram■ domy■ln■                    nmcli device show       Szczegó■y urz■dze■ sieciowych
+
+ip route del              Usu■ tras■ statyczn■                   nmcli device status     Status urz■dze■ sieciowych
+10.0.0.0/8
+
+ip route get 8.8.8.8      Poka■ tras■ do danego hosta            nmcli connection        Lista po■■cze■ NetworkManager
+                                                                 show
+
+ip neigh show             Wy■wietl tablic■ ARP                   nmcli connection        Aktywne po■■czenia
+                                                                 show --active
+
+ip neigh flush all        Wyczy■■ tablic■ ARP                    nmcli connection up     Aktywuj po■■czenie
+                                                                 'conn-name'
+
+ip -6 addr show           Wy■wietl adresy IPv6                   nmcli connection        Dezaktywuj po■■czenie
+                                                                 down 'conn-name'
+
+ip -6 route show          Wy■wietl routing IPv6                  nmcli connection add    Dodaj nowe po■■czenie
+                                                                 type ethernet ...
+
+ss -tulnp                 Gniazda nas■uchuj■ce (TCP/UDP) z       nmcli connection        Zmie■ IP
+                          PID                                    modify 'name'
+                                                                 ipv4.addresses
+                                                                 '192.168.1.10/24'
+
+
+
+
+Biblioteka komend RHCSA                                                                                                 Strona 15
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+ss -anp                   Wszystkie gniazda z PID                nmcli connection           Zmie■ bram■
+                                                                 modify 'name'
+                                                                 ipv4.gateway
+                                                                 '192.168.1.1'
+
+ss -s                     Podsumowanie statystyk gniazd          nmcli connection           Zmie■ DNS
+                                                                 modify 'name'
+                                                                 ipv4.dns
+                                                                 '8.8.8.8,8.8.4.4'
+
+ss -t state               Tylko nawi■zane po■■czenia TCP         nmcli connection           Ustaw IP statyczne
+established                                                      modify 'name'
+                                                                 ipv4.method manual
+
+ss -lntp                  Nas■uchuj■ce gniazda TCP z             nmcli connection           Prze■■cz na DHCP
+                          procesami                              modify 'name'
+                                                                 ipv4.method auto
+
+ss -lnup                  Nas■uchuj■ce gniazda UDP z             nmcli connection           Prze■aduj konfiguracj■ NM
+                          procesami                              reload
+
+ss -4 -t                  Tylko gniazda IPv4 TCP                 nmcli general              Zmie■ nazw■ hosta przez NM
+                                                                 hostname newhostname
+
+ss -6 -t                  Tylko gniazda IPv6 TCP                 nmcli radio wifi off       Wy■■cz Wi-Fi przez NM
+
+ss dst 192.168.1.100      Po■■czenia do konkretnego hosta        nmtui                      Tekstowy interfejs NetworkManager
+                                                                                            (TUI)
+
+ss sport = :22            Gniazda na porcie 22                   nmtui edit                 Edytuj po■■czenie w TUI
+
+netstat -tulnp            Porty nas■uchuj■ce (starszy format)    nmtui connect              Po■■cz w TUI
+
+netstat -rn               Tablica routingu                       cat /etc/hosts             Wy■wietl lokaln■ baz■ nazw hostów
+
+netstat -s                Statystyki protoko■ów                  cat /etc/resolv.conf       Wy■wietl konfiguracj■ DNS
+
+ping hostname             Test ■■czno■ci (ICMP)                  cat /etc/hostname          Wy■wietl nazw■ hosta systemu
+
+ping -c 4 hostname        Wy■lij 4 pakiety ICMP                  cat /etc/sysconfig/n       Konfiguracja interfejsu (stary styl)
+                                                                 etwork-scripts/ifcfg
+                                                                 -eth0
+
+ping -i 0.2 hostname      Ping co 0.2 sekundy                    ethtool eth0               Informacje o interfejsie sieciowym
+
+ping -s 1400              Ping z rozmiarem pakietu 1400B         ethtool -i eth0            Sterownik i wersja firmware interfejsu
+hostname
+
+ping6 hostname            Ping przez IPv6                        ethtool -S eth0            Statystyki interfejsu
+
+traceroute hostname       Trasa pakietów do hosta                arp -n                     Tablica ARP (numeryczna)
+
+traceroute -n             Trasa bez resolucji DNS                arp -a                     Tablica ARP (wszystkie)
+hostname
+
+tracepath hostname        Trasa z wykrywaniem MTU                tcpdump -i eth0            Przechwytuj pakiety na interfejsie
+
+mtr hostname              Dynamiczny traceroute (MTR)            tcpdump -i eth0 port       Przechwytuj pakiety na porcie 80
+                                                                 80
+
+dig hostname              Zapytanie DNS                          tcpdump -i eth0 -w         Zapisz przechwycone pakiety do pliku
+                                                                 capture.pcap
+
+dig @8.8.8.8              Zapytanie DNS przez konkretny serwer   tcpdump -n -i eth0         Przechwytuj pakiety TCP
+hostname                                                         'tcp'
+
+dig hostname A            Zapytaj o rekord A (IPv4)              nmap -sS 192.168.1.1       Skanowanie portów TCP (SYN)
+
+dig hostname AAAA         Zapytaj o rekord AAAA (IPv6)           nmap -sU 192.168.1.1       Skanowanie portów UDP
+
+dig hostname MX           Zapytaj o rekord MX                    nmap -sV 192.168.1.1       Wykryj wersje us■ug
+
+dig hostname NS           Zapytaj o rekordy NS                   nmap -O 192.168.1.1        Wykryj system operacyjny
+
+dig hostname TXT          Zapytaj o rekordy TXT                  nmap -p 80,443             Skanuj konkretne porty
+                                                                 192.168.1.1
+
+
+
+
+Biblioteka komend RHCSA                                                                                                      Strona 16
+RHCSA COMMAND LIBRARY                                                         RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+dig -x 8.8.8.8            Odwrotne zapytanie DNS             nmap 192.168.1.0/24        Skanuj ca■■ podsie■
+
+dig +short hostname       Tylko wynik bez nag■ówków          nmap --open                Poka■ tylko otwarte porty
+                                                             192.168.1.0/24
+
+dig +trace hostname       ■led■ ca■e zapytanie DNS           nc -zv host 80             Sprawd■ czy port jest otwarty
+
+nslookup hostname         Proste zapytanie DNS               nc -l 8080                 Nas■uchuj na porcie 8080
+
+host hostname             Proste zapytanie DNS (host)        nc host 80                 Po■■cz si■ z hostem na porcie 80
+
+host -t MX domain         Rekord MX domeny                   iperf3 -s                  Uruchom serwer iperf3 (test
+                                                                                        przepustowo■ci)
+
+getent hosts              Rozwi■zanie DNS z uwzgl■dnieniem   iperf3 -c host             Test przepustowo■ci do hosta
+hostname                  /etc/hosts
+
+curl -I                   Pobierz nag■ówki HTTP
+http://example.com
+
+
+
+
+■ 12. Zapora ogniowa (firewalld)                                                                                   47 komend
+
+
+firewall-cmd --state      Sprawd■ status firewalld           firewall-cmd --runti       Zapisz bie■■c■ konfiguracj■ na sta■e
+                                                             me-to-permanent
+
+systemctl status          Status us■ugi firewalld            firewall-cmd               Przypisz interfejs
+firewalld                                                    --zone=public
+                                                             --add-interface=eth0
+                                                             --permanent
+
+systemctl enable          W■■cz i uruchom firewalld          firewall-cmd               Usu■ interfejs ze strefy
+--now firewalld                                              --zone=public --remo
+                                                             ve-interface=eth0
+
+firewall-cmd              Lista dost■pnych stref             firewall-cmd               Zmie■ stref■ interfejsu
+--get-zones                                                  --zone=public --chan
+                                                             ge-interface=eth0
+
+firewall-cmd              Aktywne strefy z interfejsami      firewall-cmd               W■■cz maskarad■ (NAT)
+--get-active-zones                                           --add-masquerade
+                                                             --permanent
+
+firewall-cmd              Domy■lna strefa                    firewall-cmd               Wy■■cz maskarad■
+--get-default-zone                                           --remove-masquerade
+                                                             --permanent
+
+firewall-cmd --set-d      Zmie■ domy■ln■ stref■              firewall-cmd               Sprawd■ czy maskarada jest
+efault-zone=trusted                                          --query-masquerade         w■■czona
+
+firewall-cmd              Poka■ ca■y stan domy■lnej strefy   firewall-cmd --add-f       Port forwarding
+--list-all                                                   orward-port=port=80:
+                                                             proto=tcp:toport=808
+                                                             0 --permanent
+
+firewall-cmd              Ca■y stan strefy public            firewall-cmd               Utwórz now■ stref■
+--zone=public                                                --new-zone=myzone
+--list-all                                                   --permanent
+
+firewall-cmd              Lista dozwolonych us■ug            firewall-cmd               Usu■ stref■
+--list-services                                              --delete-zone=myzone
+                                                             --permanent
+
+firewall-cmd              Us■ugi w strefie public            firewall-cmd               Dodaj ■ród■o IP
+--zone=public                                                --zone=public --add-
+--list-services                                              source=192.168.1.0/2
+                                                             4 --permanent
+
+
+
+
+Biblioteka komend RHCSA                                                                                                 Strona 17
+RHCSA COMMAND LIBRARY                                                           RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+firewall-cmd              Lista dozwolonych portów             firewall-cmd               Usu■ ■ród■o IP
+--list-ports                                                   --zone=public --remo
+                                                               ve-source=192.168.1.
+                                                               0/24 --permanent
+
+firewall-cmd              Porty w strefie public               firewall-cmd --add-r       Blokuj IP
+--zone=public                                                  ich-rule='rule
+--list-ports                                                   family=ipv4 source
+                                                               address=1.2.3.4
+                                                               reject' --permanent
+
+firewall-cmd              Lista regu■ rozszerzonych            firewall-cmd --add-r       Limituj SSH
+--list-rich-rules                                              ich-rule='rule
+                                                               service name=ssh
+                                                               limit value=3/m
+                                                               accept' --permanent
+
+firewall-cmd              Zezwól na us■ug■ http (tymczasowo)   firewall-cmd --add-r       Loguj HTTP
+--add-service=http                                             ich-rule='rule port
+                                                               port=80 protocol=tcp
+                                                               log prefix=HTTP
+                                                               accept' --permanent
+
+firewall-cmd              Zezwól na http (na sta■e)            firewall-cmd               Lista predefiniowanych us■ug
+--add-service=http                                             --get-services
+--permanent
+
+firewall-cmd --remov      Blokuj us■ug■ http                   firewall-cmd               Szczegó■y us■ugi http
+e-service=http                                                 --info-service=http
+--permanent
+
+firewall-cmd              Https w public                       firewall-cmd               Nowa us■uga niestandardowa
+--zone=public                                                  --new-service=myapp
+--add-service=https                                            --permanent
+--permanent
+
+firewall-cmd              Otwórz port 8080/TCP (tymczasowo)    firewall-cmd               Port dla nowej us■ugi
+--add-port=8080/tcp                                            --service=myapp
+                                                               --add-port=9000/tcp
+                                                               --permanent
+
+firewall-cmd              Otwórz port 8080/TCP na sta■e        iptables -L -n -v          Lista regu■ iptables (verbose,
+--add-port=8080/tcp                                                                       numeryczne)
+--permanent
+
+firewall-cmd --remov      Zamknij port 8080/TCP                iptables -S                Lista regu■ iptables w formacie
+e-port=8080/tcp                                                                           komend
+--permanent
+
+firewall-cmd --add-p      Otwórz zakres portów                 nft list ruleset           Lista regu■ nftables
+ort=5000-5100/tcp
+--permanent
+
+firewall-cmd              Prze■aduj konfiguracj■ firewalld     nft list tables            Lista tabel nftables
+--reload
+
+firewall-cmd              Pe■ne prze■adowanie (przerywa
+--complete-reload         po■■czenia)
+
+
+
+
+■■ 13. SELinux                                                                                                    64 komend
+
+
+getenforce                Aktualny tryb SELinux                getsebool -a               Pobierz wszystkie warto■ci logiczne
+                          (Enforcing/Permissive/Disabled)
+
+setenforce 0              Prze■■cz SELinux w tryb Permissive   getsebool httpd_can_       Konkretna warto■■ logiczna
+                          (tymczasowo)                         network_connect
+
+
+
+
+Biblioteka komend RHCSA                                                                                                    Strona 18
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+setenforce 1              Prze■■cz SELinux w tryb Enforcing      setsebool httpd_can_       W■■cz warto■■ logiczn■
+                          (tymczasowo)                           network_connect on         (tymczasowo)
+
+sestatus                  Szczegó■owy status SELinux             setsebool -P httpd_c       W■■cz na sta■e (-P = permanent)
+                                                                 an_network_connect
+                                                                 on
+
+sestatus -v               Verbose status SELinux                 setsebool -P               W■■cz zapis anonimowy FTP
+                                                                 ftpd_anon_write on
+
+cat                       Sta■a konfiguracja SELinux             setsebool -P samba_e       W■■cz katalogi domowe w Samba
+/etc/selinux/config                                              nable_home_dirs on
+
+ls -Z file                Kontekst SELinux pliku                 setsebool -P               Zezwól httpd na NFS
+                                                                 httpd_use_nfs on
+
+ls -Z dir/                Kontekst SELinux plików w katalogu     semanage user -l           Lista u■ytkowników SELinux
+
+ls -dZ dir/               Kontekst SELinux katalogu              semanage login -l          Mapowanie u■ytkowników Linux na
+                                                                                            SELinux
+
+ps -Z                     Procesy z kontekstem SELinux           semanage login -a -s       Przypisz u■ytkownika do roli SELinux
+                                                                 user_u username
+
+ps -Zp PID                Kontekst SELinux konkretnego procesu   ausearch -m avc -ts        Wyszukaj odmowy SELinux (ostatnie)
+                                                                 recent
+
+id -Z                     Kontekst SELinux bie■■cego             ausearch -m avc -c         Odmowy dla konkretnego procesu
+                          u■ytkownika                            httpd
+
+ss -Z                     Po■■czenia sieciowe z kontekstem       ausearch -m avc            Odmowy SELinux z dzisiaj
+                          SELinux                                --start today
+
+chcon -t                  Zmie■ typ SELinux pliku                ausearch -m avc -ts        Sugestie regu■ dla odmów
+httpd_sys_content_t                                              recent | audit2allow
+/var/www/html/file
+
+chcon -R -t               Zmie■ typ rekurencyjnie                audit2allow -a             Analizuj odmowy i sugeruj regu■y
+httpd_sys_content_t
+/var/www/html/
+
+chcon --reference=/e      Kopiuj kontekst SELinux                audit2allow -a -M          Utwórz modu■ polityki z odmów
+tc/file target_file                                              mypolicy
+
+restorecon                Przywró■ domy■lny kontekst SELinux     semodule -i                Zainstaluj modu■ polityki SELinux
+/path/to/file                                                    mypolicy.pp
+
+restorecon -R             Przywró■ kontekst rekurencyjnie        semodule -l                Lista zainstalowanych modu■ów
+/var/www/html/
+
+restorecon -Rv            Przywró■ kontekst z list■ zmian        semodule -d mypolicy       Wy■■cz modu■ polityki
+/path/
+
+restorecon -F /path/      Wymu■ przywrócenie kontekstu           semodule -e mypolicy       W■■cz modu■ polityki
+
+semanage fcontext -l      Lista regu■ kontekstu plików           semodule -r mypolicy       Usu■ modu■ polityki
+
+semanage fcontext -l      Regu■y kontekstu dla httpd             audit2why < /var/log       Wyja■nij przyczyny odmów AVC
+| grep httpd                                                     /audit/audit.log
+
+semanage fcontext -a      Dodaj regu■■ kontekstu                 sealert -a /var/log/       Przeanalizuj logi odmów
+-t                                                               audit/audit.log            (setroubleshoot)
+httpd_sys_content_t
+'/custom(/.*)?'
+
+semanage fcontext -d      Usu■ regu■■ kontekstu                  journalctl -t              Logi setroubleshoot
+-t                                                               setroubleshoot
+httpd_sys_content_t
+'/custom(/.*)?'
+
+semanage fcontext -m      Zmodyfikuj regu■■ kontekstu            matchpathcon               Oczekiwany kontekst SELinux dla
+-t samba_share_t                                                 /path/to/file              ■cie■ki
+'/share(/.*)?'
+
+semanage port -l          Lista portów SELinux                   seinfo -u                  Informacje o u■ytkownikach SELinux
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 19
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+semanage port -l |        Porty dla us■ugi http                  seinfo -r                  Informacje o rolach SELinux
+grep http
+
+semanage port -a -t       Dodaj port 8080 do http                seinfo -t | grep           Typy SELinux dla httpd
+http_port_t -p tcp                                               httpd
+8080
+
+semanage port -d -t       Usu■ port 8080 z http                  cat /var/log/audit/a       Odmowy SELinux z logu audytu
+http_port_t -p tcp                                               udit.log | grep avc
+8080
+
+semanage port -m -t       Zmodyfikuj port SELinux                grep 'denied' /var/l       Grep odmów z logu
+http_port_t -p tcp                                               og/audit/audit.log
+8080
+
+semanage boolean -l       Lista warto■ci logicznych SELinux      fixfiles relabel           Przetag konteksty plików
+                                                                 /path
+
+semanage boolean -l       Warto■ci logiczne dla httpd            touch /.autorelabel        Przetaguj ca■y system przy restarcie
+| grep httpd
+
+
+
+
+■ 14. Przechowywanie danych — dyski i partycje                                                                       49 komend
+
+
+lsblk                     Lista urz■dze■ blokowych               df -i                      U■ycie i-w■z■ów
+
+lsblk -f                  Lista z systemami plików i UUID        df -a                      Wszystkie systemy plików
+
+lsblk -o NAME,SIZE,T      Wybrane kolumny                        du -sh /path               Rozmiar katalogu
+YPE,MOUNTPOINT
+
+lsblk -d                  Tylko dyski (bez partycji)             du -sh *                   Rozmiar wszystkich elementów
+                                                                                            bie■■cego katalogu
+
+fdisk -l                  Lista partycji na wszystkich dyskach   du -h --max-depth=1        Rozmiar podkatalogów /var
+                                                                 /var
+
+fdisk -l /dev/sda         Partycje konkretnego dysku             du -ah /path | sort        Najwi■ksze pliki w katalogu
+                                                                 -rh | head
+
+fdisk /dev/sda            Interaktywny edytor partycji MBR       du -c /path                Rozmiar z sum■ ca■kowit■
+
+fdisk -u /dev/sda         fdisk z jednostkami sektorów           hdparm -I /dev/sda         Informacje o dysku SATA
+
+gdisk /dev/sda            Interaktywny edytor partycji GPT       hdparm -tT /dev/sda        Test pr■dko■ci odczytu dysku
+
+gdisk -l /dev/sda         Lista partycji GPT                     smartctl -a /dev/sda       SMART diagnostyka dysku
+
+parted /dev/sda           Interaktywny edytor parted             smartctl -t short          Krótki test SMART
+                                                                 /dev/sda
+
+parted -l                 Lista partycji wszystkich dysków       badblocks -v               Szukaj uszkodzonych bloków
+                                                                 /dev/sda
+
+parted /dev/sda           Schemat partycji dysku                 dd if=/dev/sda             Klon dysku blok po bloku
+print                                                            of=/dev/sdb
+
+parted /dev/sda           Utwórz tablic■ GPT                     dd if=/dev/sda             Obraz dysku do pliku
+mklabel gpt                                                      of=backup.img bs=4M
+
+parted /dev/sda           Utwórz tablic■ MBR                     dd if=/dev/zero            Wyma■ dysk zerami
+mklabel msdos                                                    of=/dev/sda bs=1M
+
+parted /dev/sda           Utwórz partycj■                        dd if=/dev/urandom         Wyma■ dysk losowymi danymi
+mkpart primary 1MiB                                              of=/dev/sda bs=1M
+10GiB
+
+parted /dev/sda rm 1      Usu■ partycj■ 1                        dd if=backup.img           Przywró■ obraz dysku
+                                                                 of=/dev/sda bs=4M
+
+parted /dev/sda           Zmie■ rozmiar partycji                 dd if=/dev/sda             Wy■wietl MBR dysku
+resizepart 1 20GiB                                               bs=512 count=1 |
+                                                                 hexdump -C
+
+
+
+
+Biblioteka komend RHCSA                                                                                                    Strona 20
+RHCSA COMMAND LIBRARY                                                           RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+partprobe /dev/sda        Poinformuj j■dro o zmianie tablicy      wipefs -a /dev/sda      Usu■ wszystkie sygnatury z dysku
+                          partycji
+
+partprobe                 Prze■aduj tablic■ partycji wszystkich   sgdisk --zap-all        Usu■ tablic■ partycji GPT
+                          dysków                                  /dev/sda
+
+blkid                     Wy■wietl UUID i typy systemów plików    cfdisk /dev/sda         Interaktywny edytor partycji (TUI)
+
+blkid /dev/sda1           UUID konkretnej partycji                sfdisk -d /dev/sda >    Zapisz schemat partycji do pliku
+                                                                  layout.txt
+
+blkid -t TYPE=ext4        Znajd■ partycje ext4                    sfdisk /dev/sda <       Przywró■ schemat partycji z pliku
+                                                                  layout.txt
+
+df -h                     U■ycie dysku w czytelnym formacie       sfdisk --backup         Kopia zapasowa tablicy partycji
+                                                                  /dev/sda
+
+df -hT                    U■ycie dysku z typem systemu plików
+
+
+
+
+■ 15. LVM — Logical Volume Manager                                                                                 59 komend
+
+
+pvs                       Podsumowanie wolumenów fizycznych       lvs                     Podsumowanie wolumenów logicznych
+                          (PV)                                                            (LV)
+
+pvdisplay                 Szczegó■y wolumenów fizycznych          lvdisplay               Szczegó■y wolumenów logicznych
+
+pvdisplay /dev/sdb        Szczegó■y konkretnego PV                lvdisplay               Szczegó■y konkretnego LV
+                                                                  /dev/vgname/lvname
+
+pvcreate /dev/sdb         Utwórz wolumen fizyczny                 lvcreate -L 10G -n      Utwórz LV o rozmiarze 10GB
+                                                                  lvname vgname
+
+pvcreate /dev/sdb         Utwórz kilka PV naraz                   lvcreate -l 100%FREE    U■yj ca■ej wolnej przestrzeni
+/dev/sdc                                                          -n lvname vgname
+
+pvremove /dev/sdb         Usu■ wolumen fizyczny                   lvcreate -l 50%VG -n    U■yj 50% przestrzeni VG
+                                                                  lvname vgname
+
+pvresize /dev/sdb         Zmie■ rozmiar PV (po rozszerzeniu       lvcreate -l 100%PVS     LV z konkretnego PV
+                          partycji)                               -n lvname vgname
+                                                                  /dev/sdb
+
+pvmove /dev/sdb           Przenie■ dane z PV na inne              lvcreate --type         Utwórz LV mirror
+                                                                  mirror -m 1 -L 5G -n
+                                                                  lvname vgname
+
+pvmove /dev/sdb           Przenie■ dane mi■dzy PV                 lvcreate --type         Utwórz LV striped
+/dev/sdc                                                          striped -i 2 -L 10G
+                                                                  -n lvname vgname
+
+pvscan                    Skanuj w poszukiwaniu PV                lvcreate -s -L 1G -n    Utwórz snapshot LV
+                                                                  snapname
+                                                                  /dev/vgname/lvname
+
+pvck /dev/sdb             Sprawd■ metadane PV                     lvcreate --thin -L      Utwórz cienki wolumen
+                                                                  10G vgname/poolname
+
+vgs                       Podsumowanie grup wolumenów (VG)        lvcreate --thinpool     Utwórz thin pool
+                                                                  poolname -L 20G
+                                                                  vgname
+
+vgdisplay                 Szczegó■y grup wolumenów                lvremove                Usu■ wolumen logiczny
+                                                                  /dev/vgname/lvname
+
+vgdisplay vgname          Szczegó■y konkretnej VG                 lvremove -f             Wymu■ usuni■cie LV
+                                                                  /dev/vgname/lvname
+
+vgcreate vgname           Utwórz grup■ wolumenów                  lvextend -L +5G         Rozszerz LV o 5GB
+/dev/sdb                                                          /dev/vgname/lvname
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 21
+RHCSA COMMAND LIBRARY                                                         RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+vgcreate vgname           Utwórz VG z kilku PV               lvextend -L 20G            Ustaw rozmiar LV na 20GB
+/dev/sdb /dev/sdc                                            /dev/vgname/lvname
+
+vgcreate -s 16M           Utwórz VG z rozmiarem PE 16MB      lvextend -l                U■yj ca■ej wolnej przestrzeni
+vgname /dev/sdb                                              +100%FREE
+                                                             /dev/vgname/lvname
+
+vgremove vgname           Usu■ grup■ wolumenów               lvextend -r -L +5G         Rozszerz LV i system plików
+                                                             /dev/vgname/lvname
+
+vgextend vgname           Dodaj PV do grupy wolumenów        lvreduce -L -2G            Zmniejsz LV o 2GB (uwaga!)
+/dev/sdc                                                     /dev/vgname/lvname
+
+vgreduce vgname           Usu■ PV z grupy wolumenów          lvresize -L 15G            Zmie■ rozmiar LV do 15GB
+/dev/sdc                                                     /dev/vgname/lvname
+
+vgrename oldname          Zmie■ nazw■ grupy wolumenów        lvresize -r -L +5G         Zmie■ rozmiar LV i system plików
+newname                                                      /dev/vgname/lvname
+
+vgchange -ay vgname       Aktywuj grup■ wolumenów            lvrename vgname            Zmie■ nazw■ wolumenu logicznego
+                                                             oldlv newlv
+
+vgchange -an vgname       Dezaktywuj grup■ wolumenów         lvchange -ay               Aktywuj LV
+                                                             /dev/vgname/lvname
+
+vgscan                    Skanuj w poszukiwaniu VG           lvchange -an               Dezaktywuj LV
+                                                             /dev/vgname/lvname
+
+vgck vgname               Sprawd■ metadane VG                lvconvert --merge          Scal snapshot z orygina■em
+                                                             /dev/vgname/snapname
+
+vgexport vgname           Eksportuj VG (dla przeniesienia)   lvscan                     Skanuj w poszukiwaniu LV
+
+vgimport vgname           Importuj VG                        lvmdiskscan                Skanuj dyski dla LVM
+
+vgmerge target            Scal dwie grupy wolumenów          dmsetup ls                 Lista urz■dze■ device-mapper
+source
+
+vgsplit vgname            Podziel VG                         dmsetup info               Informacje o urz■dzeniach DM
+newvgname /dev/sdc
+
+vgmknodes vgname          Utwórz pliki urz■dze■ dla VG
+
+
+
+
+■■ 16. Systemy plików i montowanie                                                                                 67 komend
+
+
+mkfs.ext4 /dev/sdb1       Utwórz system plików ext4          cat /etc/fstab             Trwa■a konfiguracja montowania
+
+mkfs.ext4 -L              Utwórz ext4 z etykiet■             mount | column -t          Lista zamontowanych FS
+'mylabel' /dev/sdb1                                                                     (sformatowana)
+
+mkfs.ext4 -m 1            Utwórz ext4 z 1% zarezerwowanym    tune2fs -l /dev/sdb1       Parametry systemu plików ext4
+/dev/sdb1
+
+mkfs.xfs /dev/sdb1        Utwórz system plików XFS           tune2fs -L                 Zmie■ etykiet■ ext4
+                                                             'newlabel' /dev/sdb1
+
+mkfs.xfs -L               Utwórz XFS z etykiet■              tune2fs -m 2               Zmie■ zarezerwowane bloki na 2%
+'mylabel' /dev/sdb1                                          /dev/sdb1
+
+mkfs.xfs -f               Wymu■ utworzenie XFS (nadpisz)     tune2fs -e                 Zachowanie przy b■■dach
+/dev/sdb1                                                    remount-ro /dev/sdb1
+
+mkfs.vfat /dev/sdb1       Utwórz system plików FAT32         tune2fs -j /dev/sdb1       Dodaj journaling do ext2
+
+mkfs.ntfs /dev/sdb1       Utwórz system plików NTFS          tune2fs -i 30d             Interwa■ sprawdzenia co 30 dni
+                                                             /dev/sdb1
+
+mkswap /dev/sdb2          Utwórz obszar wymiany (swap)       tune2fs -c 50              Sprawdzaj co 50 montowa■
+                                                             /dev/sdb1
+
+swapon /dev/sdb2          W■■cz obszar wymiany               dumpe2fs /dev/sdb1         Szczegó■owe informacje o ext2/3/4
+
+
+
+
+Biblioteka komend RHCSA                                                                                                 Strona 22
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+swapoff /dev/sdb2         Wy■■cz obszar wymiany                  dumpe2fs -h                Tylko nag■ówek superbloku
+                                                                 /dev/sdb1
+
+swapon -s                 Lista aktywnych obszarów wymiany       e2fsck -f /dev/sdb1        Sprawd■ system plików ext
+
+swapon -a                 W■■cz wszystkie swapy z /etc/fstab     e2fsck -p /dev/sdb1        Automatycznie napraw b■■dy
+
+swapoff -a                Wy■■cz wszystkie obszary wymiany       e2fsck -n /dev/sdb1        Sprawd■ bez naprawiania
+
+free -h                   Sprawd■ u■ycie swap                    fsck /dev/sdb1             Sprawd■ i napraw system plików
+
+mount /dev/sdb1 /mnt      Montuj partycj■                        fsck -t ext4               Sprawd■ konkretny typ FS
+                                                                 /dev/sdb1
+
+mount -t ext4             Montuj z konkretnym typem FS           fsck -a /dev/sdb1          Automatycznie napraw
+/dev/sdb1 /mnt
+
+mount -t xfs              Montuj XFS                             fsck -n /dev/sdb1          Sprawd■ bez naprawiania
+/dev/sdb1 /mnt
+
+mount -o ro               Montuj tylko do odczytu                xfs_check /dev/sdb1        Sprawd■ XFS (offline)
+/dev/sdb1 /mnt
+
+mount -o rw,noexec        Montuj z opcjami                       xfs_repair /dev/sdb1       Napraw XFS (offline)
+/dev/sdb1 /mnt
+
+mount -o remount,rw       Przemontuj z opcj■ rw                  xfs_repair -n              Sprawd■ XFS bez naprawy
+/mnt                                                             /dev/sdb1
+
+mount -o remount,ro       Przemontuj root jako ro                xfs_info /mnt              Informacje o zamontowanym XFS
+/
+
+mount UUID=xxx /mnt       Montuj po UUID                         xfs_admin -l               Etykieta systemu plików XFS
+                                                                 /dev/sdb1
+
+mount LABEL=mylabel       Montuj po etykiecie                    xfs_admin -L               Zmie■ etykiet■ XFS
+/mnt                                                             'newlabel' /dev/sdb1
+
+mount -a                  Montuj wszystko z /etc/fstab           xfs_admin -U               Generuj nowy UUID dla XFS
+                                                                 generate /dev/sdb1
+
+umount /mnt               Odmontuj system plików                 xfs_growfs /mnt            Rozszerz XFS (online)
+
+umount /dev/sdb1          Odmontuj po urz■dzeniu                 resize2fs /dev/sdb1        Rozszerz ext4 do maks. dost■pnego
+                                                                                            rozmiaru
+
+umount -l /mnt            Leniwle odmontuj (gdy zaj■ty)          resize2fs /dev/sdb1        Rozszerz ext4 do 20GB
+                                                                 20G
+
+umount -f /mnt            Wymu■ odmontowanie                     resize2fs -M               Zmniejsz ext4 do minimum
+                                                                 /dev/sdb1
+
+findmnt                   Lista zamontowanych systemów plików    e2label /dev/sdb1          Wy■wietl etykiet■ ext4
+
+findmnt /mnt              Informacje o konkretnym punkcie        e2label /dev/sdb1          Zmie■ etykiet■ ext4
+                          montowania                             'newlabel'
+
+findmnt -t xfs            Lista zamontowanych XFS                xfs_dump -l 0 -f           Kopia zapasowa XFS
+                                                                 /backup/xfs.dump
+                                                                 /mnt
+
+findmnt --fstab           Systemy plików z /etc/fstab            xfs_restore -f             Przywró■ kopi■ XFS
+                                                                 /backup/xfs.dump
+                                                                 /mnt
+
+cat /proc/mounts          Aktualnie zamontowane systemy plików
+
+
+
+
+■■ 17. Archiwizacja i kompresja                                                                                      54 komend
+
+
+tar -cvf archive.tar      Utwórz archiwum tar                    bunzip2 file.bz2           Alias dla bzip2 -d
+/path
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 23
+RHCSA COMMAND LIBRARY                                                       RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+tar -cvzf                 Utwórz archiwum gzip             xz file                    Kompresuj plik xz
+archive.tar.gz /path
+
+tar -cvjf                 Utwórz archiwum bzip2            xz -d file.xz              Dekompresuj xz
+archive.tar.bz2
+/path
+
+tar -cvJf                 Utwórz archiwum xz               unxz file.xz               Alias dla xz -d
+archive.tar.xz /path
+
+tar -xvf archive.tar      Wyodr■bnij archiwum tar          xz -l file.xz              Informacje o pliku xz
+
+tar -xvzf                 Wyodr■bnij archiwum gzip         zcat file.gz               Wy■wietl zawarto■■ gzip bez
+archive.tar.gz                                                                        dekompresji
+
+tar -xvjf                 Wyodr■bnij archiwum bzip2        bzcat file.bz2             Wy■wietl zawarto■■ bzip2 bez
+archive.tar.bz2                                                                       dekompresji
+
+tar -xvJf                 Wyodr■bnij archiwum xz           xzcat file.xz              Wy■wietl zawarto■■ xz bez
+archive.tar.xz                                                                        dekompresji
+
+tar -xvf archive.tar      Wyodr■bnij do katalogu           zgrep 'pattern'            Szukaj w skompresowanym pliku
+-C /dest/                                                  file.gz
+
+tar -tvf archive.tar      Lista zawarto■ci archiwum        zless file.gz              Przegl■daj skompresowany plik
+
+tar -tvzf                 Lista zawarto■ci gzip archiwum   zip archive.zip            Utwórz archiwum zip
+archive.tar.gz                                             file1 file2
+
+tar -rvf archive.tar      Dodaj plik do archiwum tar       zip -r archive.zip         Zip katalogu rekurencyjnie
+newfile                                                    dir/
+
+tar -uvf archive.tar      Aktualizuj plik w archiwum       unzip archive.zip          Wyodr■bnij archiwum zip
+file
+
+tar --delete -f           Usu■ plik z archiwum             unzip archive.zip -d       Wyodr■bnij do katalogu
+archive.tar file                                           /dest/
+
+tar                       Archiwum z wykluczeniem          unzip -l archive.zip       Lista zawarto■ci zip
+--exclude='*.log'
+-czf arch.tar.gz
+/path
+
+tar --exclude-vcs         Wyklucz pliki VCS                unzip -t archive.zip       Testuj integralno■■ zip
+-czf arch.tar.gz
+/path
+
+tar -czf - /path |        Archiwum przez SSH               unzip -o archive.zip       Nadpisz istniej■ce pliki
+ssh user@host 'cat >
+arch.tar.gz'
+
+tar -czf arch.tar.gz      Przyrostowy backup               zipinfo archive.zip        Szczegó■owe informacje o zip
+--listed-incremental
+=snap.snar /path
+
+tar -czf arch.tar.gz      Pliki nowsze ni■ data            cpio -o < file_list >      Utwórz archiwum cpio
+--newer-mtime='2023-                                       archive.cpio
+01-01' /path
+
+gzip file                 Kompresuj plik (zast■p)          cpio -id <                 Wyodr■bnij archiwum cpio
+                                                           archive.cpio
+
+gzip -k file              Kompresuj (zachowaj orygina■)    cpio -t <                  Lista zawarto■ci cpio
+                                                           archive.cpio
+
+gzip -d file.gz           Dekompresuj plik                 find /path -print |        Archiwum cpio przez find
+                                                           cpio -o >
+                                                           archive.cpio
+
+gzip -9 file              Maksymalna kompresja             star -c -f                 Utwórz archiwum star
+                                                           archive.star /path
+
+gzip -l file.gz           Informacje o pliku gzip          lz4 file                   Szybka kompresja lz4
+
+gunzip file.gz            Dekompresuj gzip                 lz4 -d file.lz4            Dekompresja lz4
+
+
+
+
+Biblioteka komend RHCSA                                                                                              Strona 24
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+bzip2 file                Kompresuj plik bzip2                   zstd file                  Kompresuj plik zstd
+
+bzip2 -d file.bz2         Dekompresuj bzip2                      zstd -d file.zst           Dekompresuj zstd
+
+
+
+
+■ 18. SSH i dost■p zdalny                                                                                           56 komend
+
+
+ssh user@hostname         Po■■cz przez SSH z hostem              ssh-add -d                 Usu■ klucz z agenta
+                                                                 ~/.ssh/id_rsa
+
+ssh -p 2222               Po■■cz przez niestandardowy port       eval $(ssh-agent)          Uruchom agenta SSH w bie■■cej
+user@hostname                                                                               pow■oce
+
+ssh -i                    Po■■cz z konkretnym kluczem            cat                        R■cznie dodaj klucz
+~/.ssh/key.pem                                                   ~/.ssh/id_rsa.pub >>
+user@host                                                        ~/.ssh/authorized_ke
+                                                                 ys
+
+ssh -v user@host          Tryb verbose (debugowanie)             chmod 600 ~/.ssh/aut       Ustaw poprawne uprawnienia do
+                                                                 horized_keys               authorized_keys
+
+ssh -vvv user@host        Maksymalny verbose SSH                 chmod 700 ~/.ssh/          Ustaw poprawne uprawnienia do
+                                                                                            katalogu .ssh
+
+ssh -X user@host          Po■■cz z przekazywaniem X11            cat                        Konfiguracja serwera SSH
+                                                                 /etc/ssh/sshd_config
+
+ssh -A user@host          Po■■cz z forwarding agenta SSH         sshd -t                    Sprawd■ poprawno■■ konfiguracji
+                                                                                            sshd
+
+ssh -L                    Tunel lokalny (local forward)          sshd -T                    Wy■wietl pe■n■ konfiguracj■ sshd
+8080:localhost:80
+user@host
+
+ssh -R                    Tunel zdalny (remote forward)          ssh-keyscan hostname       Pobierz klucze publiczne hosta
+8080:localhost:80
+user@host
+
+ssh -D 1080               Dynamiczny proxy SOCKS5                ssh-keyscan -H             Dodaj klucz hosta do known_hosts
+user@host                                                        hostname >>
+                                                                 ~/.ssh/known_hosts
+
+ssh -N -f -L              Tunel bez pow■oki w tle                scp file                   Kopiuj plik na zdalny host
+8080:localhost:80                                                user@host:/path
+user@host
+
+ssh -t user@host          Wykonaj komend■ przez SSH              scp                        Kopiuj plik ze zdalnego hosta
+'command'                                                        user@host:/path/file
+                                                                 .
+
+ssh -o StrictHostKey      Pomijaj sprawdzanie klucza hosta       scp -r dir/                Kopiuj katalog na zdalny host
+Checking=no                                                      user@host:/path/
+user@host
+
+ssh -o                    Limit czasu po■■czenia 10s             scp -P 2222 file           scp na niestandardowym porcie
+ConnectTimeout=10                                                user@host:/path
+user@host
+
+ssh -o PasswordAuthe      Tylko klucze (bez has■a)               scp -i key.pem file        scp z konkretnym kluczem
+ntication=no                                                     user@host:/path
+user@host
+
+ssh -J jumphost           Skok przez host po■redni (ProxyJump)   sftp user@host             Interaktywny transfer SFTP
+user@target
+
+ssh-keygen -t rsa -b      Generuj klucz RSA 4096 bit             sftp -P 2222               SFTP na niestandardowym porcie
+4096                                                             user@host
+
+ssh-keygen -t             Generuj klucz Ed25519 (zalecany)       sftp -i key.pem            SFTP z konkretnym kluczem
+ed25519                                                          user@host
+
+
+
+
+Biblioteka komend RHCSA                                                                                                      Strona 25
+RHCSA COMMAND LIBRARY                                                                RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+ssh-keygen -t ecdsa       Generuj klucz ECDSA 521 bit               rsync -avz -e ssh          Rsync przez SSH
+-b 521                                                              src/ user@host:dst/
+
+ssh-keygen -f             Generuj klucz do konkretnego pliku        rsync -avz                 Rsync z post■pem
+~/.ssh/mykey                                                        --progress src/
+                                                                    user@host:dst/
+
+ssh-keygen -p -f          Zmie■ has■o klucza prywatnego             ssh-agent bash             Uruchom pow■ok■ z nowym agentem
+~/.ssh/id_rsa                                                                                  SSH
+
+ssh-keygen -y -f          Wy■wietl klucz publiczny z prywatnego     ssh -o BatchMode=yes       Tryb wsadowy (bez interakcji)
+~/.ssh/id_rsa                                                       user@host
+
+ssh-keygen -l -f          Wy■wietl fingerprint klucza               ssh -o PreferredAuth       Tylko klucz publiczny
+~/.ssh/id_rsa.pub                                                   entications=publicke
+                                                                    y user@host
+
+ssh-keygen -R             Usu■ klucz hosta z known_hosts            systemctl reload           Prze■aduj konfiguracj■ sshd
+hostname                                                            sshd
+
+ssh-copy-id               Kopiuj klucz publiczny do hosta           systemctl restart          Zrestartuj serwer SSH
+user@host                                                           sshd
+
+ssh-copy-id -i            Kopiuj konkretny klucz                    cat ~/.ssh/config          Wy■wietl konfiguracj■ klienta SSH
+~/.ssh/mykey.pub
+user@host
+
+ssh-add                   Dodaj klucz do agenta SSH                 ssh-keygen -A              Generuj brakuj■ce klucze hosta (jako
+~/.ssh/id_rsa                                                                                  root)
+
+ssh-add -l                Lista kluczy w agencie SSH                ssh-keyscan -t rsa         Dodaj klucz RSA hosta
+                                                                    hostname >>
+                                                                    known_hosts
+
+
+
+
+■ 19. Cron i harmonogramowanie zada■                                                                                   50 komend
+
+
+crontab -l                Lista cron zada■ bie■■cego                systemd-run                Jednorazowy timer
+                          u■ytkownika                               --on-calendar='*-*-*
+                                                                    02:00:00'
+                                                                    /bin/backup.sh
+
+crontab -e                Edytuj cron zadania                       systemd-run                Wykonaj po 1 godzinie
+                                                                    --on-active=1h
+                                                                    /bin/task.sh
+
+crontab -r                Usu■ wszystkie cron zadania               at 14:30                   Zaplanuj zadanie na 14:30 dzisiaj
+
+crontab -l -u user        Lista cron zada■ konkretnego              at now + 1 hour            Zaplanuj zadanie za 1 godzin■
+                          u■ytkownika (root)
+
+crontab -e -u user        Edytuj cron zadania jako root dla         at midnight                Zaplanuj zadanie o pó■nocy
+                          innego u■ytkownika
+
+crontab -r -u user        Usu■ cron zadania u■ytkownika (jako       at -l                      Lista zaplanowanych zada■ at
+                          root)
+
+cat /etc/crontab          Systemowy plik crontab                    atq                        Alias dla at -l
+
+ls /etc/cron.d/           Pliki cron dla poszczególnych aplikacji   at -d JOB_ID               Usu■ zadanie at
+
+ls /etc/cron.daily/       Skrypty cron uruchamiane codziennie       atrm JOB_ID                Alias dla at -d
+
+ls /etc/cron.weekly/      Skrypty cron uruchamiane co tydzie■       at -c JOB_ID               Wy■wietl polecenie zadania at
+
+ls                        Skrypty cron uruchamiane co miesi■c       batch                      Zaplanuj zadanie gdy load < 1.5
+/etc/cron.monthly/
+
+ls /etc/cron.hourly/      Skrypty cron uruchamiane co godzin■       cat /etc/at.allow          Lista u■ytkowników z prawem at
+
+cat /var/spool/cron/      Plik cron konkretnego u■ytkownika         cat /etc/at.deny           Lista u■ytkowników bez prawa at
+username
+
+
+
+
+Biblioteka komend RHCSA                                                                                                        Strona 26
+RHCSA COMMAND LIBRARY                                                            RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+cat /etc/cron.allow       Lista u■ytkowników z prawem cron      # Przyk■ad cron: 0 2       Codziennie o 2:00
+                                                                * * * /backup.sh
+
+cat /etc/cron.deny        Lista u■ytkowników bez prawa cron     # Przyk■ad cron:           Co 15 minut
+                                                                */15 * * * *
+                                                                /check.sh
+
+run-parts                 R■cznie uruchom zadania daily         # Przyk■ad cron: 0         Co godzin■ w godzinach pracy
+/etc/cron.daily                                                 9-17 * * 1-5 /cmd
+
+anacron -f -n             Uruchom anacron natychmiast           # Przyk■ad cron:           Przy starcie systemu
+                                                                @reboot /startup.sh
+
+cat /etc/anacrontab       Konfiguracja anacron                  # Przyk■ad cron:           Raz dziennie
+                                                                @daily /daily.sh
+
+systemctl                 Lista timerów systemd                 # Przyk■ad cron:           Raz w tygodniu
+list-timers                                                     @weekly /weekly.sh
+
+systemctl                 Wszystkie timery (w tym nieaktywne)   # Przyk■ad cron:           Raz w miesi■cu
+list-timers --all                                               @monthly /monthly.sh
+
+systemctl status          Status konkretnego timera             # Pole 1: minuty           Sk■adnia cron — minuty
+timer-name.timer                                                (0-59)
+
+systemctl enable          W■■cz timer systemd                   # Pole 2: godziny          Sk■adnia cron — godziny
+myapp.timer                                                     (0-23)
+
+systemctl start           Uruchom timer systemd                 # Pole 3: dzie■            Sk■adnia cron — dzie■ miesi■ca
+myapp.timer                                                     miesi■ca (1-31)
+
+systemctl stop            Zatrzymaj timer systemd               # Pole 4: miesi■c          Sk■adnia cron — miesi■c
+myapp.timer                                                     (1-12)
+
+cat /etc/systemd/sys      Plik konfiguracji timera              # Pole 5: dzie■            Sk■adnia cron — dzie■ tygodnia
+tem/myapp.timer                                                 tygodnia (0-7,
+                                                                0=ndz)
+
+
+
+
+■ 20. Logowanie i monitorowanie systemu                                                                            68 komend
+
+
+journalctl                Wszystkie logi systemd journal        ausearch -ua user          Zdarzenia audytu dla u■ytkownika
+
+journalctl -xe            Ostatnie logi z wyja■nieniami         ausearch -x                Zdarzenia audytu dla programu
+                                                                /usr/sbin/sshd
+
+journalctl -b             Logi bie■■cego uruchomienia           ausearch --start           Zdarzenia audytu z dzisiaj
+                                                                today
+
+journalctl -u sshd        Logi us■ugi SSH                       aureport                   Raport ogólny z logów audytu
+
+journalctl -f             ■ledzenie logów na ■ywo               aureport -l                Raport logowa■
+
+journalctl -p err         Logi o priorytecie error              aureport -u                Raport u■ytkowników
+
+journalctl --since        Logi z dzisiaj                        aureport -f                Raport dost■pu do plików
+'today'
+
+journalctl --since        Logi z ostatniej godziny              aureport -n                Raport anomalii
+'1 hour ago'
+
+journalctl -o             Verbose format logów                  aureport --summary         Podsumowanie audytu
+verbose
+
+journalctl                Rozmiar logów journal                 systemctl status           Status us■ugi auditd
+--disk-usage                                                    auditd
+
+journalctl                Ogranicz logi do 100MB                auditctl -l                Lista aktywnych regu■ audytu
+--vacuum-size=100M
+
+dmesg                     Komunikaty j■dra systemu              auditctl -w                Monitoruj zmiany w /etc/passwd
+                                                                /etc/passwd -p wa -k
+                                                                passwd_changes
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 27
+RHCSA COMMAND LIBRARY                                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+dmesg | grep error        B■■dy w logach j■dra                     auditctl -w                Monitoruj sudoers
+                                                                   /etc/sudoers -p wa
+                                                                   -k sudoers_changes
+
+dmesg -T                  Komunikaty j■dra z czytelnym czasem      auditctl -a                Loguj wykonywanie komend
+                                                                   always,exit -F
+                                                                   arch=b64 -S execve
+                                                                   -k cmd_exec
+
+dmesg -H                  Czytelny format dmesg                    auditctl -D                Usu■ wszystkie regu■y audytu
+
+dmesg                     Tylko b■■dy i ostrze■enia j■dra          cat /etc/audit/audit       Trwa■e regu■y audytu
+--level=err,warn                                                   .rules
+
+dmesg -w                  ■ledzenie nowych komunikatów j■dra       cat /etc/audit/audit       Konfiguracja demona auditd
+                                                                   d.conf
+
+dmesg -c                  Wyczy■■ bufor ring j■dra                 logrotate -f               Wymu■ rotacj■ logów
+                                                                   /etc/logrotate.conf
+
+cat                       G■ówny log systemu (syslog)              logrotate -d               Testuj konfiguracj■ logrotate
+/var/log/messages                                                  /etc/logrotate.conf
+
+cat /var/log/secure       Logi bezpiecze■stwa i uwierzytelniania   cat                        Globalna konfiguracja logrotate
+                                                                   /etc/logrotate.conf
+
+cat                       Logi autoryzacji (Debian/Ubuntu)         ls /etc/logrotate.d/       Konfiguracje logrotate aplikacji
+/var/log/auth.log
+
+cat /var/log/cron         Logi zada■ cron                          rsyslogd -N1               Sprawd■ konfiguracj■ rsyslog
+
+cat /var/log/maillog      Logi serwera poczty                      cat                        Konfiguracja rsyslog
+                                                                   /etc/rsyslog.conf
+
+cat /var/log/audit/a      Logi audytu systemu (SELinux/auditd)     systemctl restart          Zrestartuj rsyslog
+udit.log                                                           rsyslog
+
+cat                       Logi procesu rozruchu                    sar -u 1 5                 Statystyki CPU co sekund■, 5 razy
+/var/log/boot.log
+
+tail -f                   ■ledzenie logów systemowych              sar -r 1 5                 Statystyki pami■ci co sekund■
+/var/log/messages
+
+tail -f                   ■ledzenie logów bezpiecze■stwa           sar -d 1 5                 Statystyki I/O dysku
+/var/log/secure
+
+grep 'Failed              Nieudane próby SSH                       sar -n DEV 1 5             Statystyki sieci
+password'
+/var/log/secure
+
+grep 'Accepted'           Udane logowania SSH                      sar -b 1 5                 Statystyki I/O blokowego
+/var/log/secure
+
+logger 'Test              Wy■lij wiadomo■■ do syslog               sar -A                     Wszystkie statystyki sar
+message'
+
+logger -p user.err        Log z priorytetem error                  iostat -x 1                Rozszerzone statystyki I/O co sekund■
+'Error message'
+
+logger -t myapp           Log z tagiem aplikacji                   iostat -d 1 5              Statystyki dysku co sekund■
+'Application log'
+
+ausearch -m LOGIN         Zdarzenia logowania w audycie            mpstat -P ALL 1            Statystyki CPU per rdze■
+
+ausearch -m               Zdarzenia uwierzytelniania               vmstat 1 5                 Statystyki VM co sekund■
+USER_AUTH
+
+
+
+
+■ 21. Boot i GRUB                                                                                                        69 komend
+
+
+cat                       Konfiguracja GRUB                        sysctl -p                  Za■aduj parametry z /etc/sysctl.conf
+/etc/default/grub
+
+
+
+
+Biblioteka komend RHCSA                                                                                                          Strona 28
+RHCSA COMMAND LIBRARY                                                       RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+grub2-mkconfig -o         Generuj konfiguracj■ GRUB2 (BIOS)   sysctl -p /etc/sysct    Za■aduj konkretny plik sysctl
+/boot/grub2/grub.cfg                                          l.d/99-custom.conf
+
+grub2-mkconfig -o /b      Generuj konfiguracj■ GRUB2 (UEFI)   cat /etc/sysctl.conf    Trwa■e parametry j■dra
+oot/efi/EFI/redhat/g
+rub.cfg
+
+grub2-install             Zainstaluj GRUB2 na dysku (BIOS)    cat /etc/sysctl.d/      Katalog z plikami sysctl
+/dev/sda
+
+grub2-install             Zainstaluj GRUB2 dla UEFI           echo 'net.ipv4.ip_fo    Trwa■e w■■czenie forwardingu
+--target=x86_64-efi                                           rward=1' > /etc/sysc
+                                                              tl.d/99-ip.conf
+
+grub2-set-default 0       Ustaw domy■lny wpis GRUB (index)    modprobe module_name    Za■aduj modu■ j■dra
+
+grub2-set-default         Ustaw domy■lny wpis GRUB (nazwa)    modprobe -r             Usu■ modu■ j■dra
+'CentOS'                                                      module_name
+
+grub2-editenv list        Wy■wietl zmienne ■rodowiskowe       modprobe --force        Wymu■ za■adowanie modu■u
+                          GRUB                                module
+
+grub2-reboot 1            Uruchom raz z konkretnym wpisem     lsmod                   Lista za■adowanych modu■ów j■dra
+                          GRUB
+
+ls /boot/grub2/           Zawarto■■ katalogu GRUB2            modinfo module_name     Informacje o module j■dra
+
+cat                       Pe■na konfiguracja GRUB2            depmod -a               Od■wie■ zale■no■ci modu■ów
+/boot/grub2/grub.cfg      (generowana)
+
+ls /boot/                 Zawarto■■ katalogu /boot            insmod                  Za■aduj modu■ z pliku
+                                                              /path/to/module.ko
+
+ls -la                    Zainstalowane j■dra Linux           rmmod module_name       Usu■ modu■ j■dra
+/boot/vmlinuz*
+
+ls -la                    Pliki initramfs                     cat                     Modu■y ■adowane automatycznie
+/boot/initramfs*                                              /etc/modules-load.d/
+
+uname -r                  Bie■■ca wersja j■dra                echo 'module_name' >    Za■aduj modu■ przy starcie
+                                                              /etc/modules-load.d/
+                                                              mymod.conf
+
+uname -a                  Wszystkie informacje o j■drze       cat /etc/modprobe.d/    Konfiguracja modprobe
+
+uname -m                  Architektura systemu                systemctl               Domy■lny target systemd
+                                                              get-default
+
+rpm -qa kernel            Lista zainstalowanych j■der         systemctl               Tryb konsolowy domy■lny
+                                                              set-default
+                                                              multi-user.target
+
+dnf list installed        Zainstalowane j■dra (DNF)           systemctl               Tryb graficzny domy■lny
+kernel                                                        set-default
+                                                              graphical.target
+
+dnf install kernel        Zainstaluj nowe j■dro               systemctl rescue        Tryb ratunkowy
+
+dnf remove                Usu■ stare j■dro                    systemctl emergency     Tryb awaryjny
+kernel-OLD_VERSION
+
+dracut --force            Regeneruj initramfs                 init 3                  Prze■■cz na runlevel 3 (tekstowy)
+
+dracut --force /boot      Regeneruj dla bie■■cego j■dra       init 5                  Prze■■cz na runlevel 5 (graficzny)
+/initramfs-$(uname
+-r).img $(uname -r)
+
+dracut -v --force         Regeneruj initramfs z verbose       init 1                  Tryb jednego u■ytkownika
+
+lsinitrd /boot/initr      Lista zawarto■ci initramfs          init 0                  Wy■■cz system
+amfs-$(uname -r).img
+
+lsinitrd /boot/initr      Modu■y w initramfs                  init 6                  Zrestartuj system
+amfs-$(uname -r).img
+| grep module
+
+
+
+
+Biblioteka komend RHCSA                                                                                               Strona 29
+RHCSA COMMAND LIBRARY                                                           RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+dracut --add-drivers      Dodaj sterownik do initramfs          shutdown -h now           Natychmiastowe wy■■czenie
+'megaraid_sas'
+--force
+
+dmesg | grep -i           Komunikaty j■dra o sobie              shutdown -h +10           Wy■■cz za 10 minut
+kernel
+
+cat /proc/cmdline         Parametry uruchomienia j■dra          shutdown -r now           Natychmiastowy restart
+
+cat /proc/version         Wersja j■dra i kompilator             shutdown -c               Anuluj zaplanowane wy■■czenie
+
+cat /proc/sys/kernel      Nazwa hosta z /proc                   reboot                    Zrestartuj system
+/hostname
+
+sysctl -a                 Wszystkie parametry j■dra             poweroff                  Wy■■cz system
+
+sysctl -a | grep          Sprawd■ forwarding IP                 halt                      Zatrzymaj system
+net.ipv4.ip_forward
+
+sysctl                    Konkretny parametr j■dra              sync                      Wyflushuj bufory systemu plików
+net.ipv4.ip_forward
+
+sysctl -w net.ipv4.i      Tymczasowo w■■cz forwarding IP
+p_forward=1
+
+
+
+
+■ 22. NFS i Autofs                                                                                                 35 komend
+
+
+showmount -e server       Wy■wietl eksportowane udzia■y NFS     nfsstat                   Statystyki NFS
+
+showmount -a server       Poka■ klientów montuj■cych udzia■y    nfsstat -c                Statystyki klienta NFS
+
+mount -t nfs              Montuj udzia■ NFS                     nfsstat -s                Statystyki serwera NFS
+server:/share /mnt
+
+mount -t nfs4             Montuj udzia■ NFS v4                  firewall-cmd              Otwórz porty NFS
+server:/share /mnt                                              --add-service=nfs
+                                                                --permanent
+
+mount -o ro,soft          Montuj NFS tylko do odczytu           firewall-cmd --add-s      Otwórz porty rpcbind
+server:/share /mnt                                              ervice=rpc-bind
+                                                                --permanent
+
+mount -o                  Bezpieczne opcje NFS                  firewall-cmd              Otwórz porty mountd
+nosuid,noexec                                                   --add-service=mountd
+server:/share /mnt                                              --permanent
+
+umount /mnt               Odmontuj NFS                          cat /etc/auto.master      G■ówna mapa autofs
+
+cat /etc/exports          Konfiguracja eksportów NFS (serwer)   cat /etc/auto.misc        Mapa dodatkowa autofs
+
+exportfs -a               Eksportuj wszystkie udzia■y NFS       systemctl enable          Uruchom autofs
+                                                                --now autofs
+
+exportfs -r               Prze■aduj konfiguracj■ eksportów      systemctl restart         Zrestartuj autofs
+                                                                autofs
+
+exportfs -v               Verbose lista eksportów               automount -f -v           Uruchom automount verbose
+
+exportfs -ua              Dezeksportuj wszystko                 ls /mnt/nfs/share         Wyzwól automatyczne montowanie
+
+exportfs                  Eksportuj konkretny udzia■            cat /etc/auto.master      Niestandardowa mapa autofs
+server:/share                                                   .d/nfs.autofs
+
+exportfs -s               Lista aktywnych eksportów             # /mnt/nfs                Przyk■ad wpisu auto.master
+                                                                /etc/auto.nfs
+
+systemctl enable          Uruchom serwer NFS                    # share -rw,soft          Przyk■ad wpisu mapy autofs
+--now nfs-server                                                server:/share
+
+systemctl status          Status serwera NFS                    # /-                      Bezpo■rednia mapa autofs
+nfs-server                                                      /etc/auto.direct
+
+
+
+
+Biblioteka komend RHCSA                                                                                                Strona 30
+RHCSA COMMAND LIBRARY                                                           RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+systemctl enable          Uruchom rpcbind (NFS v3)             # /mnt/direct -rw          Bezpo■rednie montowanie autofs
+--now rpcbind                                                  server:/share
+
+rpcinfo -p server         Informacje RPC z serwera
+
+
+
+
+■ 23. Kontenery Podman                                                                                               114 komend
+
+
+podman --version          Wersja Podmana                       podman exec                Wykonaj komend■ w kontenerze
+                                                               container ls /app
+
+podman info               Informacje o konfiguracji Podmana    podman exec -u root        Wykonaj jako root
+                                                               container id
+
+podman images             Lista lokalnych obrazów              podman logs                Logi kontenera
+                                                               container
+
+podman images -a          Wszystkie obrazy (w tym po■rednie)   podman logs -f             ■led■ logi kontenera
+                                                               container
+
+podman pull               Pobierz obraz z rejestru             podman logs --tail         Ostatnie 50 linii logów
+image:tag                                                      50 container
+
+podman pull registry      Pobierz obraz UBI                    podman inspect             Szczegó■y kontenera JSON
+.access.redhat.com/u                                           container
+bi8/ubi
+
+podman push               Wypchnij obraz do rejestru           podman inspect -f          Pole ze szczegó■ów kontenera
+image:tag                                                      '{{.State.Running}}'
+                                                               cont
+
+podman rmi image          Usu■ lokalny obraz                   podman top container       Procesy wewn■trz kontenera
+
+podman rmi -a             Usu■ wszystkie lokalne obrazy        podman stats               Statystyki zasobów kontenera
+                                                               container
+
+podman rmi -f image       Wymu■ usuni■cie obrazu               podman stats               Jednorazowe statystyki
+                                                               --no-stream
+
+podman image inspect      Szczegó■y obrazu                     podman diff                Zmiany w systemie plików kontenera
+image                                                          container
+
+podman image history      Historia warstw obrazu               podman commit              Utwórz obraz z kontenera
+image                                                          container newimage
+
+podman image prune        Usu■ nieu■ywane obrazy               podman cp src              Kopiuj pliki do kontenera
+                                                               container:/dst
+
+podman image prune        Usu■ wszystkie nieu■ywane obrazy     podman cp                  Kopiuj pliki z kontenera
+-a                                                             container:/src dst
+
+podman tag src:tag        Zmie■ tag obrazu                     podman pause               Wstrzymaj procesy kontenera
+dst:tag                                                        container
+
+podman save image -o      Zapisz obraz do pliku tar            podman unpause             Wznów procesy kontenera
+file.tar                                                       container
+
+podman load -i            Za■aduj obraz z pliku tar            podman rename              Zmie■ nazw■ kontenera
+file.tar                                                       oldname newname
+
+podman search nginx       Szukaj obrazu w rejestrach           podman port                Mapowania portów kontenera
+                                                               container
+
+podman search             Szukaj z filtrem                     podman network ls          Lista sieci Podman
+--filter stars=10
+nginx
+
+podman search             Lista tagów obrazu                   podman network             Utwórz sie■
+--list-tags                                                    create mynet
+registry/image
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 31
+RHCSA COMMAND LIBRARY                                                          RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+podman run image          Uruchom kontener                    podman network rm          Usu■ sie■
+                                                              mynet
+
+podman run -it image      Interaktywny kontener z bash        podman network             Szczegó■y sieci
+/bin/bash                                                     inspect mynet
+
+podman run -d image       Uruchom kontener w tle (detach)     podman network             Pod■■cz kontener do sieci
+                                                              connect mynet
+                                                              container
+
+podman run --name         Uruchom z konkretn■ nazw■           podman network             Od■■cz kontener od sieci
+mycontainer image                                             disconnect mynet
+                                                              container
+
+podman run -p             Mapuj port 8080 -> 80               podman volume ls           Lista wolumenów Podman
+8080:80 image
+
+podman run -v             Montuj wolumen host                 podman volume create       Utwórz wolumen
+/host:/container                                              myvol
+image
+
+podman run -v             Montuj nazwany wolumen              podman volume rm           Usu■ wolumen
+myvol:/data image                                             myvol
+
+podman run -e             Ustaw zmienn■ ■rodowiskow■          podman volume              Szczegó■y wolumenu
+VAR=value image                                               inspect myvol
+
+podman run                Zmienne z pliku                     podman volume prune        Usu■ nieu■ywane wolumeny
+--env-file
+/path/to/.env image
+
+podman run --rm           Usu■ kontener po zako■czeniu        podman build -t            Zbuduj obraz z Containerfile
+image                                                         myimage:tag .
+
+podman run                Polityka restartu                   podman build -f            Podaj nazw■ pliku
+--restart=always                                              Containerfile -t
+image                                                         myimage .
+
+podman run --restart      Restartuj max 3 razy przy b■■dzie   podman build               Buduj bez cache
+=on-failure:3 image                                           --no-cache -t
+                                                              myimage .
+
+podman run -u user        Uruchom jako konkretny u■ytkownik   podman build               Zmienne build
+image                                                         --build-arg KEY=val
+                                                              -t img .
+
+podman run                Uprzywilejowany kontener            cat Containerfile          Wy■wietl plik budowania kontenera
+--privileged image
+
+podman run --cap-add      Dodaj capability                    podman generate            Generuj unit systemd
+NET_ADMIN image                                               systemd --new --name
+                                                              container
+
+podman run                Usu■ wszystkie capabilities         podman generate            Generuj do pliku
+--cap-drop ALL image                                          systemd --files
+                                                              --name container
+
+podman run --memory       Ogranicz pami■■                     podman play kube           Uruchom z pliku YAML (k8s-like)
+512m image                                                    pod.yaml
+
+podman run --cpus         Ogranicz CPU                        podman generate kube       Generuj YAML dla kontenera
+1.5 image                                                     container
+
+podman run --network      U■yj sieci hosta                    podman pod ls              Lista podów
+host image
+
+podman run --network      Brak sieci                          podman pod create          Utwórz pod
+none image                                                    --name mypod
+
+podman run                Ustaw hostname kontenera            podman pod rm mypod        Usu■ pod
+--hostname myhost
+image
+
+
+
+
+Biblioteka komend RHCSA                                                                                                 Strona 32
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+podman ps                 Lista dzia■aj■cych kontenerów          podman pod start           Uruchom pod
+                                                                 mypod
+
+podman ps -a              Lista wszystkich kontenerów            podman pod stop            Zatrzymaj pod
+                                                                 mypod
+
+podman ps -q              Tylko ID dzia■aj■cych kontenerów       podman pod stats           Statystyki poda
+                                                                 mypod
+
+podman ps -qa             Tylko ID wszystkich kontenerów         podman pod inspect         Szczegó■y poda
+                                                                 mypod
+
+podman ps --format        Niestandardowy format ps               podman run --pod           Uruchom kontener w podzie
+'table {{.ID}}                                                   mypod image
+{{.Names}}'
+
+podman stop               Zatrzymaj kontener (SIGTERM)           podman system prune        Usu■ nieu■ywane zasoby
+container
+
+podman stop -t 0          Natychmiastowe zatrzymanie             podman system prune        Usu■ wszystkie nieu■ywane zasoby
+container                                                        -a
+
+podman start              Uruchom zatrzymany kontener            podman system df           U■ycie dysku przez Podman
+container
+
+podman restart            Zrestartuj kontener                    podman system reset        Resetuj stan Podmana
+container
+
+podman kill               Wy■lij sygna■ do kontenera (SIGKILL)   podman login               Zaloguj si■ do rejestru
+container                                                        registry.redhat.io
+
+podman kill -s            Wy■lij konkretny sygna■                podman logout              Wyloguj si■ z rejestru
+SIGHUP container                                                 registry.redhat.io
+
+podman rm container       Usu■ kontener                          cat /etc/containers/       Konfiguracja rejestrów
+                                                                 registries.conf
+
+podman rm -f              Wymu■ usuni■cie kontenera              cat /etc/containers/       Konfiguracja przechowywania
+container                                                        storage.conf
+
+podman rm -a              Usu■ wszystkie zatrzymane kontenery    podman unshare             Wejd■ w przestrze■ nazw
+                                                                                            u■ytkownika
+
+podman container          Usu■ zatrzymane kontenery              podman machine init        Inicjalizuj VM Podmana (macOS/Win)
+prune
+
+podman exec -it           Wykonaj bash w kontenerze              podman machine start       Uruchom VM Podmana
+container /bin/bash
+
+
+
+
+■ 24. Informacje o systemie                                                                                           60 komend
+
+
+uname -a                  Wszystkie informacje o systemie        lspci -k                   Sterowniki dla urz■dze■ PCI
+
+uname -r                  Wersja j■dra                           lspci | grep -i vga        Karta graficzna
+
+uname -m                  Architektura procesora                 lspci | grep -i eth        Kontrolery sieciowe
+
+uname -n                  Nazwa hosta sieciowego                 lspci | grep -i            Kontrolery pami■ci masowej
+                                                                 storage
+
+uname -s                  Nazwa systemu operacyjnego             lsusb                      Lista urz■dze■ USB
+
+uname -v                  Wersja j■dra (data kompilacji)         lsusb -v                   Verbose informacje o USB
+
+cat /etc/os-release       Informacje o dystrybucji Linux         lsusb -t                   Drzewo topologii USB
+
+cat                       Wersja Red Hat/CentOS/RHEL             hwinfo --short             Krótkie informacje o sprz■cie
+/etc/redhat-release
+
+cat                       Wersja CentOS                          inxi -Fxz                  Pe■ne informacje o systemie
+/etc/centos-release
+
+
+
+
+Biblioteka komend RHCSA                                                                                                     Strona 33
+RHCSA COMMAND LIBRARY                                                            RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+hostnamectl               Informacje o ho■cie i OS              uptime                     Czas dzia■ania systemu
+
+lscpu                     Informacje o procesorze               uptime -p                  Czytelny czas dzia■ania
+
+lscpu -e                  Szczegó■owe informacje o CPU          cat /proc/uptime           Czas dzia■ania w sekundach
+
+cat /proc/cpuinfo         Surowe informacje o CPU z /proc       w                          Zalogowani u■ytkownicy i load
+
+nproc                     Liczba dost■pnych procesorów          top -bn1 | head -3         Szybkie informacje o systemie
+
+lsmem                     Informacje o pami■ci RAM              cat /proc/loadavg          Load average
+
+lsmem -a                  Wszystkie zakresy pami■ci             vmstat                     Statystyki maszyny wirtualnej
+
+cat /proc/meminfo         Surowe informacje o pami■ci           iostat                     Statystyki I/O
+
+free -h                   U■ycie pami■ci RAM i swap             mpstat -P ALL              Statystyki procesorów
+
+free -m                   Pami■■ w megabajtach                  sar -u 1 3                 U■ycie CPU (3 pomiary)
+
+dmidecode -t memory       Informacje o modu■ach RAM (root)      numactl --hardware         Informacje o architekturze NUMA
+
+dmidecode -t              Informacje o procesorze (root)        lsnuma                     Lista w■z■ów NUMA
+processor
+
+dmidecode -t bios         Informacje o BIOS (root)              cat /sys/class/dmi/i       Nazwa produktu z DMI
+                                                                d/product_name
+
+dmidecode -t system       Informacje o systemie (root)          cat /sys/class/dmi/i       Producent systemu
+                                                                d/sys_vendor
+
+dmidecode -t              Informacje o p■ycie g■ównej           cat /sys/class/dmi/i       Wersja BIOS
+baseboard                                                       d/bios_version
+
+lshw                      Szczegó■owe informacje o sprz■cie     ipmitool chassis           Status obudowy (IPMI)
+                                                                status
+
+lshw -short               Krótkie podsumowanie sprz■tu          ipmitool sdr list          Czujniki sprz■towe (IPMI)
+
+lshw -class network       Informacje o karcie sieciowej         sensors                    Temperatura i napi■cia (lm-sensors)
+
+lshw -class disk          Informacje o dyskach                  sensors-detect             Wykryj czujniki sprz■towe
+
+lspci                     Lista urz■dze■ PCI                    hdparm -I /dev/sda |       Pr■dko■■ dysku
+                                                                grep Speed
+
+lspci -v                  Verbose informacje o PCI              cat /sys/block/sda/q       Sprawd■ czy SSD (0) czy HDD (1)
+                                                                ueue/rotational
+
+
+
+
+■ 25. Zmienne ■rodowiskowe i pow■oka                                                                                80 komend
+
+
+env                       Wy■wietl wszystkie zmienne            !!                         Powtórz ostatni■ komend■
+                          ■rodowiskowe
+
+printenv                  Wy■wietl wszystkie zmienne            !n                         Powtórz komend■ numer n z historii
+
+printenv PATH             Wy■wietl konkretn■ zmienn■            !string                    Powtórz ostatni■ komend■
+                                                                                           zaczynaj■c■ si■ od string
+
+echo $VARIABLE            Warto■■ zmiennej                      Ctrl+R                     Wsteczne przeszukiwanie historii
+
+export VAR=value          Eksportuj zmienn■ do ■rodowiska       echo $HISTSIZE             Rozmiar historii w pami■ci
+
+unset VAR                 Usu■ zmienn■ ■rodowiskow■             echo $HISTFILE             Plik historii polece■
+
+set                       Wy■wietl zmienne i funkcje pow■oki    echo $HISTFILESIZE         Rozmiar pliku historii
+
+set -x                    Tryb debugowania pow■oki (echo        echo $SHELL                Bie■■ca pow■oka
+                          komend)
+
+set +x                    Wy■■cz tryb debugowania               echo $BASH_VERSION         Wersja bash
+
+set -e                    Zako■cz przy b■■dzie                  echo $PS1                  Prompt pow■oki (PS1)
+
+set -u                    B■■d przy niezdefiniowanej zmiennej   alias ll='ls -alh'         Utwórz alias
+
+
+
+
+Biblioteka komend RHCSA                                                                                                    Strona 34
+RHCSA COMMAND LIBRARY                                                             RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+set -o pipefail           B■■d je■li dowolny element potoku      alias                      Lista wszystkich aliasów
+                          zawiedzie
+
+readonly VAR=value        Zmienna tylko do odczytu               unalias ll                 Usu■ alias
+
+declare -r VAR=value      Deklaruj zmienn■ jako readonly         type ll                    Sprawd■ co robi alias/komenda
+
+declare -i NUM=5          Deklaruj zmienn■ jako integer          which bash                 ■cie■ka do bash
+
+declare -a ARRAY          Deklaruj tablic■                       which python3              ■cie■ka do python3
+
+declare -A MAP            Deklaruj tablic■ asocjacyjn■           whereis bash               Lokalizacje pliku bash
+
+declare -x VAR            Eksportuj zmienn■ (jak export)         hash                       Cache lokalizacji komend
+
+declare -p VAR            Wy■wietl atrybuty i warto■■ zmiennej   hash -r                    Wyczy■■ cache komend
+
+ARRAY=(a b c)             Utwórz tablic■                         command -v ls              Sprawd■ czy komenda istnieje
+
+echo ${ARRAY[0]}          Pierwszy element tablicy               complete                   Lista completions
+
+echo ${ARRAY[@]}          Wszystkie elementy tablicy             compgen -c                 Lista wszystkich dost■pnych komend
+
+echo ${#ARRAY[@]}         Liczba elementów tablicy               compgen -a                 Lista wszystkich aliasów
+
+source                    Uruchom skrypt w bie■■cej pow■oce      bind -P                    Lista powi■za■ klawiszy
+/path/to/script.sh
+
+. /path/to/script.sh      Alias dla source                       xargs -I{} cmd {}          Przeka■ argumenty do komendy
+
+bash -c 'command'         Uruchom komend■ w bash                 xargs -n 1 cmd             Uruchom cmd dla ka■dego argumentu
+
+bash -n script.sh         Sprawd■ sk■adni■ skryptu bez           xargs -P 4 cmd             Uruchom równolegle 4 procesy
+                          wykonania
+
+bash -x script.sh         Debuguj skrypt (wy■wietlaj komendy)    seq 1 10                   Generuj sekwencj■ 1-10
+
+bash -v script.sh         Verbose — wy■wietlaj wiersze przed     seq -w 01 10               Sekwencja z zerami wiod■cymi
+                          wykonaniem
+
+cat ~/.bashrc             Konfiguracja interaktywna bash         yes 'text'                 Wypisuj tekst w niesko■czono■■
+
+cat ~/.bash_profile       Profil logowania bash                  true                       Zawsze zwraca 0 (sukces)
+
+cat ~/.bash_logout        Skrypt przy wylogowaniu                false                      Zawsze zwraca 1 (b■■d)
+
+cat /etc/profile          Globalny profil pow■oki                :                          Komenda no-op (true)
+
+cat /etc/bashrc           Globalna konfiguracja bashrc           echo $$                    PID bie■■cej pow■oki
+
+ls /etc/profile.d/        Pliki profilu dla wszystkich           echo $?                    Kod wyj■cia ostatniej komendy
+                          u■ytkowników
+
+source ~/.bashrc          Prze■aduj konfiguracj■ bash            echo $!                    PID ostatniego procesu t■a
+
+history                   Historia komend                        echo $0                    Nazwa bie■■cego skryptu
+
+history | tail -20        Ostatnie 20 komend                     echo $#                    Liczba argumentów skryptu
+
+history -c                Wyczy■■ histori■                       echo $@                    Wszystkie argumenty skryptu
+
+history -w                Zapisz histori■ do pliku               echo $*                    Wszystkie argumenty jako jeden string
+
+
+
+
+■ 26. Wyszukiwanie plików                                                                                              57 komend
+
+
+find / -name              Szukaj pliku po nazwie                 find . -nogroup            Pliki bez grupy
+'file.txt'
+
+find . -name '*.log'      Szukaj plików .log                     find . -empty              Puste pliki i katalogi
+
+find . -iname             Szukaj bez rozró■niania wielko■ci      find . -maxdepth 2         Szukaj do g■■boko■ci 2
+'*.Log'                                                          -name '*.conf'
+
+find / -type f -name      Szukaj tylko plików                    find . -mindepth 2         Szukaj od g■■boko■ci 2
+'file'                                                           -name '*.conf'
+
+
+
+
+Biblioteka komend RHCSA                                                                                                    Strona 35
+RHCSA COMMAND LIBRARY                                                                 RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+find / -type d -name      Szukaj tylko katalogów                     find . ! -name             Pliki NIE ko■cz■ce si■ na .txt
+'dir'                                                                '*.txt'
+
+find / -type l            Szukaj dowi■za■ symbolicznych              find . -name '*.log'       Pliki .log lub .txt
+                                                                     -o -name '*.txt'
+
+find / -type b            Szukaj plików blokowych                    find . -name '*.log'       Pliki .log wi■ksze ni■ 1MB
+                                                                     -a -size +1M
+
+find / -type c            Szukaj plików znakowych                    find . -name '*.tmp'       Znajd■ i usu■ pliki .tmp
+                                                                     -delete
+
+find . -size +100M        Pliki wi■ksze ni■ 100MB                    find . -name '*.log'       Usu■ ka■dy znaleziony plik
+                                                                     -exec rm {} \;
+
+find . -size -10k         Pliki mniejsze ni■ 10KB                    find . -name '*.log'       Usu■ wszystkie naraz
+                                                                     -exec rm {} +
+
+find . -size +1G          Pliki wi■ksze ni■ 1GB                      find . -name '*.txt'       Grep w znalezionych
+                                                                     -exec grep 'pattern'
+                                                                     {} \;
+
+find . -size 512c         Pliki dok■adnie 512 bajtów                 find . -name '*.py'        Chmod dla znalezionych
+                                                                     -exec chmod 755 {} \;
+
+find . -newer             Pliki nowsze ni■ plik referencyjny         find . -type f -name       Policz pliki jpg
+reference_file                                                       '*.jpg' | wc -l
+
+find . -mtime -7          Pliki zmienione w ostatnich 7 dniach       find . -type f -newer      Lista plików nowszych ni■ passwd
+                                                                     /etc/passwd -ls
+
+find . -mtime +30         Pliki niezmieniane przez 30+ dni           find /tmp -mtime +7        Usu■ stare pliki tmp
+                                                                     -exec rm -f {} \;
+
+find . -mmin -60          Pliki zmienione w ostatniej godzinie       find . -name               Bezpieczny xargs
+                                                                     '*.conf' -print0 |
+                                                                     xargs -0 grep
+                                                                     'option'
+
+find . -atime -1          Pliki u■ywane w ostatnich 24h              find . -mount -name        Nie przekraczaj granic systemów plików
+                                                                     '*.txt'
+
+find . -ctime -1          Pliki zmodyfikowane (i-w■ze■) w 24h        find . -xdev -name         Alias dla -mount
+                                                                     '*.txt'
+
+find . -perm 644          Pliki z dok■adnie takimi uprawnieniami     find / -inum 12345         Znajd■ plik po numerze i-w■z■a
+
+find . -perm -644         Pliki z co najmniej takimi uprawnieniami   find . -links +1           Pliki z wi■cej ni■ 1 dowi■zaniem
+
+find . -perm /644         Pliki z którymkolwiek z tych uprawnie■     locate file.txt            Szybkie szukanie pliku (baza danych)
+
+find . -perm -4000        Pliki z bitem SUID                         locate '*.conf' |          Szukaj konfiguracji w /etc
+                                                                     grep '/etc'
+
+find . -perm -2000        Pliki z bitem SGID                         updatedb                   Aktualizuj baz■ danych locate
+
+find . -perm -1000        Pliki z sticky bit                         locate -i pattern          Szukaj bez rozró■niania wielko■ci
+
+find . -user              Pliki nale■■ce do u■ytkownika              locate -c pattern          Policz pasuj■ce pliki
+username
+
+find . -group             Pliki nale■■ce do grupy                    locate -l 10 pattern       Ogranicz wyniki do 10
+groupname
+
+find . -uid 1000          Pliki z UID 1000                           locate -e pattern          Sprawd■ czy pliki istniej■
+
+find . -gid 1000          Pliki z GID 1000                           cat                        Konfiguracja updatedb
+                                                                     /etc/updatedb.conf
+
+find . -nouser            Pliki bez w■a■ciciela
+
+
+
+
+✏■ 27. Edytor Vim                                                                                                       115 komend
+
+
+
+
+Biblioteka komend RHCSA                                                                                                          Strona 36
+RHCSA COMMAND LIBRARY                                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+vim file.txt              Otwórz plik w Vim                        c$                         Zmie■ do ko■ca linii
+
+vim +10 file.txt          Otwórz plik w Vim na linii 10            cw                         Zmie■ s■owo
+
+vim +/pattern             Otwórz i szukaj wzorca                   cc                         Zmie■ ca■■ lini■
+file.txt
+
+vim -R file.txt           Otwórz plik tylko do odczytu             dw                         Usu■ s■owo
+
+view file.txt             Alias dla vim -R                         d$                         Usu■ do ko■ca linii
+
+vim -d file1 file2        Otwórz diff plików w Vim                 d0                         Usu■ do pocz■tku linii
+
+vimdiff file1 file2       Alias dla vim -d                         D                          Usu■ do ko■ca linii (skrót)
+
+vim -u NONE file.txt      Vim bez pliku konfiguracyjnego           /pattern                   Szukaj wzorca do przodu
+
+# Tryby Vim:              Vim ma 4 g■ówne tryby                    ?pattern                   Szukaj wzorca do ty■u
+
+# Normal — po             Tryb normalny (nawigacja)                n                          Nast■pne dopasowanie
+otwarciu
+
+# Insert — klawisz i      Tryb wstawiania                          N                          Poprzednie dopasowanie
+
+# Visual — klawisz v      Tryb wizualny (zaznaczanie)              *                          Szukaj s■owa pod kursorem (do
+                                                                                              przodu)
+
+# Command — klawisz :     Tryb komend                              #                          Szukaj s■owa pod kursorem (do ty■u)
+
+i                         Wejd■ w tryb wstawiania przed            :noh                       Usu■ pod■wietlenie wyszukiwania
+                          kursorem
+
+I                         Wstaw na pocz■tku linii                  :%s/old/new/g              Zast■p wszystkie wyst■pienia w pliku
+
+a                         Wejd■ w tryb wstawiania za kursorem      :%s/old/new/gc             Zast■p z potwierdzeniem
+
+A                         Wstaw na ko■cu linii                     :10,20s/old/new/g          Zast■p w liniach 10-20
+
+o                         Otwórz now■ lini■ poni■ej                :'<,'>s/old/new/g          Zast■p w zaznaczeniu visual
+
+O                         Otwórz now■ lini■ powy■ej                :set number                W■■cz numery linii
+
+Esc                       Wyjd■ z trybu wstawiania do              :set nonumber              Wy■■cz numery linii
+                          normalnego
+
+:w                        Zapisz plik                              :set syntax=on             W■■cz pod■wietlanie sk■adni
+
+:wq                       Zapisz i wyjd■                           :set hlsearch              Pod■wietlaj wyniki wyszukiwania
+
+:q                        Wyjd■ (gdy brak zmian)                   :set ignorecase            Szukaj bez rozró■niania wielko■ci
+
+:q!                       Wyjd■ bez zapisywania                    :set expandtab             Zamie■ Tab na spacje
+
+:x                        Zapisz i wyjd■ (tylko je■li zmieniono)   :set tabstop=4             Ustaw szeroko■■ Tab na 4
+
+ZZ                        Zapisz i wyjd■ (skrót klawiszowy)        :set shiftwidth=4          Wci■cia o 4 spacje
+
+ZQ                        Wyjd■ bez zapisywania (skrót)            :set autoindent            Automatyczne wci■cia
+
+:w newfile.txt            Zapisz jako nowy plik                    :set paste                 Tryb wklejania (wy■■cz autoindent)
+
+:e file.txt               Otwórz inny plik                         :set nopaste               Wy■■cz tryb wklejania
+
+:r file.txt               Wstaw zawarto■■ pliku w kursorem         :set list                  Poka■ niewidoczne znaki
+
+:r! command               Wstaw wyj■cie komendy                    v                          Tryb wizualny (zaznaczanie znaków)
+
+h j k l                   Nawigacja ← ↓ ↑ →                        V                          Tryb wizualny linii
+
+w                         Skok do pocz■tku nast■pnego s■owa        Ctrl+v                     Tryb wizualny blokowy
+
+b                         Skok do pocz■tku poprzedniego            gU                         Zmie■ na du■e litery (w visual)
+                          s■owa
+
+e                         Skok do ko■ca s■owa                      gu                         Zmie■ na ma■e litery (w visual)
+
+0                         Skok na pocz■tek linii                   >                          Zwi■ksz wci■cie
+
+^                         Skok na pierwszy znak (nie-bia■y)        <                          Zmniejsz wci■cie
+
+$                         Skok na koniec linii                     :sp file                   Podziel okno poziomo
+
+
+
+
+Biblioteka komend RHCSA                                                                                                     Strona 37
+RHCSA COMMAND LIBRARY                                                            RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+gg                        Skok na pocz■tek pliku                :vsp file                  Podziel okno pionowo
+
+G                         Skok na koniec pliku                  Ctrl+w Ctrl+w              Prze■■cz mi■dzy oknami
+
+:10                       Skok do linii 10                      Ctrl+w h/j/k/l             Nawigacja mi■dzy oknami
+
+10G                       Skok do linii 10                      :tabnew file               Otwórz plik w nowej zak■adce
+
+Ctrl+f                    Strona w przód                        :tabnext                   Nast■pna zak■adka
+
+Ctrl+b                    Strona w ty■                          :tabprev                   Poprzednia zak■adka
+
+Ctrl+d                    Pó■ strony w przód                    gt                         Nast■pna zak■adka (skrót)
+
+Ctrl+u                    Pó■ strony w ty■                      gT                         Poprzednia zak■adka (skrót)
+
+dd                        Usu■ (wytnij) lini■                   :mksession                 Zapisz sesj■ Vim
+                                                                session.vim
+
+5dd                       Usu■ 5 linii                          :source session.vim        Przywró■ sesj■ Vim
+
+yy                        Kopiuj (yank) lini■                   qa                         Nagraj makro do rejestru a
+
+5yy                       Kopiuj 5 linii                        q                          Zatrzymaj nagrywanie makro
+
+p                         Wklej po kursorze                     @a                         Odtwórz makro z rejestru a
+
+P                         Wklej przed kursorem                  @@                         Powtórz ostatnie makro
+
+u                         Cofnij ostatni■ zmian■                .                          Powtórz ostatni■ zmian■
+
+Ctrl+r                    Ponów cofni■t■ zmian■                 :!                         Wykonaj komend■ pow■oki
+
+x                         Usu■ znak pod kursorem                :!ls                       Wylistuj pliki z Vim
+
+X                         Usu■ znak przed kursorem              :%!sort                    Filtruj plik przez komend■
+
+r                         Zamie■ jeden znak                     cat ~/.vimrc               Konfiguracja Vim
+
+R                         Tryb zast■powania (pisz i nadpisuj)
+
+
+
+
+■ 28. Diagnostyka i narz■dzia systemowe                                                                             61 komend
+
+
+strace -p PID             ■led■ wywo■ania systemowe procesu     cat                        Statystyki gniazd
+                                                                /proc/net/sockstat
+
+strace -e trace=file      ■led■ tylko wywo■ania plikowe         cat                        Interfejsy IPv6
+cmd                                                             /proc/net/if_inet6
+
+strace -o trace.log       Zapisz ■lad do pliku                  ip -s link show eth0       Statystyki interfejsu
+cmd
+
+strace -c cmd             Policz wywo■ania systemowe            ethtool -S eth0            Szczegó■owe statystyki ethtool
+
+ltrace cmd                ■led■ wywo■ania bibliotek             sar -n EDEV 1 3            B■■dy sieciowe
+
+gdb executable            Debugger GNU                          tc qdisc show              Dyscypliny kolejkowania sieciowego
+
+gdb -p PID                Do■■cz debugger do procesu            tc class show dev          Klasy trafficu
+                                                                eth0
+
+valgrind                  Sprawd■ wycieki pami■ci               tc filter show dev         Filtry trafficu
+--leak-check=full                                               eth0
+cmd
+
+perf stat cmd             Statystyki wydajno■ci komendy         conntrack -L               Lista tabeli ■ledzenia po■■cze■
+
+perf top                  Profiler wydajno■ci (top-like)        conntrack -D -s            Usu■ wpis ■ledzenia
+                                                                1.2.3.4
+
+perf record cmd           Nagraj profil wydajno■ci              cat /proc/sys/net/nf       Liczba ■ledzonych po■■cze■
+                                                                _conntrack_count
+
+perf report               Analizuj nagrany profil               cat /proc/sys/net/nf       Maksymalna liczba po■■cze■
+                                                                _conntrack_max
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 38
+RHCSA COMMAND LIBRARY                                                         RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+sar -A -f                 Analiza historyczna sar             sysctl -w net.nf_con      Zwi■ksz limit conntrack
+/var/log/sa/saDD                                              ntrack_max=65536
+
+iostat -x -d 1 5          Szczegó■owe statystyki I/O          crash /boot/vmlinuz       Analiza core dump j■dra
+                                                              vmcore
+
+blktrace -d /dev/sda      ■lad operacji blokowych             kdump                     Narz■dzie do przechwytywania core
+-o trace                                                                                dump j■dra
+
+blkparse trace            Parsuj ■lad blkparse                cat /etc/kdump.conf       Konfiguracja kdump
+
+fio                       Test I/O dysków                     systemctl status          Status us■ugi kdump
+--filename=/tmp/test                                          kdump
+--size=1G --rw=read
+
+dd if=/dev/zero           Test zapisu sekwencyjnego           makedumpfile -l           Przetwórz vmcore
+of=/tmp/test bs=1M                                            --message-level 1 -d
+count=1000                                                    31 vmcore dumpfile
+
+dd if=/tmp/test           Test odczytu sekwencyjnego          abrt-cli list             Lista awarii ABRT
+of=/dev/null bs=1M
+
+hdparm -Tt /dev/sda       Test pr■dko■ci dysku                abrt-cli info ID          Szczegó■y awarii
+
+bonnie++                  Kompleksowy test wydajno■ci dysku   abrt-cli report ID        Zg■o■ awari■
+
+sysbench cpu              Test wydajno■ci CPU                 coredumpctl list          Lista core dumps (systemd)
+--threads=4 run
+
+sysbench memory run       Test wydajno■ci pami■ci             coredumpctl info          Szczegó■y ostatniego core dump
+
+memtester 512M 5          Test pami■ci RAM                    coredumpctl gdb           Otwórz core dump w GDB
+
+stress --cpu 4            Obci■■enie CPU                      cat /proc/sys/kernel      Wzorzec nazwy core dump
+--timeout 60                                                  /core_pattern
+
+stress-ng --cpu 4         Zaawansowane obci■■enie             ulimit -c unlimited       W■■cz generowanie core dumps
+--timeout 60
+
+lsof -n -P | grep         Porty nas■uchuj■ce                  ulimit -a                 Wy■wietl wszystkie limity
+LISTEN
+
+ss -tlnp                  Gniazda TCP nas■uchuj■ce z PID      ulimit -n 65536           Ustaw limit otwartych plików
+
+netstat -anltp            Po■■czenia TCP z PID                prlimit --pid PID         Limity konkretnego procesu
+
+cat /proc/net/tcp         Gniazda TCP z /proc                 cat /proc/PID/limits      Limity procesu z /proc
+
+cat /proc/net/udp         Gniazda UDP z /proc
+
+
+
+
+■ 29. Skrypty bash — podstawy                                                                                     104 komend
+
+
+#!/bin/bash               Shebang — interpreter bash          pattern) command ;;       Wzorzec case
+
+#!/usr/bin/env bash       Przeno■ny shebang                   esac                      Zako■czenie case
+
+# Komentarz               Komentarz w skrypcie                function myfunc() {       Definicja funkcji
+
+chmod +x script.sh        Nadaj prawa wykonania               myfunc() {                Alternatywna definicja funkcji
+
+./script.sh               Uruchom skrypt                      }                         Zako■czenie funkcji
+
+bash script.sh            Uruchom skrypt przez bash           return 0                  Zwró■ kod wyj■cia z funkcji
+
+sh script.sh              Uruchom skrypt przez sh             myfunc arg1 arg2          Wywo■aj funkcj■ z argumentami
+
+VAR='value'               Przypisz warto■■ zmiennej           $1 $2 $3                  Argumenty funkcji/skryptu
+
+VAR=$(command)            Przypisz wyj■cie komendy            $@                        Wszystkie argumenty
+
+VAR=$((5 + 3))            Arytmetyka ($(( )))                 $#                        Liczba argumentów
+
+echo "Value: $VAR"        Wydrukuj warto■■ zmiennej           $0                        Nazwa skryptu
+
+read VAR                  Wczytaj input od u■ytkownika        $$                        PID skryptu
+
+
+
+
+Biblioteka komend RHCSA                                                                                                  Strona 39
+RHCSA COMMAND LIBRARY                                                           RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+read -p 'Enter            Wczytaj z promptem                   $?                         Kod wyj■cia ostatniej komendy
+value: ' VAR
+
+read -s VAR               Wczytaj has■o (bez echa)             exit 0                     Zako■cz skrypt z kodem 0
+
+read -t 5 VAR             Wczytaj z limitem czasu 5s           exit 1                     Zako■cz skrypt z kodem b■■du
+
+read -a ARRAY             Wczytaj jako tablic■                 trap 'cleanup' EXIT        Wywo■aj funkcj■ przy wyj■ciu
+
+if [ condition ];         Instrukcja warunkowa if              trap 'handler'             Obs■uga sygna■ów
+then                                                           SIGINT
+
+elif [ condition ];       Else-if                              trap '' SIGINT             Ignoruj sygna■
+then
+
+else                      Else                                 2>/dev/null                Przekieruj stderr do /dev/null
+
+fi                        Zako■cz blok if                      1>/dev/null                Przekieruj stdout do /dev/null
+
+[ -f file ]               Test czy plik istnieje               &>/dev/null                Przekieruj stdout i stderr
+
+[ -d dir ]                Test czy katalog istnieje            >> file.txt                Do■■cz stdout do pliku
+
+[ -e path ]               Test czy ■cie■ka istnieje            2>> file.txt               Do■■cz stderr do pliku
+
+[ -r file ]               Test czy plik jest czytelny          cmd1 | cmd2                Potok (pipe)
+
+[ -w file ]               Test czy plik jest zapisywalny       cmd1 && cmd2               cmd2 tylko je■li cmd1 si■ powiod■o
+
+[ -x file ]               Test czy plik jest wykonywalny       cmd1 || cmd2               cmd2 tylko je■li cmd1 zawiod■o
+
+[ -s file ]               Test czy plik nie jest pusty         cmd1; cmd2                 Uruchom cmd1, potem cmd2
+                                                                                          (niezale■nie)
+
+[ -z "$VAR" ]             Test czy zmienna jest pusta          (cmd1; cmd2)               Uruchom w podpow■oce
+
+[ -n "$VAR" ]             Test czy zmienna nie jest pusta      { cmd1; cmd2; }            Uruchom w bie■■cej pow■oce
+                                                                                          (grupowanie)
+
+[ "$A" = "$B" ]           Porównanie stringów (równe)          $(( 10 % 3 ))              Reszta z dzielenia
+
+[ "$A" != "$B" ]          Porównanie stringów (ró■ne)          $(( 2 ** 8 ))              Pot■gowanie
+
+[ $N -eq 5 ]              Porównanie liczbowe (równe)          let 'n = n + 1'            Arytmetyka z let
+
+[ $N -ne 5 ]              Porównanie liczbowe (ró■ne)          (( n++ ))                  Inkrementacja
+
+[ $N -lt 5 ]              Porównanie liczbowe (mniejsze)       printf '%d ' 42            Sformatowane wyj■cie
+
+[ $N -le 5 ]              Porównanie liczbowe (mniejsze lub    printf '%s %s ' a b        Format stringa
+                          równe)
+
+[ $N -gt 5 ]              Porównanie liczbowe (wi■ksze)        printf '%-10s %5d '        Wyrównanie kolumn
+                                                               name 42
+
+[ $N -ge 5 ]              Porównanie liczbowe (wi■ksze lub     local VAR=value            Zmienna lokalna w funkcji
+                          równe)
+
+[[ condition ]]           Rozszerzony test (bezpieczniejszy)   ARRAY=(a b c d)            Inicjalizacja tablicy
+
+[[ -f file && -r file     Logiczne AND w te■cie                echo ${ARRAY[@]}           Wszystkie elementy tablicy
+]]
+
+[[ -f file || -d dir      Logiczne OR w te■cie                 echo ${#ARRAY[@]}          Rozmiar tablicy
+]]
+
+for VAR in list; do       P■tla for                            ARRAY+=('e')               Dodaj element do tablicy
+
+done                      Zako■czenie p■tli                    unset ARRAY[2]             Usu■ element tablicy
+
+for i in {1..10}; do      P■tla od 1 do 10                     for el in                  Iteracja po tablicy
+                                                               ${ARRAY[@]}; do
+
+for i in $(seq 1 10);     P■tla z seq                          declare -A                 Tablica asocjacyjna
+do                                                             MAP=([k1]=v1
+                                                               [k2]=v2)
+
+for ((i=0; i<10;          P■tla C-style                        echo ${MAP[k1]}            Warto■■ z tablicy asocjacyjnej
+i++)); do
+
+
+
+
+Biblioteka komend RHCSA                                                                                                    Strona 40
+RHCSA COMMAND LIBRARY                                                     RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+for file in *.txt; do     P■tla po plikach                  for k in ${!MAP[@]};    Klucze tablicy asocjacyjnej
+                                                            do
+
+while [ condition ];      P■tla while                       getopts 'ab:c' OPT      Parsowanie opcji skryptu
+do
+
+while read line; do       P■tla while przez stdin           while getopts 'h:p:'    P■tla getopts
+                                                            opt; do
+
+until [ condition ];      P■tla until (dopóki fa■sz)        mktemp                  Utwórz tymczasowy plik
+do
+
+break                     Przerwij p■tl■                    mktemp -d               Utwórz tymczasowy katalog
+
+continue                  Pomi■ bie■■c■ iteracj■            TMPFILE=$(mktemp)       Zapisz nazw■ pliku tymczasowego
+
+case $VAR in              Instrukcja case                   heredoc: cat << EOF     Heredoc — blok tekstu
+
+
+
+
+■ 30. Zaawansowane narz■dzia tekstowe                                                                         68 komend
+
+
+printf '%s ' {a..z}       Wydrukuj litery a-z               python3 -m              Prosty serwer HTTP
+                                                            http.server 8080
+
+echo {1..5}               Rozwini■cie nawiasów klamrowych   python3 -c 'import      Formatuj JSON
+                                                            json,sys; print(json
+                                                            .dumps(json.load(sys
+                                                            .stdin), indent=2))'
+
+echo file{1..3}.txt       file1.txt file2.txt file3.txt     jq '.' file.json        Formatuj i przegl■daj JSON
+
+echo {a,b,c}.log          a.log b.log c.log                 jq '.key' file.json     Wyodr■bnij warto■■ klucza z JSON
+
+echo $((RANDOM %          Losowa liczba 0-99                jq '.[] | .name'        Iteruj po tablicy JSON
+100))                                                       file.json
+
+od -An -N4                4 bajty losowe                    xmllint --format        Formatuj XML
+/dev/urandom | tr -d                                        file.xml
+' '
+
+openssl rand -hex 16      32 znaki hex losowe               xmllint --xpath         XPath na pliku XML
+                                                            '//element' file.xml
+
+openssl rand -base64      Losowy base64                     perl -pi -e             Edycja w miejscu z Perl
+32                                                          's/old/new/g' file
+
+base64 file.bin           Zakoduj plik w base64             perl -ne 'print if      Filtruj linie (Perl)
+                                                            /pattern/' file
+
+base64 -d file.b64        Zdekoduj plik base64              python3 -c              Wykonaj kod Python
+                                                            'print("Hello")'
+
+md5sum file               Hash MD5 pliku                    python3 script.py       Uruchom skrypt Python
+
+sha1sum file              Hash SHA1 pliku                   bc -l <<< '2 ^ 10'      Kalkulator (bc)
+
+sha256sum file            Hash SHA256 pliku                 echo '3.14 * 2' | bc    Arytmetyka z bc
+
+sha512sum file            Hash SHA512 pliku                 numfmt --to=iec         Konwertuj rozmiar na czytelny
+                                                            1073741824
+
+sha256sum -c              Sprawd■ sumy kontrolne            numfmt --from=iec 1G    Konwertuj czytelny na bajty
+checksums.txt
+
+md5sum file >             Zapisz sum■ MD5 do pliku          date                    Bie■■ca data i czas
+file.md5
+
+gpg --gen-key             Generuj klucz GPG                 date '+%Y-%m-%d         Sformatowana data
+                                                            %H:%M:%S'
+
+gpg --list-keys           Lista kluczy publicznych          date -d 'yesterday'     Wczorajsza data
+
+
+
+
+Biblioteka komend RHCSA                                                                                             Strona 41
+RHCSA COMMAND LIBRARY                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+gpg                       Lista kluczy prywatnych     date -d '1 week ago'    Tydzie■ temu
+--list-secret-keys
+
+gpg --import key.gpg      Importuj klucz GPG          date -d '2023-01-01'    Dzie■ tygodnia dla daty
+                                                      +%A
+
+gpg --export              Eksportuj klucz publiczny   date                    Data z Unix timestamp
+user@email > key.gpg                                  --date='@1700000000'
+
+gpg --encrypt -r          Zaszyfruj plik              date +%s                Bie■■cy Unix timestamp
+user@email file
+
+gpg --decrypt             Odszyfruj plik              date -u                 Czas UTC
+file.gpg
+
+gpg --sign file           Podpisz plik                hwclock                 Czas zegara sprz■towego
+
+gpg --verify              Zweryfikuj podpis           hwclock --systohc       Synchronizuj zegar HW z system
+file.sig file
+
+openssl x509 -in          Wy■wietl certyfikat SSL     hwclock --hctosys       Synchronizuj system z zegarem HW
+cert.pem -text
+
+openssl req -new          Utwórz CSR                  timedatectl status      Status czasu systemowego
+-newkey rsa:2048
+-nodes -keyout
+key.pem -out csr.pem
+
+openssl x509 -req         Samopodpisany cert          timedatectl set-time    Ustaw dat■ i czas
+-days 365 -in                                         '2023-01-01
+csr.pem -signkey                                      12:00:00'
+key.pem -out
+cert.pem
+
+openssl s_client          Sprawd■ certyfikat SSL      chronyc tracking        Status synchronizacji czasu NTP
+-connect
+hostname:443
+
+openssl s_client          Pe■ny certyfikat            chronyc sources         ■ród■a NTP
+-connect host:443
+2>/dev/null |
+openssl x509 -text
+
+openssl enc               Zaszyfruj plik AES          chronyc makestep        Natychmiastowa synchronizacja
+-aes-256-cbc -in
+file -out file.enc
+
+openssl enc -d            Odszyfruj plik AES          cat /etc/chrony.conf    Konfiguracja chronyd
+-aes-256-cbc -in
+file.enc -out file
+
+openssl dgst -sha256      Hash SHA256 przez openssl   systemctl status        Status us■ugi chrony
+file                                                  chronyd
+
+openssl passwd -6         Hash SHA512 has■a (crypt)   ntpdate pool.ntp.org    Jednorazowa synchronizacja NTP
+'password'
+
+
+
+
+■ 31. Zarz■dzanie dyskami RAID                                                                          20 komend
+
+
+mdadm --create            Utwórz RAID 1               mdadm --grow            Rozszerz RAID o dysk
+/dev/md0 --level=1                                    /dev/md0
+--raid-devices=2                                      --raid-devices=4
+/dev/sdb /dev/sdc
+
+mdadm --create            Utwórz RAID 5               mdadm --grow            Rozszerz do maks. rozmiaru
+/dev/md0 --level=5                                    /dev/md0 --size=max
+--raid-devices=3
+/dev/sdb /dev/sdc
+/dev/sdd
+
+
+
+
+Biblioteka komend RHCSA                                                                                     Strona 42
+RHCSA COMMAND LIBRARY                                                        RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+mdadm --detail            Szczegó■y macierzy RAID           mdadm --stop               Zatrzymaj macierz RAID
+/dev/md0                                                    /dev/md0
+
+mdadm --detail            Wszystkie macierze RAID           mdadm --start              Uruchom zatrzyman■ macierz
+--scan                                                      /dev/md0
+
+mdadm --query             Szybkie info o macierzy           mdadm --assemble           Z■ó■ macierz z dysków
+/dev/md0                                                    /dev/md0 /dev/sdb
+                                                            /dev/sdc
+
+mdadm --examine           Metadane RAID na dysku            mdadm --assemble           Automatycznie z■ó■ macierze
+/dev/sdb                                                    --scan
+
+cat /proc/mdstat          Status macierzy RAID z /proc      mdadm                      Wyczy■■ metadane RAID z dysku
+                                                            --zero-superblock
+                                                            /dev/sdb
+
+mdadm --manage            Dodaj dysk do RAID                mdadm --monitor            Monitoruj RAID
+/dev/md0 --add                                              --daemonise --mailad
+/dev/sdd                                                    dr=admin@example.com
+                                                            /dev/md0
+
+mdadm --manage            Usu■ dysk z RAID                  cat /etc/mdadm.conf        Konfiguracja mdadm
+/dev/md0 --remove
+/dev/sdb
+
+mdadm --manage            Oznacz dysk jako uszkodzony       mdadm --detail             Zapisz konfiguracj■ RAID
+/dev/md0 --fail                                             --scan >>
+/dev/sdb                                                    /etc/mdadm.conf
+
+
+
+
+■■ 32. Samba i NFS (klient)                                                                                   18 komend
+
+
+smbclient -L              Lista udzia■ów Samba              smbclient                  Debug po■■czenia Samba
+//server                                                    --debuglevel=3
+                                                            //server/share
+
+smbclient                 Po■■cz z udzia■em Samba           testparm                   Sprawd■ konfiguracj■ serwera Samba
+//server/share -U
+user
+
+smbclient                 Wy■lij plik do Samba              cat                        Konfiguracja serwera Samba
+//server/share -U                                           /etc/samba/smb.conf
+user -c 'put
+file.txt'
+
+smbclient                 Pobierz plik z Samba              smbpasswd -a user          Dodaj u■ytkownika do Samba
+//server/share -U
+user -c 'get
+file.txt'
+
+mount -t cifs             Montuj udzia■ Samba               smbpasswd -e user          W■■cz u■ytkownika Samba
+//server/share /mnt
+-o user=u,pass=p
+
+mount -t cifs             Montuj z plikiem danych           smbpasswd -d user          Wy■■cz u■ytkownika Samba
+//server/share /mnt
+-o credentials=/etc/
+samba/creds
+
+umount /mnt               Odmontuj udzia■                   pdbedit -L                 Lista u■ytkowników Samba
+
+cat /etc/fstab |          Trwa■e montowanie Samba w fstab   systemctl restart          Zrestartuj us■ugi Samba
+grep cifs                                                   smb nmb
+
+nmblookup -A server       Lookup NetBIOS                    firewall-cmd               Otwórz porty Samba
+                                                            --add-service=samba
+                                                            --permanent
+
+
+
+
+Biblioteka komend RHCSA                                                                                              Strona 43
+RHCSA COMMAND LIBRARY                                                          RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+■■ 33. Dodatkowe narz■dzia administracyjne                                                                         73 komend
+
+
+alternatives --list       Lista zarz■dzanych alternatyw       iptables-save >            Zapisz regu■y iptables
+                                                              rules.v4
+
+alternatives              Konfiguruj alternatyw■ python       iptables-restore <         Przywró■ regu■y iptables
+--config python                                               rules.v4
+
+alternatives --set        Ustaw konkretn■ alternatyw■         ip6tables -L               Regu■y iptables dla IPv6
+python
+/usr/bin/python3
+
+update-alternatives       Lista alternatyw java               nft list chain ip          Regu■y nftables filter INPUT
+--list java                                                   filter INPUT
+
+chkconfig --list          Lista us■ug (starszy system)        nft add rule ip            Dodaj regu■■ nftables
+                                                              filter INPUT tcp
+                                                              dport 80 accept
+
+ntsysv                    TUI do zarz■dzania us■ugami         nft delete rule ip         Usu■ regu■■ nftables
+                                                              filter INPUT handle
+                                                              5
+
+systemd-cgtop             Monitor grup kontrolnych cgroup     nft flush ruleset          Wyczy■■ wszystkie regu■y nftables
+
+systemd-cgls              Drzewo grup kontrolnych             cat                        Trwa■a konfiguracja nftables
+                                                              /etc/nftables.conf
+
+cgcreate -g               Utwórz grup■ cgroup                 systemctl enable           Uruchom i w■■cz nftables
+memory:mygroup                                                --now nftables
+
+cgexec -g                 Uruchom w grupie cgroup             scap-workbench             Narz■dzie GUI do skanów
+memory:mygroup cmd                                                                       SCAP/OpenSCAP
+
+cgget -r memory.limi      Pobierz parametr cgroup             oscap xccdf eval           Skan bezpiecze■stwa SCAP
+t_in_bytes mygroup                                            --profile xccdf_org.
+                                                              ssgproject.content_p
+                                                              rofile_cis /usr/shar
+                                                              e/xml/scap/ssg/conte
+                                                              nt/ssg-rhel9-ds.xml
+
+cgset -r memory.limi      Ustaw limit pami■ci cgroup          oscap xccdf generate       Raport HTML z wyników SCAP
+t_in_bytes=512M                                               report --output
+mygroup                                                       report.html
+                                                              results.xml
+
+cat /sys/fs/cgroup/m      Odczytaj limit z /sys               fips-mode-setup            W■■cz tryb FIPS
+emory/mygroup/memory                                          --enable
+.limit_in_bytes
+
+ls /sys/fs/cgroup/        Lista grup kontrolnych              fips-mode-setup            Sprawd■ tryb FIPS
+                                                              --check
+
+nsenter -t PID -m -u      Wejd■ w przestrze■ nazw procesu     update-crypto-polici       Poka■ polityk■ kryptograficzn■
+-i -n -p -- bash                                              es --show
+
+unshare --mount bash      Nowa przestrze■ nazw mount          update-crypto-polici       Ustaw domy■ln■ polityk■
+                                                              es --set DEFAULT
+
+unshare --net bash        Nowa przestrze■ nazw sieciowa       update-crypto-polici       Ustaw polityk■ FIPS
+                                                              es --set FIPS
+
+ip netns add myns         Utwórz przestrze■ nazw sieciow■     update-crypto-polici       Ustaw polityk■ FUTURE
+                                                              es --set FUTURE
+
+ip netns exec myns        Wykonaj w przestrzeni nazw          update-crypto-polici       Ustaw polityk■ LEGACY
+bash                                                          es --set LEGACY
+
+ip netns list             Lista przestrzeni nazw sieciowych   cat /etc/crypto-poli       Konfiguracja polityki kryptograficznej
+                                                              cies/config
+
+ip netns delete myns      Usu■ przestrze■ nazw sieciow■       authselect list            Lista profili uwierzytelniania
+
+
+
+
+Biblioteka komend RHCSA                                                                                                   Strona 44
+RHCSA COMMAND LIBRARY                                                               RHCSA 9 | Red Hat Certified System Administrator
+
+
+
+
+strace -e openat ls       ■led■ tylko openat syscall               authselect current         Aktualny profil authselect
+/tmp
+
+bpftool prog list         Lista programów eBPF                     authselect select          Ustaw profil SSSD
+                                                                   sssd
+
+bpftool map list          Lista map eBPF                           authselect select          Ustaw profil LDAP
+                                                                   ldap
+
+tcpdump -i any -w         Przechwytuj na wszystkich interfejsach   authselect                 Zastosuj zmiany authselect
+/tmp/cap.pcap                                                      apply-changes
+
+tcpdump -r                Odczytaj przechwycone pakiety            realm list                 Lista skonfigurowanych domen AD/IPA
+/tmp/cap.pcap
+
+wireshark                 Graficzny analizator protoko■ów          realm discover             Odkryj domen■ AD
+                                                                   example.com
+
+tshark -i eth0            Wireshark CLI                            realm join                 Do■■cz do domeny AD
+                                                                   example.com
+
+tshark -r cap.pcap        Pola z pcap                              realm leave                Opu■■ domen■ AD
+-T fields -e                                                       example.com
+http.request.uri
+
+nmcli connection          Eksportuj profil NM                      realm permit               Zezwól u■ytkownikowi AD na dost■p
+export conn >                                                      user@example.com
+conn.nmconnection
+
+nmcli connection          Importuj profil NM                       realm deny --all           Odmów dost■pu wszystkim
+import type ethernet                                                                          u■ytkownikom AD
+file
+conn.nmconnection
+
+firewall-cmd              Ca■y stan wszystkich stref               sssd --version             Wersja SSSD
+--list-all-zones
+
+firewall-cmd              SSH w strefie drop (uwaga!)              systemctl status           Status us■ugi SSSD
+--zone=drop                                                        sssd
+--add-service=ssh
+
+firewall-cmd              Bezpo■rednia regu■a iptables             sssctl user-show           Informacje o u■ytkowniku SSSD
+--permanent --direct                                               user@example.com
+--add-rule ipv4
+filter INPUT 0 -p tcp
+--dport 80 -j ACCEPT
+
+firewall-cmd              Lista bezpo■rednich regu■                sssctl cache-remove        Usu■ cache SSSD
+--permanent --direct
+--get-all-rules
+
+iptables -t nat -L        Regu■y NAT iptables                      cat                        Konfiguracja SSSD
+                                                                   /etc/sssd/sssd.conf
+
+iptables -t mangle        Regu■y mangle iptables
+-L
+
+
+
+
+Biblioteka komend RHCSA                                                                                                    Strona 45
+
