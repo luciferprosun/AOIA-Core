@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
@@ -61,8 +62,20 @@ class KnowledgeRouter:
         self.project_dir = project_dir
         self.engine = engine
         if retriever is not None:
+            warnings.warn(
+                "Custom KnowledgeRouter retriever bypasses the canonical retrieval facade. "
+                "Use only in tests or controlled compatibility paths.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             self.retrieve = retriever
         elif engine is not None and hasattr(engine, "retrieve_operational_memory"):
+            warnings.warn(
+                "KnowledgeRouter engine injection is deprecated and bypasses the canonical retrieval facade. "
+                "Use runtime.retrieval.facade instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             self.retrieve = engine.retrieve_operational_memory
         else:
             self.retrieve = lambda query: retrieve_linux_knowledge(query, max_results=6, project_dir=project_dir)
