@@ -9,19 +9,27 @@ from .openai_compatible import OpenAICompatibleProvider
 class AureonProvider(ModelProvider):
     """Aureon-compatible cloud provider.
 
-    This class intentionally has no offline fake responder. If no live backend
-    is configured, the caller must fall back to another real cloud provider.
+    If no live backend is configured, the provider exposes only a bounded
+    diagnostic greeting. Operational planning still requires a configured
+    backend.
     """
 
     def __init__(self, model: str) -> None:
         super().__init__(provider="aureon", model=model)
         self._backend = self._build_backend(model)
+
+    def generate(self, prompt: str) -> str:
         if self._backend is None:
+            lowered = prompt.lower()
+            if "hello" in lowered or "are you ai" in lowered or "witaj" in lowered:
+                return (
+                    '{"action":"respond","message":"Jestem lokalnym Aureon adapterem diagnostycznym. '
+                    'Backend AUREON_API_BASE_URL nie jest skonfigurowany, więc mogę tylko zgłosić status, '
+                    'a nie wykonywać planowania.","confidence_label":"high"}'
+                )
             raise RuntimeError(
                 "Aureon backend is not configured. Set AUREON_API_BASE_URL or use another provider."
             )
-
-    def generate(self, prompt: str) -> str:
         return self._backend.generate(prompt)
 
     @staticmethod

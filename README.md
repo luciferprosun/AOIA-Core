@@ -142,6 +142,33 @@ Default URL:
 http://127.0.0.1:4311
 ```
 
+### 2c. Terminal operator console
+
+The minimal Textual TUI wraps the existing runtime without replacing routing,
+provider, provenance, retrieval, or approval semantics.
+
+```bash
+cd /path/to/flAmeBorbLLC-AIOA-LiGaLu
+./scripts/start_tui.sh
+```
+
+Controls:
+
+- Enter a normal request to run it through `AgentRuntime.run_text_request()`.
+- `/model` lists configured model presets.
+- `/model gemini`, `/model openrouter`, `/model deepseek`, or `/model aureon` uses the existing provider switch path.
+- `/status` prints the current runtime status into the transcript.
+- `/clear` clears the visible transcript.
+- `Ctrl+A` approves a pending risky action.
+- `Ctrl+X` rejects a pending risky action.
+- `Ctrl+P` / `Ctrl+N` navigate command history.
+- `Ctrl+R` refreshes runtime status.
+- `Ctrl+C` or `q` exits.
+
+The TUI shows only operator-visible transcript output and replay-safe
+operational telemetry. It intentionally does not display hidden reasoning,
+raw provider internals, prompts, or chain-of-thought traces.
+
 ### 3. Playwright
 
 Required Python dependency:

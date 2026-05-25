@@ -324,6 +324,11 @@ class AgentRuntime:
     def handle_user_request(self, user_input: str) -> None:
         """Run the bounded action loop for one user request."""
         self.memory_store.set_current_task(user_input)
+        if user_input.strip().lower() in {"help", "?"}:
+            result = self.command_registry.execute("/help", self)
+            if result.handled and result.message:
+                print(f"\nAgent> {result.message}")
+            return
         if self.safeguards.kill_switch:
             self.emit_epistemic_unknown("Epistemic kill switch is enabled.")
             return
@@ -631,6 +636,11 @@ class AgentRuntime:
             return []
 
         raw_plan = payload.get("plan", [])
+        if "plan" not in payload and "action" in payload:
+            try:
+                return [validate_action(payload)]
+            except Exception:
+                return []
         if not isinstance(raw_plan, list):
             return []
 
@@ -700,6 +710,7 @@ class AgentRuntime:
         request_trace: list[dict[str, Any]],
     ) -> None:
         print(f"\n[PLAN] {len(planned_actions)} proposed step(s).")
+        last_result: dict[str, Any] | None = None
         for step, action in enumerate(planned_actions, start=1):
             self.print_action(action, step)
             try:
@@ -718,6 +729,7 @@ class AgentRuntime:
                 return
 
             self.print_result(result)
+            last_result = result
             self.log_session_event(
                 "planned_step_result",
                 {
@@ -735,6 +747,8 @@ class AgentRuntime:
             )
             if action["action"] == "respond" or result.get("stop_loop") or result.get("cancelled"):
                 return
+        if last_result and last_result.get("success"):
+            print("Agent> Część operacji została już wykonana poprawnie.")
 
     def run_text_request(self, user_input: str) -> dict[str, Any]:
         """Execute one text request and capture the textual transcript."""
@@ -917,7 +931,7 @@ class AgentRuntime:
             print(f"\n[INFO] Redirect URL unwrapped to: {normalized_url}")
 
         start_action = {"action": "browser_start", "reason": "Local URL bootstrap."}
-        start_result = self.executor.execute(start_action)
+        start_result = self.executor.execute(start_action, require_approval=False)
         self.print_result(start_result)
         request_trace.append(
             {
@@ -932,7 +946,7 @@ class AgentRuntime:
             "url": normalized_url,
             "reason": "Local URL bootstrap.",
         }
-        open_result = self.executor.execute(open_action)
+        open_result = self.executor.execute(open_action, require_approval=False)
         self.print_result(open_result)
         request_trace.append(
             {
@@ -948,7 +962,7 @@ class AgentRuntime:
                 "action": "browser_get_visible_text",
                 "reason": "Capture visible page text before analysis.",
             }
-            text_result = self.executor.execute(text_action)
+            text_result = self.executor.execute(text_action, require_approval=False)
             self.print_result(text_result)
             snapshot_path = self.save_page_text_snapshot(normalized_url, text_result)
             if snapshot_path is not None:

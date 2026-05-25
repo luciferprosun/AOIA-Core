@@ -20,7 +20,7 @@ DEFAULT_PROVIDER_CHAIN = [
 
 DEFAULT_MODEL_PRESETS: dict[str, str] = {
     "gemma": "openrouter/google/gemma-3-27b-it",
-    "openrouter": "openrouter/google/gemma-3-27b-it",
+    "openrouter": "openrouter/free",
     "openrouter-gemma": "openrouter/google/gemma-3-27b-it",
     "gemini": "gemini/gemini-2.5-flash",
     "deepseek": "deepseek/deepseek-chat",
@@ -184,8 +184,6 @@ class ProviderManager:
         model = model.strip()
         if not provider or not model:
             raise ValueError(f"Invalid model name: {model_name}")
-        if provider in REMOVED_PROVIDERS:
-            raise ValueError(f"Provider removed from terminal app: {provider}")
         return f"{provider}/{model}"
 
     def _fallback_candidates(self) -> list[str]:

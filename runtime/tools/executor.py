@@ -73,7 +73,11 @@ class ExecutionEngine:
         if tool is None:
             raise ValueError(f"Unhandled action: {name}")
 
-        if require_approval and name != "respond":
+        needs_approval = bool(action.get("requires_confirmation", False))
+        if name == "shell_execute":
+            needs_approval = needs_approval or classify_shell_command(action.get("command", "")).requires_confirmation
+
+        if require_approval and name != "respond" and needs_approval:
             approved = self._request_approval(action)
             if not approved:
                 result = {

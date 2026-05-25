@@ -1,2 +1,5 @@
 google-genai>=1.0.0
 playwright>=1.59.0
+beautifulsoup4>=4.12.0
+rich>=13.7.0
+textual>=0.86.0
