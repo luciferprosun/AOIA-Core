@@ -129,6 +129,13 @@ def build_obsidian_vault_paths(project_dir: Path) -> ObsidianVaultPaths:
 class MemoryStore:
     """Persist lightweight runtime state to disk after each step."""
 
+    ALLOWED_EVIDENCE_KIND = "aoia_kernel_evidence"
+    ALLOWED_EVIDENCE_SOURCES = {
+        "aoia_kernel",
+        "knowledge_router",
+        "external_evidence_source",
+    }
+
     def __init__(self, project_dir: Path, cwd: Path) -> None:
         self.paths = build_runtime_paths(project_dir)
         self.vault_paths = build_obsidian_vault_paths(project_dir)
@@ -166,6 +173,7 @@ class MemoryStore:
         self.append_vault_note(kind, payload)
 
     def append_evidence(self, kind: str, payload: dict[str, Any]) -> None:
+        self._validate_evidence_payload(kind, payload)
         record = {
             "timestamp": dt.datetime.now().isoformat(),
             "kind": kind,
@@ -174,6 +182,22 @@ class MemoryStore:
         with self.evidence_file.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
         self._append_channel_note(self.vault_paths.evidence_dir, kind, payload)
+
+    def _validate_evidence_payload(self, kind: str, payload: dict[str, Any]) -> None:
+        if kind != self.ALLOWED_EVIDENCE_KIND:
+            raise ValueError(
+                f"Evidence writes are restricted to {self.ALLOWED_EVIDENCE_KIND}; got {kind}"
+            )
+        if not isinstance(payload, dict):
+            raise TypeError("Evidence payload must be a dictionary")
+        source = payload.get("source")
+        fingerprint = payload.get("fingerprint")
+        if not isinstance(source, str) or not source.strip():
+            raise ValueError("Evidence payload must include a non-empty source identifier")
+        if source.strip() not in self.ALLOWED_EVIDENCE_SOURCES:
+            raise ValueError(f"Evidence source is not allowed: {source}")
+        if not isinstance(fingerprint, str) or not fingerprint.strip():
+            raise ValueError("Evidence payload must include a non-empty fingerprint")
 
     def append_reasoning(self, kind: str, payload: dict[str, Any]) -> None:
         record = {
