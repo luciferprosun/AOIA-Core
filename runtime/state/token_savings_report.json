@@ -1,9 +1,0 @@
-{
-  "created_at": "2026-05-23T20:40:53.503640",
-  "api_calls_avoided": 0,
-  "local_retrieval_hits": 0,
-  "local_retrieval_misses": 0,
-  "command_reuse_frequency": 0,
-  "workflow_reuse": 0,
-  "updated_at": "2026-05-23T20:40:53.503662"
-}

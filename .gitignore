@@ -2,3 +2,11 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+/runtime/logs/
+/runtime/obsidian_vault/
+/runtime/screenshots/
+/runtime/state/
+/runtime/project_scan.json
+/runtime/contradiction_registry.json
+/runtime/memory/*.jsonl
+/runtime/memory/hats/*.json
