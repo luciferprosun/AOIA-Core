@@ -6,6 +6,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from runtime_paths import runtime_state_dir
+
 
 # TRANSITIONAL MEMORY MONOLITH
 # NO NEW RESPONSIBILITIES.
@@ -54,15 +56,16 @@ class AgentMemory:
 
 def build_runtime_paths(project_dir: Path) -> RuntimePaths:
     """Create and return the directory layout for memory, browser, and logs."""
+    root = runtime_state_dir(project_dir)
     paths = RuntimePaths(
         project_dir=project_dir,
-        state_dir=project_dir / "state",
-        memory_dir=project_dir / "memory",
-        screenshots_dir=project_dir / "screenshots",
-        browser_logs_dir=project_dir / "logs" / "browser",
-        session_logs_dir=project_dir / "logs" / "sessions",
-        command_logs_dir=project_dir / "logs" / "commands",
-        error_logs_dir=project_dir / "logs" / "errors",
+        state_dir=root / "state",
+        memory_dir=root / "memory",
+        screenshots_dir=root / "screenshots",
+        browser_logs_dir=root / "logs" / "browser",
+        session_logs_dir=root / "logs" / "sessions",
+        command_logs_dir=root / "logs" / "commands",
+        error_logs_dir=root / "logs" / "errors",
     )
     for path in asdict(paths).values():
         if isinstance(path, Path):
@@ -71,7 +74,7 @@ def build_runtime_paths(project_dir: Path) -> RuntimePaths:
 
 
 def build_obsidian_vault_paths(project_dir: Path) -> ObsidianVaultPaths:
-    vault_dir = project_dir / "obsidian_vault"
+    vault_dir = runtime_state_dir(project_dir) / "obsidian_vault"
     paths = ObsidianVaultPaths(
         vault_dir=vault_dir,
         daily_dir=vault_dir / "Daily",

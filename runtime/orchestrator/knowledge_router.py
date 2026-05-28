@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from retrieval.facade import retrieve_linux_knowledge
+from runtime_paths import runtime_state_dir
 
 
 LINUX_OPERATIONAL_HINTS = {
@@ -79,7 +80,7 @@ class KnowledgeRouter:
             self.retrieve = engine.retrieve_operational_memory
         else:
             self.retrieve = lambda query: retrieve_linux_knowledge(query, max_results=6, project_dir=project_dir)
-        self.report_path = project_dir / "state" / "token_savings_report.json"
+        self.report_path = runtime_state_dir(project_dir) / "state" / "token_savings_report.json"
         self.report_path.parent.mkdir(parents=True, exist_ok=True)
         self._ensure_report()
 

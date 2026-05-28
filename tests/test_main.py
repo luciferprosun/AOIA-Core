@@ -309,7 +309,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             self.assertIn("Model switched to: aureon/aureon-queen", result.message)
             self.assertEqual(manager.current_model, "aureon/aureon-queen")
             self.assertEqual(
-                json.loads((project_dir / "state" / "model_config.json").read_text(encoding="utf-8"))["model"],
+                json.loads(manager.config_path.read_text(encoding="utf-8"))["model"],
                 "aureon/aureon-queen",
             )
 

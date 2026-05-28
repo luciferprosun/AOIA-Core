@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from .base import CommandRegistry, CommandResult
+from runtime_paths import runtime_state_dir
 from retrieval.facade import (
     linux_filter_by_topic,
     linux_library_status,
@@ -16,7 +17,7 @@ from retrieval.facade import (
 )
 from tools.validator import validate_action
 
-SCEMDA_ZIP = Path.home() / "Desktop" / "kimi agetn..zip"
+SCEMDA_ZIP = Path.home() / ".local" / "share" / "aoia" / "kimi agetn..zip"
 
 
 def build_command_registry() -> CommandRegistry:
@@ -298,7 +299,9 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
         return CommandResult(True, "\n".join(lines))
 
     if command == "savings":
-        report_path = runtime.project_dir / "state" / "token_savings_report.json"
+        report_path = getattr(getattr(runtime, "knowledge_router", None), "report_path", None)
+        if report_path is None:
+            report_path = runtime_state_dir(runtime.project_dir) / "state" / "token_savings_report.json"
         if not report_path.exists():
             return CommandResult(True, "No token savings report yet.")
         try:

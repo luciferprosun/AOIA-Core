@@ -4,6 +4,8 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from runtime_paths import runtime_state_dir
+
 
 @dataclass
 class MemoryHat:
@@ -46,8 +48,9 @@ class MemoryHatStore:
     """Persistent context overlays used by the planner prompt."""
 
     def __init__(self, project_dir: Path) -> None:
-        self.hats_dir = project_dir / "memory" / "hats"
-        self.active_file = project_dir / "state" / "active_hat.json"
+        state_root = runtime_state_dir(project_dir)
+        self.hats_dir = state_root / "memory" / "hats"
+        self.active_file = state_root / "state" / "active_hat.json"
         self.hats_dir.mkdir(parents=True, exist_ok=True)
         self.active_file.parent.mkdir(parents=True, exist_ok=True)
         self._ensure_defaults()

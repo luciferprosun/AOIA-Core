@@ -9,6 +9,7 @@ from .aureon_provider import AureonProvider
 from .base import ModelProvider
 from .gemini_provider import GeminiProvider
 from .openai_compatible import OpenAICompatibleProvider
+from runtime_paths import runtime_state_dir
 
 
 DEFAULT_MODEL = "openrouter/google/gemma-3-27b-it"
@@ -75,8 +76,9 @@ class ProviderManager:
     def __init__(self, project_dir: Path) -> None:
         load_api_environment()
         self.project_dir = project_dir
-        self.config_path = project_dir / "state" / "model_config.json"
-        self.providers_path = project_dir / "state" / "providers.json"
+        state_dir = runtime_state_dir(project_dir)
+        self.config_path = state_dir / "state" / "model_config.json"
+        self.providers_path = state_dir / "state" / "providers.json"
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         self.provider_chain = self._load_provider_chain()
         self.current_model = self.normalize_model_name(self._load_model_name())

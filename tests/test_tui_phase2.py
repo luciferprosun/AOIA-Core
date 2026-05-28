@@ -5,10 +5,15 @@ import threading
 import unittest
 from pathlib import Path
 
-from tui.app import AOIATerminalApp, build_app
-from tui.widgets.approval_panel import ApprovalPanel
-from tui.widgets.status_bar import RuntimeStatusBar
-from tui.widgets.transcript_panel import TranscriptPanel, sanitize_transcript
+try:
+    from tui.app import AOIATerminalApp, build_app
+    from tui.widgets.approval_panel import ApprovalPanel
+    from tui.widgets.status_bar import RuntimeStatusBar
+    from tui.widgets.transcript_panel import TranscriptPanel, sanitize_transcript
+except ModuleNotFoundError as exc:
+    if exc.name == "textual":
+        raise unittest.SkipTest("optional dependency textual is not installed") from exc
+    raise
 
 
 class TUIPhase2Tests(unittest.TestCase):
