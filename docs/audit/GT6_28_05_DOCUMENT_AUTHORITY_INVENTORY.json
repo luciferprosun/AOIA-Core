@@ -1,0 +1,706 @@
+{
+  "generated_at": "2026-05-28",
+  "repository": "/home/l/Desktop/AOIA-Core",
+  "branch": "main",
+  "head": "4ae93d67b0c467c00c1dd83e9db1b5842c172629",
+  "scope": "GT6 deterministic stale-docs / duplicate-authority / forensic-exports audit",
+  "summary": {
+    "notes": [
+      "This inventory covers the main authority-risk zones inspected in GT6.",
+      "It is a review inventory, not a full file-manifest replacement.",
+      "The pre-existing untracked GT5 report remained present during this audit."
+    ]
+  },
+  "inventory": [
+    {
+      "path": "README.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as primary repository entrypoint",
+      "notes": "Primary project identity document."
+    },
+    {
+      "path": "ROADMAP.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical planning summary",
+      "notes": "Short current-priority document."
+    },
+    {
+      "path": "AUTHORITY_SCOPE.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep and cross-link from canonical docs",
+      "notes": "Authority boundary doctrine."
+    },
+    {
+      "path": "PROVENANCE_FOUNDATION.md",
+      "classification_label": "unknown-needs-review",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "review against docs/governance before canonizing",
+      "notes": "Potentially superseded in parts by governance contracts."
+    },
+    {
+      "path": "AOIA_RUNTIME_MAP.md",
+      "classification_label": "unknown-needs-review",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "manual review for move to docs/planning or historical area",
+      "notes": "Useful map, but root-level authority is ambiguous."
+    },
+    {
+      "path": "AOIA_RUNTIME_BOUNDARY_RECOMMENDATION.md",
+      "classification_label": "stale",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "candidate for future archival or planning bucket",
+      "notes": "Recommendation-phase document, not stable doctrine."
+    },
+    {
+      "path": "AOIA_CANONICAL_STRUCTURE_PLAN.md",
+      "classification_label": "stale",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "future move to planning/history",
+      "notes": "Plan document rather than current source of truth."
+    },
+    {
+      "path": "AOIA_CONTAMINATION_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "treat as historical audit only",
+      "notes": "Useful evidence of prior state, not canonical doctrine."
+    },
+    {
+      "path": "AOIA_DEPENDENCY_GRAPH.md",
+      "classification_label": "stale",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "manual review for historical relocation",
+      "notes": "Structural analysis document."
+    },
+    {
+      "path": "AOIA_ENVIRONMENT_AUDIT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "treat as historical audit",
+      "notes": "Environment-specific audit."
+    },
+    {
+      "path": "AOIA_MEMORY_ONTOLOGY.md",
+      "classification_label": "unknown-needs-review",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "review against future Evidence Memory phases",
+      "notes": "Potentially important, but not yet cleanly canonical."
+    },
+    {
+      "path": "AOIA_TRANSITIONAL_COMPONENTS.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "treat as historical architecture note",
+      "notes": "Transitional status note."
+    },
+    {
+      "path": "CURRENT_MEMORY_FLOW.md",
+      "classification_label": "stale",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "manual review for planning/history bucket",
+      "notes": "Flow analysis likely predates current stabilization."
+    },
+    {
+      "path": "MEMORY_BOUNDARY_ANALYSIS.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical analysis only",
+      "notes": "Relevant background, not canonical contract."
+    },
+    {
+      "path": "MEMORY_LAYER_DECOMPOSITION.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep out of canonical doctrine set",
+      "notes": "Decomposition analysis."
+    },
+    {
+      "path": "MUTABLE_STATE_ISOLATION_PLAN.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "historical plan only",
+      "notes": "GT3 has already implemented parts of this direction."
+    },
+    {
+      "path": "ORCHESTRATION_REMNANT_AUDIT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as audit background only",
+      "notes": "Audit note, not doctrine."
+    },
+    {
+      "path": "ROUTING_AUTHORITY_ANALYSIS.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "manual review before future move",
+      "notes": "Strong overlap with later routing doctrine and stabilization docs."
+    },
+    {
+      "path": "docs/ADR/ADR-001-deterministic-routing.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "prefer as canonical ADR set",
+      "notes": "Current deterministic routing doctrine."
+    },
+    {
+      "path": "docs/ADR/ADR-002-three-depth-model.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "prefer over older docs/adr router-depth ADR",
+      "notes": "Conflicts conceptually with older shallow/mid/deep ADR line."
+    },
+    {
+      "path": "docs/ADR/ADR-003-local-first-execution.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical",
+      "notes": "Matches current repository stance."
+    },
+    {
+      "path": "docs/ADR/ADR-004-no-runtime-learning.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical",
+      "notes": "Strong doctrinal boundary."
+    },
+    {
+      "path": "docs/ADR/ADR-005-fail-fast-philosophy.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical",
+      "notes": "Aligned with deterministic validation model."
+    },
+    {
+      "path": "docs/adr/0001-keep-aoia-isolated.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "review for archival after GT7 approval",
+      "notes": "Older ADR line; still valuable historically."
+    },
+    {
+      "path": "docs/adr/0002-minimal-deterministic-router-skeleton.md",
+      "classification_label": "stale",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "manual review due vocabulary drift",
+      "notes": "Uses older shallow/mid/deep terminology."
+    },
+    {
+      "path": "docs/adr/0003-immutable-startup-configuration.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical ADR lineage only",
+      "notes": "Still relevant context, but no longer sole authority."
+    },
+    {
+      "path": "docs/adr/0004-stdout-only-plain-text-logging.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "review against current runtime-state isolation",
+      "notes": "Old logging policy snapshot."
+    },
+    {
+      "path": "docs/adr/0005-test-constitution-determinism-first.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "historical unless merged into canonical ADR set",
+      "notes": "Still useful but duplicated by newer doctrine/test policy."
+    },
+    {
+      "path": "docs/governance/EVIDENCE_WRITE_CONTRACT.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical evidence doctrine",
+      "notes": "Strong candidate for future reviewer-facing authority."
+    },
+    {
+      "path": "docs/governance/APPEND_ONLY_PROVENANCE_CONTRACT.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical provenance doctrine",
+      "notes": "Current provenance contract."
+    },
+    {
+      "path": "docs/governance/PROVENANCE_VERIFICATION_CONTRACT.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical verification doctrine",
+      "notes": "Current local verification contract."
+    },
+    {
+      "path": "docs/governance/GOVERNANCE_IMPLEMENTATION_STATUS.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep and update as enforcement index",
+      "notes": "Useful canonical implementation map."
+    },
+    {
+      "path": "docs/governance/TEST_ENVIRONMENT_POLICY.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as canonical validation policy",
+      "notes": "Useful baseline test-policy document."
+    },
+    {
+      "path": "docs/stabilization/PHASE_0B_EVIDENCE_BOUNDARY_FORMALIZATION_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical implementation milestone",
+      "notes": "Milestone report, not doctrine."
+    },
+    {
+      "path": "docs/stabilization/PHASE_0C_APPEND_ONLY_PROVENANCE_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical milestone",
+      "notes": "Milestone report."
+    },
+    {
+      "path": "docs/stabilization/PHASE_0D_PROVENANCE_VERIFICATION_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical milestone",
+      "notes": "Milestone report."
+    },
+    {
+      "path": "docs/stabilization/PHASE_0E_CLOSURE_REPORT.md",
+      "classification_label": "canonical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as current closure reference",
+      "notes": "Strong summary of stabilized provenance block."
+    },
+    {
+      "path": "docs/forensic-runtime-audit/CURRENT_RUNTIME_TOPOLOGY.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "future move to historical/forensic bucket",
+      "notes": "Forensic analysis, not doctrine."
+    },
+    {
+      "path": "docs/forensic-runtime-audit/MEMORY_CONTAMINATION_MAP.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "treat as historical audit input",
+      "notes": "Useful only as contamination background."
+    },
+    {
+      "path": "docs/audit/AOIA_CLEANUP_PHASE1_WEB_INFORMED_MASTER_REPORT.md",
+      "classification_label": "external-model-output",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": true,
+      "recommended_action": "keep out of canonical doctrine set",
+      "notes": "Explicitly web-informed/model-mediated audit."
+    },
+    {
+      "path": "docs/audit/GT2_28_05_BOOT_FIX_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as checkpoint report only",
+      "notes": "Historical GT report."
+    },
+    {
+      "path": "docs/audit/GT3_28_05_RUNTIME_STATE_GITIGNORE_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical GT report",
+      "notes": "Tracks runtime-state cleanup."
+    },
+    {
+      "path": "docs/audit/GT4_28_05_CLOSURE_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical GT report",
+      "notes": "Closure check snapshot."
+    },
+    {
+      "path": "docs/audit/GT5_28_05_FINAL_COMMIT_PUSH_REPORT.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as historical GT report",
+      "notes": "Finalized push record."
+    },
+    {
+      "path": "reports/forensic_export/README_AUDIT.md",
+      "classification_label": "external-model-output",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": true,
+      "recommended_action": "future quarantine/archive candidate",
+      "notes": "Forensic export bundle metadata."
+    },
+    {
+      "path": "reports/forensic_export/forensic_full_snapshot.md",
+      "classification_label": "external-model-output",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": true,
+      "recommended_action": "keep out of any evidence or doctrine ingestion",
+      "notes": "Derived review packet with duplicate source content."
+    },
+    {
+      "path": "reports/forensic_export/architecture_summary.md",
+      "classification_label": "external-model-output",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": true,
+      "recommended_action": "treat as review export only",
+      "notes": "Rendered export summary."
+    },
+    {
+      "path": "reports/forensic_export/source_export/README.md",
+      "classification_label": "external-model-output",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": true,
+      "recommended_action": "never treat as canonical source root",
+      "notes": "Duplicate source export under forensic bundle."
+    },
+    {
+      "path": "reports/linux-engineering/rhcsa_existing_state_audit.md",
+      "classification_label": "historical",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": true,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "historical audit only",
+      "notes": "Engineering audit note."
+    },
+    {
+      "path": "archive/quarantine/README.md",
+      "classification_label": "quarantine",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "keep as quarantine policy note",
+      "notes": "Correctly signals non-canonical area."
+    },
+    {
+      "path": "runtime/reports/current_checkpoint_report.md",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "future quarantine/archive candidate",
+      "notes": "Runtime-generated checkpoint report."
+    },
+    {
+      "path": "runtime/reports/contamination_guard_report.md",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "keep out of canonical evidence and doctrine",
+      "notes": "Generated runtime report."
+    },
+    {
+      "path": "runtime/reports/phase_0a_forensic_execution_report.md",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": true,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "future archive candidate",
+      "notes": "Generated runtime forensic report."
+    },
+    {
+      "path": "runtime/reports/phase_0b_retrieval_facade_report.md",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": true,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "treat as generated report, not doctrine",
+      "notes": "Runtime-side phase report."
+    },
+    {
+      "path": "runtime/logs/commands/20260523_205724_366915.json",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "never promote to evidence by path alone",
+      "notes": "Representative command log artifact."
+    },
+    {
+      "path": "runtime/logs/sessions/session_20260523_204557_588315.jsonl",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "keep outside canonical authority",
+      "notes": "Representative session log artifact."
+    },
+    {
+      "path": "runtime/memory/evidence_memory.jsonl",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "treat as contamination risk for future Evidence Memory work",
+      "notes": "Path name strongly suggests canonical evidence despite runtime origin."
+    },
+    {
+      "path": "runtime/memory/history.jsonl",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "keep out of canonical ingestion",
+      "notes": "Operational runtime history only."
+    },
+    {
+      "path": "runtime/memory/reasoning_trace.jsonl",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "never treat as canonical evidence",
+      "notes": "High-risk reasoning artifact."
+    },
+    {
+      "path": "runtime/memory/hats/coding.json",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "keep as runtime-local only",
+      "notes": "Representative runtime hat profile."
+    },
+    {
+      "path": "runtime/obsidian_vault/Evidence/20260523_204557_588315.md",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "do not treat as canonical evidence",
+      "notes": "Derived markdown projection inside high-risk Evidence path."
+    },
+    {
+      "path": "runtime/obsidian_vault/Reasoning/20260523_204557_588315.md",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "exclude from any future evidence/provenance indexing",
+      "notes": "Derived reasoning projection."
+    },
+    {
+      "path": "runtime/obsidian_vault/Sessions/20260523_204557_588315.jsonl",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "treat as generated session view only",
+      "notes": "Derived session mirror."
+    },
+    {
+      "path": "runtime/state/providers.json",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "runtime-local config only",
+      "notes": "Mutable provider state."
+    },
+    {
+      "path": "runtime/state/model_config.json",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "medium",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "runtime-local only",
+      "notes": "Mutable model selection state."
+    },
+    {
+      "path": "runtime/state/token_savings_report.json",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "do not treat as doctrine or evidence",
+      "notes": "Operational metrics only."
+    },
+    {
+      "path": "runtime/project_scan.json",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "low",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "treat as temporary scan output only",
+      "notes": "Scanner output artifact."
+    },
+    {
+      "path": "runtime/contradiction_registry.json",
+      "classification_label": "generated-runtime",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": true,
+      "external_model_output": false,
+      "recommended_action": "manual review before any contradiction-system phase",
+      "notes": "High-value artifact with ambiguous authority because it lives under runtime."
+    },
+    {
+      "path": "runtime/provenance_registry.json",
+      "classification_label": "unknown-needs-review",
+      "duplicate_authority_risk": "high",
+      "stale_candidate": false,
+      "generated_runtime": false,
+      "external_model_output": false,
+      "recommended_action": "manual review before future provenance hardening",
+      "notes": "Potentially important registry, but authority role is unclear."
+    }
+  ]
+}
