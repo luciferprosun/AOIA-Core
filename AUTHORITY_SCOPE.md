@@ -20,6 +20,13 @@ Forbidden:
 - public portal/archive ownership
 - generated runtime state as equal authority to source
 
+External-model-output:
+- outside canonical authority unless explicitly reviewed and promoted by future
+  evidence/provenance rules
+- cannot override docs/governance contracts or docs/ADR active doctrine
+- cannot become evidence by path alone
+- governed by docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md
+
 Handling rule:
 - analytical reviews about AOIA may be cited elsewhere, but this root owns the
   implementation layer.

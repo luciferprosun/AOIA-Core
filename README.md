@@ -44,6 +44,10 @@ AOIA-Core is released under the MIT License. See [LICENSE](LICENSE).
 
 If future documentation-specific licensing is desired, it can be clarified later.
 
+## External Model Output Policy
+
+AOIA-Core preserves some model-assisted reviews, forensic exports, and audit packets as historical context. These files are not canonical source, not evidence, and not runtime authority. They must not be ingested into Evidence Memory or used to override governance contracts or ADRs. See [docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md](docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md).
+
 ## Existing Runtime Notes
 
 This repository publishes the functional project code and architecture work
