@@ -1,7 +1,50 @@
-# flAmeBorbLLC AIOA LiGaLu
+# AOIA-Core
 
-Open-source local terminal AI runtime with AOIA routing foundations and a
-deterministic RHCSA knowledge pipeline.
+AOIA-Core is a local-first epistemic-control runtime for auditable AI-assisted engineering workflows, separating evidence, provenance, contradictions, logs, memory traces, and runtime state from raw model output.
+
+AOIA-Core exists because AI-assisted workflows often blur the line between what a model said, what a tool produced, what was logged, and what can actually be trusted or replayed. AOIA-Core makes those layers explicit.
+
+## What AOIA-Core Controls
+
+- evidence boundaries
+- provenance verification
+- contradiction tracking
+- retrieval boundaries
+- runtime state
+- deterministic operator workflows
+- human-approved execution
+
+## What AOIA-Core Is Not
+
+- not a chatbot
+- not a generic AI agent
+- not a truth engine
+- not a RAG wrapper
+- not GUI-first
+- not cloud-first
+- not a self-modifying/autonomous swarm
+
+## Project Layers
+
+1. AOIA-Core: the final practical engineering project and main repository deliverable.
+2. MHLM / MDLH: AI-safety research background about multi-model hallucination, recursive consensus, and provenance drift.
+3. LSC: scientific case-study background and stress-test context, not the core deliverable of AOIA-Core.
+
+## Current Technical Status
+
+- GT6 authority audit complete
+- GT6B full manifest complete
+- GT7 cleanup complete through Batch 3
+- latest confirmed HEAD: `fd74671`
+- validation at public-entry savepoint: `145` tests run, `4` skipped
+
+## License
+
+AOIA-Core is released under the MIT License. See [LICENSE](LICENSE).
+
+If future documentation-specific licensing is desired, it can be clarified later.
+
+## Existing Runtime Notes
 
 This repository publishes the functional project code and architecture work
 without private API secrets, browser state, local session memory, or machine-
