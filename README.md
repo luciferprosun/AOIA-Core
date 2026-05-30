@@ -83,6 +83,18 @@ USER
 ```
 
 The runtime can:
+## Reviewer / Stress-Test Documentation
+
+AOIA-Core GT8 includes additional documentation to aid reviewers. See:
+
+- docs/stress_tests/README.md
+- docs/stress_tests/AOIA_NMS_STRESS_TEST_PROTOCOL.md
+- docs/stress_tests/FAILURE_MODES.md
+- docs/stress_tests/LSC_CASE_STUDY_PROTOCOL.md
+- docs/stress_tests/MODEL_AUDIT_MATRIX.md
+- docs/ROADMAP_4_MONTHS.md
+
+These documents formalize the reviewer credibility pass for GT8. They clarify that stress-test contexts and scientific case studies are not part of the AOIA-Core deliverable.
 - execute shell commands
 - create and edit files
 - keep lightweight agent state
