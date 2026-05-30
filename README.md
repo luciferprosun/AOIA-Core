@@ -1,6 +1,6 @@
 # AOIA-Core
 
-AOIA-Core is a local-first epistemic-control runtime for auditable AI-assisted engineering workflows, separating evidence, provenance, contradictions, logs, memory traces, and runtime state from raw model output.
+AOIA-Core is a local-first runtime for AI-assisted engineering workflows with explicit evidence, provenance, and model-output boundaries. It separates evidence, provenance, contradictions, logs, memory traces, and runtime state from raw model output.
 
 AOIA-Core exists because AI-assisted workflows often blur the line between what a model said, what a tool produced, what was logged, and what can actually be trusted or replayed. AOIA-Core makes those layers explicit.
 
@@ -37,6 +37,21 @@ AOIA-Core exists because AI-assisted workflows often blur the line between what 
 - GT7 cleanup complete through Batch 3
 - latest confirmed HEAD: `fd74671`
 - validation at public-entry savepoint: `145` tests run, `4` skipped
+- see [Implemented Capabilities](docs/governance/IMPLEMENTED_CAPABILITIES.md) for a conservative status table separating implemented, partial, planned, and documentation-only items.
+
+## For External Reviewers
+
+Start here:
+
+- [Project Overview for Reviewers](docs/reviewer/PROJECT_OVERVIEW_FOR_REVIEWERS.md)
+- [Implemented Capabilities](docs/governance/IMPLEMENTED_CAPABILITIES.md)
+- [One Concrete Example](docs/reviewer/ONE_CONCRETE_EXAMPLE.md)
+- [External Model Output Policy](docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md)
+- [Stress-Test Documentation](docs/stress_tests/README.md)
+
+AOIA-Core should be read as a local-first boundary-enforcement runtime for AI-assisted engineering workflows. It is not AGI, not autonomous, not a truth engine, not validated science, and not production-ready.
+
+Evidence Memory Phase 1A is not active unless explicitly approved later through ADR/operator decision.
 
 ## License
 
@@ -107,21 +122,13 @@ The runtime can:
 
 ## AOIA and DVM references
 
-The repository contains the current AOIA foundation work:
-
-- `adaptive_routing/`
-- `docs/`
-- `docs/AOIA_PLANETARY_INTRO.md`
-- `docs/reference/diel_vertical_migration_wikipedia_2026-05-22.html`
-- `apps/`
-
-The biological inspiration comes from diel vertical migration and related
-ocean-layer behavior. That inspiration is used only for routing concepts,
-scheduling concepts, and environmental pressure modeling.
+The repository contains current AOIA foundation work and related background references. The AOIA name draws on biological layering concepts as historical routing inspiration. This background is not part of the AOIA-Core runtime authority or reviewer deliverable.
 
 ## Application catalog
 
 The repository also contains sibling application directories under `apps/`.
+
+The `apps/` directory may contain sibling or imported application material and should not be treated as the AOIA-Core runtime deliverable unless explicitly documented.
 
 Current imported subproject:
 
