@@ -1,4 +1,4 @@
-# LSC Epistemic-Audit Case Study Protocol
+# LSC Neutrino Archive Epistemic-Audit Case Study Protocol
 
 ## Role of LSC in AOIA/NMS
 
