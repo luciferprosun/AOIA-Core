@@ -48,6 +48,19 @@ If future documentation-specific licensing is desired, it can be clarified later
 
 AOIA-Core preserves some model-assisted reviews, forensic exports, and audit packets as historical context. These files are not canonical source, not evidence, and not runtime authority. They must not be ingested into Evidence Memory or used to override governance contracts or ADRs. See [docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md](docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md).
 
+## Reviewer / Stress-Test Documentation
+
+AOIA-Core GT8 includes additional documentation to aid reviewers. See:
+
+- [docs/stress_tests/README.md](docs/stress_tests/README.md)
+- [docs/stress_tests/AOIA_NMS_STRESS_TEST_PROTOCOL.md](docs/stress_tests/AOIA_NMS_STRESS_TEST_PROTOCOL.md)
+- [docs/stress_tests/FAILURE_MODES.md](docs/stress_tests/FAILURE_MODES.md)
+- [docs/stress_tests/LSC_CASE_STUDY_PROTOCOL.md](docs/stress_tests/LSC_CASE_STUDY_PROTOCOL.md)
+- [docs/stress_tests/MODEL_AUDIT_MATRIX.md](docs/stress_tests/MODEL_AUDIT_MATRIX.md)
+- [docs/ROADMAP_4_MONTHS.md](docs/ROADMAP_4_MONTHS.md)
+
+These documents formalize the reviewer credibility pass for GT8. They clarify that stress-test contexts and scientific case studies are not part of the AOIA-Core deliverable.
+
 ## Existing Runtime Notes
 
 This repository publishes the functional project code and architecture work
@@ -83,18 +96,7 @@ USER
 ```
 
 The runtime can:
-## Reviewer / Stress-Test Documentation
 
-AOIA-Core GT8 includes additional documentation to aid reviewers. See:
-
-- docs/stress_tests/README.md
-- docs/stress_tests/AOIA_NMS_STRESS_TEST_PROTOCOL.md
-- docs/stress_tests/FAILURE_MODES.md
-- docs/stress_tests/LSC_CASE_STUDY_PROTOCOL.md
-- docs/stress_tests/MODEL_AUDIT_MATRIX.md
-- docs/ROADMAP_4_MONTHS.md
-
-These documents formalize the reviewer credibility pass for GT8. They clarify that stress-test contexts and scientific case studies are not part of the AOIA-Core deliverable.
 - execute shell commands
 - create and edit files
 - keep lightweight agent state
