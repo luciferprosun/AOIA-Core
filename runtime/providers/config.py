@@ -16,6 +16,7 @@ DEFAULT_MODEL = "openrouter/google/gemma-3-27b-it"
 DEFAULT_PROVIDER_CHAIN = [
     {"name": "openrouter", "model": "google/gemma-3-27b-it", "enabled": True},
     {"name": "gemini", "model": "gemini-2.5-flash", "enabled": True},
+    {"name": "xai", "model": "grok-4.3", "enabled": True},
     {"name": "deepseek", "model": "deepseek-chat", "enabled": True},
 ]
 
@@ -24,13 +25,21 @@ DEFAULT_MODEL_PRESETS: dict[str, str] = {
     "openrouter": "openrouter/free",
     "openrouter-gemma": "openrouter/google/gemma-3-27b-it",
     "gemini": "gemini/gemini-2.5-flash",
+    "grok": "xai/grok-4.3",
+    "xai": "xai/grok-4.3",
     "deepseek": "deepseek/deepseek-chat",
     "aureon": "aureon/aureon-queen",
 }
 
 API_FILE_CANDIDATES = [
+    Path.home() / ".config" / "aoia" / "secrets" / "openrouter.env",
+    Path.home() / ".config" / "aoia" / "secrets" / "gemini.env",
+    Path.home() / ".config" / "aoia" / "secrets" / "xai.env",
+    Path.home() / ".config" / "aoia" / "secrets" / "deepseek.env",
     Path.home() / ".config" / "openrouter" / "api.env",
     Path.home() / ".config" / "gemini" / "api.env",
+    Path.home() / ".config" / "xai" / "api.env",
+    Path.home() / ".config" / "grok" / "api.env",
     Path.home() / ".config" / "deepseek" / "api.env",
 ]
 
@@ -49,7 +58,7 @@ class ProviderConfig:
 
 
 def load_api_environment() -> None:
-    """Load known user API env files without exposing secrets."""
+    """Load private local API env files without exposing secrets."""
     for env_path in API_FILE_CANDIDATES:
         if not env_path.exists():
             continue
@@ -115,6 +124,7 @@ class ProviderManager:
     def switch_model(self, model_name: str) -> str:
         normalized = self.normalize_model_name(model_name)
         self.current_model = normalized
+        self.last_used_model = ""
         self.provider = None
         self.config_path.write_text(
             json.dumps({"model": normalized}, indent=2),
@@ -159,6 +169,8 @@ class ProviderManager:
             return "OpenRouter uses OPENROUTER_API_KEY. Current Gemma preset: google/gemma-3-27b-it."
         if provider == "deepseek":
             return "DeepSeek uses DEEPSEEK_API_KEY and an OpenAI-compatible endpoint."
+        if provider == "xai":
+            return "Grok uses XAI_API_KEY and the OpenAI-compatible xAI endpoint."
         if provider == "aureon":
             return "Aureon requires a live AUREON_API_BASE_URL. No offline fake mode is used."
         if provider in REMOVED_PROVIDERS:
@@ -257,7 +269,7 @@ class ProviderManager:
         if provider == "aureon":
             return AureonProvider(model)
         if provider == "gemini":
-            api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+            api_key = os.getenv("GEMINI_API_KEY")
             if not api_key:
                 raise FileNotFoundError("GEMINI_API_KEY not found")
             return GeminiProvider(api_key, model)
@@ -275,6 +287,13 @@ class ProviderManager:
                 model=model,
                 base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
             )
+        if provider == "xai":
+            return OpenAICompatibleProvider(
+                provider="xai",
+                api_key=self._load_xai_key(),
+                model=model,
+                base_url=os.getenv("XAI_BASE_URL", "https://api.x.ai/v1"),
+            )
         if provider in REMOVED_PROVIDERS:
             raise ValueError(f"Provider removed from terminal app: {provider}")
 
@@ -288,13 +307,22 @@ class ProviderManager:
         raise FileNotFoundError(f"{env_name} not found")
 
     @staticmethod
+    def _load_xai_key() -> str:
+        value = os.getenv("XAI_API_KEY", "").strip()
+        if value:
+            return value
+        raise FileNotFoundError("XAI_API_KEY not found")
+
+    @staticmethod
     def _provider_is_available(provider: str) -> bool:
         if provider == "aureon":
             return bool(os.getenv("AUREON_API_BASE_URL", "").strip())
         if provider == "gemini":
-            return bool(os.getenv("GEMINI_API_KEY", "").strip() or os.getenv("GOOGLE_API_KEY", "").strip())
+            return bool(os.getenv("GEMINI_API_KEY", "").strip())
         if provider == "openrouter":
             return bool(os.getenv("OPENROUTER_API_KEY", "").strip())
+        if provider == "xai":
+            return bool(os.getenv("XAI_API_KEY", "").strip())
         if provider == "deepseek":
             return bool(os.getenv("DEEPSEEK_API_KEY", "").strip())
         if provider in REMOVED_PROVIDERS:

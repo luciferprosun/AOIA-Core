@@ -4,6 +4,7 @@ const state = {
 
 const elements = {
   modelSelect: document.querySelector("#model-select"),
+  modelPicker: document.querySelector("#model-picker"),
   currentModelBadge: document.querySelector("#current-model-badge"),
   modelNote: document.querySelector("#model-note"),
   chatLog: document.querySelector("#chat-log"),
@@ -68,14 +69,18 @@ async function refreshStatus() {
   hydrateModelSelect(payload.available_models, payload.model);
 }
 
-function hydrateModelSelect(availableModels, currentModel) {
-  const choices = availableModels.map((line) => {
+function parseModelChoices(availableModels) {
+  return (availableModels || []).map((line) => {
     const [aliasPart, modelPart] = line.split("->").map((item) => item.trim());
     return {
       label: aliasPart,
       value: modelPart,
     };
   });
+}
+
+function hydrateModelSelect(availableModels, currentModel) {
+  const choices = parseModelChoices(availableModels);
 
   elements.modelSelect.innerHTML = "";
   for (const choice of choices) {
@@ -93,16 +98,47 @@ function hydrateModelSelect(availableModels, currentModel) {
     option.selected = true;
     elements.modelSelect.appendChild(option);
   }
+
+  hydrateModelPicker(choices, currentModel);
+}
+
+function hydrateModelPicker(choices, currentModel) {
+  elements.modelPicker.innerHTML = "";
+  for (const choice of choices) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "model-pill";
+    button.dataset.model = choice.value;
+    button.textContent = choice.label;
+    button.title = choice.value;
+    if (choice.value === currentModel) {
+      button.classList.add("model-pill-active");
+      button.setAttribute("aria-pressed", "true");
+    } else {
+      button.setAttribute("aria-pressed", "false");
+    }
+    button.addEventListener("click", async () => {
+      elements.modelSelect.value = choice.value;
+      try {
+        await switchModel();
+      } catch (error) {
+        elements.modelNote.textContent = String(error);
+      }
+    });
+    elements.modelPicker.appendChild(button);
+  }
 }
 
 async function switchModel() {
   const model = elements.modelSelect.value;
+  elements.modelNote.textContent = `Switching to ${model}...`;
   const payload = await jsonFetch("/api/model", {
     method: "POST",
     body: JSON.stringify({ model }),
   });
   elements.modelNote.textContent = payload.notice || `Model switched to ${payload.model}`;
   applyStatus(payload.status);
+  hydrateModelSelect(payload.status.available_models, payload.status.model);
 }
 
 async function sendPrompt(prompt) {

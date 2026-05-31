@@ -133,6 +133,32 @@ textarea {
   margin-bottom: 12px;
 }
 
+.model-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.model-pill {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  text-align: left;
+}
+
+.model-pill-active {
+  border-color: rgba(217, 109, 50, 0.62);
+  background: rgba(217, 109, 50, 0.16);
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+
 #prompt-input {
   resize: vertical;
   min-height: 120px;

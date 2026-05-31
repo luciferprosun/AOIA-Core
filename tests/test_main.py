@@ -280,6 +280,8 @@ class RuntimeArchitectureTests(unittest.TestCase):
             manager = ProviderManager(project_dir)
             self.assertEqual(manager.normalize_model_name("aureon"), "aureon/aureon-queen")
             self.assertEqual(manager.normalize_model_name("gemini"), "gemini/gemini-2.5-flash")
+            self.assertEqual(manager.normalize_model_name("grok"), "xai/grok-4.3")
+            self.assertEqual(manager.normalize_model_name("xai"), "xai/grok-4.3")
             self.assertEqual(manager.normalize_model_name("openrouter"), "openrouter/free")
             self.assertEqual(
                 manager.normalize_model_name("openai:gpt-4o-mini"),
@@ -324,6 +326,20 @@ class RuntimeArchitectureTests(unittest.TestCase):
             self.assertIn("Model switched to: gemini/gemini-2.5-flash", result.message)
             self.assertIn("google-genai", result.message)
             self.assertEqual(manager.current_model, "gemini/gemini-2.5-flash")
+            self.assertEqual(manager.describe(), "gemini/gemini-2.5-flash")
+
+    def test_model_command_switches_grok_without_instantiating_provider(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_dir = Path(tmp) / "project"
+            project_dir.mkdir()
+            manager = ProviderManager(project_dir)
+            runtime = SimpleNamespace(provider_manager=manager)
+            result = main.build_command_registry().execute("/model grok", runtime)
+            self.assertTrue(result.handled)
+            self.assertIn("Model switched to: xai/grok-4.3", result.message)
+            self.assertIn("XAI_API_KEY", result.message)
+            self.assertEqual(manager.current_model, "xai/grok-4.3")
+            self.assertEqual(manager.describe(), "xai/grok-4.3")
 
     def test_aureon_offline_provider_answers_greeting_normally(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

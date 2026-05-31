@@ -47,7 +47,7 @@ def cmd_help(_args: str, runtime) -> CommandResult:
                 "Local commands:",
                 "  /status          show local runtime state",
                 "  /model           show active model and presets",
-                "  /model NAME      switch model, e.g. aureon or gemini/gemini-2.5-flash",
+                "  /model NAME      switch model, e.g. grok or gemini/gemini-2.5-flash",
                 "  /vault           show Obsidian vault path",
                 "  /providers       show cloud provider fallback status",
                 "  /setup           show free API setup checklist",
@@ -103,6 +103,8 @@ def cmd_model(args: str, runtime) -> CommandResult:
                 "  /model openrouter/google/gemma-3-27b-it",
                 "  /model gemini",
                 "  /model gemini/gemini-2.5-flash",
+                "  /model grok",
+                "  /model xai/grok-4.3",
                 "  /model deepseek/deepseek-chat",
             ]
         )
@@ -139,9 +141,15 @@ def cmd_providers(_args: str, runtime) -> CommandResult:
 def cmd_setup(_args: str, runtime) -> CommandResult:
     lines = [
         "Free API setup checklist:",
-        "  OpenRouter Gemma: set OPENROUTER_API_KEY in ~/.config/openrouter/api.env",
-        "  Gemini: set GEMINI_API_KEY in ~/.config/gemini/api.env",
-        "  DeepSeek: set DEEPSEEK_API_KEY in ~/.config/deepseek/api.env",
+        "  Secrets must stay outside the repository and must not be committed or printed.",
+        "  Create private secrets directory:",
+        "    mkdir -p ~/.config/aoia/secrets",
+        "    chmod 700 ~/.config/aoia/secrets",
+        "  OpenRouter Gemma: set OPENROUTER_API_KEY in your environment or private ~/.config/aoia/secrets/openrouter.env",
+        "  Gemini: set GEMINI_API_KEY in your environment or private ~/.config/aoia/secrets/gemini.env",
+        "  Grok/xAI: set XAI_API_KEY in your environment or private ~/.config/aoia/secrets/xai.env. Do not commit API keys.",
+        "  DeepSeek: set DEEPSEEK_API_KEY in your environment or private ~/.config/aoia/secrets/deepseek.env",
+        "  Example private file format only: XAI_API_KEY=your_key_here",
         "  Removed from this terminal app: Ollama/local Gemma and HuggingFace.",
         "",
         "Current provider status:",
