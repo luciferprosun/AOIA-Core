@@ -73,6 +73,62 @@ class CommandGrammarCliTests(unittest.TestCase):
         payload = json.loads(result.stdout)
         self.assertEqual("firewall-cmd", payload[0]["base"])
 
+    def test_stdin_mode_classifies_two_commands(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],
+            cwd=REPO_ROOT,
+            input="systemctl status sshd\ndnf status httpd\n",
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(2, len(payload))
+        self.assertEqual("systemctl", payload[0]["base"])
+        self.assertEqual("dnf", payload[1]["base"])
+        self.assertNotEqual("exact", payload[1]["status"])
+
+    def test_stdin_mode_ignores_empty_lines(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],
+            cwd=REPO_ROOT,
+            input="\nsystemctl status sshd\n\n  \npodman ps\n",
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(2, len(payload))
+        self.assertEqual(["systemctl status sshd", "podman ps"], [item["input"] for item in payload])
+
+    def test_stdin_mode_does_not_execute_shell_commands(self):
+        marker = Path("/tmp/aoia_grammar_should_not_exist")
+        if marker.exists():
+            marker.unlink()
+
+        result = subprocess.run(
+            [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],
+            cwd=REPO_ROOT,
+            input="echo safe && touch /tmp/aoia_grammar_should_not_exist\n",
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual("suspicious", payload[0]["status"])
+        self.assertFalse(marker.exists())
+
+    def test_positional_multi_command_mode_still_works(self):
+        result = self.run_cli("systemctl status sshd", "dnf status httpd")
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(2, len(payload))
+        self.assertEqual("systemctl", payload[0]["base"])
+        self.assertEqual("dnf", payload[1]["base"])
+
 
 if __name__ == "__main__":
     unittest.main()

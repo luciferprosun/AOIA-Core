@@ -38,6 +38,12 @@ CLI readout:
 - does not execute commands
 - example: `python3 -m runtime.tools.command_grammar_cli "systemctl status sshd"`
 
+Batch / stdin mode:
+
+- reads newline-separated command strings and prints one JSON array
+- never executes input
+- example: `printf 'systemctl status sshd\npodman ps\n' | python3 -m runtime.tools.command_grammar_cli --stdin`
+
 Roadmap:
 
 - expand command families

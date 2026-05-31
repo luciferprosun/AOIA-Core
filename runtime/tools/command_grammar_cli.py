@@ -24,14 +24,23 @@ def classify_commands(commands: Sequence[str]) -> list[dict]:
     return results
 
 
+def _usage() -> str:
+    return (
+        "Usage: python3 -m runtime.tools.command_grammar_cli "
+        '"<command string>" ["<command string>" ...]\n'
+        "       python3 -m runtime.tools.command_grammar_cli --stdin"
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
+    if args == ["--stdin"]:
+        commands = [line.strip() for line in sys.stdin if line.strip()]
+        print(json.dumps(classify_commands(commands), indent=2, sort_keys=True))
+        return 0
+
     if not args:
-        print(
-            "Usage: python3 -m runtime.tools.command_grammar_cli "
-            '"<command string>" ["<command string>" ...]',
-            file=sys.stderr,
-        )
+        print(_usage(), file=sys.stderr)
         return 2
 
     print(json.dumps(classify_commands(args), indent=2, sort_keys=True))
