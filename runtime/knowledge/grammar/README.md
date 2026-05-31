@@ -22,6 +22,17 @@ Current implemented families:
 - `semanage`
 - `chmod`
 - `podman`
+- file readout: `cat`, `less`, `head`, `tail`
+- filesystem listing/readout: `ls`, `pwd`, `tree`, `basename`, `dirname`
+- search/text readout: `grep`, `find`
+- log readout: `journalctl`
+- RPM query readout: `rpm`
+
+Expanded low-risk read-only families:
+
+- file read/listing, search/text readout, log readout, and RPM query forms are classified as advisory read-only shapes when they match narrow patterns
+- destructive, state-changing, or ambiguous forms such as `find -delete`, `find -exec rm`, `rpm install`, and unsupported tree operations remain suspicious or rejected
+- these classifications are still not command safety proofs and are not executor policy
 
 Current status:
 

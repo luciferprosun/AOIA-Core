@@ -33,6 +33,8 @@ _REQUIRED_KEYS = {
 _STATUS_REJECT = "reject"
 _STATUS_SUSPICIOUS = "suspicious"
 _STATUS_FAMILY = "family"
+_DANGEROUS_FIND_TOKENS = {"-delete", "-exec", "-execdir", "-ok", "-okdir"}
+_DANGEROUS_WORDS = {"delete", "install", "remove", "rm", "restart", "start", "stop"}
 
 
 def _result(
@@ -130,6 +132,131 @@ def _flags_allowed(tokens: list[str], allowed_flags: set[str]) -> bool:
         if flag.startswith("-") and flag not in allowed_flags:
             return False
     return True
+
+
+def _non_flag_args(tokens: list[str], flags_with_values: set[str] | None = None) -> list[str]:
+    flags_with_values = flags_with_values or set()
+    args: list[str] = []
+    skip_next = False
+    for token in tokens[1:]:
+        if skip_next:
+            skip_next = False
+            continue
+        if token in flags_with_values:
+            skip_next = True
+            continue
+        if token.startswith("-"):
+            continue
+        args.append(token)
+    return args
+
+
+def _family_result(
+    pattern: dict[str, Any],
+    base: str,
+    danger: str,
+    reasons: list[str],
+) -> dict[str, Any]:
+    return _result(
+        status=_STATUS_FAMILY,
+        family=str(pattern.get("family")),
+        base=base,
+        confidence=str(pattern.get("confidence_on_match", "grammar_family")),
+        danger=danger,
+        reasons=reasons,
+        matched_pattern_id=str(pattern.get("id")),
+    )
+
+
+def _suspicious_result(
+    pattern: dict[str, Any],
+    base: str,
+    danger: str,
+    reasons: list[str],
+) -> dict[str, Any]:
+    return _result(
+        status=_STATUS_SUSPICIOUS,
+        family=str(pattern.get("family")),
+        base=base,
+        confidence="grammar_suspicious",
+        danger=danger,
+        reasons=reasons,
+        matched_pattern_id=str(pattern.get("id")),
+    )
+
+
+def _read_only_shape(
+    tokens: list[str],
+    pattern: dict[str, Any],
+    allowed_flags: set[str],
+    danger: str,
+    reasons: list[str],
+) -> dict[str, Any] | None:
+    base = tokens[0]
+    policy = str(pattern.get("positional_policy", ""))
+    flags_with_values = {"-n", "-c", "-L", "-u", "-p", "-b", "--since", "--until", "-type", "-name", "-iname", "-maxdepth", "-mindepth", "-user", "-group", "-perm", "-size", "-mtime", "-s", "-qf"}
+
+    if policy == "optional_flags_then_required_target":
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        if _non_flag_args(tokens):
+            return _family_result(pattern, base, danger, reasons + ["has_target"])
+        return _suspicious_result(pattern, base, danger, reasons + ["missing_target"])
+
+    if policy == "optional_flags_with_values_then_optional_target":
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        return _family_result(pattern, base, danger, reasons + ["readout_shape"])
+
+    if policy == "base_or_optional_flags_and_optional_targets":
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        if any(word in tokens[1:] for word in _DANGEROUS_WORDS):
+            return _suspicious_result(pattern, base, danger, reasons + ["dangerous_word"])
+        return _family_result(pattern, base, danger, reasons + ["listing_shape"])
+
+    if policy == "base_or_optional_flags_only":
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        if _non_flag_args(tokens):
+            return _suspicious_result(pattern, base, danger, reasons + ["unexpected_argument"])
+        return _family_result(pattern, base, danger, reasons + ["readout_shape"])
+
+    if policy == "optional_flags_then_required_pattern":
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        if _non_flag_args(tokens):
+            return _family_result(pattern, base, danger, reasons + ["has_pattern"])
+        return _suspicious_result(pattern, base, danger, reasons + ["missing_pattern"])
+
+    if policy == "find_read_only_predicates":
+        if any(token in _DANGEROUS_FIND_TOKENS for token in tokens[1:]):
+            return _suspicious_result(pattern, base, "unknown", reasons + ["dangerous_find_predicate"])
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        if _non_flag_args(tokens, flags_with_values):
+            return _family_result(pattern, base, danger, reasons + ["read_only_find_shape"])
+        return _suspicious_result(pattern, base, danger, reasons + ["missing_find_path"])
+
+    if policy == "flags_with_optional_values_only":
+        if len(tokens) == 1:
+            return _family_result(pattern, base, danger, reasons + ["base_only_readout"])
+        if tokens[1] in _DANGEROUS_WORDS:
+            return _suspicious_result(pattern, base, danger, reasons + ["action_word_without_flag"])
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        return _family_result(pattern, base, danger, reasons + ["log_readout_shape"])
+
+    if policy == "rpm_query_only":
+        if len(tokens) == 1:
+            return _suspicious_result(pattern, base, danger, reasons + ["missing_query_flag"])
+        if tokens[1] in _DANGEROUS_WORDS or not tokens[1].startswith("-q"):
+            return _suspicious_result(pattern, base, danger, reasons + ["not_query_shape"])
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        return _family_result(pattern, base, danger, reasons + ["rpm_query_shape"])
+
+    return None
 
 
 def validate_command_shape(command: str) -> dict[str, Any]:
@@ -244,6 +371,10 @@ def validate_command_shape(command: str) -> dict[str, Any]:
             reasons=reasons + ["unknown_firewall_flag_or_argument"],
             matched_pattern_id=str(pattern.get("id")),
         )
+
+    read_only_result = _read_only_shape(tokens, pattern, allowed_flags, danger, reasons)
+    if read_only_result is not None:
+        return read_only_result
 
     if len(tokens) == 1:
         return _result(

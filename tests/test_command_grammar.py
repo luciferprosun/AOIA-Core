@@ -40,6 +40,38 @@ class CommandGrammarTests(unittest.TestCase):
                 self.assertIn(result["status"], {"family", "exact"})
                 self.assertNotEqual("grammar_reject", result["confidence"])
 
+    def test_low_risk_read_only_families(self):
+        cases = [
+            ("cat /etc/hosts", "cat"),
+            ("less /var/log/messages", "less"),
+            ("head -n 20 /var/log/messages", "head"),
+            ("tail -f /var/log/messages", "tail"),
+            ("ls -l /etc", "ls"),
+            ("pwd", "pwd"),
+            ("tree /etc", "tree"),
+            ("basename /etc/passwd", "basename"),
+            ("dirname /etc/passwd", "dirname"),
+            ("grep root /etc/passwd", "grep"),
+            ("grep -R sshd /etc", "grep"),
+            ('find /var/log -type f -name "*.log"', "find"),
+            ("journalctl -u sshd", "journalctl"),
+            ("journalctl -xe", "journalctl"),
+            ("journalctl --since today", "journalctl"),
+            ("rpm -qa", "rpm"),
+            ("rpm -q bash", "rpm"),
+            ("rpm -qi bash", "rpm"),
+            ("rpm -ql bash", "rpm"),
+        ]
+        for command, base in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertEqual(base, result["base"])
+                self.assertIn(result["status"], {"exact", "family", "partial"})
+                self.assertNotEqual("reject", result["status"])
+                self.assertNotEqual("suspicious", result["status"])
+                self.assertEqual("read_only", result["danger"])
+
     def test_suspicious_or_rejected_shapes(self):
         cases = [
             ("systemctl install nginx", "suspicious"),
@@ -57,6 +89,23 @@ class CommandGrammarTests(unittest.TestCase):
                 result = validate_command_shape(command)
                 self.assert_required_shape(result)
                 self.assertEqual(status, result["status"])
+
+    def test_low_risk_families_reject_ambiguous_or_destructive_shapes(self):
+        cases = [
+            "find / -delete",
+            "find /tmp -exec rm -rf {} \\;",
+            "grep",
+            "cat",
+            "journalctl restart sshd",
+            "rpm install bash",
+            "tree --delete /tmp",
+        ]
+        for command in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertIn(result["status"], {"suspicious", "reject"})
+                self.assertNotEqual("exact", result["status"])
 
     def test_unknown_base_is_not_exact(self):
         result = validate_command_shape("journalctl restart sshd")

@@ -89,6 +89,21 @@ class CommandGrammarCliTests(unittest.TestCase):
         self.assertEqual("dnf", payload[1]["base"])
         self.assertNotEqual("exact", payload[1]["status"])
 
+    def test_stdin_mode_classifies_new_read_only_families(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],
+            cwd=REPO_ROOT,
+            input="cat /etc/hosts\njournalctl -u sshd\nrpm -q bash\n",
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(3, len(payload))
+        self.assertEqual(["cat", "journalctl", "rpm"], [item["base"] for item in payload])
+        self.assertEqual(["read_only", "read_only", "read_only"], [item["danger"] for item in payload])
+
     def test_stdin_mode_ignores_empty_lines(self):
         result = subprocess.run(
             [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],
