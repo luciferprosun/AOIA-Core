@@ -11,6 +11,9 @@ AI-assisted technical workflows where evidence, provenance, contradictions,
 memory traces, runtime state, model output, and human-approved execution need
 clear boundaries.
 
+Its local-first/deterministic claims apply to local retrieval and epistemic
+gating, not to external LLM output.
+
 ## AIOA / AOIA
 
 AIOA / AOIA is the broader project naming and conceptual frame around adaptive
@@ -42,6 +45,9 @@ stress-test corpus only. It is used to test whether AOIA/NMS can separate claims
 provenance, contradictions, and evidence status. LSC is not validated physics and
 is not AOIA-Core scientific output.
 
+LSC is not runtime authority and AOIA-Core does not validate, perform, or fund
+neutrino physics.
+
 ## SCEMDA
 
 SCEMDA is external applied or methodological context. It is non-canonical for
@@ -63,6 +69,9 @@ explicitly reviewed and promoted through governed human-approved processes.
 Evidence Memory is the governed evidence layer. Runtime output, logs, model
 responses, and reasoning traces do not become evidence automatically.
 
+The current evidence boundary is a controlled write path and audit-support
+mechanism. It is not a complete immutable content-addressed evidence store yet.
+
 ## Reasoning Memory
 
 Reasoning Memory records reasoning traces or operational context. It can support
@@ -72,7 +81,8 @@ review, but it is not the same as evidence.
 
 Provenance records where an artifact, claim, action, or evidence-like item came
 from and how it was handled. Provenance supports auditability; it does not by
-itself prove truth.
+itself prove truth, validate scientific claims, authenticate external sources,
+or verify model-output correctness.
 
 ## Contradiction Registry
 
@@ -96,6 +106,32 @@ authority.
 Runtime authority is the set of source code, governance rules, tests, and
 approved repository documents that define AOIA-Core behavior. External reports,
 model outputs, and research archives are not runtime authority by default.
+
+## AOIAEpistemicKernel
+
+AOIAEpistemicKernel is the canonical epistemic gate for current reviewer-facing
+runtime authority boundaries.
+
+## KnowledgeRouter
+
+KnowledgeRouter is a legacy/compatibility transition surface. It should not be
+read as a second canonical epistemic authority.
+
+## xAI/Grok and model selector
+
+xAI/Grok provider support and the model selector are optional convenience/demo
+features. They do not change runtime authority, evidence/provenance boundaries,
+or local retrieval determinism.
+
+## Web/TUI
+
+Web and TUI surfaces are optional visualization, debug, and operator interfaces.
+They are not the core deliverable.
+
+## Generated runtime artifacts
+
+Generated `state/`, `memory/`, `logs/`, and `obsidian_vault/` artifacts are
+runtime artifacts. They are not canonical source authority.
 
 ## External model output
 

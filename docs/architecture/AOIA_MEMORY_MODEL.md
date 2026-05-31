@@ -12,6 +12,11 @@ Each layer has a distinct authority class, persistence rule, mutability rule, an
 
 This document freezes the canonical memory doctrine before implementation.
 
+Reviewer scope note: this doctrine describes authority boundaries and intended
+flows. Current enforcement is partial. Generated runtime artifacts such as
+`state/`, `memory/`, `logs/`, and `obsidian_vault/` are non-canonical unless
+explicitly promoted through governed paths.
+
 ## Layer Summary
 
 | Layer | Name | Authority Class |
@@ -234,6 +239,11 @@ Contamination risks:
 Purpose:
 - Preserve factual support artifacts used for local answer formation, audit, retrieval explanation, or external inspection.
 - Store evidence as immutable objects tied to provenance.
+
+Current implementation note:
+- The present evidence boundary is a controlled write path and audit-support
+  mechanism. A complete content-addressed immutable evidence store remains
+  roadmap work.
 
 Allowed writers:
 - Evidence capture pipeline.

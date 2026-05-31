@@ -37,8 +37,8 @@ AOIA-Core exists because AI-assisted workflows often blur the line between what 
 - GT6 authority audit complete
 - GT6B full manifest complete
 - GT7 cleanup complete through Batch 3
-- latest confirmed HEAD: `fd74671`
-- validation at public-entry savepoint: `145` tests run, `4` skipped
+- latest pushed feature savepoint before this docs clarification pass: `78ab538`
+- validation at current savepoint: `146` tests run, `4` skipped
 - see [Implemented Capabilities](docs/governance/IMPLEMENTED_CAPABILITIES.md) for a conservative status table separating implemented, partial, planned, and documentation-only items.
 
 ## For External Reviewers
@@ -54,6 +54,8 @@ Start here:
 AOIA-Core should be read as a local-first boundary-enforcement runtime for AI-assisted engineering workflows. It is not AGI, not autonomous, not a truth engine, not validated science, and not production-ready.
 
 Evidence Memory Phase 1A is not active unless explicitly approved later through ADR/operator decision.
+
+Reviewer boundary note: deterministic/local-first claims apply to local retrieval and epistemic gating, not to external LLM output. Provenance records local lineage and integrity; it does not validate factual correctness, scientific claims, external source authenticity, or model-output truth. Optional provider/UI features such as xAI/Grok, the model selector, web UI, and TUI surfaces do not change runtime authority, evidence boundaries, or provenance semantics.
 
 ## License
 
@@ -121,6 +123,8 @@ The runtime can:
 - inspect live webpages
 - capture screenshots
 - switch models from inside the app with `/model`
+
+External model providers are optional and non-deterministic. They can assist operator workflows, but their output is not evidence, provenance, or runtime authority by default.
 
 ## AOIA and DVM references
 

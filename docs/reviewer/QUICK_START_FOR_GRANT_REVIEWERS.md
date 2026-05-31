@@ -7,6 +7,11 @@ AI-assisted technical workflows. It focuses on provenance, evidence boundaries,
 contradiction tracking, controlled retrieval, and human operator approval for
 risky actions.
 
+The deterministic/local-first claim applies to local Linux/RHCSA retrieval and
+the epistemic gating layer. External model providers, including optional
+xAI/Grok, are non-deterministic and are not claimed as deterministic runtime
+results.
+
 ## 2. What AOIA-Core is not
 
 AOIA-Core is not:
@@ -49,7 +54,7 @@ security, scientific validity, or production readiness.
 
 The known current savepoint result is:
 
-- `145` tests run
+- `146` tests run
 - `4` optional UI/Textual tests skipped
 - `OK`
 
@@ -68,6 +73,22 @@ scientific output, and not runtime authority.
 SCEMDA, HNC, Gary-related, and other external collaborator material remain
 external and non-canonical unless explicitly promoted through governed
 human-approved processes.
+
+Provenance verifies local lineage and chain integrity only. It does not validate
+truth, external source authenticity, scientific claims, or model output.
+
+The evidence boundary is a controlled write path and audit-support mechanism,
+not a complete immutable content-addressed evidence store.
+
+Runtime safety contracts are strong design and governance contracts with partial
+runtime enforcement today. Full enforcement remains roadmap work.
+
+`AOIAEpistemicKernel` is the canonical epistemic gate. `KnowledgeRouter` is a
+legacy/compatibility transition surface, not a second canonical authority.
+
+Web/TUI surfaces are optional visualization, debug, and operator interfaces.
+Generated `state/`, `memory/`, `logs/`, and `obsidian_vault/` artifacts are
+runtime artifacts, not canonical source authority.
 
 ## 8. Recommended reading order
 

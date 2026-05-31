@@ -8,6 +8,8 @@ This package provides a concise reviewer-facing layer for stress-test planning, 
 
 AOIA/NMS focuses on evidence/reasoning separation, provenance tracking, contradiction awareness, and audit trails for AI-assisted workflows.
 
+AOIA/NMS uses AOIA-Core as the implementation reference. Deterministic/local-first claims are limited to local retrieval and epistemic gating. External model providers, including optional xAI/Grok, are non-deterministic and non-authoritative.
+
 ## First demonstration case
 
 The first difficult demonstration case is the LSC neutrino research archive. The goal is not to prove LSC physics. The goal is to test whether AOIA/NMS can prevent premature validation, detect unsupported claims, track provenance, expose contradictions, and produce reproducible audit trails.
@@ -19,6 +21,8 @@ The first difficult demonstration case is the LSC neutrino research archive. The
 - This package does not promise production autonomous agents.
 - This package does not promise iOS, Android, GUI, or full ML benchmark implementation before funding.
 - This package avoids unsupported novelty claims such as “first ever” or “no one else can.”
+- This package does not claim that provenance proves truth, validates external source authenticity, or verifies model-output correctness.
+- This package does not claim a complete immutable evidence store or production safety certification today.
 
 ## Files
 

@@ -19,6 +19,10 @@ The repository currently includes:
 
 Some capabilities are implemented in code, some are partial, and some are documentation-only. The project should not be described as production-ready, autonomous, or scientifically validating external claims.
 
+Deterministic/local-first claims apply to local retrieval and epistemic gating.
+External LLM providers, including optional xAI/Grok, are non-deterministic and
+do not define runtime authority.
+
 ## Recent Improvements Since Proposal Submission
 
 - Reviewer entry points were added.
@@ -34,8 +38,9 @@ Some capabilities are implemented in code, some are partial, and some are docume
 Current local validation status:
 
 - `python3 -m compileall runtime tests`: PASS
+- `node --check web/app.js`: PASS
 - `PYTHONPATH=runtime:. python3 -m unittest discover -s tests -p "test*.py" -v`: PASS
-- unittest count: 145 tests OK, 4 skipped
+- unittest count: 146 tests OK, 4 skipped
 
 The skipped tests relate to optional local dependencies. This validation does not claim production readiness or full benchmark execution.
 
@@ -93,7 +98,7 @@ Safeguards:
 
 - explicit non-goals
 - claim classification
-- provenance requirements
+- provenance requirements scoped to local lineage/integrity, not truth validation
 - contradiction exposure
 - reviewer escalation
 - documentation-only scope for GT-NLNET-1
@@ -106,9 +111,17 @@ Safeguards:
 - iOS work
 - Android/PWA implementation in this step
 - frontend or GUI build work
+- treating web/TUI surfaces as the core deliverable
 - ML training
 - runtime architecture changes
 - provider changes
 - Evidence Memory activation
 - provenance logic changes
 - Contradiction Registry logic changes
+
+## Reviewer Boundary Notes
+
+- `AOIAEpistemicKernel` is the canonical epistemic gate. `KnowledgeRouter` is a legacy/compatibility transition surface.
+- The evidence boundary is a controlled write path and audit-support mechanism, not a complete immutable CAS evidence store today.
+- Runtime safety contracts are strong design/governance contracts with partial runtime enforcement today. Full enforcement remains roadmap work.
+- Generated `state/`, `memory/`, `logs/`, and `obsidian_vault/` artifacts are runtime artifacts, not canonical source authority.

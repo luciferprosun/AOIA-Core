@@ -13,6 +13,10 @@ AOIA-Core is a local-first runtime for AI-assisted engineering workflows with ex
 
 The project aims to keep AI-assisted engineering work auditable and reviewable without treating every runtime artifact as authoritative.
 
+Deterministic/local-first behavior means deterministic local retrieval and
+epistemic gating where implemented. External LLM providers are optional,
+non-deterministic helpers and are not treated as deterministic runtime results.
+
 ## What AOIA-Core Is Not
 
 AOIA-Core is not:
@@ -40,6 +44,15 @@ Implemented capabilities include:
 - core documentation and reviewer-focused status materials
 
 These are implemented at the documentation and runtime-design level. Some capabilities are present in the current codebase, while others are partial or under active governance refinement.
+
+## Boundary Clarifications
+
+- `AOIAEpistemicKernel` is the canonical epistemic gate. `KnowledgeRouter` is a legacy/compatibility transition surface, not a second canonical authority.
+- Provenance records and verifies local lineage/integrity for selected artifacts; it does not validate truth, scientific claims, external source authenticity, or model output.
+- The evidence boundary is a controlled write path and audit-support mechanism, not a complete immutable content-addressed evidence store.
+- Runtime safety contracts are strong design/governance contracts with partial runtime enforcement today; full enforcement is roadmap work.
+- xAI/Grok and the model selector are optional convenience/demo features. They do not change runtime authority, evidence/provenance boundaries, or local retrieval determinism.
+- Web and TUI surfaces are optional visualization, debug, and operator interfaces. Generated `state/`, `memory/`, `logs/`, and `obsidian_vault/` artifacts are not canonical source authority.
 
 ## What Is Planned / Inactive
 
