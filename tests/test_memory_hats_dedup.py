@@ -4,7 +4,7 @@ import inspect
 import string
 import unittest
 
-from runtime.memory_hats.init import (
+from runtime.memory_hats import (
     compute_fingerprint,
     fingerprint_for_trigger,
     normalize_trigger,

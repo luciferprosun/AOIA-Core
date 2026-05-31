@@ -3,7 +3,7 @@ import ast
 import inspect
 import unittest
 
-from runtime.memory_hats.init import PheromoneTag, ReviewStatus, SafetyLevel, TagType
+from runtime.memory_hats import PheromoneTag, ReviewStatus, SafetyLevel, TagType
 
 
 class MemoryHatsTagTests(unittest.TestCase):
@@ -20,7 +20,7 @@ class MemoryHatsTagTests(unittest.TestCase):
         )
 
     def test_module_imports_successfully(self):
-        module = importlib.import_module("runtime.memory_hats.init")
+        module = importlib.import_module("runtime.memory_hats")
 
         self.assertIs(module.PheromoneTag, PheromoneTag)
         self.assertIs(module.TagType, TagType)

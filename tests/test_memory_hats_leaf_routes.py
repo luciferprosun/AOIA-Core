@@ -3,7 +3,7 @@ import importlib
 import inspect
 import unittest
 
-from runtime.memory_hats.init import (
+from runtime.memory_hats import (
     build_leaf_path,
     is_valid_leaf_path,
     parent_leaf_path,
