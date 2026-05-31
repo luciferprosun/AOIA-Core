@@ -298,6 +298,47 @@ class CommandGrammarTests(unittest.TestCase):
                     result,
                 )
 
+    def test_gt17_tar_listing_forms_are_read_only(self):
+        cases = [
+            "tar -tf archive.tar",
+            "tar -tvf archive.tar",
+            "tar --list -f archive.tar",
+            "tar --list --file archive.tar",
+        ]
+        for command in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertEqual("tar", result["base"])
+                self.assertIn(result["status"], {"exact", "family", "partial"})
+                self.assertNotEqual("reject", result["status"])
+                self.assertEqual("read_only", result["danger"])
+
+    def test_gt17_archive_write_or_extract_forms_remain_non_read_only(self):
+        cases = [
+            "tar -xvf archive.tar",
+            "tar -cvf archive.tar file",
+            "tar -rvf archive.tar file",
+            "tar -uvf archive.tar file",
+            "tar --extract -f archive.tar",
+            "tar --create -f archive.tar file",
+            "tar --delete -f archive.tar file",
+            "rpm2cpio package.rpm | cpio -idmv",
+            "gzip file",
+            "gunzip file.gz",
+            "zip archive.zip file",
+            "unzip archive.zip",
+        ]
+        for command in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertFalse(
+                    result["status"] in {"exact", "family", "partial"}
+                    and result["danger"] == "read_only",
+                    result,
+                )
+
     def test_unknown_base_is_not_exact(self):
         result = validate_command_shape("journalctl restart sshd")
         self.assert_required_shape(result)

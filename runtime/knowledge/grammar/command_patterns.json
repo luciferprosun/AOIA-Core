@@ -280,6 +280,20 @@
     "notes": "Advisory repoquery readout shape only."
   },
   {
+    "id": "tar-list-readout",
+    "family": "archive_inspection",
+    "base": "tar",
+    "subcommands": [],
+    "allowed_flags": ["-tf", "-tvf", "--list", "-f", "--file"],
+    "required_flags": [],
+    "positional_policy": "tar_list_read_only",
+    "examples_valid": ["tar -tf archive.tar", "tar -tvf archive.tar"],
+    "examples_invalid": ["tar -xvf archive.tar", "tar -cvf archive.tar file"],
+    "confidence_on_match": "grammar_family",
+    "danger_default": "read_only",
+    "notes": "Advisory tar archive listing shape only; create, extract, update, append, and delete forms are not accepted as read-only."
+  },
+  {
     "id": "df-readout",
     "family": "system_storage_inspection",
     "base": "df",

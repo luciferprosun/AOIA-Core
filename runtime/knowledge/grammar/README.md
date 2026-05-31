@@ -55,6 +55,12 @@ GT16 package/query inspection expansion:
 - install, remove, update, rollback, undo, and package import forms remain non-read-only, suspicious, or state-changing
 - this is advisory command-shape classification only, not package-manager safety proof
 
+GT17 archive read-only inspection expansion:
+
+- `tar` listing forms such as `tar -tf` and `tar -tvf` are classified as narrow read-only archive inspection
+- archive extraction, creation, update, append, delete, compression, and pipeline extraction forms remain non-read-only or suspicious
+- this is advisory command-shape classification only, not archive safety proof
+
 Current status:
 
 - prototype on the dev branch

@@ -311,6 +311,19 @@ def _read_only_shape(
             return _suspicious_result(pattern, base, danger, reasons + ["missing_repoquery_target"])
         return _family_result(pattern, base, danger, reasons + ["repoquery_readout_shape"])
 
+    if policy == "tar_list_read_only":
+        create_or_extract_flags = ("-c", "-x", "-r", "-u", "--create", "--extract", "--append", "--update", "--delete")
+        if any(token.startswith(create_or_extract_flags) for token in tokens[1:]):
+            return _suspicious_result(pattern, base, "state_change", reasons + ["tar_non_read_only_operation"])
+        has_listing_flag = any(token in {"-tf", "-tvf", "--list"} for token in tokens[1:])
+        has_file_reference = bool(_non_flag_args(tokens))
+        for index, token in enumerate(tokens[1:], start=1):
+            if token in {"-f", "--file"} and index + 1 < len(tokens):
+                has_file_reference = True
+        if has_listing_flag and has_file_reference:
+            return _family_result(pattern, base, danger, reasons + ["tar_listing_shape"])
+        return _suspicious_result(pattern, base, danger, reasons + ["not_tar_listing_shape"])
+
     if policy == "ip_inspection":
         if len(tokens) == 1:
             return _suspicious_result(pattern, base, danger, reasons + ["missing_ip_object"])
