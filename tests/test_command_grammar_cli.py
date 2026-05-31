@@ -104,6 +104,21 @@ class CommandGrammarCliTests(unittest.TestCase):
         self.assertEqual(["cat", "journalctl", "rpm"], [item["base"] for item in payload])
         self.assertEqual(["read_only", "read_only", "read_only"], [item["danger"] for item in payload])
 
+    def test_stdin_mode_classifies_gt14_inspection_families(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],
+            cwd=REPO_ROOT,
+            input="df -h\nss -tuln\nid root\ngetent passwd root\n",
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(4, len(payload))
+        self.assertEqual(["df", "ss", "id", "getent"], [item["base"] for item in payload])
+        self.assertEqual(["read_only", "read_only", "read_only", "read_only"], [item["danger"] for item in payload])
+
     def test_stdin_mode_ignores_empty_lines(self):
         result = subprocess.run(
             [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],

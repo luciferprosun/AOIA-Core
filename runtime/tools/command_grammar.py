@@ -34,7 +34,42 @@ _STATUS_REJECT = "reject"
 _STATUS_SUSPICIOUS = "suspicious"
 _STATUS_FAMILY = "family"
 _DANGEROUS_FIND_TOKENS = {"-delete", "-exec", "-execdir", "-ok", "-okdir"}
-_DANGEROUS_WORDS = {"delete", "install", "remove", "rm", "restart", "start", "stop"}
+_DANGEROUS_WORDS = {
+    "add",
+    "change",
+    "create",
+    "delete",
+    "del",
+    "destroy",
+    "down",
+    "format",
+    "install",
+    "mklabel",
+    "mkpart",
+    "modify",
+    "remove",
+    "replace",
+    "reset",
+    "restart",
+    "rm",
+    "set",
+    "start",
+    "stop",
+    "undefine",
+    "up",
+}
+_NETWORK_CHANGE_WORDS = {
+    "add",
+    "change",
+    "delete",
+    "del",
+    "down",
+    "flush",
+    "modify",
+    "replace",
+    "set",
+    "up",
+}
 
 
 def _result(
@@ -194,7 +229,48 @@ def _read_only_shape(
 ) -> dict[str, Any] | None:
     base = tokens[0]
     policy = str(pattern.get("positional_policy", ""))
-    flags_with_values = {"-n", "-c", "-L", "-u", "-p", "-b", "--since", "--until", "-type", "-name", "-iname", "-maxdepth", "-mindepth", "-user", "-group", "-perm", "-size", "-mtime", "-s", "-qf"}
+    flags_with_values = {"-n", "-c", "-L", "-u", "-p", "-b", "-l", "-o", "--since", "--until", "-type", "-name", "-iname", "-maxdepth", "-mindepth", "-user", "-group", "-perm", "-size", "-mtime", "-s", "-qf"}
+
+    if policy == "ip_inspection":
+        if len(tokens) == 1:
+            return _suspicious_result(pattern, base, danger, reasons + ["missing_ip_object"])
+        if any(token in _NETWORK_CHANGE_WORDS for token in tokens[1:]):
+            return _suspicious_result(pattern, base, "state_change", reasons + ["network_change_word"])
+        if tokens[1] not in {"addr", "address", "link", "route"}:
+            return _suspicious_result(pattern, base, danger, reasons + ["unsupported_ip_object"])
+        if len(tokens) > 2 and tokens[2] != "show":
+            return _suspicious_result(pattern, base, "state_change", reasons + ["unsupported_ip_action"])
+        return _family_result(pattern, base, danger, reasons + ["ip_inspection_shape"])
+
+    if policy == "nmcli_inspection":
+        if tokens in (["nmcli", "connection", "show"], ["nmcli", "device", "status"]):
+            return _family_result(pattern, base, danger, reasons + ["nmcli_inspection_shape"])
+        if any(token in _NETWORK_CHANGE_WORDS for token in tokens[1:]):
+            return _suspicious_result(pattern, base, "state_change", reasons + ["network_change_word"])
+        return _suspicious_result(pattern, base, danger, reasons + ["unsupported_nmcli_shape"])
+
+    if policy == "ping_limited_probe":
+        if "-f" in tokens[1:]:
+            return _suspicious_result(pattern, base, "state_change", reasons + ["flood_ping_flag"])
+        if len(tokens) >= 4 and tokens[1] == "-c" and tokens[2].isdigit():
+            return _family_result(pattern, base, danger, reasons + ["limited_ping_probe"])
+        return _suspicious_result(pattern, base, danger, reasons + ["missing_limited_count"])
+
+    if policy == "passwd_status_only":
+        if len(tokens) in {2, 3} and tokens[1] == "-S":
+            return _family_result(pattern, base, danger, reasons + ["passwd_status_shape"])
+        return _suspicious_result(pattern, base, "state_change", reasons + ["not_status_only"])
+
+    if policy == "chage_list_only":
+        if len(tokens) >= 3 and tokens[1] == "-l":
+            return _family_result(pattern, base, danger, reasons + ["chage_list_shape"])
+        return _suspicious_result(pattern, base, "state_change", reasons + ["not_list_only"])
+
+    if policy == "getent_inspection":
+        databases = {"passwd", "group", "shadow", "hosts", "services", "protocols", "networks"}
+        if len(tokens) >= 2 and tokens[1] in databases:
+            return _family_result(pattern, base, danger, reasons + ["getent_lookup_shape"])
+        return _suspicious_result(pattern, base, danger, reasons + ["unsupported_getent_database"])
 
     if policy == "optional_flags_then_required_target":
         if not _flags_allowed(tokens, allowed_flags):

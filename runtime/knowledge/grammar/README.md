@@ -27,12 +27,21 @@ Current implemented families:
 - search/text readout: `grep`, `find`
 - log readout: `journalctl`
 - RPM query readout: `rpm`
+- system/storage inspection: `df`, `du`, `free`, `uname`, `uptime`, `dmesg`, `lsblk`, `blkid`, `smartctl`, `nvme`
+- user/account inspection: `id`, `whoami`, `groups`, `getent`, `passwd -S`, `chage -l`
+- network inspection: `ip`, `ss`, `ping -c`, `dig`, `host`, `tracepath`, `ethtool`, `nmcli`
 
 Expanded low-risk read-only families:
 
 - file read/listing, search/text readout, log readout, and RPM query forms are classified as advisory read-only shapes when they match narrow patterns
 - destructive, state-changing, or ambiguous forms such as `find -delete`, `find -exec rm`, `rpm install`, and unsupported tree operations remain suspicious or rejected
 - these classifications are still not command safety proofs and are not executor policy
+
+System, network, and account inspection families:
+
+- read-only system/storage readouts, account lookups, and network inspection forms are classified only when they match narrow advisory patterns
+- configuration, account-changing, destructive, or credential-sensitive forms remain suspicious, rejected, or non-read-only
+- this layer remains non-executing and is not runtime routing or executor authority
 
 Current status:
 
