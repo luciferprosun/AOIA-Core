@@ -15,7 +15,9 @@ AOIA-Core GT8 includes additional documentation to support reviewer validation a
   Documented failure modes and recovery pathways for AOIA-Core runtime systems.
 
 - **[LSC_CASE_STUDY_PROTOCOL.md](LSC_CASE_STUDY_PROTOCOL.md)**  
-  Scientific case study protocol for LSC (Long-term Stress Context) validation.
+  Protocol for the LSC neutrino archive stress-test corpus: a high-claim-density
+  research archive used only as stress-test material, not validated physics, not
+  AOIA-Core scientific output, and not runtime authority.
 
 - **[MODEL_AUDIT_MATRIX.md](MODEL_AUDIT_MATRIX.md)**  
   Audit matrix for model behavior validation against AOIA-Core governance contracts.
