@@ -30,6 +30,14 @@ Current status:
 - tested with the focused grammar test module
 - full unittest suite passes
 
+CLI readout:
+
+- local demonstration only
+- JSON output
+- not executor policy
+- does not execute commands
+- example: `python3 -m runtime.tools.command_grammar_cli "systemctl status sshd"`
+
 Roadmap:
 
 - expand command families
