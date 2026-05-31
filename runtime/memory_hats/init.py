@@ -5,6 +5,14 @@ from runtime.memory_hats.dedup import (
     fingerprint_for_trigger,
     normalize_trigger,
 )
+from runtime.memory_hats.leaf_routes import (
+    build_leaf_path,
+    is_valid_leaf_path,
+    parent_leaf_path,
+    parse_leaf_path,
+    path_matches_prefix,
+    slugify_path_component,
+)
 from runtime.memory_hats.tags import (
     PheromoneTag,
     ReviewStatus,
@@ -15,9 +23,15 @@ from runtime.memory_hats.tags import (
 __all__ = [
     "compute_fingerprint",
     "fingerprint_for_trigger",
+    "build_leaf_path",
+    "is_valid_leaf_path",
     "normalize_trigger",
+    "parent_leaf_path",
+    "parse_leaf_path",
+    "path_matches_prefix",
     "PheromoneTag",
     "ReviewStatus",
     "SafetyLevel",
+    "slugify_path_component",
     "TagType",
 ]
