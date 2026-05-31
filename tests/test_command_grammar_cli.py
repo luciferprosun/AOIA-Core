@@ -134,6 +134,21 @@ class CommandGrammarCliTests(unittest.TestCase):
         self.assertEqual(["systemctl", "systemctl", "systemctl"], [item["base"] for item in payload])
         self.assertEqual(["read_only", "read_only", "read_only"], [item["danger"] for item in payload])
 
+    def test_stdin_mode_classifies_gt16_package_queries(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],
+            cwd=REPO_ROOT,
+            input="dnf info bash\nrepoquery --requires bash\nrpm -q bash\n",
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(3, len(payload))
+        self.assertEqual(["dnf", "repoquery", "rpm"], [item["base"] for item in payload])
+        self.assertEqual(["read_only", "read_only", "read_only"], [item["danger"] for item in payload])
+
     def test_stdin_mode_ignores_empty_lines(self):
         result = subprocess.run(
             [sys.executable, "-m", "runtime.tools.command_grammar_cli", "--stdin"],

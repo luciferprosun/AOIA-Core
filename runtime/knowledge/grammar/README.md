@@ -49,6 +49,12 @@ GT15 focused expansion:
 - `systemctl start`, `stop`, `restart`, `enable`, `disable`, `mask`, `unmask`, `isolate`, `poweroff`, and `reboot` remain non-read-only
 - this is still advisory command-shape classification only and does not execute or authorize service operations
 
+GT16 package/query inspection expansion:
+
+- package query/list/info/search forms for `dnf`, `repoquery`, and `rpm` are classified as narrow read-only shapes
+- install, remove, update, rollback, undo, and package import forms remain non-read-only, suspicious, or state-changing
+- this is advisory command-shape classification only, not package-manager safety proof
+
 Current status:
 
 - prototype on the dev branch

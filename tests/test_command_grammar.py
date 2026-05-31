@@ -241,6 +241,63 @@ class CommandGrammarTests(unittest.TestCase):
                     result,
                 )
 
+    def test_gt16_package_query_forms_are_read_only(self):
+        cases = [
+            ("dnf history", "dnf"),
+            ("dnf history list", "dnf"),
+            ("dnf history info", "dnf"),
+            ("dnf list installed", "dnf"),
+            ("dnf list available", "dnf"),
+            ("dnf info bash", "dnf"),
+            ("dnf search httpd", "dnf"),
+            ("dnf provides /usr/bin/python3", "dnf"),
+            ("dnf repoquery bash", "dnf"),
+            ("repoquery --requires bash", "repoquery"),
+            ("repoquery --list bash", "repoquery"),
+            ("rpm -q bash", "rpm"),
+            ("rpm -qi bash", "rpm"),
+            ("rpm -ql bash", "rpm"),
+            ("rpm -qf /usr/bin/bash", "rpm"),
+            ("rpm -Va", "rpm"),
+        ]
+        for command, base in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertEqual(base, result["base"])
+                self.assertIn(result["status"], {"exact", "family", "partial"})
+                self.assertNotEqual("reject", result["status"])
+                self.assertEqual("read_only", result["danger"])
+
+    def test_gt16_package_state_changes_remain_non_read_only(self):
+        cases = [
+            "dnf install httpd",
+            "dnf remove httpd",
+            "dnf update",
+            "dnf upgrade",
+            'dnf groupinstall "Server with GUI"',
+            "dnf history undo 5",
+            "dnf history rollback 5",
+            "rpm -i package.rpm",
+            "rpm -Uvh package.rpm",
+            "rpm -e package",
+            "flatpak install flathub org.gimp.GIMP",
+            "flatpak update",
+            "snap install package_name",
+            "snap refresh",
+            "snap remove package_name",
+            "rpm2cpio package.rpm | cpio -idmv",
+        ]
+        for command in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertFalse(
+                    result["status"] in {"exact", "family", "partial"}
+                    and result["danger"] == "read_only",
+                    result,
+                )
+
     def test_unknown_base_is_not_exact(self):
         result = validate_command_shape("journalctl restart sshd")
         self.assert_required_shape(result)

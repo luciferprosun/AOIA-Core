@@ -17,15 +17,15 @@
     "id": "dnf-basic",
     "family": "package",
     "base": "dnf",
-    "subcommands": ["install", "remove", "update", "upgrade", "search", "info", "list", "repolist", "provides", "clean", "makecache"],
+    "subcommands": ["install", "remove", "update", "upgrade", "search", "info", "list", "repolist", "provides", "clean", "makecache", "history", "repoquery"],
     "allowed_flags": ["-y", "-q", "-v", "--assumeyes", "--refresh", "--installed", "--available", "--all"],
     "required_flags": [],
-    "positional_policy": "subcommand_then_optional_flags_then_optional_package_or_query",
+    "positional_policy": "dnf_mixed_package_actions",
     "examples_valid": ["dnf install httpd", "dnf search nginx"],
     "examples_invalid": ["dnf status httpd", "dnf enable package"],
     "confidence_on_match": "grammar_family",
     "danger_default": "state_change",
-    "notes": "Advisory shape pattern for DNF package-management commands; it does not validate package existence."
+    "notes": "Advisory DNF shape; query/list/search forms are read_only, install/remove/update/history undo forms remain state_change."
   },
   {
     "id": "firewall-cmd-basic",
@@ -256,14 +256,28 @@
     "family": "rpm_query",
     "base": "rpm",
     "subcommands": [],
-    "allowed_flags": ["-q", "-qa", "-qi", "-ql", "-qc", "-qd", "-qf", "-V"],
+    "allowed_flags": ["-q", "-qa", "-qi", "-ql", "-qc", "-qd", "-qf", "-qR", "-V", "-Va", "--scripts", "--changelog"],
     "required_flags": [],
     "positional_policy": "rpm_query_only",
     "examples_valid": ["rpm -qa", "rpm -q bash"],
     "examples_invalid": ["rpm install bash"],
     "confidence_on_match": "grammar_family",
     "danger_default": "read_only",
-    "notes": "Advisory RPM query shape only; installation/removal forms are not accepted here."
+    "notes": "Advisory RPM query/verify shape only; installation/removal forms are not accepted here."
+  },
+  {
+    "id": "repoquery-readout",
+    "family": "package_query",
+    "base": "repoquery",
+    "subcommands": [],
+    "allowed_flags": ["--requires", "--list", "--whatprovides", "--whatrequires"],
+    "required_flags": [],
+    "positional_policy": "repoquery_read_only",
+    "examples_valid": ["repoquery --requires bash", "repoquery --list bash"],
+    "examples_invalid": ["repoquery --install bash"],
+    "confidence_on_match": "grammar_family",
+    "danger_default": "read_only",
+    "notes": "Advisory repoquery readout shape only."
   },
   {
     "id": "df-readout",

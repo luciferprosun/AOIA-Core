@@ -269,7 +269,47 @@ def _read_only_shape(
             return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
         if subcommand in read_only_subcommands:
             return _family_result(pattern, base, "read_only", reasons + ["systemctl_readout_shape"])
-        return _family_result(pattern, base, "state_change", reasons + ["systemctl_state_change_shape"])
+            return _family_result(pattern, base, "state_change", reasons + ["systemctl_state_change_shape"])
+
+    if policy == "dnf_mixed_package_actions":
+        if len(tokens) == 1:
+            return _suspicious_result(pattern, base, danger, reasons + ["missing_dnf_subcommand"])
+        subcommand = tokens[1]
+        read_only_subcommands = {"check-update", "info", "list", "provides", "repolist", "repoquery", "search", "updateinfo"}
+        state_change_subcommands = {
+            "clean",
+            "distro-sync",
+            "downgrade",
+            "erase",
+            "groupinstall",
+            "install",
+            "makecache",
+            "module",
+            "remove",
+            "update",
+            "upgrade",
+            "upgrade-minimal",
+        }
+        if subcommand == "history":
+            if len(tokens) == 2 or (len(tokens) >= 3 and tokens[2] in {"info", "list"}):
+                return _family_result(pattern, base, "read_only", reasons + ["dnf_history_readout_shape"])
+            return _family_result(pattern, base, "state_change", reasons + ["dnf_history_state_change_shape"])
+        if subcommand in read_only_subcommands:
+            if not _flags_allowed(tokens, allowed_flags):
+                return _suspicious_result(pattern, base, "read_only", reasons + ["unknown_flag"])
+            return _family_result(pattern, base, "read_only", reasons + ["dnf_query_shape"])
+        if subcommand in state_change_subcommands:
+            return _family_result(pattern, base, "state_change", reasons + ["dnf_state_change_shape"])
+        return _suspicious_result(pattern, base, danger, reasons + ["unknown_dnf_subcommand"])
+
+    if policy == "repoquery_read_only":
+        if len(tokens) < 3:
+            return _suspicious_result(pattern, base, danger, reasons + ["missing_repoquery_flag_or_target"])
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        if not _non_flag_args(tokens):
+            return _suspicious_result(pattern, base, danger, reasons + ["missing_repoquery_target"])
+        return _family_result(pattern, base, danger, reasons + ["repoquery_readout_shape"])
 
     if policy == "ip_inspection":
         if len(tokens) == 1:
@@ -366,6 +406,10 @@ def _read_only_shape(
     if policy == "rpm_query_only":
         if len(tokens) == 1:
             return _suspicious_result(pattern, base, danger, reasons + ["missing_query_flag"])
+        if tokens[1] in {"-V", "-Va"}:
+            if not _flags_allowed(tokens, allowed_flags):
+                return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+            return _family_result(pattern, base, danger, reasons + ["rpm_verify_shape"])
         if tokens[1] in _DANGEROUS_WORDS or not tokens[1].startswith("-q"):
             return _suspicious_result(pattern, base, danger, reasons + ["not_query_shape"])
         if not _flags_allowed(tokens, allowed_flags):
