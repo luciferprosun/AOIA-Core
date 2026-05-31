@@ -231,6 +231,46 @@ def _read_only_shape(
     policy = str(pattern.get("positional_policy", ""))
     flags_with_values = {"-n", "-c", "-L", "-u", "-p", "-b", "-l", "-o", "--since", "--until", "-type", "-name", "-iname", "-maxdepth", "-mindepth", "-user", "-group", "-perm", "-size", "-mtime", "-s", "-qf"}
 
+    if policy == "systemctl_mixed_actions":
+        if len(tokens) == 1:
+            return _suspicious_result(pattern, base, danger, reasons + ["missing_systemctl_subcommand"])
+        read_only_subcommands = {
+            "cat",
+            "is-active",
+            "is-enabled",
+            "is-failed",
+            "list-unit-files",
+            "list-units",
+            "show",
+            "status",
+        }
+        state_change_subcommands = {
+            "disable",
+            "enable",
+            "isolate",
+            "mask",
+            "poweroff",
+            "reboot",
+            "reload",
+            "restart",
+            "start",
+            "stop",
+            "unmask",
+        }
+        index = 1
+        while index < len(tokens) and tokens[index].startswith("-"):
+            index += 1
+        if index >= len(tokens):
+            return _suspicious_result(pattern, base, danger, reasons + ["missing_systemctl_subcommand"])
+        subcommand = tokens[index]
+        if subcommand not in read_only_subcommands | state_change_subcommands:
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_systemctl_subcommand"])
+        if not _flags_allowed(tokens, allowed_flags):
+            return _suspicious_result(pattern, base, danger, reasons + ["unknown_flag"])
+        if subcommand in read_only_subcommands:
+            return _family_result(pattern, base, "read_only", reasons + ["systemctl_readout_shape"])
+        return _family_result(pattern, base, "state_change", reasons + ["systemctl_state_change_shape"])
+
     if policy == "ip_inspection":
         if len(tokens) == 1:
             return _suspicious_result(pattern, base, danger, reasons + ["missing_ip_object"])

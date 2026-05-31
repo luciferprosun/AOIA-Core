@@ -196,6 +196,51 @@ class CommandGrammarTests(unittest.TestCase):
                     result,
                 )
 
+    def test_gt15_systemctl_read_only_expansion(self):
+        cases = [
+            "systemctl list-units",
+            "systemctl list-unit-files",
+            "systemctl is-active sshd",
+            "systemctl is-enabled sshd",
+            "systemctl is-failed sshd",
+            "systemctl cat sshd",
+            "systemctl show sshd",
+            "systemctl show -p MainPID sshd",
+            "systemctl --user status sshd",
+        ]
+        for command in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertEqual("systemctl", result["base"])
+                self.assertIn(result["status"], {"exact", "family", "partial"})
+                self.assertEqual("read_only", result["danger"])
+
+    def test_gt15_systemctl_state_changes_remain_non_read_only(self):
+        cases = [
+            "systemctl start sshd",
+            "systemctl stop sshd",
+            "systemctl restart sshd",
+            "systemctl reload sshd",
+            "systemctl enable sshd",
+            "systemctl disable sshd",
+            "systemctl mask sshd",
+            "systemctl unmask sshd",
+            "systemctl isolate rescue.target",
+            "systemctl poweroff",
+            "systemctl reboot",
+            "systemctl install nginx",
+        ]
+        for command in cases:
+            with self.subTest(command=command):
+                result = validate_command_shape(command)
+                self.assert_required_shape(result)
+                self.assertFalse(
+                    result["status"] in {"exact", "family", "partial"}
+                    and result["danger"] == "read_only",
+                    result,
+                )
+
     def test_unknown_base_is_not_exact(self):
         result = validate_command_shape("journalctl restart sshd")
         self.assert_required_shape(result)

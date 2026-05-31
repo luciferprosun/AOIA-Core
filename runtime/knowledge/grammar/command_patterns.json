@@ -3,15 +3,15 @@
     "id": "systemctl-basic",
     "family": "systemd",
     "base": "systemctl",
-    "subcommands": ["status", "start", "stop", "restart", "reload", "enable", "disable", "is-active", "is-enabled", "list-units"],
-    "allowed_flags": ["--now", "--user", "--type=service", "--failed", "-l"],
+    "subcommands": ["status", "start", "stop", "restart", "reload", "enable", "disable", "mask", "unmask", "isolate", "poweroff", "reboot", "is-active", "is-enabled", "is-failed", "list-units", "list-unit-files", "cat", "show"],
+    "allowed_flags": ["--now", "--user", "--type=service", "--failed", "--all", "--state", "--no-pager", "-l", "-p", "--property"],
     "required_flags": [],
-    "positional_policy": "subcommand_then_optional_flags_then_optional_target",
-    "examples_valid": ["systemctl status sshd", "systemctl restart httpd"],
+    "positional_policy": "systemctl_mixed_actions",
+    "examples_valid": ["systemctl status sshd", "systemctl restart httpd", "systemctl list-units", "systemctl is-active sshd"],
     "examples_invalid": ["systemctl install nginx", "systemctl enable start httpd"],
     "confidence_on_match": "grammar_family",
     "danger_default": "state_change",
-    "notes": "Advisory command-shape pattern for common systemctl RHCSA service operations."
+    "notes": "Advisory systemctl shape; read-only inspection subcommands are labelled read_only, service-changing subcommands remain state_change."
   },
   {
     "id": "dnf-basic",

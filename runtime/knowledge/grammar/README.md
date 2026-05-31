@@ -43,6 +43,12 @@ System, network, and account inspection families:
 - configuration, account-changing, destructive, or credential-sensitive forms remain suspicious, rejected, or non-read-only
 - this layer remains non-executing and is not runtime routing or executor authority
 
+GT15 focused expansion:
+
+- `systemctl` read-only inspection forms such as `list-units`, `list-unit-files`, `is-active`, `is-enabled`, `cat`, and `show` are separated from state-changing service actions
+- `systemctl start`, `stop`, `restart`, `enable`, `disable`, `mask`, `unmask`, `isolate`, `poweroff`, and `reboot` remain non-read-only
+- this is still advisory command-shape classification only and does not execute or authorize service operations
+
 Current status:
 
 - prototype on the dev branch
