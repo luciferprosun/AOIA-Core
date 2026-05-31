@@ -13,6 +13,11 @@ from runtime.memory_hats.leaf_routes import (
     path_matches_prefix,
     slugify_path_component,
 )
+from runtime.memory_hats.storage import (
+    SQLiteTagStore,
+    row_to_tag,
+    tag_to_row,
+)
 from runtime.memory_hats.tags import (
     PheromoneTag,
     ReviewStatus,
@@ -32,6 +37,9 @@ __all__ = [
     "PheromoneTag",
     "ReviewStatus",
     "SafetyLevel",
+    "SQLiteTagStore",
     "slugify_path_component",
+    "row_to_tag",
+    "tag_to_row",
     "TagType",
 ]
