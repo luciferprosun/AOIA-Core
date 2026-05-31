@@ -2,6 +2,8 @@
 
 AOIA-Core is a local-first runtime for AI-assisted engineering workflows with explicit evidence, provenance, and model-output boundaries. It separates evidence, provenance, contradictions, logs, memory traces, and runtime state from raw model output.
 
+Grant reviewers: start with [Quick Start for Grant Reviewers](docs/reviewer/QUICK_START_FOR_GRANT_REVIEWERS.md) and [AOIA/NMS Reviewer Glossary](docs/nms/GLOSSARY.md).
+
 AOIA-Core exists because AI-assisted workflows often blur the line between what a model said, what a tool produced, what was logged, and what can actually be trusted or replayed. AOIA-Core makes those layers explicit.
 
 ## What AOIA-Core Controls
