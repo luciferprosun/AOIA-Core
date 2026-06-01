@@ -82,6 +82,7 @@ class PermissionDecision:
 @dataclass(frozen=True)
 class RespondShellSafetyResult:
     safe: bool
+    severity: str
     warnings: list[str]
     matched_patterns: list[str]
     sanitized_message: str
@@ -272,12 +273,18 @@ def inspect_respond_shell_safety(message: str) -> RespondShellSafetyResult:
     lowered = text.lower()
     warnings: list[str] = []
     matched_patterns: list[str] = []
+    severity = "none"
 
-    def add(pattern: str, warning: str) -> None:
+    def add(pattern: str, warning: str, pattern_severity: str = "warning") -> None:
+        nonlocal severity
         if pattern not in matched_patterns:
             matched_patterns.append(pattern)
         if warning not in warnings:
             warnings.append(warning)
+        if pattern_severity == "high_risk":
+            severity = "high_risk"
+        elif severity == "none":
+            severity = "warning"
 
     has_find_print0_substitution = "$(" in lowered and "find" in lowered and "-print0" in lowered
     if has_find_print0_substitution:
@@ -294,41 +301,64 @@ def inspect_respond_shell_safety(message: str) -> RespondShellSafetyResult:
         add(
             "tar_find_print0_command_substitution",
             "tar archives should consume NUL-delimited input with --null and --files-from=-.",
+            "high_risk",
         )
 
-    if re.search(r"\brm\s+-[^\n;|&]*r[^\n;|&]*f[^\n;|&]*(?:/|\*)", lowered):
-        add("rm_rf_destructive_target", "This response contains rm -rf targeting / or *.")
+    rm_rf_destructive_target = re.search(r"\brm\s+-[^\n;|&]*r[^\n;|&]*f[^\n;|&]*(?:/|\*)", lowered)
+    if rm_rf_destructive_target:
+        target = rm_rf_destructive_target.group(0)
+        add(
+            "rm_rf_destructive_target",
+            "This response contains rm -rf targeting / or *.",
+            "high_risk" if "/" in target else "warning",
+        )
 
     if re.search(r"\bmkfs(?:\.[a-z0-9]+)?\b", lowered):
-        add("mkfs_filesystem_format", "mkfs formats filesystems and can destroy data.")
+        add("mkfs_filesystem_format", "mkfs formats filesystems and can destroy data.", "high_risk")
 
     if re.search(r"\bdd\b(?=[^\n]*\bif=)(?=[^\n]*\bof=)", lowered):
-        add("dd_if_of_raw_copy", "dd with both if= and of= can overwrite disks or files.")
+        add("dd_if_of_raw_copy", "dd with both if= and of= can overwrite disks or files.", "high_risk")
 
     if "sudo" in lowered and re.search(r"\b(rm\s+-[^\n;|&]*r[^\n;|&]*f|mkfs(?:\.[a-z0-9]+)?|dd\b)", lowered):
-        add("sudo_destructive_command", "sudo combined with destructive commands raises system-level risk.")
+        add(
+            "sudo_destructive_command",
+            "sudo combined with destructive commands raises system-level risk.",
+            "high_risk",
+        )
 
     if "$(" in lowered and re.search(r"\$\([^)]*(?:rm\s+-|mkfs(?:\.[a-z0-9]+)?|dd\b|find\b|ls\b)[^)]*\)", lowered):
+        substitution_severity = (
+            "high_risk"
+            if re.search(r"\$\([^)]*(?:rm\s+-|mkfs(?:\.[a-z0-9]+)?|dd\b)[^)]*\)", lowered)
+            else "warning"
+        )
         add(
             "risky_command_substitution",
             "Command substitution around destructive or file-listing commands can be unsafe to copy-paste.",
+            substitution_severity,
         )
 
     if not warnings:
         return RespondShellSafetyResult(
             safe=True,
+            severity="none",
             warnings=[],
             matched_patterns=[],
             sanitized_message=text,
         )
 
-    prefix_lines = [
-        "AOIA shell-safety warning: this response contains command text that may be unsafe to copy-paste.",
-        *warnings,
-        "",
-    ]
+    if severity == "high_risk":
+        prefix = (
+            "AOIA HIGH-RISK SHELL ADVICE WARNING: This response contains shell command text "
+            "that may be unsafe to copy-paste. AOIA did not execute this command."
+        )
+    else:
+        prefix = "AOIA shell-safety warning: this response contains command text that may be unsafe to copy-paste."
+
+    prefix_lines = [prefix, *warnings, ""]
     return RespondShellSafetyResult(
         safe=False,
+        severity=severity,
         warnings=warnings,
         matched_patterns=matched_patterns,
         sanitized_message="\n".join(prefix_lines) + text,
