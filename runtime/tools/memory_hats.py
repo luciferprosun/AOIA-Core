@@ -47,15 +47,20 @@ DEFAULT_HATS = [
 class MemoryHatStore:
     """Persistent context overlays used by the planner prompt."""
 
-    def __init__(self, project_dir: Path) -> None:
+    def __init__(self, project_dir: Path, *, initialize_defaults: bool = True) -> None:
         state_root = runtime_state_dir(project_dir)
         self.hats_dir = state_root / "memory" / "hats"
         self.active_file = state_root / "state" / "active_hat.json"
+        if initialize_defaults:
+            self.ensure_initialized()
+
+    def ensure_initialized(self) -> None:
         self.hats_dir.mkdir(parents=True, exist_ok=True)
         self.active_file.parent.mkdir(parents=True, exist_ok=True)
         self._ensure_defaults()
 
     def list_hats(self) -> list[MemoryHat]:
+        self.ensure_initialized()
         hats: list[MemoryHat] = []
         for path in sorted(self.hats_dir.glob("*.json")):
             try:
@@ -66,6 +71,7 @@ class MemoryHatStore:
         return hats
 
     def get_hat(self, name: str) -> MemoryHat | None:
+        self.ensure_initialized()
         hat_path = self.hats_dir / f"{name}.json"
         if not hat_path.exists():
             return None
@@ -87,6 +93,7 @@ class MemoryHatStore:
         return self.get_hat(name)
 
     def load_hat(self, name: str) -> MemoryHat:
+        self.ensure_initialized()
         hat = self.get_hat(name)
         if hat is None:
             raise ValueError(f"Unknown memory hat: {name}")
@@ -105,6 +112,7 @@ class MemoryHatStore:
         project_path: str = "",
         persistent: bool = True,
     ) -> MemoryHat:
+        self.ensure_initialized()
         hat = MemoryHat(
             name=name,
             role=role,

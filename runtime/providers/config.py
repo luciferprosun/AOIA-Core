@@ -88,7 +88,6 @@ class ProviderManager:
         state_dir = runtime_state_dir(project_dir)
         self.config_path = state_dir / "state" / "model_config.json"
         self.providers_path = state_dir / "state" / "providers.json"
-        self.config_path.parent.mkdir(parents=True, exist_ok=True)
         self.provider_chain = self._load_provider_chain()
         self.current_model = self.normalize_model_name(self._load_model_name())
         self.provider: ModelProvider | None = None
@@ -126,6 +125,7 @@ class ProviderManager:
         self.current_model = normalized
         self.last_used_model = ""
         self.provider = None
+        self.config_path.parent.mkdir(parents=True, exist_ok=True)
         self.config_path.write_text(
             json.dumps({"model": normalized}, indent=2),
             encoding="utf-8",
@@ -211,12 +211,7 @@ class ProviderManager:
 
     def _load_provider_chain(self) -> list[ProviderConfig]:
         if not self.providers_path.exists():
-            providers = [ProviderConfig(**payload) for payload in DEFAULT_PROVIDER_CHAIN]
-            self.providers_path.write_text(
-                json.dumps({"providers": [asdict(provider) for provider in providers]}, indent=2),
-                encoding="utf-8",
-            )
-            return providers
+            return [ProviderConfig(**payload) for payload in DEFAULT_PROVIDER_CHAIN]
 
         try:
             payload = json.loads(self.providers_path.read_text(encoding="utf-8"))

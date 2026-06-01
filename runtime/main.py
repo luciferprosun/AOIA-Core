@@ -154,8 +154,14 @@ class AgentRuntime:
         self.debug_raw = debug_raw
         self.max_steps = max_steps
         self.safeguards = load_epistemic_safeguards()
-        self.memory_store = MemoryStore(project_dir, project_dir)
-        self.hat_store = MemoryHatStore(project_dir)
+        self.memory_store = MemoryStore(
+            project_dir,
+            project_dir,
+            initialize_vault=False,
+            persist_on_init=False,
+            record_session_start=False,
+        )
+        self.hat_store = MemoryHatStore(project_dir, initialize_defaults=False)
         self.worker_memory = GemmaWorkerMemory(project_dir)
         self.executor = ExecutionEngine(project_dir, self.memory_store)
         self.desktop_dir = detect_desktop_dir(Path.home())
@@ -1085,7 +1091,7 @@ def print_banner(runtime: AgentRuntime) -> None:
     print(f"[INFO] Current working directory: {runtime.memory_store.memory.cwd}")
     print(f"[INFO] Active model: {runtime.provider_manager.describe()}")
     print(f"[INFO] Session log: {runtime.session_log}")
-    print(f"[INFO] Obsidian vault: {runtime.memory_store.vault_dir}")
+    print(f"[INFO] Obsidian vault: {runtime.memory_store.vault_dir} (lazy)")
 
 
 def main() -> None:

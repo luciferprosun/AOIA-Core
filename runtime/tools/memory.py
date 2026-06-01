@@ -139,10 +139,20 @@ class MemoryStore:
         "external_evidence_source",
     }
 
-    def __init__(self, project_dir: Path, cwd: Path) -> None:
+    def __init__(
+        self,
+        project_dir: Path,
+        cwd: Path,
+        *,
+        initialize_vault: bool = True,
+        persist_on_init: bool = True,
+        record_session_start: bool = True,
+    ) -> None:
         self.paths = build_runtime_paths(project_dir)
-        self.vault_paths = build_obsidian_vault_paths(project_dir)
-        self.vault_dir = self.vault_paths.vault_dir
+        self.vault_dir = runtime_state_dir(project_dir) / "obsidian_vault"
+        self.vault_paths: ObsidianVaultPaths | None = None
+        if initialize_vault:
+            self.ensure_obsidian_vault()
         session_id = dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.state_file = self.paths.state_dir / "agent_state.json"
         self.history_file = self.paths.memory_dir / "history.jsonl"
@@ -150,14 +160,22 @@ class MemoryStore:
         self.reasoning_file = self.paths.memory_dir / "reasoning_trace.jsonl"
         self.browser_log_file = self.paths.browser_logs_dir / f"browser_{session_id}.jsonl"
         self.memory = AgentMemory(session_id=session_id, cwd=str(cwd))
-        self.save()
-        self.append_vault_note(
-            "session_start",
-            {
-                "session_id": session_id,
-                "cwd": str(cwd),
-            },
-        )
+        if persist_on_init:
+            self.save()
+        if record_session_start:
+            self.append_vault_note(
+                "session_start",
+                {
+                    "session_id": session_id,
+                    "cwd": str(cwd),
+                },
+            )
+
+    def ensure_obsidian_vault(self) -> ObsidianVaultPaths:
+        if self.vault_paths is None:
+            self.vault_paths = build_obsidian_vault_paths(self.paths.project_dir)
+            self.vault_dir = self.vault_paths.vault_dir
+        return self.vault_paths
 
     def save(self) -> None:
         self.state_file.write_text(
@@ -176,6 +194,7 @@ class MemoryStore:
         self.append_vault_note(kind, payload)
 
     def append_evidence(self, kind: str, payload: dict[str, Any]) -> None:
+        vault_paths = self.ensure_obsidian_vault()
         self._validate_evidence_payload(kind, payload)
         record = {
             "timestamp": dt.datetime.now().isoformat(),
@@ -184,7 +203,7 @@ class MemoryStore:
         }
         with self.evidence_file.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
-        self._append_channel_note(self.vault_paths.evidence_dir, kind, payload)
+        self._append_channel_note(vault_paths.evidence_dir, kind, payload)
 
     def _validate_evidence_payload(self, kind: str, payload: dict[str, Any]) -> None:
         if kind != self.ALLOWED_EVIDENCE_KIND:
@@ -203,6 +222,7 @@ class MemoryStore:
             raise ValueError("Evidence payload must include a non-empty fingerprint")
 
     def append_reasoning(self, kind: str, payload: dict[str, Any]) -> None:
+        vault_paths = self.ensure_obsidian_vault()
         record = {
             "timestamp": dt.datetime.now().isoformat(),
             "kind": kind,
@@ -210,7 +230,7 @@ class MemoryStore:
         }
         with self.reasoning_file.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
-        self._append_channel_note(self.vault_paths.reasoning_dir, kind, payload)
+        self._append_channel_note(vault_paths.reasoning_dir, kind, payload)
 
     def append_browser_event(self, payload: dict[str, Any]) -> None:
         with self.browser_log_file.open("a", encoding="utf-8") as handle:
@@ -262,9 +282,10 @@ class MemoryStore:
         self.save()
 
     def append_vault_note(self, kind: str, payload: dict[str, Any]) -> None:
+        vault_paths = self.ensure_obsidian_vault()
         day = dt.datetime.now().strftime("%Y-%m-%d")
-        note_path = self.vault_paths.daily_dir / f"{day}.md"
-        session_path = self.vault_paths.sessions_dir / f"{self.memory.session_id}.jsonl"
+        note_path = vault_paths.daily_dir / f"{day}.md"
+        session_path = vault_paths.sessions_dir / f"{self.memory.session_id}.jsonl"
         block = self._vault_block(kind, payload)
         note_path.write_text(
             (note_path.read_text(encoding="utf-8") if note_path.exists() else f"# {day}\n\n")

@@ -266,12 +266,39 @@ class RuntimeArchitectureTests(unittest.TestCase):
             self.assertTrue((memory.vault_dir / "00_START_HERE.md").exists())
             self.assertTrue((memory.vault_dir / ".obsidian" / "app.json").exists())
 
+    def test_runtime_boot_defers_obsidian_vault_initialization(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_dir = Path(tmp) / "project"
+            project_dir.mkdir()
+            runtime = main.AgentRuntime(FakeProvider([]), PROMPT_TEMPLATE, project_dir)
+            self.assertFalse(runtime.memory_store.vault_dir.exists())
+
+            result = runtime.command_registry.execute("/vault", runtime)
+
+            self.assertTrue(result.handled)
+            self.assertTrue(runtime.memory_store.vault_dir.exists())
+            self.assertTrue((runtime.memory_store.vault_dir / "00_START_HERE.md").exists())
+
     def test_provider_manager_defaults_to_aureon(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
             project_dir.mkdir()
             manager = ProviderManager(project_dir)
             self.assertEqual(manager.current_model, DEFAULT_MODEL)
+
+    def test_provider_manager_boot_does_not_write_state_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_dir = Path(tmp) / "project"
+            project_dir.mkdir()
+            manager = ProviderManager(project_dir)
+
+            self.assertFalse(manager.config_path.exists())
+            self.assertFalse(manager.providers_path.exists())
+
+            manager.switch_model("aureon")
+
+            self.assertTrue(manager.config_path.exists())
+            self.assertFalse(manager.providers_path.exists())
 
     def test_provider_manager_normalizes_model_aliases(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

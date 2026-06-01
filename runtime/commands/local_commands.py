@@ -126,6 +126,7 @@ def cmd_tools(_args: str, runtime) -> CommandResult:
 
 
 def cmd_vault(_args: str, runtime) -> CommandResult:
+    runtime.memory_store.ensure_obsidian_vault()
     return CommandResult(True, f"Obsidian vault: {runtime.memory_store.vault_dir}")
 
 
