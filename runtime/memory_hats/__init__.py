@@ -17,6 +17,12 @@ from runtime.memory_hats.leaf_routes import (
     path_matches_prefix,
     slugify_path_component,
 )
+from runtime.memory_hats.jsonl import (
+    export_tags_to_jsonl,
+    import_tags_from_jsonl,
+    tag_from_jsonl_record,
+    tag_to_jsonl_record,
+)
 from runtime.memory_hats.rhcsa_integration import (
     DEFAULT_PRIMARY_VEIN,
     DEFAULT_RHCSA_HAT_ID,
@@ -46,8 +52,10 @@ __all__ = [
     "DEFAULT_PRIMARY_VEIN",
     "DEFAULT_RHCSA_HAT_ID",
     "DEFAULT_SECONDARY_VEIN",
+    "export_tags_to_jsonl",
     "fingerprint_for_trigger",
     "build_leaf_path",
+    "import_tags_from_jsonl",
     "is_valid_leaf_path",
     "lookup_advisory_for_command",
     "lookup_advisory_for_grammar_result",
@@ -60,6 +68,8 @@ __all__ = [
     "SafetyLevel",
     "SQLiteTagStore",
     "slugify_path_component",
+    "tag_from_jsonl_record",
+    "tag_to_jsonl_record",
     "row_to_tag",
     "tag_to_row",
     "TagType",
