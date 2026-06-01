@@ -9,6 +9,7 @@ from runtime.memory_hats import (
     PheromoneTag,
     ReviewStatus,
     SQLiteTagStore,
+    TagType,
     import_seed_tags_into_store,
     is_valid_leaf_path,
     load_linux_rhcsa_seed_tags,
@@ -107,6 +108,31 @@ class MemoryHatsSeedTests(unittest.TestCase):
         self.assertIsNotNone(restored)
         self.assertEqual(1, target.seen_count)
         self.assertEqual(1, restored.seen_count)
+
+    def test_archive_pipeline_advisory_seed_is_discoverable_and_safe_text_only(self):
+        tags = load_linux_rhcsa_seed_tags()
+        import_seed_tags_into_store(self.store, tags)
+
+        warning = lookup_advisory_for_command(
+            "tar archive from find print0 command substitution",
+            self.store,
+            tag_type=TagType.COMMAND_SHAPE_SUSPICIOUS,
+            secondary_vein="command_shape_suspicious",
+        )
+
+        self.assertIsNotNone(warning)
+        self.assertTrue(warning.active)
+        self.assertEqual("low", warning.confidence)
+        self.assertIn("dry-run", warning.correction_text)
+        self.assertIn("find", warning.correction_text)
+        self.assertIn("-xdev", warning.correction_text)
+        self.assertIn("-print0", warning.correction_text)
+        self.assertIn("tar --null", warning.correction_text)
+        self.assertIn("--files-from=-", warning.correction_text)
+        self.assertIn("tar -tzf", warning.correction_text)
+        self.assertIn("rm -rf $(find ...)", warning.correction_text)
+        self.assertNotIn("tar -czvf ~/aoia_test_lab/archive/logs.tar.gz $(find", warning.correction_text)
+        self.assertNotIn("archive was created", warning.correction_text.lower())
 
     def test_seed_module_has_no_forbidden_imports(self):
         module = importlib.import_module("runtime.memory_hats.seeds")
