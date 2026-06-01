@@ -17,6 +17,15 @@ from runtime.memory_hats.leaf_routes import (
     path_matches_prefix,
     slugify_path_component,
 )
+from runtime.memory_hats.rhcsa_integration import (
+    DEFAULT_PRIMARY_VEIN,
+    DEFAULT_RHCSA_HAT_ID,
+    DEFAULT_SECONDARY_VEIN,
+    command_to_memory_hat_path,
+    lookup_advisory_for_command,
+    lookup_advisory_for_grammar_result,
+    validate_and_lookup_advisory,
+)
 from runtime.memory_hats.storage import (
     SQLiteTagStore,
     row_to_tag,
@@ -33,9 +42,15 @@ __all__ = [
     "AdvisoryWarning",
     "advisory_from_tag",
     "compute_fingerprint",
+    "command_to_memory_hat_path",
+    "DEFAULT_PRIMARY_VEIN",
+    "DEFAULT_RHCSA_HAT_ID",
+    "DEFAULT_SECONDARY_VEIN",
     "fingerprint_for_trigger",
     "build_leaf_path",
     "is_valid_leaf_path",
+    "lookup_advisory_for_command",
+    "lookup_advisory_for_grammar_result",
     "normalize_trigger",
     "parent_leaf_path",
     "parse_leaf_path",
@@ -48,4 +63,5 @@ __all__ = [
     "row_to_tag",
     "tag_to_row",
     "TagType",
+    "validate_and_lookup_advisory",
 ]
