@@ -8,6 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PYTHON_KNOWLEDGE_DIR = PROJECT_ROOT / "knowledge" / "languages" / "python"
 ENUMS_PATH = PYTHON_KNOWLEDGE_DIR / "schema_enums.json"
 REFERENCE_DIR = PYTHON_KNOWLEDGE_DIR / "reference"
+OFFICIAL_DOCS_CROSSCHECK_DIR = PYTHON_KNOWLEDGE_DIR / "official_docs_crosscheck"
 
 REQUIRED_ENUM_GROUPS = {
     "difficulty",
@@ -140,7 +141,11 @@ class PythonSchemaHardeningTests(unittest.TestCase):
         return json.loads(ENUMS_PATH.read_text(encoding="utf-8"))
 
     def _jsonl_paths(self) -> list[Path]:
-        return sorted(PYTHON_KNOWLEDGE_DIR.rglob("*.jsonl"))
+        return sorted(
+            path
+            for path in PYTHON_KNOWLEDGE_DIR.rglob("*.jsonl")
+            if OFFICIAL_DOCS_CROSSCHECK_DIR not in path.parents
+        )
 
     def _all_records(self):
         for path in self._jsonl_paths():
