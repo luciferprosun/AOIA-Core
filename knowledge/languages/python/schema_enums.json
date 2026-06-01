@@ -1,0 +1,41 @@
+{
+  "difficulty": [
+    "beginner",
+    "intermediate",
+    "advanced",
+    "expert"
+  ],
+  "review_status": [
+    "imported_unverified",
+    "candidate",
+    "human_reviewed",
+    "official_docs_checked",
+    "promoted",
+    "deprecated",
+    "rejected"
+  ],
+  "risk_level": [
+    "low",
+    "medium",
+    "high",
+    "critical"
+  ],
+  "execution_policy": [
+    "reference_only_no_execution",
+    "advisory_only_no_execution",
+    "safe_to_execute_in_test_sandbox",
+    "requires_human_confirmation",
+    "never_execute"
+  ],
+  "promotion_status": [
+    "not_promoted",
+    "eligible_for_review",
+    "promoted_to_advisory",
+    "blocked"
+  ],
+  "confidence_level": [
+    "low",
+    "medium",
+    "high"
+  ]
+}
