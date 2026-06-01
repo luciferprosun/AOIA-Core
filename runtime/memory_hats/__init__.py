@@ -32,6 +32,11 @@ from runtime.memory_hats.rhcsa_integration import (
     lookup_advisory_for_grammar_result,
     validate_and_lookup_advisory,
 )
+from runtime.memory_hats.seeds import (
+    LINUX_RHCSA_SEED_TAGS_PATH,
+    import_seed_tags_into_store,
+    load_linux_rhcsa_seed_tags,
+)
 from runtime.memory_hats.storage import (
     SQLiteTagStore,
     row_to_tag,
@@ -56,9 +61,12 @@ __all__ = [
     "fingerprint_for_trigger",
     "build_leaf_path",
     "import_tags_from_jsonl",
+    "import_seed_tags_into_store",
     "is_valid_leaf_path",
+    "LINUX_RHCSA_SEED_TAGS_PATH",
     "lookup_advisory_for_command",
     "lookup_advisory_for_grammar_result",
+    "load_linux_rhcsa_seed_tags",
     "normalize_trigger",
     "parent_leaf_path",
     "parse_leaf_path",
