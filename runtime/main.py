@@ -33,7 +33,7 @@ from memory.gemma_worker_memory import GemmaWorkerMemory
 from tools.memory_hats import MemoryHatStore
 from tools.memory import MemoryStore
 from tools.system_info import detect_desktop_dir
-from tools.validator import extract_json_object, validate_action
+from tools.validator import extract_json_object, inspect_respond_shell_safety, validate_action
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -1052,7 +1052,10 @@ class AgentRuntime:
                 print(f"Review reasons: {', '.join(str(reason) for reason in reasons)}")
         if result.get("message"):
             prefix = "Agent>" if result.get("stop_loop") else "Result:"
-            print(f"{prefix} {result['message']}")
+            message = str(result["message"])
+            if result.get("stop_loop"):
+                message = inspect_respond_shell_safety(message).sanitized_message
+            print(f"{prefix} {message}")
         if result.get("epistemic_note"):
             print(f"Epistemic note: {result['epistemic_note']}")
 

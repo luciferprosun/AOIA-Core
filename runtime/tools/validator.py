@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from json import JSONDecodeError
 
@@ -76,6 +77,14 @@ class PermissionDecision:
     requires_confirmation: bool
     interactive: bool
     reason: str
+
+
+@dataclass(frozen=True)
+class RespondShellSafetyResult:
+    safe: bool
+    warnings: list[str]
+    matched_patterns: list[str]
+    sanitized_message: str
 
 
 def extract_json_object(raw_text: str) -> dict:
@@ -254,4 +263,73 @@ def classify_shell_command(command: str) -> PermissionDecision:
         requires_confirmation=False,
         interactive=False,
         reason="Safe command",
+    )
+
+
+def inspect_respond_shell_safety(message: str) -> RespondShellSafetyResult:
+    """Detect shell advice that is risky even when the runtime will not execute it."""
+    text = str(message)
+    lowered = text.lower()
+    warnings: list[str] = []
+    matched_patterns: list[str] = []
+
+    def add(pattern: str, warning: str) -> None:
+        if pattern not in matched_patterns:
+            matched_patterns.append(pattern)
+        if warning not in warnings:
+            warnings.append(warning)
+
+    has_find_print0_substitution = "$(" in lowered and "find" in lowered and "-print0" in lowered
+    if has_find_print0_substitution:
+        add(
+            "find_print0_command_substitution",
+            (
+                "Do not place NUL-delimited find -print0 output inside shell command "
+                "substitution. Use a NUL-safe pipeline such as find ... -print0 | "
+                "tar --null --files-from=-."
+            ),
+        )
+
+    if "tar" in lowered and has_find_print0_substitution:
+        add(
+            "tar_find_print0_command_substitution",
+            "tar archives should consume NUL-delimited input with --null and --files-from=-.",
+        )
+
+    if re.search(r"\brm\s+-[^\n;|&]*r[^\n;|&]*f[^\n;|&]*(?:/|\*)", lowered):
+        add("rm_rf_destructive_target", "This response contains rm -rf targeting / or *.")
+
+    if re.search(r"\bmkfs(?:\.[a-z0-9]+)?\b", lowered):
+        add("mkfs_filesystem_format", "mkfs formats filesystems and can destroy data.")
+
+    if re.search(r"\bdd\b(?=[^\n]*\bif=)(?=[^\n]*\bof=)", lowered):
+        add("dd_if_of_raw_copy", "dd with both if= and of= can overwrite disks or files.")
+
+    if "sudo" in lowered and re.search(r"\b(rm\s+-[^\n;|&]*r[^\n;|&]*f|mkfs(?:\.[a-z0-9]+)?|dd\b)", lowered):
+        add("sudo_destructive_command", "sudo combined with destructive commands raises system-level risk.")
+
+    if "$(" in lowered and re.search(r"\$\([^)]*(?:rm\s+-|mkfs(?:\.[a-z0-9]+)?|dd\b|find\b|ls\b)[^)]*\)", lowered):
+        add(
+            "risky_command_substitution",
+            "Command substitution around destructive or file-listing commands can be unsafe to copy-paste.",
+        )
+
+    if not warnings:
+        return RespondShellSafetyResult(
+            safe=True,
+            warnings=[],
+            matched_patterns=[],
+            sanitized_message=text,
+        )
+
+    prefix_lines = [
+        "AOIA shell-safety warning: this response contains command text that may be unsafe to copy-paste.",
+        *warnings,
+        "",
+    ]
+    return RespondShellSafetyResult(
+        safe=False,
+        warnings=warnings,
+        matched_patterns=matched_patterns,
+        sanitized_message="\n".join(prefix_lines) + text,
     )
