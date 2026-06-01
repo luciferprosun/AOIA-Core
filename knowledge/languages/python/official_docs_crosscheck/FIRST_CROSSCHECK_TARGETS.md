@@ -2,6 +2,9 @@
 
 This file is a planning list only. It does not assert that any target has been checked, resolved, or promoted.
 
+## H19 Draft Advisory Batch Note
+H19 created draft advisory records for the first dangerous built-ins and dynamic execution batch. No official cross-check was performed, no status was promoted, and these records remain first targets for H20/H21 human and official-doc review.
+
 | priority | record_or_term | domain | reason | expected_official_source | action |
 | --- | --- | --- | --- | --- | --- |
 | 1 | eval | builtins | dangerous built-in with code execution risk | docs.python.org built-in functions documentation | cross-check behavior and safety notes |
