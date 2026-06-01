@@ -1,13 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
-from pathlib import Path
 import hashlib
 
-CACHE_DIR = Path("cache/web")
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
+from runtime_paths import aoia_state_home
+
 
 def cache_name(url: str):
-    return CACHE_DIR / f"{hashlib.md5(url.encode()).hexdigest()}.txt"
+    cache_dir = aoia_state_home() / "web_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir / f"{hashlib.md5(url.encode()).hexdigest()}.txt"
 
 def fetch_page(url: str):
     cache_file = cache_name(url)

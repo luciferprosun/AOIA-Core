@@ -27,6 +27,7 @@ from tools.validator import classify_shell_command, validate_shell_command
 from providers.config import DEFAULT_MODEL, ProviderManager
 from providers.aureon_provider import AureonProvider
 from commands.local_commands import cmd_scemda
+from tools.project_scanner import scan_project
 
 
 class FakeProvider:
@@ -102,6 +103,57 @@ class RuntimeArchitectureTests(unittest.TestCase):
             )
             self.assertTrue(result["success"])
             self.assertTrue((desktop_dir / "AI_TEST").is_dir())
+
+    def test_runtime_state_paths_follow_aoia_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            aoia_home = Path(tmp) / "aoia-home"
+            project_dir = Path(tmp) / "project"
+            project_dir.mkdir()
+
+            with patch.dict(os.environ, {"AOIA_HOME": str(aoia_home)}):
+                memory = MemoryStore(project_dir, project_dir)
+
+            self.assertTrue(str(memory.paths.state_dir).startswith(str(aoia_home)))
+            self.assertTrue(str(memory.paths.memory_dir).startswith(str(aoia_home)))
+            self.assertTrue(str(memory.paths.session_logs_dir).startswith(str(aoia_home)))
+            self.assertTrue(str(memory.vault_dir).startswith(str(aoia_home)))
+            self.assertFalse((project_dir / "state").exists())
+            self.assertFalse((project_dir / "memory").exists())
+            self.assertFalse((project_dir / "logs").exists())
+            self.assertFalse((project_dir / "obsidian_vault").exists())
+
+    def test_agent_runtime_boot_does_not_create_source_tree_state_dirs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            aoia_home = Path(tmp) / "aoia-home"
+            project_dir = Path(tmp) / "project"
+            project_dir.mkdir()
+
+            with patch.dict(os.environ, {"AOIA_HOME": str(aoia_home)}):
+                runtime = main.AgentRuntime(FakeProvider([]), PROMPT_TEMPLATE, project_dir)
+
+            self.assertTrue(str(runtime.session_log).startswith(str(aoia_home)))
+            self.assertTrue(str(runtime.knowledge_router.report_path).startswith(str(aoia_home)))
+            self.assertFalse((project_dir / "state").exists())
+            self.assertFalse((project_dir / "memory").exists())
+            self.assertFalse((project_dir / "logs").exists())
+            self.assertFalse((project_dir / "screenshots").exists())
+            self.assertFalse((project_dir / "obsidian_vault").exists())
+
+    def test_scan_project_report_uses_runtime_state_not_project_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            aoia_home = Path(tmp) / "aoia-home"
+            project_dir = Path(tmp) / "project"
+            project_dir.mkdir()
+            (project_dir / "README.md").write_text("# test\n", encoding="utf-8")
+
+            with patch.dict(os.environ, {"AOIA_HOME": str(aoia_home)}):
+                result = scan_project(str(project_dir), project_dir)
+
+            report_path = Path(result["scan_report_path"])
+            self.assertTrue(result["success"])
+            self.assertTrue(report_path.exists())
+            self.assertTrue(str(report_path).startswith(str(aoia_home)))
+            self.assertFalse((project_dir / "project_scan.json").exists())
 
     def test_executor_creates_and_writes_text_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -299,6 +351,21 @@ class RuntimeArchitectureTests(unittest.TestCase):
 
             self.assertTrue(manager.config_path.exists())
             self.assertFalse(manager.providers_path.exists())
+
+    def test_provider_manager_paths_follow_aoia_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            aoia_home = Path(tmp) / "aoia-home"
+            project_dir = Path(tmp) / "project"
+            project_dir.mkdir()
+
+            with patch.dict(os.environ, {"AOIA_HOME": str(aoia_home)}):
+                manager = ProviderManager(project_dir)
+                manager.switch_model("aureon")
+
+            self.assertTrue(str(manager.config_path).startswith(str(aoia_home)))
+            self.assertTrue(str(manager.providers_path).startswith(str(aoia_home)))
+            self.assertTrue(manager.config_path.exists())
+            self.assertFalse((project_dir / "state").exists())
 
     def test_provider_manager_normalizes_model_aliases(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

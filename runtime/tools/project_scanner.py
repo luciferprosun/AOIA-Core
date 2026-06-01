@@ -4,6 +4,8 @@ import json
 import os
 from pathlib import Path
 
+from runtime_paths import runtime_state_dir
+
 from .filesystem_tools import resolve_path
 
 
@@ -81,8 +83,9 @@ def scan_project(path_text: str, cwd: Path, max_files: int = 400) -> dict:
         "architecture_summary": architecture,
     }
 
-    report_path = root / "project_scan.json"
+    report_path = runtime_state_dir(root) / "state" / "project_scan.json"
     try:
+        report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
     except OSError:
         report_path = None
