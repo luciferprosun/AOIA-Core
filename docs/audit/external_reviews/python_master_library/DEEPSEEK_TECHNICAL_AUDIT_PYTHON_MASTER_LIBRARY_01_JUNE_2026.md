@@ -289,3 +289,7 @@ Implement schema hardening, enum validation, JSONL structure tests, dangerous-pa
 ## 15. Final Technical Recommendation
 
 Use Codex only as a careful editor, not as an authority. Schema and tests are acceptable model-assisted work because they are verifiable. Any promotion or official-docs claim requires human review. A successful next checkpoint has strict tests passing, dangerous APIs classified, no runtime code touched, and no record promoted.
+
+## H17 Archival Note
+
+This review is archived for H17 external-review consolidation as `external_model_review_unverified`. It remains advisory-only, non-canonical, and not connected to runtime. H17 uses it only as planning input alongside the Kimi external review.
