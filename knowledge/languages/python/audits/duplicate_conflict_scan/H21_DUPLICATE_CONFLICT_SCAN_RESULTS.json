@@ -50,9 +50,11 @@
   "duplicate_terms": [],
   "duplicate_titles": [],
   "duplicate_unsafe_patterns": [],
+  "missing_source_refs": [],
   "official_docs_checked_without_gate": [],
   "policy_conflicts": [],
   "premature_promotions": [],
+  "safe_to_execute_records": [],
   "scanned_file_paths": [
     "knowledge/languages/python/advisory/level_6_security_pitfalls/dangerous_builtins_batch1.jsonl",
     "knowledge/languages/python/examples.jsonl",

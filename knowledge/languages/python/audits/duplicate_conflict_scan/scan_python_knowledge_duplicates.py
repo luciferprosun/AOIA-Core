@@ -133,6 +133,12 @@ def build_report(records: list[dict[str, Any]], scanned_paths: list[Path], templ
         for record in records
         if record.get("review_status") == "official_docs_checked"
     ]
+    safe_to_execute_records = [
+        summary(record)
+        for record in records
+        if record.get("execution_policy") == "safe_to_execute_in_test_sandbox"
+    ]
+    missing_source_refs = [summary(record) for record in records if expects_source_ref(record) and not record.get("source_ref")]
 
     return {
         "scanned_files": len(scanned_paths),
@@ -149,6 +155,8 @@ def build_report(records: list[dict[str, Any]], scanned_paths: list[Path], templ
         "dangerous_low_risk_records": dangerous_low_risk_records,
         "premature_promotions": premature_promotions,
         "official_docs_checked_without_gate": official_docs_checked_without_gate,
+        "safe_to_execute_records": safe_to_execute_records,
+        "missing_source_refs": missing_source_refs,
     }
 
 
@@ -216,6 +224,21 @@ def is_dangerous_low_risk(record: dict[str, Any]) -> bool:
     return any(term in text for term in DANGEROUS_TERMS)
 
 
+def expects_source_ref(record: dict[str, Any]) -> bool:
+    path = str(record.get("_path", ""))
+    if "official_docs_crosscheck/" in path:
+        return False
+    return (
+        path.endswith(".jsonl")
+        and (
+            "/reference/" in path
+            or "/advisory/" in path
+            or path.endswith("knowledge/languages/python/examples.jsonl")
+        )
+        and "source_ref" in record
+    )
+
+
 def normalize_text(value: str) -> str:
     return re.sub(r"\s+", " ", value.strip().lower())
 
@@ -261,6 +284,8 @@ def render_summary(report: dict[str, Any]) -> str:
         f"- dangerous_low_risk_records: {len(report['dangerous_low_risk_records'])}",
         f"- premature_promotions: {len(report['premature_promotions'])}",
         f"- official_docs_checked_without_gate: {len(report['official_docs_checked_without_gate'])}",
+        f"- safe_to_execute_records: {len(report['safe_to_execute_records'])}",
+        f"- missing_source_refs: {len(report['missing_source_refs'])}",
         "",
         "## Notes",
         "- Findings are audit results, not automatic failures.",

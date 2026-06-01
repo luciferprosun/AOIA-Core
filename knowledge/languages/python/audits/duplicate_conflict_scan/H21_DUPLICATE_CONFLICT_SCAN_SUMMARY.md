@@ -16,6 +16,8 @@ This scan is read-only. It does not merge, delete, promote, or execute records.
 - dangerous_low_risk_records: 4
 - premature_promotions: 0
 - official_docs_checked_without_gate: 0
+- safe_to_execute_records: 0
+- missing_source_refs: 0
 
 ## Notes
 - Findings are audit results, not automatic failures.

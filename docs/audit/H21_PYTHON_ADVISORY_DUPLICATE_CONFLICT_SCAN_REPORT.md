@@ -4,7 +4,8 @@
 - `dev/rhcsa-command-grammar-layer`
 
 ## HEAD Before Changes
-- `4841df3`
+- Initial H21 base: `4841df3`
+- H21 completion update base: `3c74160`
 
 ## Files Created/Changed
 - `knowledge/languages/python/audits/duplicate_conflict_scan/scan_python_knowledge_duplicates.py`
@@ -24,6 +25,8 @@
 - dangerous low-risk records found: `4`
 - premature promotions found: `0`
 - official_docs_checked without gate found: `0`
+- safe_to_execute records found: `0`
+- missing source refs found: `0`
 
 ## Validation Results
 - Duplicate/conflict scan completed successfully.
@@ -33,6 +36,8 @@
 - `duplicate_ids`: `0`
 - `premature_promotions`: `0`
 - `official_docs_checked_without_gate`: `0`
+- `safe_to_execute_records`: `0`
+- `missing_source_refs`: `0`
 - `python3 -m compileall runtime tests`: passed.
 - `PYTHONPATH=runtime:. python3 -m unittest discover -s tests -p "test*.py" -v`: passed, `330` tests OK, `4` skipped.
 - Optional `pytest` run skipped because `pytest` is not installed in the current environment.
