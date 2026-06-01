@@ -1,5 +1,9 @@
 """Exports for standalone Memory Hats advisory tag structures."""
 
+from runtime.memory_hats.advisory import (
+    AdvisoryWarning,
+    advisory_from_tag,
+)
 from runtime.memory_hats.dedup import (
     compute_fingerprint,
     fingerprint_for_trigger,
@@ -26,6 +30,8 @@ from runtime.memory_hats.tags import (
 )
 
 __all__ = [
+    "AdvisoryWarning",
+    "advisory_from_tag",
     "compute_fingerprint",
     "fingerprint_for_trigger",
     "build_leaf_path",
