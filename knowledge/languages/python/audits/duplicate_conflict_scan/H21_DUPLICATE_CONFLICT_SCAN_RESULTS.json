@@ -1,0 +1,69 @@
+{
+  "dangerous_low_risk_records": [
+    {
+      "execution_policy": "reference_only_no_execution",
+      "id": "python-builtin-delattr",
+      "line": 12,
+      "path": "knowledge/languages/python/reference/builtins_index.jsonl",
+      "promotion_status": "not_promoted",
+      "review_status": "imported_unverified",
+      "risk_level": "medium",
+      "term": "delattr",
+      "title": "Python built-in: delattr"
+    },
+    {
+      "execution_policy": "reference_only_no_execution",
+      "id": "python-builtin-getattr",
+      "line": 23,
+      "path": "knowledge/languages/python/reference/builtins_index.jsonl",
+      "promotion_status": "not_promoted",
+      "review_status": "imported_unverified",
+      "risk_level": "medium",
+      "term": "getattr",
+      "title": "Python built-in: getattr"
+    },
+    {
+      "execution_policy": "reference_only_no_execution",
+      "id": "python-builtin-open",
+      "line": 43,
+      "path": "knowledge/languages/python/reference/builtins_index.jsonl",
+      "promotion_status": "not_promoted",
+      "review_status": "imported_unverified",
+      "risk_level": "medium",
+      "term": "open",
+      "title": "Python built-in: open"
+    },
+    {
+      "execution_policy": "reference_only_no_execution",
+      "id": "python-keyword-with",
+      "line": 34,
+      "path": "knowledge/languages/python/reference/keywords_index.jsonl",
+      "promotion_status": "not_promoted",
+      "review_status": "imported_unverified",
+      "risk_level": "low",
+      "term": "with",
+      "title": "Python keyword: with"
+    }
+  ],
+  "duplicate_corrected_patterns": [],
+  "duplicate_ids": [],
+  "duplicate_terms": [],
+  "duplicate_titles": [],
+  "duplicate_unsafe_patterns": [],
+  "official_docs_checked_without_gate": [],
+  "policy_conflicts": [],
+  "premature_promotions": [],
+  "scanned_file_paths": [
+    "knowledge/languages/python/advisory/level_6_security_pitfalls/dangerous_builtins_batch1.jsonl",
+    "knowledge/languages/python/examples.jsonl",
+    "knowledge/languages/python/official_docs_crosscheck/DISCREPANCY_LOG.jsonl",
+    "knowledge/languages/python/official_docs_crosscheck/batch_1_dangerous_builtins/BATCH1_DISCREPANCY_LOG.jsonl",
+    "knowledge/languages/python/official_docs_crosscheck/batch_1_dangerous_builtins/OFFICIAL_DOCS_TARGET_MAP.jsonl",
+    "knowledge/languages/python/reference/builtins_index.jsonl",
+    "knowledge/languages/python/reference/keywords_index.jsonl"
+  ],
+  "scanned_files": 7,
+  "status_conflicts": [],
+  "templates_skipped": 2,
+  "total_records": 121
+}
