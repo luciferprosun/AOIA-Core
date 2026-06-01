@@ -39,3 +39,10 @@ Every future entry should include:
 ## Current Status
 
 Scaffold only. Entries are examples and require human review before promotion.
+
+## Imported Reference Sources
+
+- `sources/Python_Master_Library_v1_GeminiPro.pdf`
+- source status: `imported_reference_unverified`
+- controlled reference indexes are under `knowledge/languages/python/reference/`
+- runtime integration has not happened
