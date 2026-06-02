@@ -100,6 +100,10 @@ def _classify(command: str, tokens: tuple[str, ...]) -> tuple[str, str]:
         return "ambiguous", "ownership change requires review"
     if _has_system_path_move(tokens):
         return "ambiguous", "move involving system path requires review"
+    if _has_find_delete(tokens):
+        return "ambiguous", "find delete action requires review"
+    if _has_echo_command_like_text(tokens):
+        return "ambiguous", "echo command-like text requires review"
     if _is_safe_read_only(tokens):
         return "safe", "recognized read-only command shape"
     return "unknown", "command shape is not recognized"
@@ -181,6 +185,30 @@ def _has_system_path_move(tokens: tuple[str, ...]) -> bool:
     if not tokens or tokens[0] != "mv":
         return False
     return any(_is_system_path(token) for token in tokens[1:])
+
+
+def _has_find_delete(tokens: tuple[str, ...]) -> bool:
+    return bool(tokens) and tokens[0] == "find" and "-delete" in tokens[1:]
+
+
+def _has_echo_command_like_text(tokens: tuple[str, ...]) -> bool:
+    if not tokens or tokens[0] != "echo":
+        return False
+    text = " ".join(tokens[1:]).strip().lower()
+    if not text:
+        return False
+    suspicious_fragments = (
+        "rm -rf",
+        "sudo ",
+        "curl ",
+        "wget ",
+        "mkfs",
+        "dd if=",
+        "dd of=",
+    )
+    if any(fragment in text for fragment in suspicious_fragments):
+        return True
+    return text in {"whoami", "bash", "sh"}
 
 
 def _is_system_path(token: str) -> bool:
