@@ -4,7 +4,12 @@ import unittest
 from pathlib import Path
 import re
 
-from runtime.schemas.command_proposal import CommandProposal, CommandRiskLevel
+from runtime.schemas.command_proposal import (
+    APPROVAL_STATES,
+    CLASSIFICATION_LABELS,
+    CommandProposal,
+    CommandRiskLevel,
+)
 
 
 class CommandProposalSchemaTests(unittest.TestCase):
@@ -117,6 +122,96 @@ class CommandProposalSchemaTests(unittest.TestCase):
         )
         for pattern in forbidden_patterns:
             self.assertIsNone(re.search(pattern, source))
+
+    def test_gt_runtime_8c_inert_fields_can_be_created(self) -> None:
+        proposal = CommandProposal(
+            raw_command="ls   -la",
+            normalized_command="ls -la",
+            tokens=["ls", "-la"],
+            classification="safe",
+            approval_state="not_required",
+            reason="read-only",
+            source="unit_test",
+        )
+        self.assertEqual(proposal.raw_command, "ls   -la")
+        self.assertEqual(proposal.normalized_command, "ls -la")
+        self.assertEqual(proposal.tokens, ("ls", "-la"))
+        self.assertEqual(proposal.classification, "safe")
+        self.assertEqual(proposal.approval_state, "not_required")
+        self.assertTrue(proposal.dry_run)
+        self.assertEqual(proposal.risk_level, CommandRiskLevel.SAFE)
+
+    def test_classification_labels_are_canonical(self) -> None:
+        self.assertEqual(
+            CLASSIFICATION_LABELS,
+            {"safe", "ambiguous", "dangerous", "unknown"},
+        )
+
+    def test_approval_states_are_canonical(self) -> None:
+        self.assertEqual(
+            APPROVAL_STATES,
+            {"not_required", "requires_human_review", "approved", "denied"},
+        )
+
+    def test_invalid_classification_raises_value_error(self) -> None:
+        with self.assertRaises(ValueError):
+            CommandProposal(
+                raw_command="git status",
+                normalized_command="git status",
+                tokens=("git", "status"),
+                classification="not_a_label",
+                approval_state="not_required",
+                reason="bad classification",
+                source="unit_test",
+            )
+
+    def test_invalid_approval_state_raises_value_error(self) -> None:
+        with self.assertRaises(ValueError):
+            CommandProposal(
+                raw_command="git status",
+                normalized_command="git status",
+                tokens=("git", "status"),
+                classification="safe",
+                approval_state="pending",
+                reason="bad approval state",
+                source="unit_test",
+            )
+
+    def test_tokens_must_be_strings(self) -> None:
+        with self.assertRaises(TypeError):
+            CommandProposal(
+                raw_command="git status",
+                normalized_command="git status",
+                tokens=("git", 1),
+                classification="safe",
+                approval_state="not_required",
+                reason="bad token",
+                source="unit_test",
+            )
+
+    def test_dry_run_defaults_to_true(self) -> None:
+        proposal = CommandProposal(
+            raw_command="pwd",
+            normalized_command="pwd",
+            tokens=("pwd",),
+            classification="safe",
+            approval_state="not_required",
+            reason="read-only",
+            source="unit_test",
+        )
+        self.assertTrue(proposal.dry_run)
+
+    def test_risky_or_ambiguous_helper(self) -> None:
+        proposal = CommandProposal(
+            raw_command="rm -rf ./build",
+            normalized_command="rm -rf ./build",
+            tokens=("rm", "-rf", "./build"),
+            classification="ambiguous",
+            approval_state="requires_human_review",
+            reason="recursive removal",
+            source="unit_test",
+        )
+        self.assertTrue(proposal.is_risky_or_ambiguous())
 
 
 if __name__ == "__main__":
