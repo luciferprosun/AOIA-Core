@@ -1,3 +1,4 @@
+from runtime.schemas.approval_decision import ApprovalDecision
 from runtime.schemas.command_proposal import (
     APPROVAL_STATES,
     CLASSIFICATION_LABELS,
@@ -6,6 +7,7 @@ from runtime.schemas.command_proposal import (
 )
 
 __all__ = [
+    "ApprovalDecision",
     "APPROVAL_STATES",
     "CLASSIFICATION_LABELS",
     "CommandProposal",

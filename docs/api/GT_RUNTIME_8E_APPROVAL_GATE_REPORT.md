@@ -15,17 +15,21 @@ The goal is to decide whether a proposal is allowed to pass as a dry-run decisio
 
 Added:
 
+- `runtime/schemas/approval_decision.py`
 - `runtime/safety/approval_gate.py`
 - `tests/test_approval_gate_dry_run.py`
 - `docs/api/GT_RUNTIME_8E_APPROVAL_GATE_REPORT.md`
 
 Updated:
 
+- `runtime/schemas/__init__.py`
 - `runtime/safety/__init__.py`
 
 ## ApprovalDecision shape
 
-`ApprovalDecision` is an inert data object.
+`ApprovalDecision` now lives in `runtime/schemas/approval_decision.py`.
+
+`ApprovalDecision` is a frozen, inert data object.
 
 Fields:
 
@@ -34,26 +38,36 @@ Fields:
 - `reason`
 - `dry_run`
 - `requires_human_review`
+- `execution_permitted`
+
+GT-RUNTIME-8E hard-locks `execution_permitted=False`.
 
 ## Approval behavior
 
 `evaluate_approval` only evaluates a `CommandProposal`.
 
+`approval_gate.py` accepts only `CommandProposal` objects.
+
+`approval_gate.py` does not parse raw strings.
+
 Behavior:
 
 - `safe` proposals return `allowed=True` with `approval_state="not_required"`
 - `ambiguous` proposals return `allowed=False` with `approval_state="requires_human_review"`
-- `dangerous` proposals return `allowed=False` with a denial decision and human-review flag
+- `dangerous` proposals return `allowed=False` with `approval_state="requires_human_review"`
 - `unknown` proposals return `allowed=False` with `approval_state="requires_human_review"`
 - non-dry-run proposals are blocked even if their classification is `safe`
+- invalid or unrecognized classifications return `allowed=False` with `approval_state="requires_human_review"`
 
-`evaluate_command_text` only parses/classifies/evaluates command text.
+`evaluate_command_text` is intentionally not included in GT-RUNTIME-8E.
 
 ## Dry-run boundary
 
 GT-RUNTIME-8E does not execute shell commands.
 
 Safe commands are allowed only as dry-run decisions, not executed.
+
+`allowed=True` means only "allowed as a dry-run decision," not "allowed to execute."
 
 Ambiguous, dangerous, unknown, and non-dry-run proposals require human review or denial.
 
