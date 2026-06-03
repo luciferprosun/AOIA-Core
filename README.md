@@ -45,6 +45,16 @@ AOIA-Core exists because AI-assisted workflows often blur the line between what 
 - validation at current savepoint: `146` tests run, `4` skipped
 - see [Implemented Capabilities](docs/governance/IMPLEMENTED_CAPABILITIES.md) for a conservative status table separating implemented, partial, planned, and documentation-only items.
 
+## Public Provenance Anchor
+
+The first public AIOA NiFe SPARKhat provenance record is published on Zenodo:
+
+- DOI: `10.5281/zenodo.20522947`
+- Record: `https://zenodo.org/records/20522947`
+- Report: [docs/audit/AIOA_NIFE_SPARKHAT_001_ZENODO_PUBLICATION_REPORT_03_JUNE_2026.md](docs/audit/AIOA_NIFE_SPARKHAT_001_ZENODO_PUBLICATION_REPORT_03_JUNE_2026.md)
+
+This record is a public provenance and lineage anchor for the AOIA / AIOA workstream. It is not a claim that Zenodo publication by itself validates AOIA, AIOA, MHLM, MDLH, or LSC research claims.
+
 ## For External Reviewers
 
 Start here:
