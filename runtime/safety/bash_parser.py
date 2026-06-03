@@ -86,6 +86,8 @@ def _classify(command: str, tokens: tuple[str, ...]) -> tuple[str, str]:
         return "dangerous", "xargs recursive removal wrapper detected"
     if _has_heredoc_runner(tokens):
         return "dangerous", "heredoc shell runner pattern detected"
+    if _has_process_substitution_runner(command, effective_tokens):
+        return "dangerous", "process substitution shell runner pattern detected"
     if _has_runner_command(effective_tokens):
         return "dangerous", "runner command mode detected"
     if _has_mkfs(effective_tokens):
@@ -102,6 +104,12 @@ def _classify(command: str, tokens: tuple[str, ...]) -> tuple[str, str]:
         return "dangerous", "privilege escalation prefix detected"
     if _has_alias_or_function_definition(command, tokens):
         return "ambiguous", "alias or function definition requires review"
+    if _has_encoded_payload_indicator(effective_tokens):
+        return "ambiguous", "encoded payload marker requires review"
+    if _has_process_substitution(command):
+        return "ambiguous", "process substitution marker detected"
+    if _has_non_ascii_marker(command):
+        return "ambiguous", "non-ASCII command marker detected"
     if _has_command_substitution(command):
         return "ambiguous", "command substitution marker detected"
     if _has_command_chaining(command):
@@ -157,6 +165,10 @@ def _has_heredoc_runner(tokens: tuple[str, ...]) -> bool:
     return bool(tokens) and tokens[0] in {"sh", "bash"} and any(
         token.startswith("<<") for token in tokens[1:]
     )
+
+
+def _has_process_substitution_runner(command: str, tokens: tuple[str, ...]) -> bool:
+    return bool(tokens) and tokens[0] in {"sh", "bash"} and _has_process_substitution(command)
 
 
 def _has_runner_command(tokens: tuple[str, ...]) -> bool:
@@ -237,6 +249,15 @@ def _has_alias_or_function_definition(command: str, tokens: tuple[str, ...]) -> 
     return "(){" in compact or "function" in tokens[:1]
 
 
+def _has_encoded_payload_indicator(tokens: tuple[str, ...]) -> bool:
+    if not tokens:
+        return False
+    if tokens[0] not in {"base64", "openssl", "xxd"}:
+        return False
+    decode_markers = {"-d", "--decode", "-D", "base64", "-r", "-p"}
+    return any(token in decode_markers for token in tokens[1:])
+
+
 def _has_echo_command_like_text(tokens: tuple[str, ...]) -> bool:
     if not tokens or tokens[0] != "echo":
         return False
@@ -265,9 +286,23 @@ def _has_sensitive_redirection(tokens: tuple[str, ...]) -> bool:
     for index, token in enumerate(tokens):
         if token in {">", ">>"} and index + 1 < len(tokens):
             return _is_system_path(tokens[index + 1])
-        if token.startswith((">", ">>")) and len(token.lstrip(">")) > 0:
-            return _is_system_path(token.lstrip(">"))
+        target = _redirection_target(token)
+        if target and _is_system_path(target):
+            return True
     return False
+
+
+def _redirection_target(token: str) -> str:
+    if token.startswith("&>"):
+        return token[2:]
+    if token.startswith((">", ">>")):
+        return token.lstrip(">")
+    for marker in (">>", ">"):
+        if marker in token:
+            prefix, target = token.split(marker, 1)
+            if prefix.isdigit() or prefix in {"&"}:
+                return target
+    return ""
 
 
 def _has_ifs_substitution(command: str) -> bool:
@@ -315,6 +350,14 @@ def _command_basename(token: str) -> str:
 
 def _has_command_substitution(command: str) -> bool:
     return "$(" in command or "`" in command
+
+
+def _has_process_substitution(command: str) -> bool:
+    return "<(" in command or ">(" in command
+
+
+def _has_non_ascii_marker(command: str) -> bool:
+    return any(ord(character) > 127 for character in command)
 
 
 def _has_command_chaining(command: str) -> bool:

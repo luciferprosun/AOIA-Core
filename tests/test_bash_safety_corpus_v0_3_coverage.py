@@ -172,6 +172,19 @@ class BashSafetyCorpusV03CoverageTests(unittest.TestCase):
             with self.subTest(pattern=pattern):
                 self.assertNotIn(pattern, source)
 
+    def test_gt_runtime_8k_targeted_hardening_cases(self) -> None:
+        cases = {
+            "bash <(echo rm -rf /)": "dangerous",
+            "base64 -d <<< cm0gLXJmIC8=": "ambiguous",
+            "echo test 2>/etc/cron.d/example": "ambiguous",
+            "ｅcho hello": "ambiguous",
+        }
+        for command, expected in cases.items():
+            with self.subTest(command=command):
+                proposal = parse_bash_command(command, source="gt_runtime_8k")
+                self.assertEqual(expected, proposal.classification)
+                self.assertNotEqual("safe", proposal.classification)
+
 
 if __name__ == "__main__":
     unittest.main()
