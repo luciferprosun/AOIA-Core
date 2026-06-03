@@ -1,5 +1,7 @@
 # AIOA Whitehat / AOIA-Core
 
+Safety status: AOIA-Core currently does not execute shell commands through the GT-RUNTIME-8 Bash Safety mini-stack. Current Bash Safety work is an inert pre-execution inspection and dry-run decision layer. `allowed=True` does not authorize execution.
+
 AIOA Whitehat is the public white-hat advisory direction of AOIA-Core. AOIA-Core remains the technical repository lineage. The system is a local-first, human-supervised, auditable advisory layer for AI-assisted technical workflows. It is not an autonomous agent and not a truth engine.
 
 AOIA-Core is a local-first runtime for AI-assisted engineering workflows with explicit evidence, provenance, and model-output boundaries. It separates evidence, provenance, contradictions, logs, memory traces, and runtime state from raw model output.
