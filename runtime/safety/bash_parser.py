@@ -11,6 +11,7 @@ SYSTEM_PATH_PREFIXES = (
     "/etc",
     "/lib",
     "/proc",
+    "/root",
     "/sbin",
     "/sys",
     "/usr",
@@ -64,47 +65,66 @@ def _proposal(
 
 
 def _classify(command: str, tokens: tuple[str, ...]) -> tuple[str, str]:
+    tokens = _normalize_executable_tokens(tokens)
+    effective_tokens = _unwrap_env_tokens(tokens)
     lowered = command.lower()
     compact = lowered.replace(" ", "")
     if compact == ":(){:|:&};:":
         return "dangerous", "fork bomb pattern detected"
+    if _has_ifs_substitution(command):
+        ifs_tokens = _unwrap_env_tokens(_normalize_executable_tokens(_ifs_expanded_tokens(command)))
+        if _has_root_recursive_remove(ifs_tokens):
+            return "dangerous", "IFS-obfuscated recursive root removal pattern detected"
+        if _has_recursive_world_write_root(ifs_tokens):
+            return "dangerous", "IFS-obfuscated recursive root permission pattern detected"
+        if _has_recursive_owner_change(ifs_tokens):
+            return "dangerous", "IFS-obfuscated recursive ownership change detected"
+        return "ambiguous", "IFS substitution marker detected"
     if _has_pipe_to_runner(tokens):
         return "dangerous", "pipe-to-runner pattern detected"
-    if _has_runner_command(tokens):
+    if _has_xargs_recursive_remove(tokens):
+        return "dangerous", "xargs recursive removal wrapper detected"
+    if _has_heredoc_runner(tokens):
+        return "dangerous", "heredoc shell runner pattern detected"
+    if _has_runner_command(effective_tokens):
         return "dangerous", "runner command mode detected"
-    if _has_mkfs(tokens):
+    if _has_mkfs(effective_tokens):
         return "dangerous", "filesystem formatting command detected"
-    if _has_dd_disk_write(tokens):
+    if _has_dd_disk_write(effective_tokens):
         return "dangerous", "dd device copy option detected"
-    if _has_root_recursive_remove(tokens):
+    if _has_root_recursive_remove(effective_tokens):
         return "dangerous", "recursive root removal pattern detected"
-    if _has_recursive_world_write_root(tokens):
+    if _has_recursive_world_write_root(effective_tokens):
         return "dangerous", "recursive world-writable root permission pattern detected"
-    if _has_recursive_owner_change(tokens):
+    if _has_recursive_owner_change(effective_tokens):
         return "dangerous", "recursive ownership change detected"
-    if tokens and tokens[0] == "sudo":
+    if effective_tokens and effective_tokens[0] == "sudo":
         return "dangerous", "privilege escalation prefix detected"
+    if _has_alias_or_function_definition(command, tokens):
+        return "ambiguous", "alias or function definition requires review"
     if _has_command_substitution(command):
         return "ambiguous", "command substitution marker detected"
     if _has_command_chaining(command):
         return "ambiguous", "command chaining marker detected"
     if _has_pipe(command):
         return "ambiguous", "pipe chain detected"
+    if _has_sensitive_redirection(tokens):
+        return "ambiguous", "redirection to sensitive path requires review"
     if _has_dev_redirection(command):
         return "ambiguous", "device redirection detected"
-    if _has_recursive_remove(tokens):
+    if _has_recursive_remove(effective_tokens):
         return "ambiguous", "recursive removal requires review"
-    if _has_recursive_permission_change(tokens):
+    if _has_recursive_permission_change(effective_tokens):
         return "ambiguous", "recursive permission change requires review"
-    if _has_owner_change(tokens):
+    if _has_owner_change(effective_tokens):
         return "ambiguous", "ownership change requires review"
-    if _has_system_path_move(tokens):
+    if _has_system_path_move(effective_tokens):
         return "ambiguous", "move involving system path requires review"
-    if _has_find_delete(tokens):
+    if _has_find_delete(effective_tokens):
         return "ambiguous", "find delete action requires review"
-    if _has_echo_command_like_text(tokens):
+    if _has_echo_command_like_text(effective_tokens):
         return "ambiguous", "echo command-like text requires review"
-    if _is_safe_read_only(tokens):
+    if _is_safe_read_only(effective_tokens):
         return "safe", "recognized read-only command shape"
     return "unknown", "command shape is not recognized"
 
@@ -112,12 +132,31 @@ def _classify(command: str, tokens: tuple[str, ...]) -> tuple[str, str]:
 def _has_pipe_to_runner(tokens: tuple[str, ...]) -> bool:
     if "|" not in tokens:
         return False
-    first = tokens[0] if tokens else ""
-    if first not in {"curl", "wget"}:
+    return any(segment and segment[0] in {"sh", "bash"} for segment in _pipe_segments(tokens)[1:])
+
+
+def _pipe_segments(tokens: tuple[str, ...]) -> tuple[tuple[str, ...], ...]:
+    segments: list[list[str]] = [[]]
+    for token in tokens:
+        if token == "|":
+            segments.append([])
+        else:
+            segments[-1].append(token)
+    return tuple(tuple(segment) for segment in segments)
+
+
+def _has_xargs_recursive_remove(tokens: tuple[str, ...]) -> bool:
+    if "xargs" not in tokens:
         return False
-    pipe_index = tokens.index("|")
-    tail = tokens[pipe_index + 1 :]
-    return bool(tail) and tail[0] in {"sh", "bash"}
+    index = tokens.index("xargs")
+    tail = _normalize_executable_tokens(tokens[index + 1 :])
+    return _is_rm_recursive_force(tail)
+
+
+def _has_heredoc_runner(tokens: tuple[str, ...]) -> bool:
+    return bool(tokens) and tokens[0] in {"sh", "bash"} and any(
+        token.startswith("<<") for token in tokens[1:]
+    )
 
 
 def _has_runner_command(tokens: tuple[str, ...]) -> bool:
@@ -191,6 +230,13 @@ def _has_find_delete(tokens: tuple[str, ...]) -> bool:
     return bool(tokens) and tokens[0] == "find" and "-delete" in tokens[1:]
 
 
+def _has_alias_or_function_definition(command: str, tokens: tuple[str, ...]) -> bool:
+    if tokens and tokens[0] == "alias":
+        return True
+    compact = command.replace(" ", "")
+    return "(){" in compact or "function" in tokens[:1]
+
+
 def _has_echo_command_like_text(tokens: tuple[str, ...]) -> bool:
     if not tokens or tokens[0] != "echo":
         return False
@@ -213,6 +259,58 @@ def _has_echo_command_like_text(tokens: tuple[str, ...]) -> bool:
 
 def _is_system_path(token: str) -> bool:
     return any(token == prefix or token.startswith(prefix + "/") for prefix in SYSTEM_PATH_PREFIXES)
+
+
+def _has_sensitive_redirection(tokens: tuple[str, ...]) -> bool:
+    for index, token in enumerate(tokens):
+        if token in {">", ">>"} and index + 1 < len(tokens):
+            return _is_system_path(tokens[index + 1])
+        if token.startswith((">", ">>")) and len(token.lstrip(">")) > 0:
+            return _is_system_path(token.lstrip(">"))
+    return False
+
+
+def _has_ifs_substitution(command: str) -> bool:
+    return "${ifs}" in command.lower()
+
+
+def _ifs_expanded_tokens(command: str) -> tuple[str, ...]:
+    if not _has_ifs_substitution(command):
+        return ()
+    expanded = command.replace("${IFS}", " ").replace("${ifs}", " ")
+    try:
+        return tuple(shlex.split(" ".join(expanded.split()), posix=True))
+    except ValueError:
+        return ()
+
+
+def _normalize_executable_tokens(tokens: tuple[str, ...]) -> tuple[str, ...]:
+    if not tokens:
+        return tokens
+    normalized = list(tokens)
+    executable_indexes = {0}
+    for index, token in enumerate(tokens[:-1]):
+        if token in {"|", "xargs", "env"}:
+            executable_indexes.add(index + 1)
+    for index in executable_indexes:
+        normalized[index] = _command_basename(normalized[index])
+    return tuple(normalized)
+
+
+def _unwrap_env_tokens(tokens: tuple[str, ...]) -> tuple[str, ...]:
+    if not tokens or tokens[0] != "env":
+        return tokens
+    tail = list(tokens[1:])
+    while tail and (tail[0].startswith("-") or ("=" in tail[0] and not tail[0].startswith("="))):
+        tail.pop(0)
+    return _normalize_executable_tokens(tuple(tail))
+
+
+def _command_basename(token: str) -> str:
+    normalized = token.lstrip("\\")
+    if normalized.startswith("/") and normalized != "/":
+        return normalized.rsplit("/", 1)[-1]
+    return normalized
 
 
 def _has_command_substitution(command: str) -> bool:
@@ -246,5 +344,7 @@ def _is_safe_read_only(tokens: tuple[str, ...]) -> bool:
     if tokens[0] == "cat" and len(tokens) >= 2:
         return True
     if tokens[0] == "grep" and len(tokens) >= 3:
+        return True
+    if tokens[0] == "systemctl" and len(tokens) >= 3 and tokens[1] == "status":
         return True
     return False
