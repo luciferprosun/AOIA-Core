@@ -82,6 +82,7 @@ are not AOIA-Core runtime authority.
 Read these files first:
 
 - `docs/reviewer/QUICK_START_FOR_GRANT_REVIEWERS.md`
+- `docs/reviewer/NLNET_EXTERNAL_REVIEWER_BRIEF.md`
 - `docs/REVIEWER_QUICKSTART.md`
 - `docs/THREAT_MODEL.md`
 - `docs/BENCHMARK_LIMITATIONS.md`
