@@ -2,9 +2,15 @@
 
 ## 1. What AOIA-Core Is
 
-AOIA-Core is a local-first pre-execution command classifier and auditable AI-agent action boundary for proposed shell commands.
+AOIA-Core is a local-first, non-executing inspection and audit layer for
+AI-proposed shell commands.
 
-The current GT-RUNTIME-6 state is a controlled command classification regression test on 12 curated internal shell-command cases. It matched all 12 internal test cases with current regex/rule logic. This is an internal regression harness and a starting point for seeking initial external technical review.
+The current public reviewer scope is Bash Safety / GT-RUNTIME inspection work:
+rule-based command parsing, classification, dry-run safety decisions, approval
+metadata, audit records, and explicit provenance/evidence-boundary context.
+
+`allowed=True` means a proposed command passed the current inspection rules. It
+does not authorize execution.
 
 ## 2. What AOIA-Core Is Not
 
@@ -13,14 +19,17 @@ The current GT-RUNTIME-6 state is a controlled command classification regression
 - It is not a claim of validated safety.
 - It does not prove complete real-world shell safety.
 - It is not a production-ready terminal execution security layer.
+- It is not an autonomous agent.
+- It does not execute proposed commands in the current public reviewer scope.
 
 ## 3. What To Read First
 
 - `README.md`
+- `docs/reviewer/QUICK_START_FOR_GRANT_REVIEWERS.md`
 - `docs/THREAT_MODEL.md`
 - `docs/BENCHMARK_LIMITATIONS.md`
-- `docs/HOW_TO_REPRODUCE_GT_RUNTIME_6.md`
 - `docs/GT_RUNTIME_ROADMAP.md`
+- `docs/governance/IMPLEMENTED_CAPABILITIES.md`
 - `docs/audit/`
 
 ## 4. Validation Commands
@@ -32,4 +41,11 @@ PYTHONPATH=runtime:. python3 -m unittest discover -s tests -p "test*.py" -v
 
 ## 5. Context Boundary
 
-LSC, MHLM or MDLH, SCEMDA or HNC, and Gary-related materials are external research or audit context and are not AOIA-Core runtime authority.
+Historical runtime entrypoints such as `runtime/main.py`, `runtime/run.sh`,
+`runtime/run_web.sh`, and `scripts/start_tui.sh` are legacy/transitional
+surfaces unless explicitly promoted by current governance. Do not treat their
+broad execution, provider, browser, or agent references as the current NLnet
+second-review claim.
+
+LSC, MHLM or MDLH, SCEMDA or HNC, and Gary-related materials are external
+research or audit context and are not AOIA-Core runtime authority.

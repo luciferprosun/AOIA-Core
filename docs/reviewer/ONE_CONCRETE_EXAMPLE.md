@@ -2,17 +2,21 @@
 
 ## Scenario
 
-A human operator asks AOIA-Core for help with a local engineering question about an RHCSA-style Linux configuration task.
+A human operator asks AOIA-Core to inspect an AI-proposed shell command before
+the operator decides what to do outside AOIA-Core.
 
-The system uses local static knowledge where available. It may also use configured runtime paths and provider switching if a provider is available. The output is treated as operational context and reviewer context, not as automatic evidence.
+The system parses the proposed command, applies current Bash Safety inspection
+rules, and returns a dry-run decision with audit context. The output is treated
+as operational/reviewer context, not as automatic evidence and not as execution
+authorization.
 
 The workflow is:
 
-1. The operator asks a question about a local engineering issue.
-2. AOIA-Core collects relevant local and configured knowledge.
-3. AOIA-Core records provenance and logs the decision path.
-4. The system presents a suggested action or explanation.
-5. If the action is risky, a human approval gate is required before execution.
+1. An AI system or human proposes a shell command.
+2. AOIA-Core inspects the proposed command without executing it.
+3. AOIA-Core records classification, dry-run decision, and audit context.
+4. The system presents a conservative explanation of the decision.
+5. Any real-world action remains outside the current public AOIA-Core scope.
 
 ## What becomes evidence?
 
@@ -27,11 +31,15 @@ Evidence is only accepted after explicit review and approval according to the au
 - It does not prove scientific validity.
 - It does not prove autonomous reasoning.
 - It does not prove that external model output is authoritative.
+- It does not execute the proposed command.
+- It does not prove sandbox containment.
 
 ## Notes
 
 The example is intentionally conservative. It illustrates the separation between model-assisted output, operational context, and evidence.
 
-Logs, provenance records, and model responses may support review, but they are not themselves proof of truth. Risky or destructive actions require human approval where gates are implemented.
+Logs, provenance records, and model responses may support review, but they are
+not themselves proof of truth. Approval metadata records review context; it does
+not convert `allowed=True` into execution authorization.
 
 External model output, if used, remains historical context unless explicitly reviewed and approved.
