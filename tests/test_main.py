@@ -482,7 +482,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             self.assertIn("Second Page", text_result["text"])
             browser_close()
 
-    def test_shell_execute_runs_curl_version(self) -> None:
+    def test_shell_execute_blocks_curl_version_by_default(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
             project_dir.mkdir()
@@ -496,8 +496,11 @@ class RuntimeArchitectureTests(unittest.TestCase):
                     "requires_confirmation": False,
                 }
             )
-            self.assertTrue(result["success"])
-            self.assertIn("curl", result["stdout"].lower())
+            self.assertFalse(result["success"])
+            self.assertTrue(result["blocked"])
+            self.assertEqual(result["mode"], "reviewer_safe_blocked")
+            self.assertEqual(result["stdout"], "")
+            self.assertIsNone(result["exit_code"])
 
     @staticmethod
     def _write_local_site(root: Path) -> None:
