@@ -1,0 +1,10 @@
+[project]
+name = "aoia-core"
+version = "0.0.0"
+description = "local-first pre-execution inspection and audit framework for AI-assisted commands"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
