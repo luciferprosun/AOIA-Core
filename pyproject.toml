@@ -8,3 +8,25 @@ dependencies = []
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "runtime"}
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+where = ["runtime"]
+include = [
+    "adaptive_routing*",
+    "commands*",
+    "knowledge*",
+    "memory*",
+    "memory_hats*",
+    "orchestrator*",
+    "providers*",
+    "retrieval*",
+    "router*",
+    "safety*",
+    "schemas*",
+    "tools*",
+]
+namespaces = true
