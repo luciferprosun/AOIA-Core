@@ -137284,6 +137284,644 @@
         }
       ],
       "triage_index": 3151
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "complete",
+      "projected_schema_record": {
+        "id": "getfacl",
+        "command": "getfacl",
+        "description": "Wyświetla ACL",
+        "category": "user",
+        "tags": [
+          "user",
+          "getfacl",
+          "linux-command",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "low",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [
+          {
+            "input": "getfacl file.txt",
+            "expected_effect": "Wyświetla ACL"
+          }
+        ],
+        "notes": "Candidate status: candidate; source_line: 5822",
+        "related_commands": [
+          "getfacl"
+        ]
+      },
+      "original_record": {
+        "command": "getfacl",
+        "command_key": "getfacl",
+        "base_command": "getfacl",
+        "category": "Users & Permissions",
+        "description": "Wyświetla ACL",
+        "examples": [
+          "getfacl file.txt"
+        ],
+        "source_line": 5822,
+        "source_page": 109,
+        "canonical_source": "runtime/knowledge/source/linux_master_library_v1.pdf",
+        "source_files": [
+          "LINUX COMMAND"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [],
+        "confidence": "high"
+      },
+      "status_history": [
+        {
+          "stage": "candidate_loader",
+          "status": "candidate",
+          "quality_flags": []
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8"
+          ]
+        }
+      ],
+      "triage_index": 3152
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "complete",
+      "projected_schema_record": {
+        "id": "setfacl",
+        "command": "setfacl",
+        "description": "Ustawia ACL 114",
+        "category": "user",
+        "tags": [
+          "user",
+          "setfacl",
+          "linux-command",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "medium",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [
+          {
+            "input": "setfacl -m u:john:rw file.txt",
+            "expected_effect": "Ustawia ACL 114"
+          }
+        ],
+        "notes": "Candidate status: candidate; source_line: 6081",
+        "related_commands": [
+          "setfacl"
+        ]
+      },
+      "original_record": {
+        "command": "setfacl",
+        "command_key": "setfacl",
+        "base_command": "setfacl",
+        "category": "Users & Permissions",
+        "description": "Ustawia ACL 114",
+        "examples": [
+          "setfacl -m u:john:rw file.txt"
+        ],
+        "source_line": 6081,
+        "source_page": 114,
+        "canonical_source": "runtime/knowledge/source/linux_master_library_v1.pdf",
+        "source_files": [
+          "LINUX COMMAND"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [],
+        "confidence": "high"
+      },
+      "status_history": [
+        {
+          "stage": "candidate_loader",
+          "status": "candidate",
+          "quality_flags": []
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8"
+          ]
+        }
+      ],
+      "triage_index": 3153
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8",
+        "family_aggregate_from_candidate_source",
+        "missing_source_page"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "partial",
+      "projected_schema_record": {
+        "id": "chronyc",
+        "command": "chronyc",
+        "description": "Chrony client command family for time synchronization inspection and control.",
+        "category": "system",
+        "tags": [
+          "system",
+          "chronyc",
+          "rhcsa-updated-command-library-1449",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "medium",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [
+          {
+            "input": "chronyc tracking",
+            "expected_effect": "Chrony client inspection/control subcommand."
+          },
+          {
+            "input": "chronyc sources",
+            "expected_effect": "Chrony client inspection/control subcommand."
+          },
+          {
+            "input": "chronyc makestep",
+            "expected_effect": "Chrony client inspection/control subcommand."
+          },
+          {
+            "input": "chronyc clients",
+            "expected_effect": "Chrony client inspection/control subcommand."
+          }
+        ],
+        "notes": "Candidate status: candidate_review aggregate; source rows: 1250, 1251, 1252, 1437, 1438; imported as dev-branch candidate knowledge only; not canonical runtime authority.",
+        "related_commands": [
+          "chronyc"
+        ]
+      },
+      "original_record": {
+        "command": "chronyc",
+        "command_key": "chronyc",
+        "base_command": "chronyc",
+        "category": "NTP",
+        "description": "Chrony client command family aggregated from candidate-only source rows.",
+        "examples": [
+          "chronyc tracking",
+          "chronyc sources",
+          "chronyc makestep",
+          "chronyc clients",
+          "chronyc activity"
+        ],
+        "source_line": null,
+        "source_page": null,
+        "canonical_source": "runtime/knowledge/candidates/rhcsa_updated_1449_commands.json",
+        "source_files": [
+          "RHCSA_Updated_Command_Library_1449_31_May_2026.md"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [],
+        "confidence": "medium"
+      },
+      "status_history": [
+        {
+          "stage": "candidate_loader",
+          "status": "candidate_review",
+          "quality_flags": []
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8",
+            "family_aggregate_from_candidate_source",
+            "missing_source_page"
+          ]
+        }
+      ],
+      "triage_index": 3154
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "complete",
+      "projected_schema_record": {
+        "id": "xfs-repair",
+        "command": "xfs_repair",
+        "description": "Always have backups before running or . 203",
+        "category": "storage",
+        "tags": [
+          "storage",
+          "xfs_repair",
+          "linux-command",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "high",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [
+          {
+            "input": "xfs_repair /dev/sda1",
+            "expected_effect": "Always have backups before running or . 203"
+          },
+          {
+            "input": "xfs_repair",
+            "expected_effect": "Always have backups before running or . 203"
+          }
+        ],
+        "notes": "Candidate status: candidate; source_line: 10133",
+        "related_commands": [
+          "xfs_repair"
+        ]
+      },
+      "original_record": {
+        "command": "xfs_repair",
+        "command_key": "xfs_repair",
+        "base_command": "xfs_repair",
+        "category": "Storage",
+        "description": "Always have backups before running or . 203",
+        "examples": [
+          "xfs_repair /dev/sda1",
+          "xfs_repair"
+        ],
+        "source_line": 10133,
+        "source_page": 203,
+        "canonical_source": "runtime/knowledge/source/linux_master_library_v1.pdf",
+        "source_files": [
+          "LINUX COMMAND",
+          "komendy"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [],
+        "confidence": "high"
+      },
+      "status_history": [
+        {
+          "stage": "candidate_loader",
+          "status": "candidate",
+          "quality_flags": []
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8"
+          ]
+        }
+      ],
+      "triage_index": 3155
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "complete",
+      "projected_schema_record": {
+        "id": "e2fsck",
+        "command": "e2fsck",
+        "description": "Sprawdza ext2/3/4",
+        "category": "storage",
+        "tags": [
+          "storage",
+          "e2fsck",
+          "linux-command",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "high",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [
+          {
+            "input": "e2fsck -f /dev/sda1",
+            "expected_effect": "Sprawdza ext2/3/4"
+          }
+        ],
+        "notes": "Candidate status: candidate; source_line: 8990",
+        "related_commands": [
+          "e2fsck"
+        ]
+      },
+      "original_record": {
+        "command": "e2fsck",
+        "command_key": "e2fsck",
+        "base_command": "e2fsck",
+        "category": "Storage",
+        "description": "Sprawdza ext2/3/4",
+        "examples": [
+          "e2fsck -f /dev/sda1"
+        ],
+        "source_line": 8990,
+        "source_page": 178,
+        "canonical_source": "runtime/knowledge/source/linux_master_library_v1.pdf",
+        "source_files": [
+          "LINUX COMMAND"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [],
+        "confidence": "high"
+      },
+      "status_history": [
+        {
+          "stage": "candidate_loader",
+          "status": "candidate",
+          "quality_flags": []
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8"
+          ]
+        }
+      ],
+      "triage_index": 3156
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "complete",
+      "projected_schema_record": {
+        "id": "sar",
+        "command": "sar",
+        "description": "Use for baseline establishment.",
+        "category": "process",
+        "tags": [
+          "process",
+          "sar",
+          "linux-command",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "low",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [
+          {
+            "input": "sar -u 1 10",
+            "expected_effect": "Use for baseline establishment."
+          },
+          {
+            "input": "sar -u -f /var/log/sa/sa01",
+            "expected_effect": "Use for baseline establishment."
+          },
+          {
+            "input": "sar",
+            "expected_effect": "Use for baseline establishment."
+          }
+        ],
+        "notes": "Candidate status: candidate; source_line: 11590",
+        "related_commands": [
+          "sar"
+        ]
+      },
+      "original_record": {
+        "command": "sar",
+        "command_key": "sar",
+        "base_command": "sar",
+        "category": "Processes",
+        "description": "Use for baseline establishment.",
+        "examples": [
+          "sar -u 1 10",
+          "sar -u -f /var/log/sa/sa01",
+          "sar"
+        ],
+        "source_line": 11590,
+        "source_page": 235,
+        "canonical_source": "runtime/knowledge/source/linux_master_library_v1.pdf",
+        "source_files": [
+          "LINUX COMMAND",
+          "komendy"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [],
+        "confidence": "high"
+      },
+      "status_history": [
+        {
+          "stage": "candidate_loader",
+          "status": "candidate",
+          "quality_flags": []
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8"
+          ]
+        }
+      ],
+      "triage_index": 3157
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "complete",
+      "projected_schema_record": {
+        "id": "sealert",
+        "command": "sealert",
+        "description": "Analiza alertów (SETroubleshoot)",
+        "category": "security",
+        "tags": [
+          "security",
+          "sealert",
+          "linux-command",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "low",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [
+          {
+            "input": "sealert -a /var/log/audit/audit.log",
+            "expected_effect": "Analiza alertów (SETroubleshoot)"
+          }
+        ],
+        "notes": "Candidate status: candidate; source_line: 14946",
+        "related_commands": [
+          "sealert"
+        ]
+      },
+      "original_record": {
+        "command": "sealert",
+        "command_key": "sealert",
+        "base_command": "sealert",
+        "category": "Logs",
+        "description": "Analiza alertów (SETroubleshoot)",
+        "examples": [
+          "sealert -a /var/log/audit/audit.log"
+        ],
+        "source_line": 14946,
+        "source_page": 309,
+        "canonical_source": "runtime/knowledge/source/linux_master_library_v1.pdf",
+        "source_files": [
+          "LINUX COMMAND"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [],
+        "confidence": "high"
+      },
+      "status_history": [
+        {
+          "stage": "candidate_loader",
+          "status": "candidate",
+          "quality_flags": []
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8"
+          ]
+        }
+      ],
+      "triage_index": 3158
+    },
+    {
+      "triage_status": "REVIEW",
+      "triage_reasons": [
+        "hat2_candidate_batch1_stage8",
+        "manual_source_check_required",
+        "no_local_source_match"
+      ],
+      "schema_valid": true,
+      "schema_errors": [],
+      "provenance_status": "partial",
+      "projected_schema_record": {
+        "id": "coredumpctl",
+        "command": "coredumpctl",
+        "description": "Systemd coredump inspection command family proposed for later source-backed review.",
+        "category": "system",
+        "tags": [
+          "system",
+          "coredumpctl",
+          "stage8-proposal-only",
+          "hat2-candidate-batch1-stage8"
+        ],
+        "risk": "medium",
+        "os": [
+          "linux",
+          "rhel"
+        ],
+        "shell": [
+          "bash"
+        ],
+        "examples": [],
+        "notes": "Stage 8 proposal-only record. No local candidate/canonical/rejected match found in dedup baseline; manual source and provenance check required before any promotion.",
+        "related_commands": [
+          "coredumpctl"
+        ]
+      },
+      "original_record": {
+        "command": "coredumpctl",
+        "command_key": "coredumpctl",
+        "base_command": "coredumpctl",
+        "category": "System Diagnostics",
+        "description": "Proposed new Hat 002 candidate family with no local source-backed record yet.",
+        "examples": [],
+        "source_line": null,
+        "source_page": null,
+        "canonical_source": "Desktop/AOIA-Canonical-Inventory-2026-06-05/AOIA_Hat002_Candidate_Batch_1_Final15_Dedup_Proposal_2026-06-05.md",
+        "source_files": [
+          "AOIA_Hat002_Candidate_Batch_1_Final15_Dedup_Proposal_2026-06-05.md"
+        ],
+        "status": "candidate",
+        "duplicate_type": "",
+        "duplicate_of": "",
+        "quality_flags": [
+          "manual_source_check_required"
+        ],
+        "confidence": "low"
+      },
+      "status_history": [
+        {
+          "stage": "hat2_candidate_batch1_dedup",
+          "status": "candidate_proposal_only",
+          "quality_flags": [
+            "manual_source_check_required"
+          ]
+        },
+        {
+          "stage": "hat2_candidate_batch1_stage8",
+          "status": "REVIEW",
+          "reasons": [
+            "hat2_candidate_batch1_stage8",
+            "manual_source_check_required",
+            "no_local_source_match"
+          ]
+        }
+      ],
+      "triage_index": 3159
     }
   ]
 }
