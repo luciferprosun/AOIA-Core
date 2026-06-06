@@ -12,7 +12,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0002",
@@ -27,7 +46,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0003",
@@ -42,7 +80,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0004",
@@ -57,7 +114,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0005",
@@ -72,7 +148,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0006",
@@ -87,7 +182,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0007",
@@ -102,7 +216,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0008",
@@ -117,7 +250,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0009",
@@ -132,7 +284,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0010",
@@ -147,7 +318,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0011",
@@ -162,7 +352,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0012",
@@ -177,7 +386,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0013",
@@ -192,7 +420,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0014",
@@ -207,7 +454,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0015",
@@ -222,7 +488,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0016",
@@ -237,7 +522,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0017",
@@ -252,7 +556,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0018",
@@ -267,7 +590,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0019",
@@ -282,7 +624,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0020",
@@ -297,7 +658,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0021",
@@ -312,7 +692,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0022",
@@ -327,7 +726,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0023",
@@ -342,7 +760,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0024",
@@ -357,7 +794,26 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "tool_id": "HAT003-TOOL-0025",
@@ -372,6 +828,25 @@
       "source:tool",
       "execution:no",
       "review:human-required"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "tooling_entry",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   }
 ]

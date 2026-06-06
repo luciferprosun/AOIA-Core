@@ -1,19 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "AOIA Hat 003 Normalized Entry Schema",
-  "description": "Draft schema for H3-AUDIT-1 normalization. This schema is static metadata only and does not permit execution.",
+  "description": "Draft schema for Hat 003 normalized entries after H3-SCHEMA-SOURCE-HARDEN-1. This schema records honesty metadata such as DRAFT, NOT_CANONICAL, UNVERIFIED, NEEDS_SOURCE_VERIFICATION, NEEDS_CARD_DEEPENING, execution_permitted=false, and human_review_required=true.",
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "id",
-    "hat_id",
-    "title",
+    "baseline_status",
+    "canonical",
+    "canonical_status",
     "category",
-    "summary",
-    "review_status",
     "execution_permitted",
+    "generation_method",
+    "hat_id",
     "human_review_required",
-    "provenance"
+    "id",
+    "provenance",
+    "review_status",
+    "source_verification_requirement",
+    "source_verification_status",
+    "status",
+    "summary",
+    "title"
   ],
   "properties": {
     "id": {
@@ -69,6 +76,85 @@
     },
     "provenance": {
       "type": "object"
+    },
+    "status": {
+      "const": "DRAFT"
+    },
+    "baseline_status": {
+      "const": "DRAFT_BASELINE"
+    },
+    "canonical": {
+      "const": false
+    },
+    "canonical_status": {
+      "const": "NOT_CANONICAL"
+    },
+    "source_verification_status": {
+      "enum": [
+        "UNVERIFIED",
+        "PARTIALLY_VERIFIED",
+        "VERIFIED"
+      ]
+    },
+    "source_verification_requirement": {
+      "enum": [
+        "NEEDS_SOURCE_VERIFICATION",
+        "SOURCE_VERIFIED"
+      ]
+    },
+    "source_authority_status": {
+      "enum": [
+        "PRIMARY",
+        "SECONDARY",
+        "COMMUNITY",
+        "TERTIARY",
+        "UNKNOWN",
+        "UNVERIFIED",
+        "MIXED_OR_UNVERIFIED"
+      ]
+    },
+    "card_deepening_status": {
+      "enum": [
+        "NEEDS_CARD_DEEPENING",
+        "CARD_DEEPENED"
+      ]
+    },
+    "generation_method": {
+      "enum": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "CURATED_SOURCE_INDEX_ENTRY",
+        "SOURCE_VERIFIED_NORMALIZED_ENTRY"
+      ]
+    },
+    "authority_tier": {
+      "enum": [
+        "PRIMARY",
+        "SECONDARY",
+        "COMMUNITY",
+        "TERTIARY",
+        "UNKNOWN"
+      ]
+    },
+    "license_status": {
+      "type": "string"
+    },
+    "verification_notes": {
+      "type": "string"
+    },
+    "last_verified_date": {
+      "type": "string"
+    },
+    "example_execution_policy": {
+      "type": "string"
+    },
+    "hat_separation_notes": {
+      "type": "string"
+    },
+    "false_positive_notes": {
+      "type": "string"
+    },
+    "false_negative_notes": {
+      "type": "string"
     }
   }
 }

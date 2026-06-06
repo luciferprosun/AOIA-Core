@@ -22,5 +22,23 @@
   "no_repo_files_modified": true,
   "no_commit": true,
   "no_push": true,
-  "network_used": false
+  "network_used": false,
+  "status": "DRAFT",
+  "baseline_status": "DRAFT_BASELINE",
+  "canonical": false,
+  "canonical_status": "NOT_CANONICAL",
+  "source_verification_status": "UNVERIFIED",
+  "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+  "execution_permitted": false,
+  "human_review_required": true,
+  "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+  "card_deepening_status": "NEEDS_CARD_DEEPENING",
+  "last_hardening_pass": "H3-SCHEMA-SOURCE-HARDEN-1",
+  "hardening_summary": {
+    "cards_without_primary_source": 80,
+    "generic_card_candidates": 125,
+    "generic_rules": 35,
+    "generic_corpus_cases": 55,
+    "schema_gaps_before_hardening": 11
+  }
 }

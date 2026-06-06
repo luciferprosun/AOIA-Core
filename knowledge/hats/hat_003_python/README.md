@@ -3,6 +3,12 @@
 Status: DRAFT_BASELINE
 Canonical: false
 Review status: DRAFT
+Source verification status: UNVERIFIED
+Source verification requirement: NEEDS_SOURCE_VERIFICATION
+Execution permitted: false
+Human review required: true
+Canonical status: NOT_CANONICAL
+Card deepening status: NEEDS_CARD_DEEPENING
 
 This is not canonical Python truth. This is a knowledge and static review pack.
 It does not execute code. It does not approve execution. It does not replace human judgment.

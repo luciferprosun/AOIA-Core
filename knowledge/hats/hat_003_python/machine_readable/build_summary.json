@@ -14,5 +14,9 @@
     "files": 38
   },
   "aoia_core_status": "## dev/gt-runtime-8-bash-safety-planning...origin/dev/gt-runtime-8-bash-safety-planning",
-  "aoia_core_diff_stat": "(empty)"
+  "aoia_core_diff_stat": "(empty)",
+  "status": "HISTORICAL_BUILD_SUMMARY",
+  "canonical": false,
+  "source_verification_status": "UNVERIFIED",
+  "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION"
 }

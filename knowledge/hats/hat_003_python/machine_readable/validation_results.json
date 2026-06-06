@@ -197,5 +197,10 @@
     "tooling_entries": 25,
     "curriculum_modules": 12,
     "files": 38
-  }
+  },
+  "status": "HISTORICAL_BUILD_VALIDATION",
+  "canonical": false,
+  "source_verification_status": "UNVERIFIED",
+  "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+  "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE"
 }

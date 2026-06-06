@@ -14,7 +14,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-EXEC-0002",
@@ -31,7 +50,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-PICKLE-0003",
@@ -48,7 +86,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-YAML-0004",
@@ -65,7 +122,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-SUBPROCESS-0005",
@@ -82,7 +158,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-PATH-0006",
@@ -99,7 +194,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-TEMP-0007",
@@ -116,7 +230,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-SECRET-0008",
@@ -133,7 +266,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "SECURITY_SENSITIVE",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-DEPS-0009",
@@ -150,7 +302,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-SAFE-DEBUG-0010",
@@ -167,7 +338,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-11-0011",
@@ -184,7 +374,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-12-0012",
@@ -201,7 +410,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-13-0013",
@@ -218,7 +446,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-14-0014",
@@ -235,7 +482,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-15-0015",
@@ -252,7 +518,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-16-0016",
@@ -269,7 +554,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-17-0017",
@@ -286,7 +590,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-18-0018",
@@ -303,7 +626,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-19-0019",
@@ -320,7 +662,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-20-0020",
@@ -337,7 +698,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-21-0021",
@@ -354,7 +734,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-22-0022",
@@ -371,7 +770,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-23-0023",
@@ -388,7 +806,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-24-0024",
@@ -405,7 +842,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-25-0025",
@@ -422,7 +878,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-26-0026",
@@ -439,7 +914,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-27-0027",
@@ -456,7 +950,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-28-0028",
@@ -473,7 +986,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-29-0029",
@@ -490,7 +1022,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-30-0030",
@@ -507,7 +1058,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-31-0031",
@@ -524,7 +1094,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-32-0032",
@@ -541,7 +1130,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-33-0033",
@@ -558,7 +1166,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-34-0034",
@@ -575,7 +1202,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-35-0035",
@@ -592,7 +1238,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-36-0036",
@@ -609,7 +1274,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-37-0037",
@@ -626,7 +1310,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-38-0038",
@@ -643,7 +1346,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-39-0039",
@@ -660,7 +1382,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-40-0040",
@@ -677,7 +1418,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-41-0041",
@@ -694,7 +1454,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-42-0042",
@@ -711,7 +1490,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-43-0043",
@@ -728,7 +1526,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-44-0044",
@@ -745,7 +1562,26 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   },
   {
     "rule_id": "HAT003-GENERAL-45-0045",
@@ -762,6 +1598,25 @@
     ],
     "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
     "risk_label": "REVIEW_REQUIRED",
-    "do_not_execute": true
+    "do_not_execute": true,
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "validation_rule",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft validation rule. Needs source verification and rule-specific deepening."
+    }
   }
 ]

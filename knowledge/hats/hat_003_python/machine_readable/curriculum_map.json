@@ -34,7 +34,26 @@
       "execution:no",
       "review:human-required",
       "level:beginner"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-02",
@@ -71,7 +90,26 @@
       "execution:no",
       "review:human-required",
       "level:beginner"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-03",
@@ -108,7 +146,26 @@
       "execution:no",
       "review:human-required",
       "level:beginner"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-04",
@@ -145,7 +202,26 @@
       "execution:no",
       "review:human-required",
       "level:intermediate"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-05",
@@ -182,7 +258,26 @@
       "execution:no",
       "review:human-required",
       "level:intermediate"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-06",
@@ -219,7 +314,26 @@
       "execution:no",
       "review:human-required",
       "level:intermediate"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-07",
@@ -256,7 +370,26 @@
       "execution:no",
       "review:human-required",
       "level:intermediate"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-08",
@@ -293,7 +426,26 @@
       "execution:no",
       "review:human-required",
       "level:advanced"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-09",
@@ -330,7 +482,26 @@
       "execution:no",
       "review:human-required",
       "level:advanced"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-10",
@@ -367,7 +538,26 @@
       "execution:no",
       "review:human-required",
       "level:professional"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-11",
@@ -404,7 +594,26 @@
       "execution:no",
       "review:human-required",
       "level:professional"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "module_id": "HAT003-MODULE-12",
@@ -441,6 +650,25 @@
       "execution:no",
       "review:human-required",
       "level:professional"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "curriculum_module",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   }
 ]

@@ -3,6 +3,12 @@
 Status: DRAFT_BASELINE
 Canonical: false
 Review status: DRAFT
+Source verification status: UNVERIFIED
+Source verification requirement: NEEDS_SOURCE_VERIFICATION
+Execution permitted: false
+Human review required: true
+Canonical status: NOT_CANONICAL
+Latest metadata hardening pass: H3-SCHEMA-SOURCE-HARDEN-1
 
 This is not canonical Python truth. This is a knowledge and static review pack.
 It does not execute code. It does not approve execution. It does not replace human judgment.
@@ -17,6 +23,8 @@ AOIA Hat 003 consumes reviewed knowledge; it does not browse autonomously.
 - Main ZIP intake completed in `/home/l/Desktop/AOIA_HAT_003_ZIP_INTAKE_2026-06-06`.
 - Kimi, Sonnet, and DeepSeek audits were architecture/workflow-level and convergence-level, not full artifact-level canonical approval.
 - Current contents are not canonical.
+- Current contents remain UNVERIFIED and NEEDS_SOURCE_VERIFICATION.
+- Current generated cards, rules, and corpus cases remain NEEDS_CARD_DEEPENING.
 - Runtime use remains prohibited for all entries.
 - No Python snippets were executed.
 - No repo runtime files were modified.

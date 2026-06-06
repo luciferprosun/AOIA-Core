@@ -21,7 +21,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.repository_pattern"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0002",
@@ -45,7 +64,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.unit_of_work"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0003",
@@ -69,7 +107,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.service_layer"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0004",
@@ -93,7 +150,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.ports_and_adapters"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0005",
@@ -117,7 +193,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.hexagonal_architecture"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0006",
@@ -141,7 +236,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.dependency_inversion"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0007",
@@ -165,7 +279,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.composition_root"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0008",
@@ -189,7 +322,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.domain_model"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0009",
@@ -213,7 +365,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.application_service"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0010",
@@ -237,7 +408,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.adapter_boundary"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0011",
@@ -261,7 +451,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.dto_mapping"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0012",
@@ -285,7 +494,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.command_handler"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0013",
@@ -309,7 +537,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.query_handler"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0014",
@@ -333,7 +580,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.event_dispatcher"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0015",
@@ -357,7 +623,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.domain_event"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0016",
@@ -381,7 +666,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.transaction_script"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0017",
@@ -405,7 +709,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.anti_corruption_layer"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0018",
@@ -429,7 +752,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.facade"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0019",
@@ -453,7 +795,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.strategy"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0020",
@@ -477,7 +838,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.factory"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0021",
@@ -501,7 +881,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.builder"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0022",
@@ -525,7 +924,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.observer"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0023",
@@ -549,7 +967,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.pipeline"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0024",
@@ -573,7 +1010,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.plugin_registry"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0025",
@@ -597,7 +1053,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.configuration_object"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0026",
@@ -621,7 +1096,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.functional_core_imperative_shell"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0027",
@@ -645,7 +1139,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.layered_architecture"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0028",
@@ -669,7 +1182,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.modular_monolith"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0029",
@@ -693,7 +1225,26 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.async_worker_boundary"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   },
   {
     "pattern_id": "HAT003-ARCH-0030",
@@ -717,6 +1268,25 @@
       "execution:no",
       "level:professional",
       "mV:-70.003.architecture.test_double_boundary"
-    ]
+    ],
+    "status": "DRAFT",
+    "baseline_status": "DRAFT_BASELINE",
+    "canonical": false,
+    "canonical_status": "NOT_CANONICAL",
+    "source_verification_status": "UNVERIFIED",
+    "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+    "execution_permitted": false,
+    "human_review_required": true,
+    "review_status": "DRAFT",
+    "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "card_deepening_status": "NEEDS_CARD_DEEPENING",
+    "source_authority_status": "UNVERIFIED",
+    "provenance": {
+      "origin": "AOIA Hat 003 imported draft baseline",
+      "record_type": "architecture_pattern",
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "direct_source_verified": false,
+      "notes": "Generated draft metadata. Needs source verification and deepening before canonical use."
+    }
   }
 ]

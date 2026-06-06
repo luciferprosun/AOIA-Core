@@ -3,6 +3,12 @@
 Status: DRAFT_BASELINE
 Canonical: false
 Review status: DRAFT
+Source verification status: UNVERIFIED
+Source verification requirement: NEEDS_SOURCE_VERIFICATION
+Execution permitted: false
+Human review required: true
+Canonical status: NOT_CANONICAL
+Generation method: GENERATED_DRAFT_NO_DIRECT_SOURCE where applicable
 
 This is not canonical Python truth. This is a knowledge and static review pack.
 It does not execute code. It does not approve execution. It does not replace human judgment.
@@ -16,12 +22,12 @@ AOIA Hat 003 consumes reviewed knowledge; it does not browse autonomously.
 - Artifact: AOIA Hat 003 Python Engineering Knowledge Pack
 - Status: DRAFT_BASELINE
 - Canonical: false
-- Generation method: AI-assisted draft
-- Review status: draft, pending H3-AUDIT-1
-- Source status: broad source atlas, not fully source-verified per card
+- Generation method: AI-assisted draft with hardened metadata status markers
+- Review status: DRAFT, pending H3-AUDIT-2 source verification and H3-DEEPEN-1
+- Source status: broad source atlas, unverified per card
 - Intended use: static knowledge, curriculum seed, schema seed, future RAG after review
 - Prohibited use: execution approval, autonomous coding, production safety claims
-- Next phase: H3-AUDIT-1 source verification and card deepening
+- Next phase: H3-AUDIT-2 source verification and H3-DEEPEN-1 card deepening
 
 ## Imported Source
 
@@ -45,5 +51,5 @@ Reason:
 
 Recommended future use:
 
-- H3-AUDIT-1 may extract topic coverage, curriculum gaps, and source candidates after manual review.
+- H3-AUDIT-2 may extract topic coverage, curriculum gaps, and source candidates after manual review.
 - Supplemental material must not be treated as primary source or canonical Python authority.
