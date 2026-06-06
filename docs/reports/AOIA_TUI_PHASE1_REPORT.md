@@ -107,7 +107,6 @@ Supported input examples:
 - `gemini`
 - `openrouter`
 - `deepseek`
-- `aureon`
 - `/model gemini`
 
 No provider adapter logic was rewritten.
@@ -171,7 +170,7 @@ Operator controls:
 
 - `Ctrl+R`: refresh status
 - `q`: quit
-- provider input box: enter `gemini`, `openrouter`, `deepseek`, `aureon`, or `/model NAME`
+- provider input box: enter `gemini`, `openrouter`, `deepseek`, or `/model NAME`
 
 ## 9. Remaining Blockers
 

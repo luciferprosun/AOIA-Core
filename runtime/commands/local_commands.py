@@ -97,7 +97,6 @@ def cmd_model(args: str, runtime) -> CommandResult:
         lines.extend(
             [
                 "Examples:",
-                "  /model aureon",
                 "  /model gemma",
                 "  /model openrouter-gemma",
                 "  /model openrouter/google/gemma-3-27b-it",
@@ -401,7 +400,7 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
 
 def cmd_scemda(args: str, runtime) -> CommandResult:
     addon_dir = runtime.project_dir / "addons" / "scemda"
-    script_path = addon_dir / "scemda_aureon_agent_v2.py"
+    script_path = addon_dir / "scemda_agent_v2.py"
     extracted = ensure_scemda_addon(addon_dir)
 
     if not script_path.exists():
@@ -492,7 +491,7 @@ def ensure_scemda_addon(addon_dir: Path) -> list[str]:
     extracted: list[str] = []
     wanted = {
         "README_SCEMDA_v2.md",
-        "scemda_aureon_agent_v2.py",
+        "scemda_agent_v2.py",
         "scemda_comprehensive_validation.py",
         "scemda_full_validation.py",
         "scemda_open_data_fetcher.py",

@@ -25,7 +25,6 @@ from tools.memory import MemoryStore
 from tools.system_info import detect_desktop_dir
 from tools.validator import classify_shell_command, validate_shell_command
 from providers.config import DEFAULT_MODEL, ProviderManager
-from providers.aureon_provider import AureonProvider
 from commands.local_commands import cmd_scemda
 from tools.project_scanner import scan_project
 
@@ -331,7 +330,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             self.assertTrue(runtime.memory_store.vault_dir.exists())
             self.assertTrue((runtime.memory_store.vault_dir / "00_START_HERE.md").exists())
 
-    def test_provider_manager_defaults_to_aureon(self) -> None:
+    def test_provider_manager_defaults_to_default_model(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
             project_dir.mkdir()
@@ -347,7 +346,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             self.assertFalse(manager.config_path.exists())
             self.assertFalse(manager.providers_path.exists())
 
-            manager.switch_model("aureon")
+            manager.switch_model("gemini")
 
             self.assertTrue(manager.config_path.exists())
             self.assertFalse(manager.providers_path.exists())
@@ -360,7 +359,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
 
             with patch.dict(os.environ, {"AOIA_HOME": str(aoia_home)}):
                 manager = ProviderManager(project_dir)
-                manager.switch_model("aureon")
+                manager.switch_model("gemini")
 
             self.assertTrue(str(manager.config_path).startswith(str(aoia_home)))
             self.assertTrue(str(manager.providers_path).startswith(str(aoia_home)))
@@ -372,7 +371,6 @@ class RuntimeArchitectureTests(unittest.TestCase):
             project_dir = Path(tmp) / "project"
             project_dir.mkdir()
             manager = ProviderManager(project_dir)
-            self.assertEqual(manager.normalize_model_name("aureon"), "aureon/aureon-queen")
             self.assertEqual(manager.normalize_model_name("gemini"), "gemini/gemini-2.5-flash")
             self.assertEqual(manager.normalize_model_name("grok"), "xai/grok-4.3")
             self.assertEqual(manager.normalize_model_name("xai"), "xai/grok-4.3")
@@ -391,23 +389,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             result = main.build_command_registry().execute("/model list", runtime)
             self.assertTrue(result.handled)
             self.assertIn("Current model:", result.message)
-            self.assertIn("aureon", result.message)
             self.assertIn("gemini", result.message)
-
-    def test_model_command_switches_alias_to_full_name(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            project_dir = Path(tmp) / "project"
-            project_dir.mkdir()
-            manager = ProviderManager(project_dir)
-            runtime = SimpleNamespace(provider_manager=manager)
-            result = main.build_command_registry().execute("/model aureon", runtime)
-            self.assertTrue(result.handled)
-            self.assertIn("Model switched to: aureon/aureon-queen", result.message)
-            self.assertEqual(manager.current_model, "aureon/aureon-queen")
-            self.assertEqual(
-                json.loads(manager.config_path.read_text(encoding="utf-8"))["model"],
-                "aureon/aureon-queen",
-            )
 
     def test_model_command_switches_gemini_without_instantiating_provider(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -434,16 +416,6 @@ class RuntimeArchitectureTests(unittest.TestCase):
             self.assertIn("XAI_API_KEY", result.message)
             self.assertEqual(manager.current_model, "xai/grok-4.3")
             self.assertEqual(manager.describe(), "xai/grok-4.3")
-
-    def test_aureon_offline_provider_answers_greeting_normally(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            _ = tmp
-            with patch.dict(os.environ, {}, clear=True):
-                provider = AureonProvider("aureon-queen")
-                reply = provider.generate('{"user_request":"hello are you ai ?"}')
-            payload = json.loads(reply)
-            self.assertEqual(payload["action"], "respond")
-            self.assertIn("lokalnym Aureon", payload["message"])
 
     @unittest.skipUnless(PLAYWRIGHT_AVAILABLE, "Playwright is not installed")
     def test_browser_open_search_screenshot_visible_text_and_navigation(self) -> None:

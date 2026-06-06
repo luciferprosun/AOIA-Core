@@ -5,7 +5,6 @@ import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from .aureon_provider import AureonProvider
 from .base import ModelProvider
 from .gemini_provider import GeminiProvider
 from .openai_compatible import OpenAICompatibleProvider
@@ -28,7 +27,6 @@ DEFAULT_MODEL_PRESETS: dict[str, str] = {
     "grok": "xai/grok-4.3",
     "xai": "xai/grok-4.3",
     "deepseek": "deepseek/deepseek-chat",
-    "aureon": "aureon/aureon-queen",
 }
 
 API_FILE_CANDIDATES = [
@@ -171,8 +169,6 @@ class ProviderManager:
             return "DeepSeek uses DEEPSEEK_API_KEY and an OpenAI-compatible endpoint."
         if provider == "xai":
             return "Grok uses XAI_API_KEY and the OpenAI-compatible xAI endpoint."
-        if provider == "aureon":
-            return "Aureon requires a live AUREON_API_BASE_URL. No offline fake mode is used."
         if provider in REMOVED_PROVIDERS:
             return "This provider was removed from the terminal app because it is not configured."
         return None
@@ -222,7 +218,7 @@ class ProviderManager:
         for item in payload.get("providers", []):
             if not isinstance(item, dict):
                 continue
-            name = str(item.get("name", "")).strip()
+            name = str(item.get("name", "")).strip().lower()
             model = str(item.get("model", "")).strip()
             if name in REMOVED_PROVIDERS:
                 continue
@@ -253,7 +249,7 @@ class ProviderManager:
         except json.JSONDecodeError:
             return DEFAULT_MODEL
         model = str(payload.get("model") or DEFAULT_MODEL)
-        provider = model.split("/", 1)[0]
+        provider = model.split("/", 1)[0].lower()
         if provider in REMOVED_PROVIDERS:
             return DEFAULT_MODEL
         return model
@@ -261,8 +257,6 @@ class ProviderManager:
     def _build_provider(self, model_name: str) -> ModelProvider:
         provider, model = model_name.split("/", 1)
 
-        if provider == "aureon":
-            return AureonProvider(model)
         if provider == "gemini":
             api_key = os.getenv("GEMINI_API_KEY")
             if not api_key:
@@ -310,8 +304,6 @@ class ProviderManager:
 
     @staticmethod
     def _provider_is_available(provider: str) -> bool:
-        if provider == "aureon":
-            return bool(os.getenv("AUREON_API_BASE_URL", "").strip())
         if provider == "gemini":
             return bool(os.getenv("GEMINI_API_KEY", "").strip())
         if provider == "openrouter":

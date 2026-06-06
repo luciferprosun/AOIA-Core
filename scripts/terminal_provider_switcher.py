@@ -40,11 +40,9 @@ KEY_NAMES = (
     "TOGETHER_API_KEY",
     "HUGGINGFACE_API_KEY",
     "XAI_API_KEY",
-    "AUREON_API_BASE_URL",
 )
 
 PROVIDER_KEYS = {
-    "aureon": ("AUREON_API_BASE_URL",),
     "deepseek": ("DEEPSEEK_API_KEY",),
     "gemini": ("GEMINI_API_KEY", "GOOGLE_API_KEY"),
     "openrouter": ("OPENROUTER_API_KEY",),
