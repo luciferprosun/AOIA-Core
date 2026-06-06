@@ -1,0 +1,1290 @@
+[
+  {
+    "source_id": "SRC-PY-OFFICIAL-001",
+    "name": "Official Python Documentation",
+    "category": "official",
+    "subcategory": "documentation",
+    "url_or_reference": "https://docs.python.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "canonical Python behavior and docs",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-002",
+    "name": "Python Language Reference",
+    "category": "official",
+    "subcategory": "language_reference",
+    "url_or_reference": "https://docs.python.org/3/reference/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "syntax and data model",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-003",
+    "name": "Python Library Reference",
+    "category": "official",
+    "subcategory": "library_reference",
+    "url_or_reference": "https://docs.python.org/3/library/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "standard library behavior",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-004",
+    "name": "Python HOWTOs",
+    "category": "official",
+    "subcategory": "howto",
+    "url_or_reference": "https://docs.python.org/3/howto/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "practical official guidance",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-005",
+    "name": "Python Tutorial",
+    "category": "official",
+    "subcategory": "tutorial",
+    "url_or_reference": "https://docs.python.org/3/tutorial/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "beginner learning sequence",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-006",
+    "name": "CPython Developer Guide",
+    "category": "official",
+    "subcategory": "cpython_architecture",
+    "url_or_reference": "https://devguide.python.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "CPython internals and contribution workflow",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-007",
+    "name": "CPython Source Repository",
+    "category": "official",
+    "subcategory": "cpython_source",
+    "url_or_reference": "https://github.com/python/cpython",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "implementation architecture reference",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-008",
+    "name": "Python Packaging User Guide",
+    "category": "official",
+    "subcategory": "packaging",
+    "url_or_reference": "https://packaging.python.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "packaging and distribution guidance",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-009",
+    "name": "PyPI",
+    "category": "official",
+    "subcategory": "package_index",
+    "url_or_reference": "https://pypi.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "package index metadata and release lookup",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-010",
+    "name": "PEP 8",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0008/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "style guide",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-011",
+    "name": "PEP 20",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0020/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "Zen of Python",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-012",
+    "name": "PEP 257",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0257/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "docstring conventions",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-013",
+    "name": "PEP 484",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0484/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "type hints",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-014",
+    "name": "PEP 517",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0517/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "build backend interface",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-015",
+    "name": "PEP 518",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0518/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "pyproject build requirements",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-016",
+    "name": "PEP 621",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0621/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "project metadata",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-017",
+    "name": "PEP 634",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0634/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "structural pattern matching",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-OFFICIAL-018",
+    "name": "PEP 695",
+    "category": "official",
+    "subcategory": "pep",
+    "url_or_reference": "https://peps.python.org/pep-0695/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "type parameter syntax",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-019",
+    "name": "vinta awesome-python",
+    "category": "community",
+    "subcategory": "github_index",
+    "url_or_reference": "https://github.com/vinta/awesome-python",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "library discovery",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-020",
+    "name": "Awesome Python Books",
+    "category": "community",
+    "subcategory": "book_index",
+    "url_or_reference": "https://github.com/Junnplus/awesome-python-books",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "book discovery",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-021",
+    "name": "TheAlgorithms Python",
+    "category": "community",
+    "subcategory": "github_examples",
+    "url_or_reference": "https://github.com/TheAlgorithms/Python",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "algorithm examples for review",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-022",
+    "name": "Project Based Learning Python",
+    "category": "community",
+    "subcategory": "curriculum",
+    "url_or_reference": "https://github.com/practical-tutorials/project-based-learning",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "project learning references",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-023",
+    "name": "Python Patterns",
+    "category": "community",
+    "subcategory": "patterns",
+    "url_or_reference": "https://github.com/faif/python-patterns",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "pattern examples",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-024",
+    "name": "best-of-python",
+    "category": "community",
+    "subcategory": "github_index",
+    "url_or_reference": "https://github.com/ml-tooling/best-of-python",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "tooling discovery",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-025",
+    "name": "best-of-ml-python",
+    "category": "community",
+    "subcategory": "github_index",
+    "url_or_reference": "https://github.com/ml-tooling/best-of-ml-python",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "ML tooling discovery",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-BOOK-026",
+    "name": "Architecture Patterns with Python",
+    "category": "book",
+    "subcategory": "architecture",
+    "url_or_reference": "https://www.cosmicpython.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "service layer and unit of work",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-BOOK-027",
+    "name": "Clean Architectures in Python",
+    "category": "book",
+    "subcategory": "architecture",
+    "url_or_reference": "https://www.thedigitalcatbooks.com/pycabook-introduction/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "clean architecture examples",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-028",
+    "name": "Full Stack Python",
+    "category": "community",
+    "subcategory": "web_architecture",
+    "url_or_reference": "https://www.fullstackpython.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "web ecosystem map",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-COMMUNITY-029",
+    "name": "TestDriven.io Python Material",
+    "category": "community",
+    "subcategory": "testing_web",
+    "url_or_reference": "https://testdriven.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "testing and web engineering articles",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-ARCHITECTURE-030",
+    "name": "Domain-Driven Design in Python",
+    "category": "architecture",
+    "subcategory": "ddd",
+    "url_or_reference": "local concept reference",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "DDD vocabulary for Python review",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-ARCHITECTURE-031",
+    "name": "Repository Pattern",
+    "category": "architecture",
+    "subcategory": "pattern",
+    "url_or_reference": "local concept reference",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "persistence boundary pattern",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-ARCHITECTURE-032",
+    "name": "Unit of Work Pattern",
+    "category": "architecture",
+    "subcategory": "pattern",
+    "url_or_reference": "local concept reference",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "transaction boundary pattern",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-ARCHITECTURE-033",
+    "name": "Service Layer Pattern",
+    "category": "architecture",
+    "subcategory": "pattern",
+    "url_or_reference": "local concept reference",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "application workflow boundary",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-ARCHITECTURE-034",
+    "name": "Ports and Adapters",
+    "category": "architecture",
+    "subcategory": "pattern",
+    "url_or_reference": "local concept reference",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "dependency inversion boundary",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-ARCHITECTURE-035",
+    "name": "Hexagonal Architecture",
+    "category": "architecture",
+    "subcategory": "pattern",
+    "url_or_reference": "local concept reference",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "external adapter isolation",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-036",
+    "name": "Automate the Boring Stuff with Python",
+    "category": "learning",
+    "subcategory": "book",
+    "url_or_reference": "https://automatetheboringstuff.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "practical beginner automation",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-037",
+    "name": "Think Python 2nd Edition",
+    "category": "learning",
+    "subcategory": "book",
+    "url_or_reference": "https://greenteapress.com/wp/think-python-2e/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "introductory computer science",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-038",
+    "name": "Dive Into Python 3",
+    "category": "learning",
+    "subcategory": "book",
+    "url_or_reference": "https://diveintopython3.net/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "intermediate language learning",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-039",
+    "name": "Fluent Python",
+    "category": "learning",
+    "subcategory": "book",
+    "url_or_reference": "https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "advanced Python idioms",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-040",
+    "name": "Real Python",
+    "category": "learning",
+    "subcategory": "tutorials",
+    "url_or_reference": "https://realpython.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "practical tutorials",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-041",
+    "name": "Google Python Class",
+    "category": "learning",
+    "subcategory": "course",
+    "url_or_reference": "https://developers.google.com/edu/python",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "beginner course",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-042",
+    "name": "Python Module of the Week",
+    "category": "learning",
+    "subcategory": "stdlib",
+    "url_or_reference": "https://pymotw.com/3/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "standard library examples",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-043",
+    "name": "ArjanCodes",
+    "category": "learning",
+    "subcategory": "video",
+    "url_or_reference": "https://www.youtube.com/@ArjanCodes",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "design and maintainability discussions",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-044",
+    "name": "mCoding",
+    "category": "learning",
+    "subcategory": "video",
+    "url_or_reference": "https://www.youtube.com/@mCoding",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "Python internals and idioms",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-045",
+    "name": "Corey Schafer",
+    "category": "learning",
+    "subcategory": "video",
+    "url_or_reference": "https://www.youtube.com/@coreyms",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "beginner and intermediate tutorials",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-046",
+    "name": "Talk Python Podcast",
+    "category": "learning",
+    "subcategory": "podcast",
+    "url_or_reference": "https://talkpython.fm/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "ecosystem interviews",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-LEARNING-047",
+    "name": "Python Bytes",
+    "category": "learning",
+    "subcategory": "podcast",
+    "url_or_reference": "https://pythonbytes.fm/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "secondary",
+    "recommended_use": "news and package discovery",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-048",
+    "name": "FastAPI",
+    "category": "web_api",
+    "subcategory": "framework",
+    "url_or_reference": "https://fastapi.tiangolo.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "ASGI API framework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-049",
+    "name": "Django",
+    "category": "web_api",
+    "subcategory": "framework",
+    "url_or_reference": "https://www.djangoproject.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "full-stack web framework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-050",
+    "name": "Flask",
+    "category": "web_api",
+    "subcategory": "framework",
+    "url_or_reference": "https://flask.palletsprojects.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "WSGI microframework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-051",
+    "name": "Starlette",
+    "category": "web_api",
+    "subcategory": "framework",
+    "url_or_reference": "https://www.starlette.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "ASGI toolkit",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-052",
+    "name": "Requests",
+    "category": "web_api",
+    "subcategory": "http_client",
+    "url_or_reference": "https://requests.readthedocs.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "synchronous HTTP client",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-053",
+    "name": "HTTPX",
+    "category": "web_api",
+    "subcategory": "http_client",
+    "url_or_reference": "https://www.python-httpx.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "sync and async HTTP client",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-054",
+    "name": "aiohttp",
+    "category": "web_api",
+    "subcategory": "http_client",
+    "url_or_reference": "https://docs.aiohttp.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "async HTTP client/server",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-055",
+    "name": "Scrapy",
+    "category": "web_api",
+    "subcategory": "scraping",
+    "url_or_reference": "https://scrapy.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "crawler framework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-WEB_API-056",
+    "name": "BeautifulSoup",
+    "category": "web_api",
+    "subcategory": "parsing",
+    "url_or_reference": "https://www.crummy.com/software/BeautifulSoup/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "HTML parsing",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-CLI-057",
+    "name": "Typer",
+    "category": "cli",
+    "subcategory": "framework",
+    "url_or_reference": "https://typer.tiangolo.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "typed CLI framework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-CLI-058",
+    "name": "Click",
+    "category": "cli",
+    "subcategory": "framework",
+    "url_or_reference": "https://click.palletsprojects.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "CLI framework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-CLI-059",
+    "name": "Rich",
+    "category": "cli",
+    "subcategory": "terminal_ui",
+    "url_or_reference": "https://rich.readthedocs.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "terminal formatting",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-060",
+    "name": "NumPy",
+    "category": "data_ml",
+    "subcategory": "array",
+    "url_or_reference": "https://numpy.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "array computing",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-061",
+    "name": "Pandas",
+    "category": "data_ml",
+    "subcategory": "dataframe",
+    "url_or_reference": "https://pandas.pydata.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "dataframe analysis",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-062",
+    "name": "Polars",
+    "category": "data_ml",
+    "subcategory": "dataframe",
+    "url_or_reference": "https://pola.rs/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "dataframe engine",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-063",
+    "name": "Matplotlib",
+    "category": "data_ml",
+    "subcategory": "visualization",
+    "url_or_reference": "https://matplotlib.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "plotting",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-064",
+    "name": "SciPy",
+    "category": "data_ml",
+    "subcategory": "scientific",
+    "url_or_reference": "https://scipy.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "scientific computing",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-065",
+    "name": "scikit-learn",
+    "category": "data_ml",
+    "subcategory": "machine_learning",
+    "url_or_reference": "https://scikit-learn.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "classical ML",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-066",
+    "name": "PyTorch",
+    "category": "data_ml",
+    "subcategory": "deep_learning",
+    "url_or_reference": "https://pytorch.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "deep learning",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-067",
+    "name": "TensorFlow",
+    "category": "data_ml",
+    "subcategory": "deep_learning",
+    "url_or_reference": "https://www.tensorflow.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "deep learning",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-068",
+    "name": "Hugging Face Transformers",
+    "category": "data_ml",
+    "subcategory": "nlp_ai",
+    "url_or_reference": "https://huggingface.co/docs/transformers/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "model tooling",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-069",
+    "name": "LangChain",
+    "category": "data_ml",
+    "subcategory": "llm_apps",
+    "url_or_reference": "https://python.langchain.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "LLM application framework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-070",
+    "name": "Jupyter",
+    "category": "data_ml",
+    "subcategory": "notebooks",
+    "url_or_reference": "https://jupyter.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "notebook workflows",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-DATA_ML-071",
+    "name": "Google Colab",
+    "category": "data_ml",
+    "subcategory": "notebooks",
+    "url_or_reference": "https://colab.research.google.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "hosted notebook workflows",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-072",
+    "name": "pytest",
+    "category": "quality",
+    "subcategory": "testing",
+    "url_or_reference": "https://docs.pytest.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "test framework",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-073",
+    "name": "unittest",
+    "category": "quality",
+    "subcategory": "testing",
+    "url_or_reference": "https://docs.python.org/3/library/unittest.html",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "standard library testing",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-074",
+    "name": "Hypothesis",
+    "category": "quality",
+    "subcategory": "property_testing",
+    "url_or_reference": "https://hypothesis.readthedocs.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "property-based testing",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-075",
+    "name": "tox",
+    "category": "quality",
+    "subcategory": "env_testing",
+    "url_or_reference": "https://tox.wiki/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "test environment automation",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-076",
+    "name": "nox",
+    "category": "quality",
+    "subcategory": "env_testing",
+    "url_or_reference": "https://nox.thea.codes/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "session automation",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-077",
+    "name": "coverage.py",
+    "category": "quality",
+    "subcategory": "coverage",
+    "url_or_reference": "https://coverage.readthedocs.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "coverage measurement",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-078",
+    "name": "Ruff",
+    "category": "quality",
+    "subcategory": "linting",
+    "url_or_reference": "https://docs.astral.sh/ruff/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "linting and formatting",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-079",
+    "name": "Black",
+    "category": "quality",
+    "subcategory": "formatting",
+    "url_or_reference": "https://black.readthedocs.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "formatter",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-080",
+    "name": "isort",
+    "category": "quality",
+    "subcategory": "imports",
+    "url_or_reference": "https://pycqa.github.io/isort/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "import sorting",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-081",
+    "name": "mypy",
+    "category": "quality",
+    "subcategory": "typing",
+    "url_or_reference": "https://mypy.readthedocs.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "static type checking",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-082",
+    "name": "Pyright",
+    "category": "quality",
+    "subcategory": "typing",
+    "url_or_reference": "https://microsoft.github.io/pyright/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "static type checking",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-083",
+    "name": "uv",
+    "category": "packaging",
+    "subcategory": "tooling",
+    "url_or_reference": "https://docs.astral.sh/uv/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "package and environment tool",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-084",
+    "name": "pip",
+    "category": "packaging",
+    "subcategory": "tooling",
+    "url_or_reference": "https://pip.pypa.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "package installer",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-085",
+    "name": "pipx",
+    "category": "packaging",
+    "subcategory": "tooling",
+    "url_or_reference": "https://pipx.pypa.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "isolated app installer",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-086",
+    "name": "Poetry",
+    "category": "packaging",
+    "subcategory": "tooling",
+    "url_or_reference": "https://python-poetry.org/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "dependency and packaging tool",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-087",
+    "name": "Hatch",
+    "category": "packaging",
+    "subcategory": "tooling",
+    "url_or_reference": "https://hatch.pypa.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "project manager",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-088",
+    "name": "setuptools",
+    "category": "packaging",
+    "subcategory": "build_backend",
+    "url_or_reference": "https://setuptools.pypa.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "build backend",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-089",
+    "name": "wheel",
+    "category": "packaging",
+    "subcategory": "distribution",
+    "url_or_reference": "https://wheel.readthedocs.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "wheel format",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-090",
+    "name": "venv",
+    "category": "packaging",
+    "subcategory": "environment",
+    "url_or_reference": "https://docs.python.org/3/library/venv.html",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "primary",
+    "recommended_use": "virtual environments",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-PACKAGING-091",
+    "name": "conda",
+    "category": "packaging",
+    "subcategory": "environment",
+    "url_or_reference": "https://docs.conda.io/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "environment management",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  },
+  {
+    "source_id": "SRC-PY-QUALITY-092",
+    "name": "pre-commit",
+    "category": "quality",
+    "subcategory": "automation",
+    "url_or_reference": "https://pre-commit.com/",
+    "license_or_access_note": "public documentation or public reference; verify license before copying content",
+    "trust_level": "curated_secondary",
+    "recommended_use": "local quality hooks",
+    "hat_relevance": [
+      "Hat003"
+    ],
+    "risk_notes": "Use for static knowledge mapping only. Track version differences and do not copy proprietary text."
+  }
+]

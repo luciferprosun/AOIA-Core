@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AOIA Hat 003 Normalized Entry Schema",
+  "description": "Draft schema for H3-AUDIT-1 normalization. This schema is static metadata only and does not permit execution.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "id",
+    "hat_id",
+    "title",
+    "category",
+    "summary",
+    "review_status",
+    "execution_permitted",
+    "human_review_required",
+    "provenance"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "hat_id": {
+      "const": "003"
+    },
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "review_status": {
+      "enum": [
+        "DRAFT",
+        "PENDING_REVIEW",
+        "APPROVED",
+        "REJECTED",
+        "DEPRECATED"
+      ]
+    },
+    "risk_label": {
+      "type": "string"
+    },
+    "python_version_range": {
+      "type": "string"
+    },
+    "aoia_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "execution_permitted": {
+      "const": false
+    },
+    "human_review_required": {
+      "const": true
+    },
+    "provenance": {
+      "type": "object"
+    }
+  }
+}

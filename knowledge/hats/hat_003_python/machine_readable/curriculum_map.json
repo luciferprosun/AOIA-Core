@@ -1,0 +1,446 @@
+[
+  {
+    "module_id": "HAT003-MODULE-01",
+    "title": "Python foundations",
+    "level": "beginner",
+    "objectives": [
+      "Build static review vocabulary for python foundations.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-OFFICIAL-004",
+      "SRC-PY-OFFICIAL-005"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-PYTHON-CORE-0001",
+      "HAT003-PY-PYTHON-CORE-0002",
+      "HAT003-PY-PYTHON-CORE-0003",
+      "HAT003-PY-PYTHON-CORE-0004",
+      "HAT003-PY-PYTHON-CORE-0005",
+      "HAT003-PY-PYTHON-CORE-0006",
+      "HAT003-PY-PYTHON-CORE-0007",
+      "HAT003-PY-PYTHON-CORE-0008"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-02",
+    "title": "Data structures and functions",
+    "level": "beginner",
+    "objectives": [
+      "Build static review vocabulary for data structures and functions.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-OFFICIAL-007",
+      "SRC-PY-OFFICIAL-008"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-PYTHON-CORE-0011",
+      "HAT003-PY-PYTHON-CORE-0012",
+      "HAT003-PY-PYTHON-CORE-0013",
+      "HAT003-PY-PYTHON-CORE-0014",
+      "HAT003-PY-PYTHON-CORE-0015",
+      "HAT003-PY-PYTHON-CORE-0016",
+      "HAT003-PY-PYTHON-CORE-0017",
+      "HAT003-PY-PYTHON-CORE-0018"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-03",
+    "title": "Modules and standard library",
+    "level": "beginner",
+    "objectives": [
+      "Build static review vocabulary for modules and standard library.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-OFFICIAL-010",
+      "SRC-PY-OFFICIAL-011"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-PYTHON-CORE-0021",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0022",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0023",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0024",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0025",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0026",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0027",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0028"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-04",
+    "title": "Object-oriented Python",
+    "level": "intermediate",
+    "objectives": [
+      "Build static review vocabulary for object-oriented python.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-OFFICIAL-013",
+      "SRC-PY-OFFICIAL-014"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-SOFTWARE-ENGINEERING-0031",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0032",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0033",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0034",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0035",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0036",
+      "HAT003-PY-WEB-API-0037",
+      "HAT003-PY-WEB-API-0038"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-05",
+    "title": "Typing and modern Python",
+    "level": "intermediate",
+    "objectives": [
+      "Build static review vocabulary for typing and modern python.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-OFFICIAL-016",
+      "SRC-PY-OFFICIAL-017"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-WEB-API-0041",
+      "HAT003-PY-WEB-API-0042",
+      "HAT003-PY-WEB-API-0043",
+      "HAT003-PY-WEB-API-0044",
+      "HAT003-PY-WEB-API-0045",
+      "HAT003-PY-WEB-API-0046",
+      "HAT003-PY-WEB-API-0047",
+      "HAT003-PY-WEB-API-0048"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-06",
+    "title": "Testing and quality",
+    "level": "intermediate",
+    "objectives": [
+      "Build static review vocabulary for testing and quality.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-COMMUNITY-019",
+      "SRC-PY-COMMUNITY-020"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-DATA-ML-0051",
+      "HAT003-PY-DATA-ML-0052",
+      "HAT003-PY-DATA-ML-0053",
+      "HAT003-PY-DATA-ML-0054",
+      "HAT003-PY-DATA-ML-0055",
+      "HAT003-PY-DATA-ML-0056",
+      "HAT003-PY-DATA-ML-0057",
+      "HAT003-PY-DATA-ML-0058"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-07",
+    "title": "Packaging and environments",
+    "level": "intermediate",
+    "objectives": [
+      "Build static review vocabulary for packaging and environments.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-COMMUNITY-022",
+      "SRC-PY-COMMUNITY-023"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-DATA-ML-0061",
+      "HAT003-PY-DATA-ML-0062",
+      "HAT003-PY-DATA-ML-0063",
+      "HAT003-PY-DATA-ML-0064",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0065",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0066",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0067",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0068"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-08",
+    "title": "Web/API Python",
+    "level": "advanced",
+    "objectives": [
+      "Build static review vocabulary for web/api python.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-COMMUNITY-025",
+      "SRC-PY-BOOK-026"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0071",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0072",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0073",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0074",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0075",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0076",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0077",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0078"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-09",
+    "title": "Data/ML Python",
+    "level": "advanced",
+    "objectives": [
+      "Build static review vocabulary for data/ml python.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-COMMUNITY-028",
+      "SRC-PY-COMMUNITY-029"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0081",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0082",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0083",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0084",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0085",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0086",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0087",
+      "HAT003-PY-SECURITY-STATIC-SAFETY-0088"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-10",
+    "title": "Architecture and professional engineering",
+    "level": "professional",
+    "objectives": [
+      "Build static review vocabulary for architecture and professional engineering.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-ARCHITECTURE-031",
+      "SRC-PY-ARCHITECTURE-032"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-SOFTWARE-ENGINEERING-0091",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0092",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0093",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0094",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0095",
+      "HAT003-PY-SOFTWARE-ENGINEERING-0096",
+      "HAT003-PY-WEB-API-0097",
+      "HAT003-PY-WEB-API-0098"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-11",
+    "title": "Security and static safety review",
+    "level": "professional",
+    "objectives": [
+      "Build static review vocabulary for security and static safety review.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-ARCHITECTURE-034",
+      "SRC-PY-ARCHITECTURE-035"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-WEB-API-0101",
+      "HAT003-PY-WEB-API-0102",
+      "HAT003-PY-WEB-API-0103",
+      "HAT003-PY-WEB-API-0104",
+      "HAT003-PY-WEB-API-0105",
+      "HAT003-PY-WEB-API-0106",
+      "HAT003-PY-WEB-API-0107",
+      "HAT003-PY-WEB-API-0108"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional"
+    ]
+  },
+  {
+    "module_id": "HAT003-MODULE-12",
+    "title": "AOIA integration and knowledge indexing",
+    "level": "professional",
+    "objectives": [
+      "Build static review vocabulary for aoia integration and knowledge indexing.",
+      "Map knowledge to source IDs and AOIA tags.",
+      "Identify safety boundaries without executing snippets."
+    ],
+    "source_ids": [
+      "SRC-PY-LEARNING-037",
+      "SRC-PY-LEARNING-038"
+    ],
+    "related_card_ids": [
+      "HAT003-PY-DATA-ML-0111",
+      "HAT003-PY-DATA-ML-0112",
+      "HAT003-PY-DATA-ML-0113",
+      "HAT003-PY-DATA-ML-0114",
+      "HAT003-PY-DATA-ML-0115",
+      "HAT003-PY-DATA-ML-0116",
+      "HAT003-PY-DATA-ML-0117",
+      "HAT003-PY-DATA-ML-0118"
+    ],
+    "expected_outputs": [
+      "review notes",
+      "source-backed card links",
+      "safe static checklist items"
+    ],
+    "review_notes": "Human review remains required for ambiguous or security-sensitive material.",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional"
+    ]
+  }
+]

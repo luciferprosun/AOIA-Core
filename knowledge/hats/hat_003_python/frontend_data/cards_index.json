@@ -1,0 +1,2127 @@
+[
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0001",
+    "title": "Python statement and expression boundaries",
+    "category": "python_core",
+    "subcategory": "syntax",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.syntax"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0002",
+    "title": "Object identity equality and truthiness",
+    "category": "python_core",
+    "subcategory": "data_model",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.data_model"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0003",
+    "title": "Function arguments defaults and call semantics",
+    "category": "python_core",
+    "subcategory": "functions",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.functions"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0004",
+    "title": "Class attributes versus instance attributes",
+    "category": "python_core",
+    "subcategory": "classes",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.classes"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0005",
+    "title": "Exception hierarchy and explicit handling",
+    "category": "python_core",
+    "subcategory": "exceptions",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.exceptions"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0006",
+    "title": "Module boundaries and import side effects",
+    "category": "python_core",
+    "subcategory": "modules",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.modules"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0007",
+    "title": "Absolute and relative import review",
+    "category": "python_core",
+    "subcategory": "imports",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.imports"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0008",
+    "title": "Iterator protocol review",
+    "category": "python_core",
+    "subcategory": "iterators",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.iterators"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0009",
+    "title": "Generator state and lazy evaluation",
+    "category": "python_core",
+    "subcategory": "generators",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.generators"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0010",
+    "title": "Decorator transparency and metadata",
+    "category": "python_core",
+    "subcategory": "decorators",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.decorators"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0011",
+    "title": "Resource lifetime with context managers",
+    "category": "python_core",
+    "subcategory": "context_managers",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.context_managers"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0012",
+    "title": "Type hints as review support",
+    "category": "python_core",
+    "subcategory": "typing",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.typing"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0013",
+    "title": "Dataclass defaults and mutability",
+    "category": "python_core",
+    "subcategory": "dataclasses",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.dataclasses"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0014",
+    "title": "Pattern matching exhaustiveness review",
+    "category": "python_core",
+    "subcategory": "pattern_matching",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.pattern_matching"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0015",
+    "title": "Async function boundaries",
+    "category": "python_core",
+    "subcategory": "async_await",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.async_await"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0016",
+    "title": "Thread process and async tradeoffs",
+    "category": "python_core",
+    "subcategory": "concurrency",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.concurrency"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0017",
+    "title": "Standard library first review",
+    "category": "python_core",
+    "subcategory": "standard_library",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.standard_library"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0018",
+    "title": "File I/O encoding and path review",
+    "category": "python_core",
+    "subcategory": "file_io",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.file_io"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0019",
+    "title": "Logging without leaking secrets",
+    "category": "python_core",
+    "subcategory": "logging",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.logging"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0020",
+    "title": "Configuration loading boundaries",
+    "category": "python_core",
+    "subcategory": "configuration",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.configuration"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0021",
+    "title": "CLI input validation",
+    "category": "python_core",
+    "subcategory": "cli_tools",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.cli_tools"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0022",
+    "title": "src layout and import clarity",
+    "category": "software_engineering",
+    "subcategory": "project_layout",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.project_layout"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0023",
+    "title": "pyproject metadata review",
+    "category": "software_engineering",
+    "subcategory": "packaging",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.packaging"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0024",
+    "title": "Pinned dependency review",
+    "category": "software_engineering",
+    "subcategory": "dependency_management",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.dependency_management"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0025",
+    "title": "Unit test scope and determinism",
+    "category": "software_engineering",
+    "subcategory": "testing",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.testing"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0026",
+    "title": "Type checker configuration",
+    "category": "software_engineering",
+    "subcategory": "type_checking",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.type_checking"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0027",
+    "title": "Lint rule triage",
+    "category": "software_engineering",
+    "subcategory": "linting",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.linting"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0028",
+    "title": "Formatter consistency",
+    "category": "software_engineering",
+    "subcategory": "formatting",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.formatting"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0029",
+    "title": "Docstring purpose and limits",
+    "category": "software_engineering",
+    "subcategory": "documentation",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.documentation"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0030",
+    "title": "Error boundaries and user messages",
+    "category": "software_engineering",
+    "subcategory": "error_handling",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.error_handling"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0031",
+    "title": "Metrics logs and traces without secrets",
+    "category": "software_engineering",
+    "subcategory": "observability",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.observability"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0032",
+    "title": "Complexity review",
+    "category": "software_engineering",
+    "subcategory": "maintainability",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.maintainability"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0033",
+    "title": "Small behavior-preserving changes",
+    "category": "software_engineering",
+    "subcategory": "refactoring",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.refactoring"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0034",
+    "title": "Static review checklist discipline",
+    "category": "software_engineering",
+    "subcategory": "code_review",
+    "difficulty": "professional",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "source:official",
+      "mV:-70.003.code_review"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0035",
+    "title": "Pattern use without overengineering",
+    "category": "software_engineering",
+    "subcategory": "design_patterns",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.design_patterns"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0036",
+    "title": "Architecture boundary mapping",
+    "category": "software_engineering",
+    "subcategory": "architecture_patterns",
+    "difficulty": "professional",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "source:official",
+      "mV:-70.003.architecture_patterns"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0037",
+    "title": "HTTP timeout and retry review",
+    "category": "web_api",
+    "subcategory": "http_clients",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.http_clients"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0038",
+    "title": "FastAPI dependency injection review",
+    "category": "web_api",
+    "subcategory": "fastapi",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.fastapi"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0039",
+    "title": "Django settings and ORM review",
+    "category": "web_api",
+    "subcategory": "django",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.django"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0040",
+    "title": "Flask application factory review",
+    "category": "web_api",
+    "subcategory": "flask",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.flask"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0041",
+    "title": "ASGI lifecycle review",
+    "category": "web_api",
+    "subcategory": "asgi",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.asgi"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0042",
+    "title": "WSGI deployment boundary review",
+    "category": "web_api",
+    "subcategory": "wsgi",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.wsgi"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0043",
+    "title": "REST status and schema review",
+    "category": "web_api",
+    "subcategory": "rest",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.rest"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0044",
+    "title": "Authentication flow review",
+    "category": "web_api",
+    "subcategory": "authentication",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.authentication"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0045",
+    "title": "Authorization check placement",
+    "category": "web_api",
+    "subcategory": "authorization",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.authorization"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0046",
+    "title": "Request validation review",
+    "category": "web_api",
+    "subcategory": "validation",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.validation"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0047",
+    "title": "Serialization format safety",
+    "category": "web_api",
+    "subcategory": "serialization",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.serialization"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0048",
+    "title": "Background task reliability",
+    "category": "web_api",
+    "subcategory": "background_tasks",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.background_tasks"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0049",
+    "title": "Database transaction boundary",
+    "category": "web_api",
+    "subcategory": "database_integration",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.database_integration"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0050",
+    "title": "Array shape and dtype review",
+    "category": "data_ml",
+    "subcategory": "numpy",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.numpy"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0051",
+    "title": "DataFrame mutation review",
+    "category": "data_ml",
+    "subcategory": "pandas",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.pandas"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0052",
+    "title": "Lazy plan review basics",
+    "category": "data_ml",
+    "subcategory": "polars",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.polars"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0053",
+    "title": "Plot generation boundary",
+    "category": "data_ml",
+    "subcategory": "matplotlib",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.matplotlib"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0054",
+    "title": "Scientific routine assumptions",
+    "category": "data_ml",
+    "subcategory": "scipy",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.scipy"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0055",
+    "title": "Train test split review",
+    "category": "data_ml",
+    "subcategory": "scikit_learn",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.scikit_learn"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0056",
+    "title": "Model checkpoint safety review",
+    "category": "data_ml",
+    "subcategory": "pytorch",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.pytorch"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0057",
+    "title": "TensorFlow saved model review",
+    "category": "data_ml",
+    "subcategory": "tensorflow",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.tensorflow"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0058",
+    "title": "Model and tokenizer source review",
+    "category": "data_ml",
+    "subcategory": "transformers",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.transformers"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0059",
+    "title": "Notebook reproducibility review",
+    "category": "data_ml",
+    "subcategory": "jupyter",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.jupyter"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0060",
+    "title": "Hosted notebook boundary",
+    "category": "data_ml",
+    "subcategory": "colab",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.colab"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0061",
+    "title": "Seeds data versions and environments",
+    "category": "data_ml",
+    "subcategory": "reproducibility",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.reproducibility"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0062",
+    "title": "Schema checks for data pipelines",
+    "category": "data_ml",
+    "subcategory": "data_validation",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.data_validation"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0063",
+    "title": "Metric selection and leakage review",
+    "category": "data_ml",
+    "subcategory": "model_evaluation",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.model_evaluation"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0064",
+    "title": "ML safety static checklist",
+    "category": "data_ml",
+    "subcategory": "ml_safety_basics",
+    "difficulty": "professional",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "source:official",
+      "mV:-70.003.ml_safety_basics"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0065",
+    "title": "Unsafe eval usage detection",
+    "category": "security_static_safety",
+    "subcategory": "unsafe_dynamic_execution",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.unsafe_dynamic_execution"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0066",
+    "title": "Unsafe exec usage detection",
+    "category": "security_static_safety",
+    "subcategory": "unsafe_dynamic_execution",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.unsafe_dynamic_execution"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0067",
+    "title": "Unsafe pickle loading detection",
+    "category": "security_static_safety",
+    "subcategory": "deserialization",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.deserialization"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0068",
+    "title": "Unsafe yaml load detection",
+    "category": "security_static_safety",
+    "subcategory": "deserialization",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.deserialization"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0069",
+    "title": "Subprocess shell argument review",
+    "category": "security_static_safety",
+    "subcategory": "subprocess_shell_risk",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.subprocess_shell_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0070",
+    "title": "Shell injection concept review",
+    "category": "security_static_safety",
+    "subcategory": "subprocess_shell_risk",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.subprocess_shell_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0071",
+    "title": "Path traversal review",
+    "category": "security_static_safety",
+    "subcategory": "path_traversal",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.path_traversal"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0072",
+    "title": "Insecure temporary file review",
+    "category": "security_static_safety",
+    "subcategory": "file_system_risk",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.file_system_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0073",
+    "title": "Hardcoded secret candidate review",
+    "category": "security_static_safety",
+    "subcategory": "secrets",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.secrets"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0074",
+    "title": "Dependency confusion review",
+    "category": "security_static_safety",
+    "subcategory": "dependency_risk",
+    "difficulty": "professional",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "safety:static-review",
+      "mV:-70.003.dependency_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0075",
+    "title": "Typosquatting review",
+    "category": "security_static_safety",
+    "subcategory": "dependency_risk",
+    "difficulty": "professional",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "safety:static-review",
+      "mV:-70.003.dependency_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0076",
+    "title": "Unpinned dependency review",
+    "category": "security_static_safety",
+    "subcategory": "dependency_risk",
+    "difficulty": "intermediate",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "safety:static-review",
+      "mV:-70.003.dependency_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0077",
+    "title": "Insecure deserialization boundaries",
+    "category": "security_static_safety",
+    "subcategory": "deserialization",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.deserialization"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0078",
+    "title": "Unsafe file write review",
+    "category": "security_static_safety",
+    "subcategory": "file_system_risk",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.file_system_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0079",
+    "title": "Unsafe network call review",
+    "category": "security_static_safety",
+    "subcategory": "network_risk",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.network_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0080",
+    "title": "SSRF concept review",
+    "category": "security_static_safety",
+    "subcategory": "network_risk",
+    "difficulty": "professional",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "safety:static-review",
+      "mV:-70.003.network_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0081",
+    "title": "SQL injection concept review",
+    "category": "security_static_safety",
+    "subcategory": "injection_risks",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.injection_risks"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0082",
+    "title": "XSS concept for Python web apps",
+    "category": "security_static_safety",
+    "subcategory": "web_security",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.web_security"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0083",
+    "title": "Authentication mistake review",
+    "category": "security_static_safety",
+    "subcategory": "web_security",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.web_security"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0084",
+    "title": "Authorization mistake review",
+    "category": "security_static_safety",
+    "subcategory": "web_security",
+    "difficulty": "advanced",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "safety:static-review",
+      "mV:-70.003.web_security"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0085",
+    "title": "Logging secret prevention",
+    "category": "security_static_safety",
+    "subcategory": "logging_risk",
+    "difficulty": "intermediate",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "safety:static-review",
+      "mV:-70.003.logging_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0086",
+    "title": "Supply chain risk review",
+    "category": "security_static_safety",
+    "subcategory": "dependency_risk",
+    "difficulty": "professional",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "safety:static-review",
+      "mV:-70.003.dependency_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0087",
+    "title": "Unsafe debug configuration review",
+    "category": "security_static_safety",
+    "subcategory": "configuration_risk",
+    "difficulty": "intermediate",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "safety:static-review",
+      "mV:-70.003.configuration_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0088",
+    "title": "AI-generated code static review",
+    "category": "security_static_safety",
+    "subcategory": "ai_generated_code_risk",
+    "difficulty": "professional",
+    "risk_label": "SECURITY_SENSITIVE",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "safety:static-review",
+      "mV:-70.003.ai_generated_code_risk"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0089",
+    "title": "Docstring purpose and limits checklist variant 89",
+    "category": "software_engineering",
+    "subcategory": "documentation",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.documentation"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0090",
+    "title": "Error boundaries and user messages checklist variant 90",
+    "category": "software_engineering",
+    "subcategory": "error_handling",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.error_handling"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0091",
+    "title": "Metrics logs and traces without secrets checklist variant 91",
+    "category": "software_engineering",
+    "subcategory": "observability",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.observability"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0092",
+    "title": "Complexity review checklist variant 92",
+    "category": "software_engineering",
+    "subcategory": "maintainability",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.maintainability"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0093",
+    "title": "Small behavior-preserving changes checklist variant 93",
+    "category": "software_engineering",
+    "subcategory": "refactoring",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.refactoring"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0094",
+    "title": "Static review checklist discipline checklist variant 94",
+    "category": "software_engineering",
+    "subcategory": "code_review",
+    "difficulty": "professional",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "source:official",
+      "mV:-70.003.code_review"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0095",
+    "title": "Pattern use without overengineering checklist variant 95",
+    "category": "software_engineering",
+    "subcategory": "design_patterns",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.design_patterns"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0096",
+    "title": "Architecture boundary mapping checklist variant 96",
+    "category": "software_engineering",
+    "subcategory": "architecture_patterns",
+    "difficulty": "professional",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:professional",
+      "source:official",
+      "mV:-70.003.architecture_patterns"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0097",
+    "title": "HTTP timeout and retry review checklist variant 97",
+    "category": "web_api",
+    "subcategory": "http_clients",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.http_clients"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0098",
+    "title": "FastAPI dependency injection review checklist variant 98",
+    "category": "web_api",
+    "subcategory": "fastapi",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.fastapi"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0099",
+    "title": "Django settings and ORM review checklist variant 99",
+    "category": "web_api",
+    "subcategory": "django",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.django"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0100",
+    "title": "Flask application factory review checklist variant 100",
+    "category": "web_api",
+    "subcategory": "flask",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.flask"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0101",
+    "title": "ASGI lifecycle review checklist variant 101",
+    "category": "web_api",
+    "subcategory": "asgi",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.asgi"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0102",
+    "title": "WSGI deployment boundary review checklist variant 102",
+    "category": "web_api",
+    "subcategory": "wsgi",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.wsgi"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0103",
+    "title": "REST status and schema review checklist variant 103",
+    "category": "web_api",
+    "subcategory": "rest",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.rest"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0104",
+    "title": "Authentication flow review checklist variant 104",
+    "category": "web_api",
+    "subcategory": "authentication",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.authentication"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0105",
+    "title": "Authorization check placement checklist variant 105",
+    "category": "web_api",
+    "subcategory": "authorization",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.authorization"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0106",
+    "title": "Request validation review checklist variant 106",
+    "category": "web_api",
+    "subcategory": "validation",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.validation"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0107",
+    "title": "Serialization format safety checklist variant 107",
+    "category": "web_api",
+    "subcategory": "serialization",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.serialization"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0108",
+    "title": "Background task reliability checklist variant 108",
+    "category": "web_api",
+    "subcategory": "background_tasks",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.background_tasks"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-WEB-API-0109",
+    "title": "Database transaction boundary checklist variant 109",
+    "category": "web_api",
+    "subcategory": "database_integration",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.database_integration"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0110",
+    "title": "Array shape and dtype review checklist variant 110",
+    "category": "data_ml",
+    "subcategory": "numpy",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.numpy"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0111",
+    "title": "DataFrame mutation review checklist variant 111",
+    "category": "data_ml",
+    "subcategory": "pandas",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.pandas"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0112",
+    "title": "Lazy plan review basics checklist variant 112",
+    "category": "data_ml",
+    "subcategory": "polars",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.polars"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0113",
+    "title": "Plot generation boundary checklist variant 113",
+    "category": "data_ml",
+    "subcategory": "matplotlib",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.matplotlib"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0114",
+    "title": "Scientific routine assumptions checklist variant 114",
+    "category": "data_ml",
+    "subcategory": "scipy",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.scipy"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0115",
+    "title": "Train test split review checklist variant 115",
+    "category": "data_ml",
+    "subcategory": "scikit_learn",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.scikit_learn"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0116",
+    "title": "Model checkpoint safety review checklist variant 116",
+    "category": "data_ml",
+    "subcategory": "pytorch",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.pytorch"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0117",
+    "title": "TensorFlow saved model review checklist variant 117",
+    "category": "data_ml",
+    "subcategory": "tensorflow",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.tensorflow"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0118",
+    "title": "Model and tokenizer source review checklist variant 118",
+    "category": "data_ml",
+    "subcategory": "transformers",
+    "difficulty": "advanced",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:advanced",
+      "source:official",
+      "mV:-70.003.transformers"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0119",
+    "title": "Notebook reproducibility review checklist variant 119",
+    "category": "data_ml",
+    "subcategory": "jupyter",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.jupyter"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-DATA-ML-0120",
+    "title": "Hosted notebook boundary checklist variant 120",
+    "category": "data_ml",
+    "subcategory": "colab",
+    "difficulty": "intermediate",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:intermediate",
+      "source:official",
+      "mV:-70.003.colab"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0121",
+    "title": "Python statement and expression boundaries checklist variant 121",
+    "category": "python_core",
+    "subcategory": "syntax",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.syntax"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0122",
+    "title": "Object identity equality and truthiness checklist variant 122",
+    "category": "python_core",
+    "subcategory": "data_model",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.data_model"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0123",
+    "title": "Function arguments defaults and call semantics checklist variant 123",
+    "category": "python_core",
+    "subcategory": "functions",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.functions"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0124",
+    "title": "Class attributes versus instance attributes checklist variant 124",
+    "category": "python_core",
+    "subcategory": "classes",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.classes"
+    ]
+  },
+  {
+    "card_id": "HAT003-PY-PYTHON-CORE-0125",
+    "title": "Exception hierarchy and explicit handling checklist variant 125",
+    "category": "python_core",
+    "subcategory": "exceptions",
+    "difficulty": "beginner",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required",
+      "level:beginner",
+      "source:official",
+      "mV:-70.003.exceptions"
+    ]
+  }
+]

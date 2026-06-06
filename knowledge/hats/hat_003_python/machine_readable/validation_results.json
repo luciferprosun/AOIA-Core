@@ -1,0 +1,201 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "source count >= 45",
+      "passed": true,
+      "detail": "92"
+    },
+    {
+      "name": "knowledge card count >= 120",
+      "passed": true,
+      "detail": "125"
+    },
+    {
+      "name": "validation rule count >= 40",
+      "passed": true,
+      "detail": "45"
+    },
+    {
+      "name": "corpus case count >= 60",
+      "passed": true,
+      "detail": "65"
+    },
+    {
+      "name": "architecture pattern count >= 25",
+      "passed": true,
+      "detail": "30"
+    },
+    {
+      "name": "security pattern count >= 25",
+      "passed": true,
+      "detail": "30"
+    },
+    {
+      "name": "tooling entry count >= 20",
+      "passed": true,
+      "detail": "25"
+    },
+    {
+      "name": "curriculum module count == 12",
+      "passed": true,
+      "detail": "12"
+    },
+    {
+      "name": "source CSV count matches JSON",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "knowledge card CSV count matches JSONL",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "validation rule CSV count matches JSON",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "corpus case CSV count matches JSONL",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/taxonomy_core.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/architecture_patterns.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/validation_rules.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/taxonomy_safety.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/dependency_tooling_map.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/metadata.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/build_summary.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/security_patterns.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/source_atlas.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/curriculum_map.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: machine_readable/validation_results.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: frontend_data/cards_index.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: frontend_data/category_tree.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: frontend_data/stats.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "json parses: frontend_data/search_index.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "jsonl parses: machine_readable/knowledge_cards.jsonl",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "jsonl parses: machine_readable/corpus_cases.jsonl",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "csv parses: csv/source_atlas.csv",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "csv parses: csv/validation_rules.csv",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "csv parses: csv/corpus_cases.csv",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "csv parses: csv/knowledge_cards.csv",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "csv parses: csv/taxonomy.csv",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "no obvious real secret-looking values",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "AOIA-Core git status remains clean",
+      "passed": true,
+      "detail": "## dev/gt-runtime-8-bash-safety-planning...origin/dev/gt-runtime-8-bash-safety-planning"
+    },
+    {
+      "name": "no files created inside AOIA-Core",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "counts": {
+    "sources": 92,
+    "knowledge_cards": 125,
+    "validation_rules": 45,
+    "corpus_cases": 65,
+    "architecture_patterns": 30,
+    "security_patterns": 30,
+    "tooling_entries": 25,
+    "curriculum_modules": 12,
+    "files": 38
+  }
+}

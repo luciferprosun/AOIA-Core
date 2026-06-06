@@ -1,0 +1,37 @@
+{
+  "hat_id": "003",
+  "hat_name": "Python Engineering Knowledge Library",
+  "status": "DRAFT_BASELINE",
+  "canonical": false,
+  "execution_permitted": false,
+  "review_status": "DRAFT",
+  "target_path": "knowledge/hats/hat_003_python/",
+  "created_or_imported_date": "2026-06-06",
+  "next_phase": "H3-AUDIT-1 source verification and card deepening",
+  "supplemental_material": {
+    "imported": false,
+    "status": "MANUAL_REVIEW_REQUIRED",
+    "files": [
+      "/home/l/Desktop/python_engineering_book.md",
+      "/home/l/Desktop/python_engineering_book.pdf"
+    ],
+    "reason": "Secondary/generated educational material with executable-looking examples and risk-pattern lines; not suitable for blind import."
+  },
+  "counts": {
+    "sources": 92,
+    "knowledge_cards": 125,
+    "validation_rules": 45,
+    "corpus_cases": 65,
+    "architecture_patterns": 30,
+    "security_patterns": 30,
+    "tooling_entries": 25,
+    "curriculum_modules": 12
+  },
+  "safety_boundary": {
+    "knowledge_static_review_only": true,
+    "executes_code": false,
+    "approves_execution": false,
+    "autonomous_agent": false,
+    "human_review_required": true
+  }
+}

@@ -1,0 +1,80 @@
+taxonomy_id,parent_id,name,label,description,risk_label,aoia_tags
+HAT003-TAX-CORE-0001,,python_core,Python Core,Top-level Hat 003 category for python core.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0002,HAT003-TAX-CORE-0001,syntax,Syntax,Static review and curriculum node for syntax.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0003,HAT003-TAX-CORE-0001,data_model,Data Model,Static review and curriculum node for data model.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0004,HAT003-TAX-CORE-0001,functions,Functions,Static review and curriculum node for functions.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0005,HAT003-TAX-CORE-0001,classes,Classes,Static review and curriculum node for classes.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0006,HAT003-TAX-CORE-0001,exceptions,Exceptions,Static review and curriculum node for exceptions.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0007,HAT003-TAX-CORE-0001,modules,Modules,Static review and curriculum node for modules.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0008,HAT003-TAX-CORE-0001,imports,Imports,Static review and curriculum node for imports.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0009,HAT003-TAX-CORE-0001,iterators,Iterators,Static review and curriculum node for iterators.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0010,HAT003-TAX-CORE-0001,generators,Generators,Static review and curriculum node for generators.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0011,HAT003-TAX-CORE-0001,decorators,Decorators,Static review and curriculum node for decorators.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0012,HAT003-TAX-CORE-0001,context_managers,Context Managers,Static review and curriculum node for context managers.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0013,HAT003-TAX-CORE-0001,typing,Typing,Static review and curriculum node for typing.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0014,HAT003-TAX-CORE-0001,dataclasses,Dataclasses,Static review and curriculum node for dataclasses.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0015,HAT003-TAX-CORE-0001,pattern_matching,Pattern Matching,Static review and curriculum node for pattern matching.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0016,HAT003-TAX-CORE-0001,async_await,Async Await,Static review and curriculum node for async await.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0017,HAT003-TAX-CORE-0001,concurrency,Concurrency,Static review and curriculum node for concurrency.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0018,HAT003-TAX-CORE-0001,standard_library,Standard Library,Static review and curriculum node for standard library.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0019,HAT003-TAX-CORE-0001,file_io,File Io,Static review and curriculum node for file io.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0020,HAT003-TAX-CORE-0001,logging,Logging,Static review and curriculum node for logging.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0021,HAT003-TAX-CORE-0001,configuration,Configuration,Static review and curriculum node for configuration.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0022,HAT003-TAX-CORE-0001,cli_tools,Cli Tools,Static review and curriculum node for cli tools.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0023,,software_engineering,Software Engineering,Top-level Hat 003 category for software engineering.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0024,HAT003-TAX-CORE-0023,project_layout,Project Layout,Static review and curriculum node for project layout.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0025,HAT003-TAX-CORE-0023,packaging,Packaging,Static review and curriculum node for packaging.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0026,HAT003-TAX-CORE-0023,dependency_management,Dependency Management,Static review and curriculum node for dependency management.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0027,HAT003-TAX-CORE-0023,testing,Testing,Static review and curriculum node for testing.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0028,HAT003-TAX-CORE-0023,type_checking,Type Checking,Static review and curriculum node for type checking.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0029,HAT003-TAX-CORE-0023,linting,Linting,Static review and curriculum node for linting.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0030,HAT003-TAX-CORE-0023,formatting,Formatting,Static review and curriculum node for formatting.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0031,HAT003-TAX-CORE-0023,documentation,Documentation,Static review and curriculum node for documentation.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0032,HAT003-TAX-CORE-0023,error_handling,Error Handling,Static review and curriculum node for error handling.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0033,HAT003-TAX-CORE-0023,observability,Observability,Static review and curriculum node for observability.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0034,HAT003-TAX-CORE-0023,maintainability,Maintainability,Static review and curriculum node for maintainability.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0035,HAT003-TAX-CORE-0023,refactoring,Refactoring,Static review and curriculum node for refactoring.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0036,HAT003-TAX-CORE-0023,code_review,Code Review,Static review and curriculum node for code review.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0037,HAT003-TAX-CORE-0023,design_patterns,Design Patterns,Static review and curriculum node for design patterns.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0038,HAT003-TAX-CORE-0023,architecture_patterns,Architecture Patterns,Static review and curriculum node for architecture patterns.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0039,,web_api,Web Api,Top-level Hat 003 category for web api.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0040,HAT003-TAX-CORE-0039,http_clients,Http Clients,Static review and curriculum node for http clients.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0041,HAT003-TAX-CORE-0039,fastapi,Fastapi,Static review and curriculum node for fastapi.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0042,HAT003-TAX-CORE-0039,django,Django,Static review and curriculum node for django.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0043,HAT003-TAX-CORE-0039,flask,Flask,Static review and curriculum node for flask.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0044,HAT003-TAX-CORE-0039,asgi,Asgi,Static review and curriculum node for asgi.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0045,HAT003-TAX-CORE-0039,wsgi,Wsgi,Static review and curriculum node for wsgi.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0046,HAT003-TAX-CORE-0039,rest,Rest,Static review and curriculum node for rest.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0047,HAT003-TAX-CORE-0039,authentication,Authentication,Static review and curriculum node for authentication.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0048,HAT003-TAX-CORE-0039,authorization,Authorization,Static review and curriculum node for authorization.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0049,HAT003-TAX-CORE-0039,validation,Validation,Static review and curriculum node for validation.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0050,HAT003-TAX-CORE-0039,serialization,Serialization,Static review and curriculum node for serialization.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0051,HAT003-TAX-CORE-0039,background_tasks,Background Tasks,Static review and curriculum node for background tasks.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0052,HAT003-TAX-CORE-0039,database_integration,Database Integration,Static review and curriculum node for database integration.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0053,,data_ml,Data Ml,Top-level Hat 003 category for data ml.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0054,HAT003-TAX-CORE-0053,numpy,Numpy,Static review and curriculum node for numpy.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0055,HAT003-TAX-CORE-0053,pandas,Pandas,Static review and curriculum node for pandas.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0056,HAT003-TAX-CORE-0053,matplotlib,Matplotlib,Static review and curriculum node for matplotlib.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0057,HAT003-TAX-CORE-0053,scikit_learn,Scikit Learn,Static review and curriculum node for scikit learn.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0058,HAT003-TAX-CORE-0053,pytorch,Pytorch,Static review and curriculum node for pytorch.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0059,HAT003-TAX-CORE-0053,tensorflow,Tensorflow,Static review and curriculum node for tensorflow.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0060,HAT003-TAX-CORE-0053,transformers,Transformers,Static review and curriculum node for transformers.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0061,HAT003-TAX-CORE-0053,notebooks,Notebooks,Static review and curriculum node for notebooks.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0062,HAT003-TAX-CORE-0053,reproducibility,Reproducibility,Static review and curriculum node for reproducibility.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0063,HAT003-TAX-CORE-0053,data_validation,Data Validation,Static review and curriculum node for data validation.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0064,HAT003-TAX-CORE-0053,model_evaluation,Model Evaluation,Static review and curriculum node for model evaluation.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-CORE-0065,HAT003-TAX-CORE-0053,ml_safety_basics,Ml Safety Basics,Static review and curriculum node for ml safety basics.,SAFE_EDUCATIONAL,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0001,,security_static_safety,Security Static Safety,Top-level Hat 003 category for security static safety.,REVIEW_REQUIRED,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0002,HAT003-TAX-SAFETY-0001,unsafe_dynamic_execution,Unsafe Dynamic Execution,Static review and curriculum node for unsafe dynamic execution.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0003,HAT003-TAX-SAFETY-0001,subprocess_shell_risk,Subprocess Shell Risk,Static review and curriculum node for subprocess shell risk.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0004,HAT003-TAX-SAFETY-0001,deserialization,Deserialization,Static review and curriculum node for deserialization.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0005,HAT003-TAX-SAFETY-0001,path_traversal,Path Traversal,Static review and curriculum node for path traversal.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0006,HAT003-TAX-SAFETY-0001,secrets,Secrets,Static review and curriculum node for secrets.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0007,HAT003-TAX-SAFETY-0001,dependency_risk,Dependency Risk,Static review and curriculum node for dependency risk.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0008,HAT003-TAX-SAFETY-0001,web_security,Web Security,Static review and curriculum node for web security.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0009,HAT003-TAX-SAFETY-0001,injection_risks,Injection Risks,Static review and curriculum node for injection risks.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0010,HAT003-TAX-SAFETY-0001,file_system_risk,File System Risk,Static review and curriculum node for file system risk.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0011,HAT003-TAX-SAFETY-0001,network_risk,Network Risk,Static review and curriculum node for network risk.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0012,HAT003-TAX-SAFETY-0001,logging_risk,Logging Risk,Static review and curriculum node for logging risk.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0013,HAT003-TAX-SAFETY-0001,configuration_risk,Configuration Risk,Static review and curriculum node for configuration risk.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required
+HAT003-TAX-SAFETY-0014,HAT003-TAX-SAFETY-0001,ai_generated_code_risk,Ai Generated Code Risk,Static review and curriculum node for ai generated code risk.,SECURITY_SENSITIVE,hat:003;domain:python;execution:no;review:human-required

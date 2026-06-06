@@ -1,0 +1,542 @@
+[
+  {
+    "pattern_id": "HAT003-SEC-0001",
+    "name": "unsafe_eval",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe eval.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_eval"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0002",
+    "name": "unsafe_exec",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe exec.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_exec"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0003",
+    "name": "unsafe_pickle",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe pickle.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_pickle"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0004",
+    "name": "unsafe_yaml_load",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe yaml load.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_yaml_load"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0005",
+    "name": "unsafe_subprocess_usage",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe subprocess usage.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_subprocess_usage"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0006",
+    "name": "shell_injection",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for shell injection.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.shell_injection"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0007",
+    "name": "path_traversal",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for path traversal.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.path_traversal"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0008",
+    "name": "insecure_temp_files",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for insecure temp files.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.insecure_temp_files"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0009",
+    "name": "hardcoded_secrets",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for hardcoded secrets.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.hardcoded_secrets"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0010",
+    "name": "dependency_confusion",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for dependency confusion.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.dependency_confusion"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0011",
+    "name": "typosquatting",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for typosquatting.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.typosquatting"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0012",
+    "name": "unpinned_dependencies",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unpinned dependencies.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unpinned_dependencies"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0013",
+    "name": "insecure_deserialization",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for insecure deserialization.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.insecure_deserialization"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0014",
+    "name": "unsafe_file_writes",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe file writes.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_file_writes"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0015",
+    "name": "unsafe_network_calls",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe network calls.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_network_calls"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0016",
+    "name": "ssrf_concept",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for ssrf concept.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.ssrf_concept"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0017",
+    "name": "sql_injection_concept",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for sql injection concept.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.sql_injection_concept"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0018",
+    "name": "xss_concept_python_web",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for xss concept python web.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.xss_concept_python_web"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0019",
+    "name": "authentication_mistakes",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for authentication mistakes.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.authentication_mistakes"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0020",
+    "name": "authorization_mistakes",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for authorization mistakes.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.authorization_mistakes"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0021",
+    "name": "logging_secrets",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for logging secrets.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.logging_secrets"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0022",
+    "name": "supply_chain_risk",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for supply chain risk.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.supply_chain_risk"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0023",
+    "name": "weak_randomness",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for weak randomness.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.weak_randomness"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0024",
+    "name": "unsafe_archive_extraction",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe archive extraction.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_archive_extraction"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0025",
+    "name": "debug_mode_exposure",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for debug mode exposure.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.debug_mode_exposure"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0026",
+    "name": "overbroad_permissions",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for overbroad permissions.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.overbroad_permissions"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0027",
+    "name": "missing_input_validation",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for missing input validation.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.missing_input_validation"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0028",
+    "name": "unsafe_template_rendering",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for unsafe template rendering.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.unsafe_template_rendering"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0029",
+    "name": "ai_generated_code_risk",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for ai generated code risk.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.ai_generated_code_risk"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-SEC-0030",
+    "name": "credential_in_config",
+    "category": "security_static_safety",
+    "summary": "Defensive static review pattern for credential in config.",
+    "detection_focus": "Find suspicious code shapes and route them to human review without executing snippets.",
+    "safe_guidance": "Prefer least privilege, explicit input validation, and safe library APIs.",
+    "do_not_provide": "No exploit instructions, no payload construction, no live target steps.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "safety:static-review",
+      "execution:no",
+      "review:human-required",
+      "mV:-70.003.security.credential_in_config"
+    ]
+  }
+]

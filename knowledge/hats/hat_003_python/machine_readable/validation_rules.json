@@ -1,0 +1,767 @@
+[
+  {
+    "rule_id": "HAT003-SAFE-EVAL-0001",
+    "name": "Detect unsafe eval usage",
+    "category": "security_static_review",
+    "severity": "high",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags direct eval usage for human review.",
+    "positive_examples": [
+      "eval(user_input)"
+    ],
+    "negative_examples": [
+      "ast.literal_eval(trusted_literal_string)"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-EXEC-0002",
+    "name": "Detect unsafe exec usage",
+    "category": "security_static_review",
+    "severity": "high",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags direct exec usage for human review.",
+    "positive_examples": [
+      "exec(user_text)"
+    ],
+    "negative_examples": [
+      "compile(template, name, 'exec') reviewed offline"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-PICKLE-0003",
+    "name": "Detect pickle load boundaries",
+    "category": "security_static_review",
+    "severity": "high",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags pickle loading for source trust review.",
+    "positive_examples": [
+      "pickle.loads(blob)"
+    ],
+    "negative_examples": [
+      "json.loads(text)"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-YAML-0004",
+    "name": "Detect unsafe yaml load",
+    "category": "security_static_review",
+    "severity": "high",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags YAML loading that may construct objects.",
+    "positive_examples": [
+      "yaml.load(text)"
+    ],
+    "negative_examples": [
+      "yaml.safe_load(text)"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-SUBPROCESS-0005",
+    "name": "Detect shell=True",
+    "category": "security_static_review",
+    "severity": "high",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags subprocess calls using shell interpretation.",
+    "positive_examples": [
+      "subprocess.run(cmd, shell=True)"
+    ],
+    "negative_examples": [
+      "subprocess.run(['tool', 'arg'])"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-PATH-0006",
+    "name": "Detect path traversal joins",
+    "category": "security_static_review",
+    "severity": "high",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags user-controlled path joins.",
+    "positive_examples": [
+      "open(base + '/' + user_path)"
+    ],
+    "negative_examples": [
+      "safe_path = root / clean_name"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-TEMP-0007",
+    "name": "Detect insecure temp files",
+    "category": "security_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags predictable temp file names.",
+    "positive_examples": [
+      "open('/tmp/app.tmp', 'w')"
+    ],
+    "negative_examples": [
+      "tempfile.NamedTemporaryFile()"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-SECRET-0008",
+    "name": "Detect hardcoded secret candidates",
+    "category": "security_static_review",
+    "severity": "high",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags credential-looking assignments.",
+    "positive_examples": [
+      "API_KEY = 'PLACEHOLDER_DO_NOT_USE'"
+    ],
+    "negative_examples": [
+      "API_KEY = os.environ.get('API_KEY')"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-DEPS-0009",
+    "name": "Detect unpinned dependencies",
+    "category": "dependency_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags dependency specs without bounds or locks.",
+    "positive_examples": [
+      "requests"
+    ],
+    "negative_examples": [
+      "requests==0.0.0-placeholder"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-SAFE-DEBUG-0010",
+    "name": "Detect debug mode exposure",
+    "category": "web_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Flags debug mode in app configuration.",
+    "positive_examples": [
+      "debug=True"
+    ],
+    "negative_examples": [
+      "debug=False"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-11-0011",
+    "name": "Static review rule 11",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 11.",
+    "positive_examples": [
+      "# suspicious_pattern_11"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_11"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-12-0012",
+    "name": "Static review rule 12",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 12.",
+    "positive_examples": [
+      "# suspicious_pattern_12"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_12"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-13-0013",
+    "name": "Static review rule 13",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 13.",
+    "positive_examples": [
+      "# suspicious_pattern_13"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_13"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-14-0014",
+    "name": "Static review rule 14",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 14.",
+    "positive_examples": [
+      "# suspicious_pattern_14"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_14"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-15-0015",
+    "name": "Static review rule 15",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 15.",
+    "positive_examples": [
+      "# suspicious_pattern_15"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_15"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-16-0016",
+    "name": "Static review rule 16",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 16.",
+    "positive_examples": [
+      "# suspicious_pattern_16"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_16"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-17-0017",
+    "name": "Static review rule 17",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 17.",
+    "positive_examples": [
+      "# suspicious_pattern_17"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_17"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-18-0018",
+    "name": "Static review rule 18",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 18.",
+    "positive_examples": [
+      "# suspicious_pattern_18"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_18"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-19-0019",
+    "name": "Static review rule 19",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 19.",
+    "positive_examples": [
+      "# suspicious_pattern_19"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_19"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-20-0020",
+    "name": "Static review rule 20",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 20.",
+    "positive_examples": [
+      "# suspicious_pattern_20"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_20"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-21-0021",
+    "name": "Static review rule 21",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 21.",
+    "positive_examples": [
+      "# suspicious_pattern_21"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_21"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-22-0022",
+    "name": "Static review rule 22",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 22.",
+    "positive_examples": [
+      "# suspicious_pattern_22"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_22"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-23-0023",
+    "name": "Static review rule 23",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 23.",
+    "positive_examples": [
+      "# suspicious_pattern_23"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_23"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-24-0024",
+    "name": "Static review rule 24",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 24.",
+    "positive_examples": [
+      "# suspicious_pattern_24"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_24"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-25-0025",
+    "name": "Static review rule 25",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 25.",
+    "positive_examples": [
+      "# suspicious_pattern_25"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_25"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-26-0026",
+    "name": "Static review rule 26",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 26.",
+    "positive_examples": [
+      "# suspicious_pattern_26"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_26"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-27-0027",
+    "name": "Static review rule 27",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 27.",
+    "positive_examples": [
+      "# suspicious_pattern_27"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_27"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-28-0028",
+    "name": "Static review rule 28",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 28.",
+    "positive_examples": [
+      "# suspicious_pattern_28"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_28"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-29-0029",
+    "name": "Static review rule 29",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 29.",
+    "positive_examples": [
+      "# suspicious_pattern_29"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_29"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-30-0030",
+    "name": "Static review rule 30",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 30.",
+    "positive_examples": [
+      "# suspicious_pattern_30"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_30"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-31-0031",
+    "name": "Static review rule 31",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 31.",
+    "positive_examples": [
+      "# suspicious_pattern_31"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_31"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-32-0032",
+    "name": "Static review rule 32",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 32.",
+    "positive_examples": [
+      "# suspicious_pattern_32"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_32"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-33-0033",
+    "name": "Static review rule 33",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 33.",
+    "positive_examples": [
+      "# suspicious_pattern_33"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_33"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-34-0034",
+    "name": "Static review rule 34",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 34.",
+    "positive_examples": [
+      "# suspicious_pattern_34"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_34"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-35-0035",
+    "name": "Static review rule 35",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 35.",
+    "positive_examples": [
+      "# suspicious_pattern_35"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_35"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-36-0036",
+    "name": "Static review rule 36",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 36.",
+    "positive_examples": [
+      "# suspicious_pattern_36"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_36"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-37-0037",
+    "name": "Static review rule 37",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 37.",
+    "positive_examples": [
+      "# suspicious_pattern_37"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_37"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-38-0038",
+    "name": "Static review rule 38",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 38.",
+    "positive_examples": [
+      "# suspicious_pattern_38"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_38"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-39-0039",
+    "name": "Static review rule 39",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 39.",
+    "positive_examples": [
+      "# suspicious_pattern_39"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_39"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-40-0040",
+    "name": "Static review rule 40",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 40.",
+    "positive_examples": [
+      "# suspicious_pattern_40"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_40"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-41-0041",
+    "name": "Static review rule 41",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 41.",
+    "positive_examples": [
+      "# suspicious_pattern_41"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_41"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-42-0042",
+    "name": "Static review rule 42",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 42.",
+    "positive_examples": [
+      "# suspicious_pattern_42"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_42"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-43-0043",
+    "name": "Static review rule 43",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 43.",
+    "positive_examples": [
+      "# suspicious_pattern_43"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_43"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-44-0044",
+    "name": "Static review rule 44",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 44.",
+    "positive_examples": [
+      "# suspicious_pattern_44"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_44"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  },
+  {
+    "rule_id": "HAT003-GENERAL-45-0045",
+    "name": "Static review rule 45",
+    "category": "python_static_review",
+    "severity": "medium",
+    "pattern_type": "AST_or_static_pattern",
+    "description": "Generic Python static review rule 45.",
+    "positive_examples": [
+      "# suspicious_pattern_45"
+    ],
+    "negative_examples": [
+      "# reviewed_safe_pattern_45"
+    ],
+    "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+    "risk_label": "REVIEW_REQUIRED",
+    "do_not_execute": true
+  }
+]

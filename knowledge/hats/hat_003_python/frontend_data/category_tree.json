@@ -1,0 +1,560 @@
+[
+  {
+    "id": "HAT003-TAX-CORE-0001",
+    "name": "python_core",
+    "label": "Python Core",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "children": [
+      {
+        "id": "HAT003-TAX-CORE-0002",
+        "name": "syntax",
+        "label": "Syntax",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0003",
+        "name": "data_model",
+        "label": "Data Model",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0004",
+        "name": "functions",
+        "label": "Functions",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0005",
+        "name": "classes",
+        "label": "Classes",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0006",
+        "name": "exceptions",
+        "label": "Exceptions",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0007",
+        "name": "modules",
+        "label": "Modules",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0008",
+        "name": "imports",
+        "label": "Imports",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0009",
+        "name": "iterators",
+        "label": "Iterators",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0010",
+        "name": "generators",
+        "label": "Generators",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0011",
+        "name": "decorators",
+        "label": "Decorators",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0012",
+        "name": "context_managers",
+        "label": "Context Managers",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0013",
+        "name": "typing",
+        "label": "Typing",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0014",
+        "name": "dataclasses",
+        "label": "Dataclasses",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0015",
+        "name": "pattern_matching",
+        "label": "Pattern Matching",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0016",
+        "name": "async_await",
+        "label": "Async Await",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0017",
+        "name": "concurrency",
+        "label": "Concurrency",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0018",
+        "name": "standard_library",
+        "label": "Standard Library",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0019",
+        "name": "file_io",
+        "label": "File Io",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0020",
+        "name": "logging",
+        "label": "Logging",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0021",
+        "name": "configuration",
+        "label": "Configuration",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0022",
+        "name": "cli_tools",
+        "label": "Cli Tools",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "HAT003-TAX-CORE-0023",
+    "name": "software_engineering",
+    "label": "Software Engineering",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "children": [
+      {
+        "id": "HAT003-TAX-CORE-0024",
+        "name": "project_layout",
+        "label": "Project Layout",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0025",
+        "name": "packaging",
+        "label": "Packaging",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0026",
+        "name": "dependency_management",
+        "label": "Dependency Management",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0027",
+        "name": "testing",
+        "label": "Testing",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0028",
+        "name": "type_checking",
+        "label": "Type Checking",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0029",
+        "name": "linting",
+        "label": "Linting",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0030",
+        "name": "formatting",
+        "label": "Formatting",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0031",
+        "name": "documentation",
+        "label": "Documentation",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0032",
+        "name": "error_handling",
+        "label": "Error Handling",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0033",
+        "name": "observability",
+        "label": "Observability",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0034",
+        "name": "maintainability",
+        "label": "Maintainability",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0035",
+        "name": "refactoring",
+        "label": "Refactoring",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0036",
+        "name": "code_review",
+        "label": "Code Review",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0037",
+        "name": "design_patterns",
+        "label": "Design Patterns",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0038",
+        "name": "architecture_patterns",
+        "label": "Architecture Patterns",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "HAT003-TAX-CORE-0039",
+    "name": "web_api",
+    "label": "Web Api",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "children": [
+      {
+        "id": "HAT003-TAX-CORE-0040",
+        "name": "http_clients",
+        "label": "Http Clients",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0041",
+        "name": "fastapi",
+        "label": "Fastapi",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0042",
+        "name": "django",
+        "label": "Django",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0043",
+        "name": "flask",
+        "label": "Flask",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0044",
+        "name": "asgi",
+        "label": "Asgi",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0045",
+        "name": "wsgi",
+        "label": "Wsgi",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0046",
+        "name": "rest",
+        "label": "Rest",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0047",
+        "name": "authentication",
+        "label": "Authentication",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0048",
+        "name": "authorization",
+        "label": "Authorization",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0049",
+        "name": "validation",
+        "label": "Validation",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0050",
+        "name": "serialization",
+        "label": "Serialization",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0051",
+        "name": "background_tasks",
+        "label": "Background Tasks",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0052",
+        "name": "database_integration",
+        "label": "Database Integration",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "HAT003-TAX-CORE-0053",
+    "name": "data_ml",
+    "label": "Data Ml",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "children": [
+      {
+        "id": "HAT003-TAX-CORE-0054",
+        "name": "numpy",
+        "label": "Numpy",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0055",
+        "name": "pandas",
+        "label": "Pandas",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0056",
+        "name": "matplotlib",
+        "label": "Matplotlib",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0057",
+        "name": "scikit_learn",
+        "label": "Scikit Learn",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0058",
+        "name": "pytorch",
+        "label": "Pytorch",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0059",
+        "name": "tensorflow",
+        "label": "Tensorflow",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0060",
+        "name": "transformers",
+        "label": "Transformers",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0061",
+        "name": "notebooks",
+        "label": "Notebooks",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0062",
+        "name": "reproducibility",
+        "label": "Reproducibility",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0063",
+        "name": "data_validation",
+        "label": "Data Validation",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0064",
+        "name": "model_evaluation",
+        "label": "Model Evaluation",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-CORE-0065",
+        "name": "ml_safety_basics",
+        "label": "Ml Safety Basics",
+        "risk_label": "SAFE_EDUCATIONAL",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "HAT003-TAX-SAFETY-0001",
+    "name": "security_static_safety",
+    "label": "Security Static Safety",
+    "risk_label": "REVIEW_REQUIRED",
+    "children": [
+      {
+        "id": "HAT003-TAX-SAFETY-0002",
+        "name": "unsafe_dynamic_execution",
+        "label": "Unsafe Dynamic Execution",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0003",
+        "name": "subprocess_shell_risk",
+        "label": "Subprocess Shell Risk",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0004",
+        "name": "deserialization",
+        "label": "Deserialization",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0005",
+        "name": "path_traversal",
+        "label": "Path Traversal",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0006",
+        "name": "secrets",
+        "label": "Secrets",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0007",
+        "name": "dependency_risk",
+        "label": "Dependency Risk",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0008",
+        "name": "web_security",
+        "label": "Web Security",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0009",
+        "name": "injection_risks",
+        "label": "Injection Risks",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0010",
+        "name": "file_system_risk",
+        "label": "File System Risk",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0011",
+        "name": "network_risk",
+        "label": "Network Risk",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0012",
+        "name": "logging_risk",
+        "label": "Logging Risk",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0013",
+        "name": "configuration_risk",
+        "label": "Configuration Risk",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      },
+      {
+        "id": "HAT003-TAX-SAFETY-0014",
+        "name": "ai_generated_code_risk",
+        "label": "Ai Generated Code Risk",
+        "risk_label": "SECURITY_SENSITIVE",
+        "children": []
+      }
+    ]
+  }
+]

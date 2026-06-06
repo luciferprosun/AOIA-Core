@@ -1,0 +1,18 @@
+{
+  "output_folder": "/home/l/Desktop/AOIA_HAT_003_PYTHON_KNOWLEDGE_PACK_v1_DRAFT",
+  "zip_path": "/home/l/Desktop/AOIA_HAT_003_PYTHON_KNOWLEDGE_PACK_v1_DRAFT.zip",
+  "validation_passed": true,
+  "counts": {
+    "sources": 92,
+    "knowledge_cards": 125,
+    "validation_rules": 45,
+    "corpus_cases": 65,
+    "architecture_patterns": 30,
+    "security_patterns": 30,
+    "tooling_entries": 25,
+    "curriculum_modules": 12,
+    "files": 38
+  },
+  "aoia_core_status": "## dev/gt-runtime-8-bash-safety-planning...origin/dev/gt-runtime-8-bash-safety-planning",
+  "aoia_core_diff_stat": "(empty)"
+}

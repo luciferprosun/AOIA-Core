@@ -1,0 +1,26 @@
+{
+  "pack_id": "AOIA-HAT-003-PYTHON-KNOWLEDGE-PACK",
+  "version": "v1.0 DRAFT",
+  "created_at_local": "2026-06-06T18:57:35",
+  "output_folder": "/home/l/Desktop/AOIA_HAT_003_PYTHON_KNOWLEDGE_PACK_v1_DRAFT",
+  "zip_path": "/home/l/Desktop/AOIA_HAT_003_PYTHON_KNOWLEDGE_PACK_v1_DRAFT.zip",
+  "prototype_zip_status": "prototype ZIP not found at /mnt/data/4_5848376578060328350.zip; structure built from user requirements",
+  "boundary": "knowledge and static review only; no execution approval",
+  "risk_labels": [
+    "SAFE_EDUCATIONAL",
+    "REVIEW_REQUIRED",
+    "SECURITY_SENSITIVE",
+    "DANGEROUS_IF_EXECUTED",
+    "FORBIDDEN_LIVE_USE"
+  ],
+  "aoia_tags": [
+    "hat:003",
+    "domain:python",
+    "execution:no",
+    "review:human-required"
+  ],
+  "no_repo_files_modified": true,
+  "no_commit": true,
+  "no_push": true,
+  "network_used": false
+}

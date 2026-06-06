@@ -1,0 +1,198 @@
+[
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0001",
+    "parent_id": "",
+    "name": "security_static_safety",
+    "label": "Security Static Safety",
+    "description": "Top-level Hat 003 category for security static safety.",
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0002",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "unsafe_dynamic_execution",
+    "label": "Unsafe Dynamic Execution",
+    "description": "Static review and curriculum node for unsafe dynamic execution.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0003",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "subprocess_shell_risk",
+    "label": "Subprocess Shell Risk",
+    "description": "Static review and curriculum node for subprocess shell risk.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0004",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "deserialization",
+    "label": "Deserialization",
+    "description": "Static review and curriculum node for deserialization.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0005",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "path_traversal",
+    "label": "Path Traversal",
+    "description": "Static review and curriculum node for path traversal.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0006",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "secrets",
+    "label": "Secrets",
+    "description": "Static review and curriculum node for secrets.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0007",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "dependency_risk",
+    "label": "Dependency Risk",
+    "description": "Static review and curriculum node for dependency risk.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0008",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "web_security",
+    "label": "Web Security",
+    "description": "Static review and curriculum node for web security.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0009",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "injection_risks",
+    "label": "Injection Risks",
+    "description": "Static review and curriculum node for injection risks.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0010",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "file_system_risk",
+    "label": "File System Risk",
+    "description": "Static review and curriculum node for file system risk.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0011",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "network_risk",
+    "label": "Network Risk",
+    "description": "Static review and curriculum node for network risk.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0012",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "logging_risk",
+    "label": "Logging Risk",
+    "description": "Static review and curriculum node for logging risk.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0013",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "configuration_risk",
+    "label": "Configuration Risk",
+    "description": "Static review and curriculum node for configuration risk.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-SAFETY-0014",
+    "parent_id": "HAT003-TAX-SAFETY-0001",
+    "name": "ai_generated_code_risk",
+    "label": "Ai Generated Code Risk",
+    "description": "Static review and curriculum node for ai generated code risk.",
+    "risk_label": "SECURITY_SENSITIVE",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  }
+]

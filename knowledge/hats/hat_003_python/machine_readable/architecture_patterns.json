@@ -1,0 +1,722 @@
+[
+  {
+    "pattern_id": "HAT003-ARCH-0001",
+    "name": "repository_pattern",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear repository pattern boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.repository_pattern"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0002",
+    "name": "unit_of_work",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear unit of work boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.unit_of_work"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0003",
+    "name": "service_layer",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear service layer boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.service_layer"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0004",
+    "name": "ports_and_adapters",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear ports and adapters boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.ports_and_adapters"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0005",
+    "name": "hexagonal_architecture",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear hexagonal architecture boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.hexagonal_architecture"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0006",
+    "name": "dependency_inversion",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear dependency inversion boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.dependency_inversion"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0007",
+    "name": "composition_root",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear composition root boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.composition_root"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0008",
+    "name": "domain_model",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear domain model boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.domain_model"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0009",
+    "name": "application_service",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear application service boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.application_service"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0010",
+    "name": "adapter_boundary",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear adapter boundary boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.adapter_boundary"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0011",
+    "name": "dto_mapping",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear dto mapping boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.dto_mapping"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0012",
+    "name": "command_handler",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear command handler boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.command_handler"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0013",
+    "name": "query_handler",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear query handler boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.query_handler"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0014",
+    "name": "event_dispatcher",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear event dispatcher boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.event_dispatcher"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0015",
+    "name": "domain_event",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear domain event boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.domain_event"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0016",
+    "name": "transaction_script",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear transaction script boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.transaction_script"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0017",
+    "name": "anti_corruption_layer",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear anti corruption layer boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.anti_corruption_layer"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0018",
+    "name": "facade",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear facade boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.facade"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0019",
+    "name": "strategy",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear strategy boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.strategy"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0020",
+    "name": "factory",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear factory boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.factory"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0021",
+    "name": "builder",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear builder boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.builder"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0022",
+    "name": "observer",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear observer boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.observer"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0023",
+    "name": "pipeline",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear pipeline boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.pipeline"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0024",
+    "name": "plugin_registry",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear plugin registry boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.plugin_registry"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0025",
+    "name": "configuration_object",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear configuration object boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.configuration_object"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0026",
+    "name": "functional_core_imperative_shell",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear functional core imperative shell boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.functional_core_imperative_shell"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0027",
+    "name": "layered_architecture",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear layered architecture boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.layered_architecture"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0028",
+    "name": "modular_monolith",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear modular monolith boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.modular_monolith"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0029",
+    "name": "async_worker_boundary",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear async worker boundary boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.async_worker_boundary"
+    ]
+  },
+  {
+    "pattern_id": "HAT003-ARCH-0030",
+    "name": "test_double_boundary",
+    "category": "architecture_patterns",
+    "summary": "Review Python code for clear test double boundary boundaries and dependency direction.",
+    "use_when": "Use as a static design review lens, not as mandatory architecture.",
+    "review_questions": [
+      "Are dependencies pointing inward toward stable domain rules?",
+      "Can infrastructure be replaced without rewriting business logic?",
+      "Are tests able to isolate the boundary?"
+    ],
+    "source_ids": [
+      "SRC-PY-BOOK-026",
+      "SRC-PY-ARCHITECTURE-030"
+    ],
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "level:professional",
+      "mV:-70.003.architecture.test_double_boundary"
+    ]
+  }
+]

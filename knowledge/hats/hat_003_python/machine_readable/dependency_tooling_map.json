@@ -1,0 +1,377 @@
+[
+  {
+    "tool_id": "HAT003-TOOL-0001",
+    "name": "pip",
+    "category": "package_installation",
+    "recommended_use": "Install Python packages from configured indexes with careful index and hash policy review.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0002",
+    "name": "uv",
+    "category": "environment_and_locking",
+    "recommended_use": "Fast package and environment workflow; review lockfile and index choices.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0003",
+    "name": "venv",
+    "category": "environment",
+    "recommended_use": "Standard library virtual environments.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0004",
+    "name": "pipx",
+    "category": "app_installation",
+    "recommended_use": "Install Python command-line apps into isolated environments.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0005",
+    "name": "poetry",
+    "category": "project_management",
+    "recommended_use": "Manage dependencies, locking, and publishing workflow.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0006",
+    "name": "hatch",
+    "category": "project_management",
+    "recommended_use": "Build, version, and environment workflow.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0007",
+    "name": "setuptools",
+    "category": "build_backend",
+    "recommended_use": "Classic build backend and package metadata support.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0008",
+    "name": "wheel",
+    "category": "distribution",
+    "recommended_use": "Wheel distribution format.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0009",
+    "name": "conda",
+    "category": "environment",
+    "recommended_use": "Cross-language environment management.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0010",
+    "name": "pytest",
+    "category": "testing",
+    "recommended_use": "Test framework and fixture system.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0011",
+    "name": "unittest",
+    "category": "testing",
+    "recommended_use": "Standard library test framework.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0012",
+    "name": "hypothesis",
+    "category": "property_testing",
+    "recommended_use": "Generate input cases for property tests.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0013",
+    "name": "tox",
+    "category": "test_matrix",
+    "recommended_use": "Run tests across environments.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0014",
+    "name": "nox",
+    "category": "session_automation",
+    "recommended_use": "Python session automation.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0015",
+    "name": "coverage.py",
+    "category": "coverage",
+    "recommended_use": "Measure executed test coverage.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0016",
+    "name": "ruff",
+    "category": "linting",
+    "recommended_use": "Fast linting and formatting.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0017",
+    "name": "black",
+    "category": "formatting",
+    "recommended_use": "Consistent code formatting.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0018",
+    "name": "isort",
+    "category": "import_sorting",
+    "recommended_use": "Stable import ordering.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0019",
+    "name": "mypy",
+    "category": "type_checking",
+    "recommended_use": "Static type checking.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0020",
+    "name": "pyright",
+    "category": "type_checking",
+    "recommended_use": "Static type checking and editor integration.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0021",
+    "name": "pre-commit",
+    "category": "quality_gate",
+    "recommended_use": "Run local checks before commits.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0022",
+    "name": "twine",
+    "category": "publishing",
+    "recommended_use": "Upload distributions after credential and repository review.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0023",
+    "name": "build",
+    "category": "build_frontend",
+    "recommended_use": "PEP 517 package build frontend.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0024",
+    "name": "pip-audit",
+    "category": "dependency_security",
+    "recommended_use": "Audit dependency vulnerability metadata without treating results as final proof.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "tool_id": "HAT003-TOOL-0025",
+    "name": "bandit",
+    "category": "security_static_review",
+    "recommended_use": "Static security scanner for Python patterns.",
+    "static_review_notes": "Review configuration, lockfiles, index URLs, and generated reports before acting.",
+    "risk_label": "REVIEW_REQUIRED",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "source:tool",
+      "execution:no",
+      "review:human-required"
+    ]
+  }
+]

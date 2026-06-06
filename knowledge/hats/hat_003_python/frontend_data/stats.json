@@ -1,0 +1,13 @@
+{
+  "card_count": 125,
+  "taxonomy_node_count": 79,
+  "security_card_count": 24,
+  "risk_labels": [
+    "SAFE_EDUCATIONAL",
+    "REVIEW_REQUIRED",
+    "SECURITY_SENSITIVE",
+    "DANGEROUS_IF_EXECUTED",
+    "FORBIDDEN_LIVE_USE"
+  ],
+  "version": "v1.0 DRAFT"
+}

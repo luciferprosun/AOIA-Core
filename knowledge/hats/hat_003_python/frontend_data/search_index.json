@@ -1,0 +1,752 @@
+[
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0001",
+    "kind": "knowledge_card",
+    "title": "Python statement and expression boundaries",
+    "text": "Python statement and expression boundaries Static review card for python statement and expression boundaries in Python engineering. python_core syntax hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.syntax"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0002",
+    "kind": "knowledge_card",
+    "title": "Object identity equality and truthiness",
+    "text": "Object identity equality and truthiness Static review card for object identity equality and truthiness in Python engineering. python_core data_model hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.data_model"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0003",
+    "kind": "knowledge_card",
+    "title": "Function arguments defaults and call semantics",
+    "text": "Function arguments defaults and call semantics Static review card for function arguments defaults and call semantics in Python engineering. python_core functions hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.functions"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0004",
+    "kind": "knowledge_card",
+    "title": "Class attributes versus instance attributes",
+    "text": "Class attributes versus instance attributes Static review card for class attributes versus instance attributes in Python engineering. python_core classes hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.classes"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0005",
+    "kind": "knowledge_card",
+    "title": "Exception hierarchy and explicit handling",
+    "text": "Exception hierarchy and explicit handling Static review card for exception hierarchy and explicit handling in Python engineering. python_core exceptions hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.exceptions"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0006",
+    "kind": "knowledge_card",
+    "title": "Module boundaries and import side effects",
+    "text": "Module boundaries and import side effects Static review card for module boundaries and import side effects in Python engineering. python_core modules hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.modules"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0007",
+    "kind": "knowledge_card",
+    "title": "Absolute and relative import review",
+    "text": "Absolute and relative import review Static review card for absolute and relative import review in Python engineering. python_core imports hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.imports"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0008",
+    "kind": "knowledge_card",
+    "title": "Iterator protocol review",
+    "text": "Iterator protocol review Static review card for iterator protocol review in Python engineering. python_core iterators hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.iterators"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0009",
+    "kind": "knowledge_card",
+    "title": "Generator state and lazy evaluation",
+    "text": "Generator state and lazy evaluation Static review card for generator state and lazy evaluation in Python engineering. python_core generators hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.generators"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0010",
+    "kind": "knowledge_card",
+    "title": "Decorator transparency and metadata",
+    "text": "Decorator transparency and metadata Static review card for decorator transparency and metadata in Python engineering. python_core decorators hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.decorators"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0011",
+    "kind": "knowledge_card",
+    "title": "Resource lifetime with context managers",
+    "text": "Resource lifetime with context managers Static review card for resource lifetime with context managers in Python engineering. python_core context_managers hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.context_managers"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0012",
+    "kind": "knowledge_card",
+    "title": "Type hints as review support",
+    "text": "Type hints as review support Static review card for type hints as review support in Python engineering. python_core typing hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.typing"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0013",
+    "kind": "knowledge_card",
+    "title": "Dataclass defaults and mutability",
+    "text": "Dataclass defaults and mutability Static review card for dataclass defaults and mutability in Python engineering. python_core dataclasses hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.dataclasses"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0014",
+    "kind": "knowledge_card",
+    "title": "Pattern matching exhaustiveness review",
+    "text": "Pattern matching exhaustiveness review Static review card for pattern matching exhaustiveness review in Python engineering. python_core pattern_matching hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.pattern_matching"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0015",
+    "kind": "knowledge_card",
+    "title": "Async function boundaries",
+    "text": "Async function boundaries Static review card for async function boundaries in Python engineering. python_core async_await hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.async_await"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0016",
+    "kind": "knowledge_card",
+    "title": "Thread process and async tradeoffs",
+    "text": "Thread process and async tradeoffs Static review card for thread process and async tradeoffs in Python engineering. python_core concurrency hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.concurrency"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0017",
+    "kind": "knowledge_card",
+    "title": "Standard library first review",
+    "text": "Standard library first review Static review card for standard library first review in Python engineering. python_core standard_library hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.standard_library"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0018",
+    "kind": "knowledge_card",
+    "title": "File I/O encoding and path review",
+    "text": "File I/O encoding and path review Static review card for file i/o encoding and path review in Python engineering. python_core file_io hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.file_io"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0019",
+    "kind": "knowledge_card",
+    "title": "Logging without leaking secrets",
+    "text": "Logging without leaking secrets Static review card for logging without leaking secrets in Python engineering. python_core logging hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.logging"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0020",
+    "kind": "knowledge_card",
+    "title": "Configuration loading boundaries",
+    "text": "Configuration loading boundaries Static review card for configuration loading boundaries in Python engineering. python_core configuration hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.configuration"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0021",
+    "kind": "knowledge_card",
+    "title": "CLI input validation",
+    "text": "CLI input validation Static review card for cli input validation in Python engineering. python_core cli_tools hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.cli_tools"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0022",
+    "kind": "knowledge_card",
+    "title": "src layout and import clarity",
+    "text": "src layout and import clarity Static review card for src layout and import clarity in Python engineering. software_engineering project_layout hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.project_layout"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0023",
+    "kind": "knowledge_card",
+    "title": "pyproject metadata review",
+    "text": "pyproject metadata review Static review card for pyproject metadata review in Python engineering. software_engineering packaging hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.packaging"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0024",
+    "kind": "knowledge_card",
+    "title": "Pinned dependency review",
+    "text": "Pinned dependency review Static review card for pinned dependency review in Python engineering. software_engineering dependency_management hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.dependency_management"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0025",
+    "kind": "knowledge_card",
+    "title": "Unit test scope and determinism",
+    "text": "Unit test scope and determinism Static review card for unit test scope and determinism in Python engineering. software_engineering testing hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.testing"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0026",
+    "kind": "knowledge_card",
+    "title": "Type checker configuration",
+    "text": "Type checker configuration Static review card for type checker configuration in Python engineering. software_engineering type_checking hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.type_checking"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0027",
+    "kind": "knowledge_card",
+    "title": "Lint rule triage",
+    "text": "Lint rule triage Static review card for lint rule triage in Python engineering. software_engineering linting hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.linting"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0028",
+    "kind": "knowledge_card",
+    "title": "Formatter consistency",
+    "text": "Formatter consistency Static review card for formatter consistency in Python engineering. software_engineering formatting hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.formatting"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0029",
+    "kind": "knowledge_card",
+    "title": "Docstring purpose and limits",
+    "text": "Docstring purpose and limits Static review card for docstring purpose and limits in Python engineering. software_engineering documentation hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.documentation"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0030",
+    "kind": "knowledge_card",
+    "title": "Error boundaries and user messages",
+    "text": "Error boundaries and user messages Static review card for error boundaries and user messages in Python engineering. software_engineering error_handling hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.error_handling"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0031",
+    "kind": "knowledge_card",
+    "title": "Metrics logs and traces without secrets",
+    "text": "Metrics logs and traces without secrets Static review card for metrics logs and traces without secrets in Python engineering. software_engineering observability hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.observability"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0032",
+    "kind": "knowledge_card",
+    "title": "Complexity review",
+    "text": "Complexity review Static review card for complexity review in Python engineering. software_engineering maintainability hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.maintainability"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0033",
+    "kind": "knowledge_card",
+    "title": "Small behavior-preserving changes",
+    "text": "Small behavior-preserving changes Static review card for small behavior-preserving changes in Python engineering. software_engineering refactoring hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.refactoring"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0034",
+    "kind": "knowledge_card",
+    "title": "Static review checklist discipline",
+    "text": "Static review checklist discipline Static review card for static review checklist discipline in Python engineering. software_engineering code_review hat:003 domain:python execution:no review:human-required level:professional source:official mV:-70.003.code_review"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0035",
+    "kind": "knowledge_card",
+    "title": "Pattern use without overengineering",
+    "text": "Pattern use without overengineering Static review card for pattern use without overengineering in Python engineering. software_engineering design_patterns hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.design_patterns"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0036",
+    "kind": "knowledge_card",
+    "title": "Architecture boundary mapping",
+    "text": "Architecture boundary mapping Static review card for architecture boundary mapping in Python engineering. software_engineering architecture_patterns hat:003 domain:python execution:no review:human-required level:professional source:official mV:-70.003.architecture_patterns"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0037",
+    "kind": "knowledge_card",
+    "title": "HTTP timeout and retry review",
+    "text": "HTTP timeout and retry review Static review card for http timeout and retry review in Python engineering. web_api http_clients hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.http_clients"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0038",
+    "kind": "knowledge_card",
+    "title": "FastAPI dependency injection review",
+    "text": "FastAPI dependency injection review Static review card for fastapi dependency injection review in Python engineering. web_api fastapi hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.fastapi"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0039",
+    "kind": "knowledge_card",
+    "title": "Django settings and ORM review",
+    "text": "Django settings and ORM review Static review card for django settings and orm review in Python engineering. web_api django hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.django"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0040",
+    "kind": "knowledge_card",
+    "title": "Flask application factory review",
+    "text": "Flask application factory review Static review card for flask application factory review in Python engineering. web_api flask hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.flask"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0041",
+    "kind": "knowledge_card",
+    "title": "ASGI lifecycle review",
+    "text": "ASGI lifecycle review Static review card for asgi lifecycle review in Python engineering. web_api asgi hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.asgi"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0042",
+    "kind": "knowledge_card",
+    "title": "WSGI deployment boundary review",
+    "text": "WSGI deployment boundary review Static review card for wsgi deployment boundary review in Python engineering. web_api wsgi hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.wsgi"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0043",
+    "kind": "knowledge_card",
+    "title": "REST status and schema review",
+    "text": "REST status and schema review Static review card for rest status and schema review in Python engineering. web_api rest hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.rest"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0044",
+    "kind": "knowledge_card",
+    "title": "Authentication flow review",
+    "text": "Authentication flow review Static review card for authentication flow review in Python engineering. web_api authentication hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.authentication"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0045",
+    "kind": "knowledge_card",
+    "title": "Authorization check placement",
+    "text": "Authorization check placement Static review card for authorization check placement in Python engineering. web_api authorization hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.authorization"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0046",
+    "kind": "knowledge_card",
+    "title": "Request validation review",
+    "text": "Request validation review Static review card for request validation review in Python engineering. web_api validation hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.validation"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0047",
+    "kind": "knowledge_card",
+    "title": "Serialization format safety",
+    "text": "Serialization format safety Static review card for serialization format safety in Python engineering. web_api serialization hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.serialization"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0048",
+    "kind": "knowledge_card",
+    "title": "Background task reliability",
+    "text": "Background task reliability Static review card for background task reliability in Python engineering. web_api background_tasks hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.background_tasks"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0049",
+    "kind": "knowledge_card",
+    "title": "Database transaction boundary",
+    "text": "Database transaction boundary Static review card for database transaction boundary in Python engineering. web_api database_integration hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.database_integration"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0050",
+    "kind": "knowledge_card",
+    "title": "Array shape and dtype review",
+    "text": "Array shape and dtype review Static review card for array shape and dtype review in Python engineering. data_ml numpy hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.numpy"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0051",
+    "kind": "knowledge_card",
+    "title": "DataFrame mutation review",
+    "text": "DataFrame mutation review Static review card for dataframe mutation review in Python engineering. data_ml pandas hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.pandas"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0052",
+    "kind": "knowledge_card",
+    "title": "Lazy plan review basics",
+    "text": "Lazy plan review basics Static review card for lazy plan review basics in Python engineering. data_ml polars hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.polars"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0053",
+    "kind": "knowledge_card",
+    "title": "Plot generation boundary",
+    "text": "Plot generation boundary Static review card for plot generation boundary in Python engineering. data_ml matplotlib hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.matplotlib"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0054",
+    "kind": "knowledge_card",
+    "title": "Scientific routine assumptions",
+    "text": "Scientific routine assumptions Static review card for scientific routine assumptions in Python engineering. data_ml scipy hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.scipy"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0055",
+    "kind": "knowledge_card",
+    "title": "Train test split review",
+    "text": "Train test split review Static review card for train test split review in Python engineering. data_ml scikit_learn hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.scikit_learn"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0056",
+    "kind": "knowledge_card",
+    "title": "Model checkpoint safety review",
+    "text": "Model checkpoint safety review Static review card for model checkpoint safety review in Python engineering. data_ml pytorch hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.pytorch"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0057",
+    "kind": "knowledge_card",
+    "title": "TensorFlow saved model review",
+    "text": "TensorFlow saved model review Static review card for tensorflow saved model review in Python engineering. data_ml tensorflow hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.tensorflow"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0058",
+    "kind": "knowledge_card",
+    "title": "Model and tokenizer source review",
+    "text": "Model and tokenizer source review Static review card for model and tokenizer source review in Python engineering. data_ml transformers hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.transformers"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0059",
+    "kind": "knowledge_card",
+    "title": "Notebook reproducibility review",
+    "text": "Notebook reproducibility review Static review card for notebook reproducibility review in Python engineering. data_ml jupyter hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.jupyter"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0060",
+    "kind": "knowledge_card",
+    "title": "Hosted notebook boundary",
+    "text": "Hosted notebook boundary Static review card for hosted notebook boundary in Python engineering. data_ml colab hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.colab"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0061",
+    "kind": "knowledge_card",
+    "title": "Seeds data versions and environments",
+    "text": "Seeds data versions and environments Static review card for seeds data versions and environments in Python engineering. data_ml reproducibility hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.reproducibility"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0062",
+    "kind": "knowledge_card",
+    "title": "Schema checks for data pipelines",
+    "text": "Schema checks for data pipelines Static review card for schema checks for data pipelines in Python engineering. data_ml data_validation hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.data_validation"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0063",
+    "kind": "knowledge_card",
+    "title": "Metric selection and leakage review",
+    "text": "Metric selection and leakage review Static review card for metric selection and leakage review in Python engineering. data_ml model_evaluation hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.model_evaluation"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0064",
+    "kind": "knowledge_card",
+    "title": "ML safety static checklist",
+    "text": "ML safety static checklist Static review card for ml safety static checklist in Python engineering. data_ml ml_safety_basics hat:003 domain:python execution:no review:human-required level:professional source:official mV:-70.003.ml_safety_basics"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0065",
+    "kind": "knowledge_card",
+    "title": "Unsafe eval usage detection",
+    "text": "Unsafe eval usage detection Static review card for unsafe eval usage detection in Python engineering. security_static_safety unsafe_dynamic_execution hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.unsafe_dynamic_execution"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0066",
+    "kind": "knowledge_card",
+    "title": "Unsafe exec usage detection",
+    "text": "Unsafe exec usage detection Static review card for unsafe exec usage detection in Python engineering. security_static_safety unsafe_dynamic_execution hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.unsafe_dynamic_execution"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0067",
+    "kind": "knowledge_card",
+    "title": "Unsafe pickle loading detection",
+    "text": "Unsafe pickle loading detection Static review card for unsafe pickle loading detection in Python engineering. security_static_safety deserialization hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.deserialization"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0068",
+    "kind": "knowledge_card",
+    "title": "Unsafe yaml load detection",
+    "text": "Unsafe yaml load detection Static review card for unsafe yaml load detection in Python engineering. security_static_safety deserialization hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.deserialization"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0069",
+    "kind": "knowledge_card",
+    "title": "Subprocess shell argument review",
+    "text": "Subprocess shell argument review Static review card for subprocess shell argument review in Python engineering. security_static_safety subprocess_shell_risk hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.subprocess_shell_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0070",
+    "kind": "knowledge_card",
+    "title": "Shell injection concept review",
+    "text": "Shell injection concept review Static review card for shell injection concept review in Python engineering. security_static_safety subprocess_shell_risk hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.subprocess_shell_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0071",
+    "kind": "knowledge_card",
+    "title": "Path traversal review",
+    "text": "Path traversal review Static review card for path traversal review in Python engineering. security_static_safety path_traversal hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.path_traversal"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0072",
+    "kind": "knowledge_card",
+    "title": "Insecure temporary file review",
+    "text": "Insecure temporary file review Static review card for insecure temporary file review in Python engineering. security_static_safety file_system_risk hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.file_system_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0073",
+    "kind": "knowledge_card",
+    "title": "Hardcoded secret candidate review",
+    "text": "Hardcoded secret candidate review Static review card for hardcoded secret candidate review in Python engineering. security_static_safety secrets hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.secrets"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0074",
+    "kind": "knowledge_card",
+    "title": "Dependency confusion review",
+    "text": "Dependency confusion review Static review card for dependency confusion review in Python engineering. security_static_safety dependency_risk hat:003 domain:python execution:no review:human-required level:professional safety:static-review mV:-70.003.dependency_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0075",
+    "kind": "knowledge_card",
+    "title": "Typosquatting review",
+    "text": "Typosquatting review Static review card for typosquatting review in Python engineering. security_static_safety dependency_risk hat:003 domain:python execution:no review:human-required level:professional safety:static-review mV:-70.003.dependency_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0076",
+    "kind": "knowledge_card",
+    "title": "Unpinned dependency review",
+    "text": "Unpinned dependency review Static review card for unpinned dependency review in Python engineering. security_static_safety dependency_risk hat:003 domain:python execution:no review:human-required level:intermediate safety:static-review mV:-70.003.dependency_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0077",
+    "kind": "knowledge_card",
+    "title": "Insecure deserialization boundaries",
+    "text": "Insecure deserialization boundaries Static review card for insecure deserialization boundaries in Python engineering. security_static_safety deserialization hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.deserialization"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0078",
+    "kind": "knowledge_card",
+    "title": "Unsafe file write review",
+    "text": "Unsafe file write review Static review card for unsafe file write review in Python engineering. security_static_safety file_system_risk hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.file_system_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0079",
+    "kind": "knowledge_card",
+    "title": "Unsafe network call review",
+    "text": "Unsafe network call review Static review card for unsafe network call review in Python engineering. security_static_safety network_risk hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.network_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0080",
+    "kind": "knowledge_card",
+    "title": "SSRF concept review",
+    "text": "SSRF concept review Static review card for ssrf concept review in Python engineering. security_static_safety network_risk hat:003 domain:python execution:no review:human-required level:professional safety:static-review mV:-70.003.network_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0081",
+    "kind": "knowledge_card",
+    "title": "SQL injection concept review",
+    "text": "SQL injection concept review Static review card for sql injection concept review in Python engineering. security_static_safety injection_risks hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.injection_risks"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0082",
+    "kind": "knowledge_card",
+    "title": "XSS concept for Python web apps",
+    "text": "XSS concept for Python web apps Static review card for xss concept for python web apps in Python engineering. security_static_safety web_security hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.web_security"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0083",
+    "kind": "knowledge_card",
+    "title": "Authentication mistake review",
+    "text": "Authentication mistake review Static review card for authentication mistake review in Python engineering. security_static_safety web_security hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.web_security"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0084",
+    "kind": "knowledge_card",
+    "title": "Authorization mistake review",
+    "text": "Authorization mistake review Static review card for authorization mistake review in Python engineering. security_static_safety web_security hat:003 domain:python execution:no review:human-required level:advanced safety:static-review mV:-70.003.web_security"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0085",
+    "kind": "knowledge_card",
+    "title": "Logging secret prevention",
+    "text": "Logging secret prevention Static review card for logging secret prevention in Python engineering. security_static_safety logging_risk hat:003 domain:python execution:no review:human-required level:intermediate safety:static-review mV:-70.003.logging_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0086",
+    "kind": "knowledge_card",
+    "title": "Supply chain risk review",
+    "text": "Supply chain risk review Static review card for supply chain risk review in Python engineering. security_static_safety dependency_risk hat:003 domain:python execution:no review:human-required level:professional safety:static-review mV:-70.003.dependency_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0087",
+    "kind": "knowledge_card",
+    "title": "Unsafe debug configuration review",
+    "text": "Unsafe debug configuration review Static review card for unsafe debug configuration review in Python engineering. security_static_safety configuration_risk hat:003 domain:python execution:no review:human-required level:intermediate safety:static-review mV:-70.003.configuration_risk"
+  },
+  {
+    "id": "HAT003-PY-SECURITY-STATIC-SAFETY-0088",
+    "kind": "knowledge_card",
+    "title": "AI-generated code static review",
+    "text": "AI-generated code static review Static review card for ai-generated code static review in Python engineering. security_static_safety ai_generated_code_risk hat:003 domain:python execution:no review:human-required level:professional safety:static-review mV:-70.003.ai_generated_code_risk"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0089",
+    "kind": "knowledge_card",
+    "title": "Docstring purpose and limits checklist variant 89",
+    "text": "Docstring purpose and limits checklist variant 89 Static review card for docstring purpose and limits checklist variant 89 in Python engineering. software_engineering documentation hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.documentation"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0090",
+    "kind": "knowledge_card",
+    "title": "Error boundaries and user messages checklist variant 90",
+    "text": "Error boundaries and user messages checklist variant 90 Static review card for error boundaries and user messages checklist variant 90 in Python engineering. software_engineering error_handling hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.error_handling"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0091",
+    "kind": "knowledge_card",
+    "title": "Metrics logs and traces without secrets checklist variant 91",
+    "text": "Metrics logs and traces without secrets checklist variant 91 Static review card for metrics logs and traces without secrets checklist variant 91 in Python engineering. software_engineering observability hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.observability"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0092",
+    "kind": "knowledge_card",
+    "title": "Complexity review checklist variant 92",
+    "text": "Complexity review checklist variant 92 Static review card for complexity review checklist variant 92 in Python engineering. software_engineering maintainability hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.maintainability"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0093",
+    "kind": "knowledge_card",
+    "title": "Small behavior-preserving changes checklist variant 93",
+    "text": "Small behavior-preserving changes checklist variant 93 Static review card for small behavior-preserving changes checklist variant 93 in Python engineering. software_engineering refactoring hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.refactoring"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0094",
+    "kind": "knowledge_card",
+    "title": "Static review checklist discipline checklist variant 94",
+    "text": "Static review checklist discipline checklist variant 94 Static review card for static review checklist discipline checklist variant 94 in Python engineering. software_engineering code_review hat:003 domain:python execution:no review:human-required level:professional source:official mV:-70.003.code_review"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0095",
+    "kind": "knowledge_card",
+    "title": "Pattern use without overengineering checklist variant 95",
+    "text": "Pattern use without overengineering checklist variant 95 Static review card for pattern use without overengineering checklist variant 95 in Python engineering. software_engineering design_patterns hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.design_patterns"
+  },
+  {
+    "id": "HAT003-PY-SOFTWARE-ENGINEERING-0096",
+    "kind": "knowledge_card",
+    "title": "Architecture boundary mapping checklist variant 96",
+    "text": "Architecture boundary mapping checklist variant 96 Static review card for architecture boundary mapping checklist variant 96 in Python engineering. software_engineering architecture_patterns hat:003 domain:python execution:no review:human-required level:professional source:official mV:-70.003.architecture_patterns"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0097",
+    "kind": "knowledge_card",
+    "title": "HTTP timeout and retry review checklist variant 97",
+    "text": "HTTP timeout and retry review checklist variant 97 Static review card for http timeout and retry review checklist variant 97 in Python engineering. web_api http_clients hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.http_clients"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0098",
+    "kind": "knowledge_card",
+    "title": "FastAPI dependency injection review checklist variant 98",
+    "text": "FastAPI dependency injection review checklist variant 98 Static review card for fastapi dependency injection review checklist variant 98 in Python engineering. web_api fastapi hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.fastapi"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0099",
+    "kind": "knowledge_card",
+    "title": "Django settings and ORM review checklist variant 99",
+    "text": "Django settings and ORM review checklist variant 99 Static review card for django settings and orm review checklist variant 99 in Python engineering. web_api django hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.django"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0100",
+    "kind": "knowledge_card",
+    "title": "Flask application factory review checklist variant 100",
+    "text": "Flask application factory review checklist variant 100 Static review card for flask application factory review checklist variant 100 in Python engineering. web_api flask hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.flask"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0101",
+    "kind": "knowledge_card",
+    "title": "ASGI lifecycle review checklist variant 101",
+    "text": "ASGI lifecycle review checklist variant 101 Static review card for asgi lifecycle review checklist variant 101 in Python engineering. web_api asgi hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.asgi"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0102",
+    "kind": "knowledge_card",
+    "title": "WSGI deployment boundary review checklist variant 102",
+    "text": "WSGI deployment boundary review checklist variant 102 Static review card for wsgi deployment boundary review checklist variant 102 in Python engineering. web_api wsgi hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.wsgi"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0103",
+    "kind": "knowledge_card",
+    "title": "REST status and schema review checklist variant 103",
+    "text": "REST status and schema review checklist variant 103 Static review card for rest status and schema review checklist variant 103 in Python engineering. web_api rest hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.rest"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0104",
+    "kind": "knowledge_card",
+    "title": "Authentication flow review checklist variant 104",
+    "text": "Authentication flow review checklist variant 104 Static review card for authentication flow review checklist variant 104 in Python engineering. web_api authentication hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.authentication"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0105",
+    "kind": "knowledge_card",
+    "title": "Authorization check placement checklist variant 105",
+    "text": "Authorization check placement checklist variant 105 Static review card for authorization check placement checklist variant 105 in Python engineering. web_api authorization hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.authorization"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0106",
+    "kind": "knowledge_card",
+    "title": "Request validation review checklist variant 106",
+    "text": "Request validation review checklist variant 106 Static review card for request validation review checklist variant 106 in Python engineering. web_api validation hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.validation"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0107",
+    "kind": "knowledge_card",
+    "title": "Serialization format safety checklist variant 107",
+    "text": "Serialization format safety checklist variant 107 Static review card for serialization format safety checklist variant 107 in Python engineering. web_api serialization hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.serialization"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0108",
+    "kind": "knowledge_card",
+    "title": "Background task reliability checklist variant 108",
+    "text": "Background task reliability checklist variant 108 Static review card for background task reliability checklist variant 108 in Python engineering. web_api background_tasks hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.background_tasks"
+  },
+  {
+    "id": "HAT003-PY-WEB-API-0109",
+    "kind": "knowledge_card",
+    "title": "Database transaction boundary checklist variant 109",
+    "text": "Database transaction boundary checklist variant 109 Static review card for database transaction boundary checklist variant 109 in Python engineering. web_api database_integration hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.database_integration"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0110",
+    "kind": "knowledge_card",
+    "title": "Array shape and dtype review checklist variant 110",
+    "text": "Array shape and dtype review checklist variant 110 Static review card for array shape and dtype review checklist variant 110 in Python engineering. data_ml numpy hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.numpy"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0111",
+    "kind": "knowledge_card",
+    "title": "DataFrame mutation review checklist variant 111",
+    "text": "DataFrame mutation review checklist variant 111 Static review card for dataframe mutation review checklist variant 111 in Python engineering. data_ml pandas hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.pandas"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0112",
+    "kind": "knowledge_card",
+    "title": "Lazy plan review basics checklist variant 112",
+    "text": "Lazy plan review basics checklist variant 112 Static review card for lazy plan review basics checklist variant 112 in Python engineering. data_ml polars hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.polars"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0113",
+    "kind": "knowledge_card",
+    "title": "Plot generation boundary checklist variant 113",
+    "text": "Plot generation boundary checklist variant 113 Static review card for plot generation boundary checklist variant 113 in Python engineering. data_ml matplotlib hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.matplotlib"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0114",
+    "kind": "knowledge_card",
+    "title": "Scientific routine assumptions checklist variant 114",
+    "text": "Scientific routine assumptions checklist variant 114 Static review card for scientific routine assumptions checklist variant 114 in Python engineering. data_ml scipy hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.scipy"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0115",
+    "kind": "knowledge_card",
+    "title": "Train test split review checklist variant 115",
+    "text": "Train test split review checklist variant 115 Static review card for train test split review checklist variant 115 in Python engineering. data_ml scikit_learn hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.scikit_learn"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0116",
+    "kind": "knowledge_card",
+    "title": "Model checkpoint safety review checklist variant 116",
+    "text": "Model checkpoint safety review checklist variant 116 Static review card for model checkpoint safety review checklist variant 116 in Python engineering. data_ml pytorch hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.pytorch"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0117",
+    "kind": "knowledge_card",
+    "title": "TensorFlow saved model review checklist variant 117",
+    "text": "TensorFlow saved model review checklist variant 117 Static review card for tensorflow saved model review checklist variant 117 in Python engineering. data_ml tensorflow hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.tensorflow"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0118",
+    "kind": "knowledge_card",
+    "title": "Model and tokenizer source review checklist variant 118",
+    "text": "Model and tokenizer source review checklist variant 118 Static review card for model and tokenizer source review checklist variant 118 in Python engineering. data_ml transformers hat:003 domain:python execution:no review:human-required level:advanced source:official mV:-70.003.transformers"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0119",
+    "kind": "knowledge_card",
+    "title": "Notebook reproducibility review checklist variant 119",
+    "text": "Notebook reproducibility review checklist variant 119 Static review card for notebook reproducibility review checklist variant 119 in Python engineering. data_ml jupyter hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.jupyter"
+  },
+  {
+    "id": "HAT003-PY-DATA-ML-0120",
+    "kind": "knowledge_card",
+    "title": "Hosted notebook boundary checklist variant 120",
+    "text": "Hosted notebook boundary checklist variant 120 Static review card for hosted notebook boundary checklist variant 120 in Python engineering. data_ml colab hat:003 domain:python execution:no review:human-required level:intermediate source:official mV:-70.003.colab"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0121",
+    "kind": "knowledge_card",
+    "title": "Python statement and expression boundaries checklist variant 121",
+    "text": "Python statement and expression boundaries checklist variant 121 Static review card for python statement and expression boundaries checklist variant 121 in Python engineering. python_core syntax hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.syntax"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0122",
+    "kind": "knowledge_card",
+    "title": "Object identity equality and truthiness checklist variant 122",
+    "text": "Object identity equality and truthiness checklist variant 122 Static review card for object identity equality and truthiness checklist variant 122 in Python engineering. python_core data_model hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.data_model"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0123",
+    "kind": "knowledge_card",
+    "title": "Function arguments defaults and call semantics checklist variant 123",
+    "text": "Function arguments defaults and call semantics checklist variant 123 Static review card for function arguments defaults and call semantics checklist variant 123 in Python engineering. python_core functions hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.functions"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0124",
+    "kind": "knowledge_card",
+    "title": "Class attributes versus instance attributes checklist variant 124",
+    "text": "Class attributes versus instance attributes checklist variant 124 Static review card for class attributes versus instance attributes checklist variant 124 in Python engineering. python_core classes hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.classes"
+  },
+  {
+    "id": "HAT003-PY-PYTHON-CORE-0125",
+    "kind": "knowledge_card",
+    "title": "Exception hierarchy and explicit handling checklist variant 125",
+    "text": "Exception hierarchy and explicit handling checklist variant 125 Static review card for exception hierarchy and explicit handling checklist variant 125 in Python engineering. python_core exceptions hat:003 domain:python execution:no review:human-required level:beginner source:official mV:-70.003.exceptions"
+  }
+]

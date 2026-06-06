@@ -1,0 +1,912 @@
+[
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0001",
+    "parent_id": "",
+    "name": "python_core",
+    "label": "Python Core",
+    "description": "Top-level Hat 003 category for python core.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0002",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "syntax",
+    "label": "Syntax",
+    "description": "Static review and curriculum node for syntax.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0003",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "data_model",
+    "label": "Data Model",
+    "description": "Static review and curriculum node for data model.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0004",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "functions",
+    "label": "Functions",
+    "description": "Static review and curriculum node for functions.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0005",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "classes",
+    "label": "Classes",
+    "description": "Static review and curriculum node for classes.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0006",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "exceptions",
+    "label": "Exceptions",
+    "description": "Static review and curriculum node for exceptions.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0007",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "modules",
+    "label": "Modules",
+    "description": "Static review and curriculum node for modules.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0008",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "imports",
+    "label": "Imports",
+    "description": "Static review and curriculum node for imports.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0009",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "iterators",
+    "label": "Iterators",
+    "description": "Static review and curriculum node for iterators.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0010",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "generators",
+    "label": "Generators",
+    "description": "Static review and curriculum node for generators.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0011",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "decorators",
+    "label": "Decorators",
+    "description": "Static review and curriculum node for decorators.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0012",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "context_managers",
+    "label": "Context Managers",
+    "description": "Static review and curriculum node for context managers.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0013",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "typing",
+    "label": "Typing",
+    "description": "Static review and curriculum node for typing.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0014",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "dataclasses",
+    "label": "Dataclasses",
+    "description": "Static review and curriculum node for dataclasses.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0015",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "pattern_matching",
+    "label": "Pattern Matching",
+    "description": "Static review and curriculum node for pattern matching.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0016",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "async_await",
+    "label": "Async Await",
+    "description": "Static review and curriculum node for async await.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0017",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "concurrency",
+    "label": "Concurrency",
+    "description": "Static review and curriculum node for concurrency.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0018",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "standard_library",
+    "label": "Standard Library",
+    "description": "Static review and curriculum node for standard library.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0019",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "file_io",
+    "label": "File Io",
+    "description": "Static review and curriculum node for file io.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0020",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "logging",
+    "label": "Logging",
+    "description": "Static review and curriculum node for logging.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0021",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "configuration",
+    "label": "Configuration",
+    "description": "Static review and curriculum node for configuration.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0022",
+    "parent_id": "HAT003-TAX-CORE-0001",
+    "name": "cli_tools",
+    "label": "Cli Tools",
+    "description": "Static review and curriculum node for cli tools.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0023",
+    "parent_id": "",
+    "name": "software_engineering",
+    "label": "Software Engineering",
+    "description": "Top-level Hat 003 category for software engineering.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0024",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "project_layout",
+    "label": "Project Layout",
+    "description": "Static review and curriculum node for project layout.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0025",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "packaging",
+    "label": "Packaging",
+    "description": "Static review and curriculum node for packaging.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0026",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "dependency_management",
+    "label": "Dependency Management",
+    "description": "Static review and curriculum node for dependency management.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0027",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "testing",
+    "label": "Testing",
+    "description": "Static review and curriculum node for testing.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0028",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "type_checking",
+    "label": "Type Checking",
+    "description": "Static review and curriculum node for type checking.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0029",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "linting",
+    "label": "Linting",
+    "description": "Static review and curriculum node for linting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0030",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "formatting",
+    "label": "Formatting",
+    "description": "Static review and curriculum node for formatting.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0031",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "documentation",
+    "label": "Documentation",
+    "description": "Static review and curriculum node for documentation.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0032",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "error_handling",
+    "label": "Error Handling",
+    "description": "Static review and curriculum node for error handling.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0033",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "observability",
+    "label": "Observability",
+    "description": "Static review and curriculum node for observability.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0034",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "maintainability",
+    "label": "Maintainability",
+    "description": "Static review and curriculum node for maintainability.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0035",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "refactoring",
+    "label": "Refactoring",
+    "description": "Static review and curriculum node for refactoring.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0036",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "code_review",
+    "label": "Code Review",
+    "description": "Static review and curriculum node for code review.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0037",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "design_patterns",
+    "label": "Design Patterns",
+    "description": "Static review and curriculum node for design patterns.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0038",
+    "parent_id": "HAT003-TAX-CORE-0023",
+    "name": "architecture_patterns",
+    "label": "Architecture Patterns",
+    "description": "Static review and curriculum node for architecture patterns.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0039",
+    "parent_id": "",
+    "name": "web_api",
+    "label": "Web Api",
+    "description": "Top-level Hat 003 category for web api.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0040",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "http_clients",
+    "label": "Http Clients",
+    "description": "Static review and curriculum node for http clients.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0041",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "fastapi",
+    "label": "Fastapi",
+    "description": "Static review and curriculum node for fastapi.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0042",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "django",
+    "label": "Django",
+    "description": "Static review and curriculum node for django.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0043",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "flask",
+    "label": "Flask",
+    "description": "Static review and curriculum node for flask.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0044",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "asgi",
+    "label": "Asgi",
+    "description": "Static review and curriculum node for asgi.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0045",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "wsgi",
+    "label": "Wsgi",
+    "description": "Static review and curriculum node for wsgi.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0046",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "rest",
+    "label": "Rest",
+    "description": "Static review and curriculum node for rest.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0047",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "authentication",
+    "label": "Authentication",
+    "description": "Static review and curriculum node for authentication.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0048",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "authorization",
+    "label": "Authorization",
+    "description": "Static review and curriculum node for authorization.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0049",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "validation",
+    "label": "Validation",
+    "description": "Static review and curriculum node for validation.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0050",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "serialization",
+    "label": "Serialization",
+    "description": "Static review and curriculum node for serialization.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0051",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "background_tasks",
+    "label": "Background Tasks",
+    "description": "Static review and curriculum node for background tasks.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0052",
+    "parent_id": "HAT003-TAX-CORE-0039",
+    "name": "database_integration",
+    "label": "Database Integration",
+    "description": "Static review and curriculum node for database integration.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0053",
+    "parent_id": "",
+    "name": "data_ml",
+    "label": "Data Ml",
+    "description": "Top-level Hat 003 category for data ml.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0054",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "numpy",
+    "label": "Numpy",
+    "description": "Static review and curriculum node for numpy.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0055",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "pandas",
+    "label": "Pandas",
+    "description": "Static review and curriculum node for pandas.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0056",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "matplotlib",
+    "label": "Matplotlib",
+    "description": "Static review and curriculum node for matplotlib.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0057",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "scikit_learn",
+    "label": "Scikit Learn",
+    "description": "Static review and curriculum node for scikit learn.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0058",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "pytorch",
+    "label": "Pytorch",
+    "description": "Static review and curriculum node for pytorch.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0059",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "tensorflow",
+    "label": "Tensorflow",
+    "description": "Static review and curriculum node for tensorflow.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0060",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "transformers",
+    "label": "Transformers",
+    "description": "Static review and curriculum node for transformers.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0061",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "notebooks",
+    "label": "Notebooks",
+    "description": "Static review and curriculum node for notebooks.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0062",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "reproducibility",
+    "label": "Reproducibility",
+    "description": "Static review and curriculum node for reproducibility.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0063",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "data_validation",
+    "label": "Data Validation",
+    "description": "Static review and curriculum node for data validation.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0064",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "model_evaluation",
+    "label": "Model Evaluation",
+    "description": "Static review and curriculum node for model evaluation.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  },
+  {
+    "taxonomy_id": "HAT003-TAX-CORE-0065",
+    "parent_id": "HAT003-TAX-CORE-0053",
+    "name": "ml_safety_basics",
+    "label": "Ml Safety Basics",
+    "description": "Static review and curriculum node for ml safety basics.",
+    "risk_label": "SAFE_EDUCATIONAL",
+    "aoia_tags": [
+      "hat:003",
+      "domain:python",
+      "execution:no",
+      "review:human-required"
+    ]
+  }
+]
