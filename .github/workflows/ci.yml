@@ -19,6 +19,9 @@ jobs:
       - name: Compile source trees
         run: python3 -m compileall runtime tests scripts
 
+      - name: Install build backend
+        run: python3 -m pip install --upgrade pip setuptools wheel
+
       - name: Install editable package
         run: python3 -m pip install --no-build-isolation -e . --no-deps
 
