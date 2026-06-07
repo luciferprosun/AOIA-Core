@@ -1,0 +1,3142 @@
+{
+  "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+  "artifact_type": "hat_003_validation_rules_normalized_draft",
+  "baseline_status": "DRAFT_BASELINE",
+  "blocked_use": [
+    "canonical_promotion",
+    "source_verification_claims",
+    "runtime_enforcement",
+    "automated_validation_enforcement",
+    "retrieval_promotion"
+  ],
+  "canonical": false,
+  "canonical_status": "NOT_CANONICAL",
+  "category_counts": {
+    "dependency_static_review": 1,
+    "python_static_review": 35,
+    "security_static_review": 8,
+    "web_static_review": 1
+  },
+  "execution_permitted": false,
+  "human_review_required": true,
+  "normalization_status": "NORMALIZED_DRAFT",
+  "phase": "H3-E",
+  "quarantine_status": "QUARANTINED_DRAFT",
+  "record_count": 45,
+  "records": [
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags direct eval usage for human review.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "ast.literal_eval(trusted_literal_string)"
+        ],
+        "positive_examples": [
+          "eval(user_input)"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect unsafe eval usage",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-EVAL-0001"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-EVAL-0001",
+      "severity": "high",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags direct exec usage for human review.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "compile(template, name, 'exec') reviewed offline"
+        ],
+        "positive_examples": [
+          "exec(user_text)"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect unsafe exec usage",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-EXEC-0002"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-EXEC-0002",
+      "severity": "high",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags pickle loading for source trust review.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "json.loads(text)"
+        ],
+        "positive_examples": [
+          "pickle.loads(blob)"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect pickle load boundaries",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-PICKLE-0003"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-PICKLE-0003",
+      "severity": "high",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags YAML loading that may construct objects.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "yaml.safe_load(text)"
+        ],
+        "positive_examples": [
+          "yaml.load(text)"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect unsafe yaml load",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-YAML-0004"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-YAML-0004",
+      "severity": "high",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags subprocess calls using shell interpretation.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "subprocess.run(['tool', 'arg'])"
+        ],
+        "positive_examples": [
+          "subprocess.run(cmd, shell=True)"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect shell=True",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-SUBPROCESS-0005"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-SUBPROCESS-0005",
+      "severity": "high",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags user-controlled path joins.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "safe_path = root / clean_name"
+        ],
+        "positive_examples": [
+          "open(base + '/' + user_path)"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect path traversal joins",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-PATH-0006"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-PATH-0006",
+      "severity": "high",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags predictable temp file names.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "tempfile.NamedTemporaryFile()"
+        ],
+        "positive_examples": [
+          "open('/tmp/app.tmp', 'w')"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect insecure temp files",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-TEMP-0007"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-TEMP-0007",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "security_static_review",
+      "description": "Flags credential-looking assignments.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "API_KEY = os.environ.get('API_KEY')"
+        ],
+        "positive_examples": [
+          "API_KEY = 'PLACEHOLDER_DO_NOT_USE'"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect hardcoded secret candidates",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-SECRET-0008"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "SECURITY_SENSITIVE",
+      "rule_id": "HAT003-SAFE-SECRET-0008",
+      "severity": "high",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "dependency_static_review",
+      "description": "Flags dependency specs without bounds or locks.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "requests==0.0.0-placeholder"
+        ],
+        "positive_examples": [
+          "requests"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect unpinned dependencies",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-DEPS-0009"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-SAFE-DEPS-0009",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "web_static_review",
+      "description": "Flags debug mode in app configuration.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "debug=False"
+        ],
+        "positive_examples": [
+          "debug=True"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Detect debug mode exposure",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-SAFE-DEBUG-0010"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-SAFE-DEBUG-0010",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 11.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_11"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_11"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 11",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-11-0011"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-11-0011",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 12.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_12"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_12"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 12",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-12-0012"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-12-0012",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 13.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_13"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_13"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 13",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-13-0013"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-13-0013",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 14.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_14"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_14"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 14",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-14-0014"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-14-0014",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 15.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_15"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_15"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 15",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-15-0015"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-15-0015",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 16.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_16"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_16"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 16",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-16-0016"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-16-0016",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 17.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_17"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_17"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 17",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-17-0017"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-17-0017",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 18.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_18"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_18"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 18",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-18-0018"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-18-0018",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 19.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_19"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_19"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 19",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-19-0019"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-19-0019",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 20.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_20"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_20"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 20",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-20-0020"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-20-0020",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 21.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_21"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_21"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 21",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-21-0021"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-21-0021",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 22.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_22"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_22"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 22",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-22-0022"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-22-0022",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 23.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_23"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_23"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 23",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-23-0023"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-23-0023",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 24.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_24"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_24"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 24",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-24-0024"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-24-0024",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 25.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_25"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_25"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 25",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-25-0025"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-25-0025",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 26.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_26"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_26"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 26",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-26-0026"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-26-0026",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 27.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_27"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_27"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 27",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-27-0027"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-27-0027",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 28.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_28"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_28"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 28",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-28-0028"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-28-0028",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 29.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_29"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_29"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 29",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-29-0029"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-29-0029",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 30.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_30"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_30"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 30",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-30-0030"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-30-0030",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 31.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_31"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_31"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 31",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-31-0031"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-31-0031",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 32.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_32"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_32"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 32",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-32-0032"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-32-0032",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 33.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_33"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_33"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 33",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-33-0033"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-33-0033",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 34.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_34"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_34"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 34",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-34-0034"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-34-0034",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 35.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_35"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_35"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 35",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-35-0035"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-35-0035",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 36.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_36"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_36"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 36",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-36-0036"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-36-0036",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 37.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_37"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_37"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 37",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-37-0037"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-37-0037",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 38.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_38"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_38"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 38",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-38-0038"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-38-0038",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 39.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_39"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_39"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 39",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-39-0039"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-39-0039",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 40.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_40"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_40"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 40",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-40-0040"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-40-0040",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 41.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_41"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_41"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 41",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-41-0041"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-41-0041",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 42.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_42"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_42"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 42",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-42-0042"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-42-0042",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 43.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_43"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_43"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 43",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-43-0043"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-43-0043",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 44.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_44"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_44"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 44",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-44-0044"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-44-0044",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_enforcement",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "category": "python_static_review",
+      "description": "Generic Python static review rule 45.",
+      "example_policy": {
+        "do_not_execute": true,
+        "examples_are_inert_review_text": true,
+        "execution_permitted": false,
+        "negative_examples": [
+          "# reviewed_safe_pattern_45"
+        ],
+        "positive_examples": [
+          "# suspicious_pattern_45"
+        ]
+      },
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "rule_use_permitted": false,
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "validation_enforcement_permitted": false
+      },
+      "name": "Static review rule 45",
+      "normalization_notes": [
+        "EXISTING_RULE_TEXT_PRESERVED",
+        "EXAMPLES_MARKED_INERT_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "pattern_type": "AST_or_static_pattern",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft rule for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-E validation rule normalization derivative",
+        "record_type": "normalized_validation_rule",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "validation_rule",
+        "source_rule_id": "HAT003-GENERAL-45-0045"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "recommended_human_review": "Check source trust, input control, safer alternatives, and whether the behavior is necessary.",
+      "record_type": "normalized_validation_rule",
+      "risk_label": "REVIEW_REQUIRED",
+      "rule_id": "HAT003-GENERAL-45-0045",
+      "severity": "medium",
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+      "source_record_type": "validation_rule"
+    }
+  ],
+  "severity_counts": {
+    "high": 7,
+    "medium": 38
+  },
+  "source_file": "knowledge/hats/hat_003_python/machine_readable/validation_rules.json",
+  "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+  "source_verification_status": "UNVERIFIED",
+  "status": "DRAFT",
+  "unique_rule_ids": 45
+}
