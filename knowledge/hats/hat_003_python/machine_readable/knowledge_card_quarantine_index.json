@@ -1,0 +1,5298 @@
+{
+  "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+  "artifact_type": "hat_003_card_quarantine_index",
+  "baseline_status": "DRAFT_BASELINE",
+  "blocked_use": [
+    "canonical_promotion",
+    "source_verification_claims",
+    "runtime_routing",
+    "retrieval_promotion",
+    "teaching_content_publication"
+  ],
+  "canonical": false,
+  "canonical_status": "NOT_CANONICAL",
+  "cards": [
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0001",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-002",
+        "SRC-PY-OFFICIAL-009"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "syntax",
+      "title": "Python statement and expression boundaries"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0002",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-003",
+        "SRC-PY-OFFICIAL-010"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "data_model",
+      "title": "Object identity equality and truthiness"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0003",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-004",
+        "SRC-PY-OFFICIAL-011"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "functions",
+      "title": "Function arguments defaults and call semantics"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0004",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-005",
+        "SRC-PY-OFFICIAL-012"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "classes",
+      "title": "Class attributes versus instance attributes"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0005",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-006",
+        "SRC-PY-OFFICIAL-013"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "exceptions",
+      "title": "Exception hierarchy and explicit handling"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0006",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-007",
+        "SRC-PY-OFFICIAL-014"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "modules",
+      "title": "Module boundaries and import side effects"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0007",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-008",
+        "SRC-PY-OFFICIAL-015"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "imports",
+      "title": "Absolute and relative import review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0008",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-009",
+        "SRC-PY-OFFICIAL-016"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "iterators",
+      "title": "Iterator protocol review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0009",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-010",
+        "SRC-PY-OFFICIAL-017"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "generators",
+      "title": "Generator state and lazy evaluation"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0010",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-011",
+        "SRC-PY-OFFICIAL-018"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "decorators",
+      "title": "Decorator transparency and metadata"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0011",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-012",
+        "SRC-PY-COMMUNITY-019"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "context_managers",
+      "title": "Resource lifetime with context managers"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0012",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-013",
+        "SRC-PY-COMMUNITY-020"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "typing",
+      "title": "Type hints as review support"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0013",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-014",
+        "SRC-PY-COMMUNITY-021"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "dataclasses",
+      "title": "Dataclass defaults and mutability"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0014",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-015",
+        "SRC-PY-COMMUNITY-022"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "pattern_matching",
+      "title": "Pattern matching exhaustiveness review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0015",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-016",
+        "SRC-PY-COMMUNITY-023"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "async_await",
+      "title": "Async function boundaries"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0016",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-017",
+        "SRC-PY-COMMUNITY-024"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "concurrency",
+      "title": "Thread process and async tradeoffs"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0017",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-018",
+        "SRC-PY-COMMUNITY-025"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "standard_library",
+      "title": "Standard library first review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0018",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-019",
+        "SRC-PY-BOOK-026"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "file_io",
+      "title": "File I/O encoding and path review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0019",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-020",
+        "SRC-PY-BOOK-027"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "logging",
+      "title": "Logging without leaking secrets"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0020",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-021",
+        "SRC-PY-COMMUNITY-028"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "configuration",
+      "title": "Configuration loading boundaries"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0021",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-022",
+        "SRC-PY-COMMUNITY-029"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "cli_tools",
+      "title": "CLI input validation"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0022",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-023",
+        "SRC-PY-ARCHITECTURE-030"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "project_layout",
+      "title": "src layout and import clarity"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0023",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-024",
+        "SRC-PY-ARCHITECTURE-031"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "packaging",
+      "title": "pyproject metadata review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0024",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-025",
+        "SRC-PY-ARCHITECTURE-032"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "dependency_management",
+      "title": "Pinned dependency review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0025",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-BOOK-026",
+        "SRC-PY-ARCHITECTURE-033"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "testing",
+      "title": "Unit test scope and determinism"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0026",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-BOOK-027",
+        "SRC-PY-ARCHITECTURE-034"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "type_checking",
+      "title": "Type checker configuration"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0027",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-028",
+        "SRC-PY-ARCHITECTURE-035"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "linting",
+      "title": "Lint rule triage"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0028",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-029",
+        "SRC-PY-LEARNING-036"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "formatting",
+      "title": "Formatter consistency"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0029",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-030",
+        "SRC-PY-LEARNING-037"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "documentation",
+      "title": "Docstring purpose and limits"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0030",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-031",
+        "SRC-PY-LEARNING-038"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "error_handling",
+      "title": "Error boundaries and user messages"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0031",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-032",
+        "SRC-PY-LEARNING-039"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "observability",
+      "title": "Metrics logs and traces without secrets"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0032",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-033",
+        "SRC-PY-LEARNING-040"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "maintainability",
+      "title": "Complexity review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0033",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-034",
+        "SRC-PY-LEARNING-041"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "refactoring",
+      "title": "Small behavior-preserving changes"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0034",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-035",
+        "SRC-PY-LEARNING-042"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "code_review",
+      "title": "Static review checklist discipline"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0035",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-036",
+        "SRC-PY-LEARNING-043"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "design_patterns",
+      "title": "Pattern use without overengineering"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0036",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-037",
+        "SRC-PY-LEARNING-044"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "architecture_patterns",
+      "title": "Architecture boundary mapping"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0037",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-038",
+        "SRC-PY-LEARNING-045"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "http_clients",
+      "title": "HTTP timeout and retry review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0038",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-039",
+        "SRC-PY-LEARNING-046"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "fastapi",
+      "title": "FastAPI dependency injection review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0039",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-040",
+        "SRC-PY-LEARNING-047"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "django",
+      "title": "Django settings and ORM review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0040",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-041",
+        "SRC-PY-WEB_API-048"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "flask",
+      "title": "Flask application factory review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0041",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-042",
+        "SRC-PY-WEB_API-049"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "asgi",
+      "title": "ASGI lifecycle review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0042",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-043",
+        "SRC-PY-WEB_API-050"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "wsgi",
+      "title": "WSGI deployment boundary review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0043",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-044",
+        "SRC-PY-WEB_API-051"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "rest",
+      "title": "REST status and schema review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0044",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-045",
+        "SRC-PY-WEB_API-052"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "authentication",
+      "title": "Authentication flow review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0045",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-046",
+        "SRC-PY-WEB_API-053"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "authorization",
+      "title": "Authorization check placement"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0046",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-LEARNING-047",
+        "SRC-PY-WEB_API-054"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "validation",
+      "title": "Request validation review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0047",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-048",
+        "SRC-PY-WEB_API-055"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "serialization",
+      "title": "Serialization format safety"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0048",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-049",
+        "SRC-PY-WEB_API-056"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "background_tasks",
+      "title": "Background task reliability"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0049",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-050",
+        "SRC-PY-CLI-057"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "database_integration",
+      "title": "Database transaction boundary"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0050",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-051",
+        "SRC-PY-CLI-058"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "numpy",
+      "title": "Array shape and dtype review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0051",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-052",
+        "SRC-PY-CLI-059"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "pandas",
+      "title": "DataFrame mutation review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0052",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-053",
+        "SRC-PY-DATA_ML-060"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "polars",
+      "title": "Lazy plan review basics"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0053",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-054",
+        "SRC-PY-DATA_ML-061"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "matplotlib",
+      "title": "Plot generation boundary"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0054",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-055",
+        "SRC-PY-DATA_ML-062"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "scipy",
+      "title": "Scientific routine assumptions"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0055",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-WEB_API-056",
+        "SRC-PY-DATA_ML-063"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "scikit_learn",
+      "title": "Train test split review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0056",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-CLI-057",
+        "SRC-PY-DATA_ML-064"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "pytorch",
+      "title": "Model checkpoint safety review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0057",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-CLI-058",
+        "SRC-PY-DATA_ML-065"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "tensorflow",
+      "title": "TensorFlow saved model review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0058",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-CLI-059",
+        "SRC-PY-DATA_ML-066"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "transformers",
+      "title": "Model and tokenizer source review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0059",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-060",
+        "SRC-PY-DATA_ML-067"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "jupyter",
+      "title": "Notebook reproducibility review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0060",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-061",
+        "SRC-PY-DATA_ML-068"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "colab",
+      "title": "Hosted notebook boundary"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0061",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-062",
+        "SRC-PY-DATA_ML-069"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "reproducibility",
+      "title": "Seeds data versions and environments"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0062",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-063",
+        "SRC-PY-DATA_ML-070"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "data_validation",
+      "title": "Schema checks for data pipelines"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0063",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-064",
+        "SRC-PY-DATA_ML-071"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "model_evaluation",
+      "title": "Metric selection and leakage review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0064",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-065",
+        "SRC-PY-QUALITY-072"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "ml_safety_basics",
+      "title": "ML safety static checklist"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0065",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-066",
+        "SRC-PY-QUALITY-073"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "unsafe_dynamic_execution",
+      "title": "Unsafe eval usage detection"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0066",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-067",
+        "SRC-PY-QUALITY-074"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "unsafe_dynamic_execution",
+      "title": "Unsafe exec usage detection"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0067",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-068",
+        "SRC-PY-QUALITY-075"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "deserialization",
+      "title": "Unsafe pickle loading detection"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0068",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-069",
+        "SRC-PY-QUALITY-076"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "deserialization",
+      "title": "Unsafe yaml load detection"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0069",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-070",
+        "SRC-PY-QUALITY-077"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "subprocess_shell_risk",
+      "title": "Subprocess shell argument review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0070",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-DATA_ML-071",
+        "SRC-PY-QUALITY-078"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "subprocess_shell_risk",
+      "title": "Shell injection concept review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0071",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-072",
+        "SRC-PY-QUALITY-079"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "path_traversal",
+      "title": "Path traversal review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0072",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-073",
+        "SRC-PY-QUALITY-080"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "file_system_risk",
+      "title": "Insecure temporary file review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0073",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-074",
+        "SRC-PY-QUALITY-081"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "secrets",
+      "title": "Hardcoded secret candidate review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0074",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-075",
+        "SRC-PY-QUALITY-082"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "dependency_risk",
+      "title": "Dependency confusion review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0075",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-076",
+        "SRC-PY-PACKAGING-083"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "dependency_risk",
+      "title": "Typosquatting review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0076",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-077",
+        "SRC-PY-PACKAGING-084"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "dependency_risk",
+      "title": "Unpinned dependency review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0077",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-078",
+        "SRC-PY-PACKAGING-085"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "deserialization",
+      "title": "Insecure deserialization boundaries"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0078",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-079",
+        "SRC-PY-PACKAGING-086"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "file_system_risk",
+      "title": "Unsafe file write review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0079",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-080",
+        "SRC-PY-PACKAGING-087"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "network_risk",
+      "title": "Unsafe network call review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0080",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-081",
+        "SRC-PY-PACKAGING-088"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "network_risk",
+      "title": "SSRF concept review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0081",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-082",
+        "SRC-PY-PACKAGING-089"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "injection_risks",
+      "title": "SQL injection concept review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0082",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-083",
+        "SRC-PY-PACKAGING-090"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "web_security",
+      "title": "XSS concept for Python web apps"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0083",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-084",
+        "SRC-PY-PACKAGING-091"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "web_security",
+      "title": "Authentication mistake review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0084",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-085",
+        "SRC-PY-QUALITY-092"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "web_security",
+      "title": "Authorization mistake review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0085",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-086",
+        "SRC-PY-OFFICIAL-001"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "logging_risk",
+      "title": "Logging secret prevention"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0086",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-087",
+        "SRC-PY-OFFICIAL-002"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "dependency_risk",
+      "title": "Supply chain risk review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0087",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-088",
+        "SRC-PY-OFFICIAL-003"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "configuration_risk",
+      "title": "Unsafe debug configuration review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SECURITY-STATIC-SAFETY-0088",
+      "category": "security_static_safety",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-089",
+        "SRC-PY-OFFICIAL-004"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "ai_generated_code_risk",
+      "title": "AI-generated code static review"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0089",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-090",
+        "SRC-PY-OFFICIAL-005"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "documentation",
+      "title": "Docstring purpose and limits checklist variant 89"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0090",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-PACKAGING-091",
+        "SRC-PY-OFFICIAL-006"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "error_handling",
+      "title": "Error boundaries and user messages checklist variant 90"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0091",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-QUALITY-092",
+        "SRC-PY-OFFICIAL-007"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "observability",
+      "title": "Metrics logs and traces without secrets checklist variant 91"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0092",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-001",
+        "SRC-PY-OFFICIAL-008"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "maintainability",
+      "title": "Complexity review checklist variant 92"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0093",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-002",
+        "SRC-PY-OFFICIAL-009"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "refactoring",
+      "title": "Small behavior-preserving changes checklist variant 93"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0094",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-003",
+        "SRC-PY-OFFICIAL-010"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "code_review",
+      "title": "Static review checklist discipline checklist variant 94"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0095",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-004",
+        "SRC-PY-OFFICIAL-011"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "design_patterns",
+      "title": "Pattern use without overengineering checklist variant 95"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-SOFTWARE-ENGINEERING-0096",
+      "category": "software_engineering",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-005",
+        "SRC-PY-OFFICIAL-012"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "architecture_patterns",
+      "title": "Architecture boundary mapping checklist variant 96"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0097",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-006",
+        "SRC-PY-OFFICIAL-013"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "http_clients",
+      "title": "HTTP timeout and retry review checklist variant 97"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0098",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-007",
+        "SRC-PY-OFFICIAL-014"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "fastapi",
+      "title": "FastAPI dependency injection review checklist variant 98"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0099",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-008",
+        "SRC-PY-OFFICIAL-015"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "django",
+      "title": "Django settings and ORM review checklist variant 99"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0100",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-009",
+        "SRC-PY-OFFICIAL-016"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "flask",
+      "title": "Flask application factory review checklist variant 100"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0101",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-010",
+        "SRC-PY-OFFICIAL-017"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "asgi",
+      "title": "ASGI lifecycle review checklist variant 101"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0102",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-011",
+        "SRC-PY-OFFICIAL-018"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "wsgi",
+      "title": "WSGI deployment boundary review checklist variant 102"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0103",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-012",
+        "SRC-PY-COMMUNITY-019"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "rest",
+      "title": "REST status and schema review checklist variant 103"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0104",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-013",
+        "SRC-PY-COMMUNITY-020"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "authentication",
+      "title": "Authentication flow review checklist variant 104"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0105",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-014",
+        "SRC-PY-COMMUNITY-021"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "authorization",
+      "title": "Authorization check placement checklist variant 105"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0106",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-015",
+        "SRC-PY-COMMUNITY-022"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "validation",
+      "title": "Request validation review checklist variant 106"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0107",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-016",
+        "SRC-PY-COMMUNITY-023"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "serialization",
+      "title": "Serialization format safety checklist variant 107"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0108",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-017",
+        "SRC-PY-COMMUNITY-024"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "background_tasks",
+      "title": "Background task reliability checklist variant 108"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-WEB-API-0109",
+      "category": "web_api",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-OFFICIAL-018",
+        "SRC-PY-COMMUNITY-025"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "database_integration",
+      "title": "Database transaction boundary checklist variant 109"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0110",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-019",
+        "SRC-PY-BOOK-026"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "numpy",
+      "title": "Array shape and dtype review checklist variant 110"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0111",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-020",
+        "SRC-PY-BOOK-027"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "pandas",
+      "title": "DataFrame mutation review checklist variant 111"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0112",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-021",
+        "SRC-PY-COMMUNITY-028"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "polars",
+      "title": "Lazy plan review basics checklist variant 112"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0113",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-022",
+        "SRC-PY-COMMUNITY-029"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "matplotlib",
+      "title": "Plot generation boundary checklist variant 113"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0114",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-023",
+        "SRC-PY-ARCHITECTURE-030"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "scipy",
+      "title": "Scientific routine assumptions checklist variant 114"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0115",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-024",
+        "SRC-PY-ARCHITECTURE-031"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "scikit_learn",
+      "title": "Train test split review checklist variant 115"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0116",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-025",
+        "SRC-PY-ARCHITECTURE-032"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "pytorch",
+      "title": "Model checkpoint safety review checklist variant 116"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0117",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-BOOK-026",
+        "SRC-PY-ARCHITECTURE-033"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "tensorflow",
+      "title": "TensorFlow saved model review checklist variant 117"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0118",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-BOOK-027",
+        "SRC-PY-ARCHITECTURE-034"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "transformers",
+      "title": "Model and tokenizer source review checklist variant 118"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0119",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-028",
+        "SRC-PY-ARCHITECTURE-035"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "jupyter",
+      "title": "Notebook reproducibility review checklist variant 119"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-DATA-ML-0120",
+      "category": "data_ml",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-COMMUNITY-029",
+        "SRC-PY-LEARNING-036"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "colab",
+      "title": "Hosted notebook boundary checklist variant 120"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0121",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-030",
+        "SRC-PY-LEARNING-037"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "syntax",
+      "title": "Python statement and expression boundaries checklist variant 121"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0122",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-031",
+        "SRC-PY-LEARNING-038"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "data_model",
+      "title": "Object identity equality and truthiness checklist variant 122"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0123",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-032",
+        "SRC-PY-LEARNING-039"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "functions",
+      "title": "Function arguments defaults and call semantics checklist variant 123"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0124",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-033",
+        "SRC-PY-LEARNING-040"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "classes",
+      "title": "Class attributes versus instance attributes checklist variant 124"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_routing",
+        "retrieval_promotion",
+        "teaching_content_publication"
+      ],
+      "canonical": false,
+      "canonical_status": "NOT_CANONICAL",
+      "card_deepening_status": "NEEDS_CARD_DEEPENING",
+      "card_id": "HAT003-PY-PYTHON-CORE-0125",
+      "category": "python_core",
+      "content_fields_quarantined": [
+        "summary",
+        "key_points",
+        "safe_examples",
+        "anti_patterns",
+        "safety_notes"
+      ],
+      "execution_permitted": false,
+      "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+      "human_review_required": true,
+      "quarantine_reasons": [
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "UNVERIFIED_SOURCE_REFERENCES",
+        "NEEDS_CARD_DEEPENING",
+        "CONTENT_FIELDS_QUARANTINED",
+        "NOT_CANONICAL"
+      ],
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "source_ids": [
+        "SRC-PY-ARCHITECTURE-034",
+        "SRC-PY-LEARNING-041"
+      ],
+      "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+      "source_verification_status": "UNVERIFIED",
+      "status": "DRAFT",
+      "subcategory": "exceptions",
+      "title": "Exception hierarchy and explicit handling checklist variant 125"
+    }
+  ],
+  "category_counts": {
+    "data_ml": 26,
+    "python_core": 26,
+    "security_static_safety": 24,
+    "software_engineering": 23,
+    "web_api": 26
+  },
+  "content_fields_quarantined": [
+    "summary",
+    "key_points",
+    "safe_examples",
+    "anti_patterns",
+    "safety_notes"
+  ],
+  "execution_permitted": false,
+  "human_review_required": true,
+  "phase": "H3-D",
+  "quarantine_reasons": [
+    "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+    "UNVERIFIED_SOURCE_REFERENCES",
+    "NEEDS_CARD_DEEPENING",
+    "CONTENT_FIELDS_QUARANTINED",
+    "NOT_CANONICAL"
+  ],
+  "quarantine_status": "QUARANTINED_DRAFT",
+  "record_count": 125,
+  "source_file": "knowledge/hats/hat_003_python/machine_readable/knowledge_cards.jsonl",
+  "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+  "source_verification_status": "UNVERIFIED",
+  "status": "DRAFT",
+  "thinned_card_file": "knowledge/hats/hat_003_python/machine_readable/knowledge_cards_thinned_draft.jsonl",
+  "unique_card_ids": 125
+}
