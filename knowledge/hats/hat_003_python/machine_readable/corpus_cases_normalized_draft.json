@@ -1,0 +1,4523 @@
+{
+  "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+  "artifact_type": "hat_003_corpus_cases_normalized_draft",
+  "baseline_status": "DRAFT_BASELINE",
+  "blocked_use": [
+    "canonical_promotion",
+    "source_verification_claims",
+    "runtime_execution",
+    "automated_test_execution",
+    "automated_validation_enforcement",
+    "retrieval_promotion"
+  ],
+  "canonical": false,
+  "canonical_status": "NOT_CANONICAL",
+  "category_counts": {
+    "python_static_review": 55,
+    "security_static_review": 8,
+    "web_static_review": 2
+  },
+  "execution_permitted": false,
+  "human_review_required": true,
+  "normalization_status": "NORMALIZED_DRAFT",
+  "phase": "H3-F",
+  "quarantine_status": "QUARANTINED_DRAFT",
+  "record_count": 65,
+  "records": [
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0001",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "hardcoded_secret_candidate",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0001",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "API_KEY = 'PLACEHOLDER_DO_NOT_USE'",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Hardcoded API key placeholder"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0002",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "unsafe_eval",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0002",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "result = eval(user_input)",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Eval on user input"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0003",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "unsafe_exec",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0003",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "exec(template_text)",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Exec on text input"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0004",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "unsafe_deserialization",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0004",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "obj = pickle.loads(blob)",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Pickle loads blob"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0005",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "unsafe_yaml_load",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0005",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "data = yaml.load(text)",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "YAML unsafe load"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0006",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "shell_injection_risk",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0006",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "subprocess.run(command, shell=True)",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Subprocess shell true"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0007",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "path_traversal_candidate",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0007",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "target = base / user_supplied_name",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Path traversal join"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0008",
+      "category": "security_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "logging_secret_risk",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0008",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "logger.info('token=%s', token)",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Logging secret placeholder"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0009",
+      "category": "web_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "sql_injection_candidate",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0009",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "query = f\"select * from users where name='{name}'\"",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "SQL string formatting"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0010",
+      "category": "web_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "debug_mode_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0010",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "SECURITY_SENSITIVE",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "app.run(debug=True)",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Debug mode placeholder"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0011",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0011",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_11: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 11"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0012",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0012",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_12: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 12"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0013",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0013",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_13: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 13"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0014",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0014",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_14: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 14"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0015",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0015",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_15: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 15"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0016",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0016",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_16: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 16"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0017",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0017",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_17: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 17"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0018",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0018",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_18: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 18"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0019",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0019",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_19: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 19"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0020",
+      "category": "python_static_review",
+      "difficulty": "beginner",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0020",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_20: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 20"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0021",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0021",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_21: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 21"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0022",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0022",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_22: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 22"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0023",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0023",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_23: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 23"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0024",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0024",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_24: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 24"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0025",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0025",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_25: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 25"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0026",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0026",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_26: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 26"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0027",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0027",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_27: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 27"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0028",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0028",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_28: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 28"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0029",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0029",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_29: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 29"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0030",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0030",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_30: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 30"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0031",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0031",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_31: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 31"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0032",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0032",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_32: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 32"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0033",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0033",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_33: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 33"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0034",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0034",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_34: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 34"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0035",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0035",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_35: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 35"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0036",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0036",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_36: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 36"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0037",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0037",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_37: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 37"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0038",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0038",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_38: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 38"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0039",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0039",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_39: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 39"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0040",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0040",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_40: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 40"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0041",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0041",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_41: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 41"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0042",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0042",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_42: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 42"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0043",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0043",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_43: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 43"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0044",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0044",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_44: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 44"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0045",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0045",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_45: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 45"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0046",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0046",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_46: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 46"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0047",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0047",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_47: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 47"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0048",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0048",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_48: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 48"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0049",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0049",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_49: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 49"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0050",
+      "category": "python_static_review",
+      "difficulty": "intermediate",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0050",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_50: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 50"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0051",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0051",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_51: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 51"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0052",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0052",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_52: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 52"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0053",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0053",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_53: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 53"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0054",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0054",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_54: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 54"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0055",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0055",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_55: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 55"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0056",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0056",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_56: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 56"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0057",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0057",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_57: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 57"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0058",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0058",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_58: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 58"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0059",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0059",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_59: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 59"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0060",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0060",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_60: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 60"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0061",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0061",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_61: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 61"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0062",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0062",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_62: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 62"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0063",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0063",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_63: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 63"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0064",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0064",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_64: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 64"
+    },
+    {
+      "allowed_use": "TRACEABILITY_AND_REBUILD_PLANNING_ONLY",
+      "blocked_use": [
+        "canonical_promotion",
+        "source_verification_claims",
+        "runtime_execution",
+        "automated_test_execution",
+        "automated_validation_enforcement",
+        "retrieval_promotion"
+      ],
+      "case_id": "HAT003-CORPUS-0065",
+      "category": "python_static_review",
+      "difficulty": "advanced",
+      "expected_labels": [
+        "static_review",
+        "requires_human_review"
+      ],
+      "governance": {
+        "baseline_status": "DRAFT_BASELINE",
+        "canonical": false,
+        "canonical_status": "NOT_CANONICAL",
+        "canonical_use_permitted": false,
+        "card_deepening_status": "NEEDS_CARD_DEEPENING",
+        "corpus_use_permitted": false,
+        "execution_permitted": false,
+        "generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "human_review_required": true,
+        "retrieval_use_permitted": false,
+        "review_status": "DRAFT",
+        "runtime_use_permitted": false,
+        "source_authority_status": "UNVERIFIED",
+        "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+        "source_verification_status": "UNVERIFIED",
+        "status": "DRAFT",
+        "test_generation_permitted": false,
+        "validation_enforcement_permitted": false
+      },
+      "normalization_notes": [
+        "EXISTING_CORPUS_TEXT_PRESERVED",
+        "INPUT_SNIPPET_MARKED_INERT_STATIC_REVIEW_TEXT",
+        "NO_SOURCE_VERIFICATION_PERFORMED",
+        "NO_CANONICAL_PROMOTION",
+        "NO_EXECUTION_PERMITTED"
+      ],
+      "normalization_status": "NORMALIZED_DRAFT",
+      "provenance": {
+        "content_transform": "EXISTING_FIELDS_REPACKAGED_NO_KNOWLEDGE_ADDED",
+        "direct_source_verified": false,
+        "notes": "Derivative draft corpus case for traceability, normalization, and rebuild planning only.",
+        "origin": "AOIA Hat 003 H3-F corpus case normalization derivative",
+        "record_type": "normalized_corpus_case",
+        "source_case_id": "HAT003-CORPUS-0065",
+        "source_generation_method": "GENERATED_DRAFT_NO_DIRECT_SOURCE",
+        "source_record_type": "corpus_case"
+      },
+      "quarantine_status": "QUARANTINED_DRAFT",
+      "record_type": "normalized_corpus_case",
+      "risk_label": "REVIEW_REQUIRED",
+      "safe_explanation": "This is an inert static-review example. Real secrets and private files must never be included.",
+      "snippet_policy": {
+        "do_not_execute": true,
+        "execution_permitted": false,
+        "input_snippet": "# inert snippet case_65: review_only = True",
+        "snippet_is_inert_static_review_text": true
+      },
+      "source_record_path": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+      "source_record_type": "corpus_case",
+      "title": "Static review corpus case 65"
+    }
+  ],
+  "risk_label_counts": {
+    "REVIEW_REQUIRED": 55,
+    "SECURITY_SENSITIVE": 10
+  },
+  "source_file": "knowledge/hats/hat_003_python/machine_readable/corpus_cases.jsonl",
+  "source_verification_requirement": "NEEDS_SOURCE_VERIFICATION",
+  "source_verification_status": "UNVERIFIED",
+  "status": "DRAFT",
+  "unique_case_ids": 65,
+  "unique_expected_label_count": 12
+}
