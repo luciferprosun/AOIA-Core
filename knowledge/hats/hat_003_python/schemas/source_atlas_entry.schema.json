@@ -22,6 +22,11 @@
     "canonical_status",
     "source_verification_status",
     "source_verification_requirement",
+    "source_record_role",
+    "source_mapping_status",
+    "source_verification_gate",
+    "canonical_use_permitted",
+    "content_copy_policy",
     "execution_permitted",
     "human_review_required",
     "authority_tier",
@@ -78,6 +83,21 @@
     },
     "source_verification_requirement": {
       "const": "NEEDS_SOURCE_VERIFICATION"
+    },
+    "source_record_role": {
+      "const": "DRAFT_TRACEABILITY_SOURCE"
+    },
+    "source_mapping_status": {
+      "const": "DRAFT_ID_MAPPING_ONLY"
+    },
+    "source_verification_gate": {
+      "const": "REQUIRES_LATER_HUMAN_SOURCE_VERIFICATION"
+    },
+    "canonical_use_permitted": {
+      "const": false
+    },
+    "content_copy_policy": {
+      "const": "NO_SOURCE_TEXT_COPY_WITHOUT_LICENSE_REVIEW"
     },
     "execution_permitted": {
       "const": false
