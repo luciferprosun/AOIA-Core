@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aoia.local/schemas/hat_003_python/validation_rule.schema.json",
+  "title": "Hat 003 Python Validation Rule Draft Schema",
+  "description": "Compact draft-only schema for Hat 003 validation rules. Rule examples are inert review text and must not be executed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rule_id",
+    "name",
+    "category",
+    "severity",
+    "pattern_type",
+    "description",
+    "positive_examples",
+    "negative_examples",
+    "recommended_human_review",
+    "risk_label",
+    "do_not_execute",
+    "status",
+    "baseline_status",
+    "canonical",
+    "canonical_status",
+    "source_verification_status",
+    "source_verification_requirement",
+    "execution_permitted",
+    "human_review_required",
+    "review_status",
+    "generation_method",
+    "card_deepening_status",
+    "source_authority_status",
+    "provenance"
+  ],
+  "properties": {
+    "rule_id": {
+      "type": "string",
+      "pattern": "^HAT003-[A-Z0-9-]+$"
+    },
+    "name": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "category": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "severity": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "pattern_type": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "description": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "positive_examples": {
+      "$ref": "#/definitions/string_array"
+    },
+    "negative_examples": {
+      "$ref": "#/definitions/string_array"
+    },
+    "recommended_human_review": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "risk_label": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "do_not_execute": {
+      "const": true
+    },
+    "status": {
+      "const": "DRAFT"
+    },
+    "baseline_status": {
+      "const": "DRAFT_BASELINE"
+    },
+    "canonical": {
+      "const": false
+    },
+    "canonical_status": {
+      "const": "NOT_CANONICAL"
+    },
+    "source_verification_status": {
+      "const": "UNVERIFIED"
+    },
+    "source_verification_requirement": {
+      "const": "NEEDS_SOURCE_VERIFICATION"
+    },
+    "execution_permitted": {
+      "const": false
+    },
+    "human_review_required": {
+      "const": true
+    },
+    "review_status": {
+      "const": "DRAFT"
+    },
+    "generation_method": {
+      "const": "GENERATED_DRAFT_NO_DIRECT_SOURCE"
+    },
+    "card_deepening_status": {
+      "const": "NEEDS_CARD_DEEPENING"
+    },
+    "source_authority_status": {
+      "$ref": "#/definitions/source_authority_status"
+    },
+    "provenance": {
+      "$ref": "#/definitions/provenance"
+    }
+  },
+  "definitions": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "string_array": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/non_empty_string"
+      }
+    },
+    "source_authority_status": {
+      "enum": [
+        "PRIMARY",
+        "SECONDARY",
+        "COMMUNITY",
+        "TERTIARY",
+        "UNKNOWN",
+        "UNVERIFIED",
+        "MIXED_OR_UNVERIFIED"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "record_type",
+        "generation_method",
+        "direct_source_verified",
+        "notes"
+      ],
+      "properties": {
+        "origin": {
+          "$ref": "#/definitions/non_empty_string"
+        },
+        "record_type": {
+          "const": "validation_rule"
+        },
+        "generation_method": {
+          "const": "GENERATED_DRAFT_NO_DIRECT_SOURCE"
+        },
+        "direct_source_verified": {
+          "const": false
+        },
+        "notes": {
+          "$ref": "#/definitions/non_empty_string"
+        }
+      }
+    }
+  }
+}

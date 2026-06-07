@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aoia.local/schemas/hat_003_python/retrieval_index_entry.schema.json",
+  "title": "Hat 003 Python Retrieval Index Entry Draft Schema",
+  "description": "Compact draft-only schema for derivative Hat 003 retrieval index entries. Index entries are not canonical knowledge records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "title",
+    "text",
+    "status",
+    "canonical",
+    "source_verification_status",
+    "card_deepening_status",
+    "execution_permitted",
+    "human_review_required"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^HAT003-[A-Z0-9-]+$"
+    },
+    "kind": {
+      "enum": [
+        "knowledge_card",
+        "validation_rule",
+        "corpus_case",
+        "source_atlas_entry"
+      ]
+    },
+    "title": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "text": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "status": {
+      "const": "DRAFT"
+    },
+    "canonical": {
+      "const": false
+    },
+    "source_verification_status": {
+      "const": "UNVERIFIED"
+    },
+    "card_deepening_status": {
+      "enum": [
+        null,
+        "NEEDS_CARD_DEEPENING"
+      ]
+    },
+    "execution_permitted": {
+      "const": false
+    },
+    "human_review_required": {
+      "const": true
+    }
+  },
+  "definitions": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

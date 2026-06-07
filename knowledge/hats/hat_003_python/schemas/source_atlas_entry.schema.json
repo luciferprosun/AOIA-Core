@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aoia.local/schemas/hat_003_python/source_atlas_entry.schema.json",
+  "title": "Hat 003 Python Source Atlas Entry Draft Schema",
+  "description": "Compact draft-only schema for Hat 003 source atlas entries. Source entries remain unverified and non-canonical until a later source-verification phase.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_id",
+    "name",
+    "category",
+    "subcategory",
+    "url_or_reference",
+    "license_or_access_note",
+    "trust_level",
+    "recommended_use",
+    "hat_relevance",
+    "risk_notes",
+    "status",
+    "baseline_status",
+    "canonical",
+    "canonical_status",
+    "source_verification_status",
+    "source_verification_requirement",
+    "execution_permitted",
+    "human_review_required",
+    "authority_tier",
+    "generation_method",
+    "card_deepening_status",
+    "provenance"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "pattern": "^SRC-PY-[A-Z0-9_-]+$"
+    },
+    "name": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "category": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "subcategory": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "url_or_reference": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "license_or_access_note": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "trust_level": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "recommended_use": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "hat_relevance": {
+      "$ref": "#/definitions/string_array"
+    },
+    "risk_notes": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "status": {
+      "const": "DRAFT"
+    },
+    "baseline_status": {
+      "const": "DRAFT_BASELINE"
+    },
+    "canonical": {
+      "const": false
+    },
+    "canonical_status": {
+      "const": "NOT_CANONICAL"
+    },
+    "source_verification_status": {
+      "const": "UNVERIFIED"
+    },
+    "source_verification_requirement": {
+      "const": "NEEDS_SOURCE_VERIFICATION"
+    },
+    "execution_permitted": {
+      "const": false
+    },
+    "human_review_required": {
+      "const": true
+    },
+    "authority_tier": {
+      "$ref": "#/definitions/authority_tier"
+    },
+    "generation_method": {
+      "enum": [
+        "CURATED_SOURCE_INDEX_ENTRY",
+        "GENERATED_DRAFT_NO_DIRECT_SOURCE"
+      ]
+    },
+    "card_deepening_status": {
+      "enum": [
+        null,
+        "NEEDS_CARD_DEEPENING"
+      ]
+    },
+    "provenance": {
+      "$ref": "#/definitions/provenance"
+    }
+  },
+  "definitions": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "string_array": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/non_empty_string"
+      }
+    },
+    "authority_tier": {
+      "enum": [
+        "PRIMARY",
+        "SECONDARY",
+        "COMMUNITY",
+        "TERTIARY",
+        "UNKNOWN"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "record_type",
+        "generation_method",
+        "direct_source_verified",
+        "notes"
+      ],
+      "properties": {
+        "origin": {
+          "$ref": "#/definitions/non_empty_string"
+        },
+        "record_type": {
+          "const": "source_index_entry"
+        },
+        "generation_method": {
+          "enum": [
+            "CURATED_SOURCE_INDEX_ENTRY",
+            "GENERATED_DRAFT_NO_DIRECT_SOURCE"
+          ]
+        },
+        "direct_source_verified": {
+          "const": false
+        },
+        "notes": {
+          "$ref": "#/definitions/non_empty_string"
+        }
+      }
+    }
+  }
+}

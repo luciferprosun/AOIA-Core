@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aoia.local/schemas/hat_003_python/knowledge_card.schema.json",
+  "title": "Hat 003 Python Knowledge Card Draft Schema",
+  "description": "Compact draft-only schema for Hat 003 knowledge cards. It preserves non-canonical, unverified, no-execution governance for deterministic later rebuilds.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "card_id",
+    "title",
+    "category",
+    "subcategory",
+    "difficulty",
+    "source_ids",
+    "summary",
+    "key_points",
+    "safe_examples",
+    "anti_patterns",
+    "safety_notes",
+    "related_cards",
+    "aoia_tags",
+    "risk_label",
+    "review_status",
+    "status",
+    "baseline_status",
+    "canonical",
+    "canonical_status",
+    "source_verification_status",
+    "source_verification_requirement",
+    "execution_permitted",
+    "human_review_required",
+    "generation_method",
+    "card_deepening_status",
+    "source_authority_status",
+    "provenance"
+  ],
+  "properties": {
+    "card_id": {
+      "type": "string",
+      "pattern": "^HAT003-PY-[A-Z0-9-]+$"
+    },
+    "title": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "category": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "subcategory": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "difficulty": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "source_ids": {
+      "$ref": "#/definitions/string_array"
+    },
+    "summary": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "key_points": {
+      "$ref": "#/definitions/string_array"
+    },
+    "safe_examples": {
+      "$ref": "#/definitions/string_array"
+    },
+    "anti_patterns": {
+      "$ref": "#/definitions/string_array"
+    },
+    "safety_notes": {
+      "$ref": "#/definitions/string_array"
+    },
+    "related_cards": {
+      "$ref": "#/definitions/string_array"
+    },
+    "aoia_tags": {
+      "$ref": "#/definitions/string_array"
+    },
+    "risk_label": {
+      "$ref": "#/definitions/non_empty_string"
+    },
+    "review_status": {
+      "const": "DRAFT"
+    },
+    "status": {
+      "const": "DRAFT"
+    },
+    "baseline_status": {
+      "const": "DRAFT_BASELINE"
+    },
+    "canonical": {
+      "const": false
+    },
+    "canonical_status": {
+      "const": "NOT_CANONICAL"
+    },
+    "source_verification_status": {
+      "const": "UNVERIFIED"
+    },
+    "source_verification_requirement": {
+      "const": "NEEDS_SOURCE_VERIFICATION"
+    },
+    "execution_permitted": {
+      "const": false
+    },
+    "human_review_required": {
+      "const": true
+    },
+    "generation_method": {
+      "const": "GENERATED_DRAFT_NO_DIRECT_SOURCE"
+    },
+    "card_deepening_status": {
+      "const": "NEEDS_CARD_DEEPENING"
+    },
+    "source_authority_status": {
+      "$ref": "#/definitions/source_authority_status"
+    },
+    "provenance": {
+      "$ref": "#/definitions/provenance"
+    }
+  },
+  "definitions": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "string_array": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/non_empty_string"
+      }
+    },
+    "source_authority_status": {
+      "enum": [
+        "PRIMARY",
+        "SECONDARY",
+        "COMMUNITY",
+        "TERTIARY",
+        "UNKNOWN",
+        "UNVERIFIED",
+        "MIXED_OR_UNVERIFIED"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "record_type",
+        "generation_method",
+        "direct_source_verified",
+        "notes"
+      ],
+      "properties": {
+        "origin": {
+          "$ref": "#/definitions/non_empty_string"
+        },
+        "record_type": {
+          "const": "knowledge_card"
+        },
+        "generation_method": {
+          "const": "GENERATED_DRAFT_NO_DIRECT_SOURCE"
+        },
+        "direct_source_verified": {
+          "const": false
+        },
+        "notes": {
+          "$ref": "#/definitions/non_empty_string"
+        }
+      }
+    }
+  }
+}
