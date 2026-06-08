@@ -1,5 +1,6 @@
 const state = {
   currentModel: "",
+  catalogModels: [],
 };
 
 const elements = {
@@ -22,6 +23,13 @@ const elements = {
   catalogStatus: document.querySelector("#catalog-status"),
   catalogNotice: document.querySelector("#catalog-notice"),
   modelCatalog: document.querySelector("#model-catalog"),
+  providerConfigStatus: document.querySelector("#provider-config-status"),
+  routerTaskSensitivity: document.querySelector("#router-task-sensitivity"),
+  routerModelSelect: document.querySelector("#router-model-select"),
+  routerPrompt: document.querySelector("#router-prompt"),
+  routerHumanApproval: document.querySelector("#router-human-approval"),
+  routerProposalResult: document.querySelector("#router-proposal-result"),
+  routerCallResult: document.querySelector("#router-call-result"),
 };
 
 async function jsonFetch(url, options = {}) {
@@ -75,6 +83,14 @@ async function refreshStatus() {
 async function refreshModelCatalog() {
   const payload = await jsonFetch("/api/model-catalog");
   hydrateModelCatalog(payload);
+}
+
+async function refreshProviderConfigStatus() {
+  const payload = await jsonFetch("/api/provider-config-status");
+  elements.providerConfigStatus.textContent = [
+    `Gemini: ${payload.gemini_configured ? "configured" : "not configured"}`,
+    `OpenRouter: ${payload.openrouter_configured ? "configured" : "not configured"}`,
+  ].join(" / ");
 }
 
 function parseModelChoices(availableModels) {
@@ -142,6 +158,8 @@ function hydrateModelCatalog(payload) {
   elements.catalogNotice.textContent =
     payload.notice ||
     "Preview only - no provider calls. Human approval required before any future provider call.";
+  state.catalogModels = payload.models || [];
+  hydrateRouterModelSelect(state.catalogModels);
   elements.modelCatalog.innerHTML = "";
 
   for (const model of payload.models || []) {
@@ -188,6 +206,58 @@ function hydrateModelCatalog(payload) {
   }
 }
 
+function hydrateRouterModelSelect(models) {
+  elements.routerModelSelect.innerHTML = "";
+  for (const model of models || []) {
+    const option = document.createElement("option");
+    option.value = model.model_id;
+    option.dataset.providerId = model.provider_id;
+    option.textContent = `${model.provider_id} -> ${model.display_name || model.model_id}`;
+    elements.routerModelSelect.appendChild(option);
+  }
+}
+
+function selectedRouterModel() {
+  const option = elements.routerModelSelect.selectedOptions[0];
+  return {
+    model_id: elements.routerModelSelect.value,
+    provider_id: option ? option.dataset.providerId : "",
+  };
+}
+
+function renderJson(element, payload) {
+  element.textContent = JSON.stringify(payload, null, 2);
+}
+
+async function createSelectionProposal() {
+  const selected = selectedRouterModel();
+  const payload = await jsonFetch("/api/model-selection/propose", {
+    method: "POST",
+    body: JSON.stringify({
+      provider_id: selected.provider_id,
+      model_id: selected.model_id,
+      task_sensitivity: elements.routerTaskSensitivity.value,
+      user_prompt: elements.routerPrompt.value,
+    }),
+  });
+  renderJson(elements.routerProposalResult, payload);
+}
+
+async function approveAndCallProviderOnce() {
+  const selected = selectedRouterModel();
+  const payload = await jsonFetch("/api/model-selection/approve-and-call", {
+    method: "POST",
+    body: JSON.stringify({
+      provider_id: selected.provider_id,
+      model_id: selected.model_id,
+      task_sensitivity: elements.routerTaskSensitivity.value,
+      user_prompt: elements.routerPrompt.value,
+      human_approved: elements.routerHumanApproval.checked === true,
+    }),
+  });
+  renderJson(elements.routerCallResult, payload);
+}
+
 async function switchModel() {
   const model = elements.modelSelect.value;
   elements.modelNote.textContent = `Switching to ${model}...`;
@@ -221,8 +291,25 @@ document.querySelector("#switch-model").addEventListener("click", async () => {
 document.querySelector("#refresh-status").addEventListener("click", async () => {
   try {
     await refreshStatus();
+    await refreshProviderConfigStatus();
   } catch (error) {
     addMessage("System", `Refresh failed: ${error}`);
+  }
+});
+
+document.querySelector("#create-selection-proposal").addEventListener("click", async () => {
+  try {
+    await createSelectionProposal();
+  } catch (error) {
+    renderJson(elements.routerProposalResult, { ok: false, error: String(error) });
+  }
+});
+
+document.querySelector("#approve-and-call-provider").addEventListener("click", async () => {
+  try {
+    await approveAndCallProviderOnce();
+  } catch (error) {
+    renderJson(elements.routerCallResult, { ok: false, error: String(error), call_made: false, output_trusted: false });
   }
 });
 
@@ -262,6 +349,7 @@ async function bootstrap() {
   try {
     await refreshStatus();
     await refreshModelCatalog();
+    await refreshProviderConfigStatus();
   } catch (error) {
     addMessage("System", `Startup failed: ${error}`);
   }

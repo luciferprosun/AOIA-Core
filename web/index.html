@@ -115,6 +115,52 @@
           <div id="model-catalog" class="catalog-grid" aria-live="polite"></div>
         </section>
 
+        <section class="router-panel">
+          <div class="catalog-head">
+            <div>
+              <p class="eyebrow">Controlled Provider Call</p>
+              <h3>One-Shot Model Selection</h3>
+            </div>
+            <span id="provider-config-status" class="badge">checking keys</span>
+          </div>
+          <p class="note">
+            Provider response is untrusted. No automatic fallback. No canonical promotion.
+            No execution from model output. Secrets are not displayed or logged.
+          </p>
+          <div class="router-grid">
+            <div>
+              <label class="label" for="router-task-sensitivity">Task sensitivity</label>
+              <select id="router-task-sensitivity" class="select">
+                <option value="PUBLIC_DEV">PUBLIC_DEV</option>
+                <option value="INTERNAL_NON_CANONICAL">INTERNAL_NON_CANONICAL</option>
+                <option value="SENSITIVE">SENSITIVE</option>
+                <option value="CANONICAL">CANONICAL</option>
+                <option value="SECRET_ADJACENT">SECRET_ADJACENT</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="router-model-select">Selected provider/model</label>
+              <select id="router-model-select" class="select"></select>
+            </div>
+          </div>
+          <label class="label" for="router-prompt">Prompt for selected provider</label>
+          <textarea
+            id="router-prompt"
+            rows="4"
+            placeholder="Enter a prompt for one explicitly approved provider call."
+          ></textarea>
+          <div class="router-actions">
+            <button id="create-selection-proposal" type="button" class="button button-ghost">Create selection proposal</button>
+            <label class="approval-check">
+              <input id="router-human-approval" type="checkbox" />
+              <span>I approve this one provider call</span>
+            </label>
+            <button id="approve-and-call-provider" type="button" class="button button-primary">Approve and call selected provider once</button>
+          </div>
+          <pre id="router-proposal-result" class="router-output" aria-live="polite"></pre>
+          <pre id="router-call-result" class="router-output" aria-live="polite"></pre>
+        </section>
+
         <section id="chat-log" class="chat-log" aria-live="polite"></section>
 
         <form id="composer" class="composer">

@@ -1,0 +1,165 @@
+from __future__ import annotations
+
+import json
+from dataclasses import asdict, dataclass
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+try:
+    from runtime.provider_config import _get_gemini_api_key, _get_openrouter_api_key
+except ModuleNotFoundError:  # pragma: no cover - script launch path
+    from provider_config import _get_gemini_api_key, _get_openrouter_api_key
+
+
+@dataclass(frozen=True)
+class ProviderCallResult:
+    provider_id: str
+    model_id: str
+    call_made: bool
+    output_text: str = ""
+    output_trusted: bool = False
+    error: str = ""
+
+    def __post_init__(self) -> None:
+        if self.output_trusted is not False:
+            raise ValueError("provider output must remain untrusted")
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+def call_selected_provider_once(
+    *,
+    provider_id: str,
+    model_id: str,
+    user_prompt: str,
+    human_approved: bool,
+    provider_call_permitted: bool,
+    policy_rejected: bool,
+) -> ProviderCallResult:
+    if human_approved is not True:
+        return _blocked(provider_id, model_id, "human approval is required")
+    if provider_call_permitted is not True:
+        return _blocked(provider_id, model_id, "provider call is not permitted")
+    if policy_rejected:
+        return _blocked(provider_id, model_id, "policy rejected this provider call")
+    if not user_prompt.strip():
+        return _blocked(provider_id, model_id, "prompt is required")
+
+    if provider_id == "gemini":
+        return _call_gemini_once(model_id=model_id, user_prompt=user_prompt)
+    if provider_id == "openrouter":
+        return _call_openrouter_once(model_id=model_id, user_prompt=user_prompt)
+    if provider_id == "local":
+        return _blocked(provider_id, model_id, "local model execution not implemented in M1-ROUTER-A")
+    return _blocked(provider_id, model_id, "provider is not supported in M1-ROUTER-A")
+
+
+def _blocked(provider_id: str, model_id: str, error: str) -> ProviderCallResult:
+    return ProviderCallResult(
+        provider_id=provider_id,
+        model_id=model_id,
+        call_made=False,
+        output_text="",
+        output_trusted=False,
+        error=error,
+    )
+
+
+def _call_gemini_once(*, model_id: str, user_prompt: str) -> ProviderCallResult:
+    api_key = _get_gemini_api_key()
+    if api_key is None:
+        return _blocked("gemini", model_id, "Gemini provider is not configured")
+
+    gemini_model = model_id.removeprefix("gemini/")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
+    request = Request(
+        url,
+        data=json.dumps({"contents": [{"parts": [{"text": user_prompt}]}]}).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    return _send_json_request(
+        provider_id="gemini",
+        model_id=model_id,
+        request=request,
+        extractor=_extract_gemini_text,
+    )
+
+
+def _call_openrouter_once(*, model_id: str, user_prompt: str) -> ProviderCallResult:
+    api_key = _get_openrouter_api_key()
+    if api_key is None:
+        return _blocked("openrouter", model_id, "OpenRouter provider is not configured")
+
+    openrouter_model = model_id.removeprefix("openrouter/")
+    request = Request(
+        "https://openrouter.ai/api/v1/chat/completions",
+        data=json.dumps(
+            {
+                "model": openrouter_model,
+                "messages": [{"role": "user", "content": user_prompt}],
+            }
+        ).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    return _send_json_request(
+        provider_id="openrouter",
+        model_id=model_id,
+        request=request,
+        extractor=_extract_openrouter_text,
+    )
+
+
+def _send_json_request(*, provider_id: str, model_id: str, request: Request, extractor) -> ProviderCallResult:
+    try:
+        with urlopen(request, timeout=60) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except HTTPError as error:
+        return ProviderCallResult(
+            provider_id=provider_id,
+            model_id=model_id,
+            call_made=True,
+            output_text="",
+            output_trusted=False,
+            error=f"provider HTTP error {error.code}",
+        )
+    except (URLError, TimeoutError, json.JSONDecodeError) as error:
+        return ProviderCallResult(
+            provider_id=provider_id,
+            model_id=model_id,
+            call_made=True,
+            output_text="",
+            output_trusted=False,
+            error=f"provider call failed: {type(error).__name__}",
+        )
+
+    return ProviderCallResult(
+        provider_id=provider_id,
+        model_id=model_id,
+        call_made=True,
+        output_text=extractor(payload),
+        output_trusted=False,
+        error="",
+    )
+
+
+def _extract_gemini_text(payload: dict) -> str:
+    parts = (
+        payload.get("candidates", [{}])[0]
+        .get("content", {})
+        .get("parts", [])
+    )
+    return "\n".join(str(part.get("text", "")) for part in parts if part.get("text"))
+
+
+def _extract_openrouter_text(payload: dict) -> str:
+    choices = payload.get("choices", [])
+    if not choices:
+        return ""
+    message = choices[0].get("message", {})
+    return str(message.get("content", ""))

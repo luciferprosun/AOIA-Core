@@ -10,6 +10,7 @@ from pathlib import Path
 from threading import Lock
 from urllib.parse import urlparse
 
+from model_router import create_model_selection_proposal, evaluate_model_selection_policy, execute_approved_model_call_once
 from model_catalog import get_static_model_catalog_payload
 from main import (
     DEBUG_RAW_RESPONSE,
@@ -91,6 +92,11 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/model-catalog":
             self._write_json(HTTPStatus.OK, get_static_model_catalog_payload())
             return
+        if parsed.path == "/api/provider-config-status":
+            from provider_config import get_provider_config_status
+
+            self._write_json(HTTPStatus.OK, get_provider_config_status())
+            return
         if parsed.path in {"/", "/index.html"}:
             self.path = "/index.html"
         return super().do_GET()
@@ -116,6 +122,73 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                     self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "model is required"})
                     return
                 self._write_json(HTTPStatus.OK, SERVICE.switch_model(model_name))
+                return
+
+            if parsed.path == "/api/model-selection/propose":
+                provider_id = str(payload.get("provider_id", "")).strip()
+                model_id = str(payload.get("model_id", "")).strip()
+                task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
+                user_prompt = str(payload.get("user_prompt", ""))
+                if not provider_id or not model_id or not task_sensitivity:
+                    self._write_json(
+                        HTTPStatus.BAD_REQUEST,
+                        {"ok": False, "error": "provider_id, model_id, and task_sensitivity are required"},
+                    )
+                    return
+                proposal = create_model_selection_proposal(
+                    provider_id=provider_id,
+                    model_id=model_id,
+                    task_sensitivity=task_sensitivity,
+                    user_prompt=user_prompt,
+                )
+                decision = evaluate_model_selection_policy(proposal=proposal)
+                self._write_json(
+                    HTTPStatus.OK,
+                    {
+                        "ok": True,
+                        "proposal": proposal,
+                        "decision": decision,
+                        "human_approval_required": True,
+                        "provider_call_permitted": False,
+                        "output_trusted": False,
+                    },
+                )
+                return
+
+            if parsed.path == "/api/model-selection/approve-and-call":
+                provider_id = str(payload.get("provider_id", "")).strip()
+                model_id = str(payload.get("model_id", "")).strip()
+                task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
+                user_prompt = str(payload.get("user_prompt", ""))
+                human_approved = payload.get("human_approved") is True
+                if not provider_id or not model_id or not task_sensitivity:
+                    self._write_json(
+                        HTTPStatus.BAD_REQUEST,
+                        {"ok": False, "error": "provider_id, model_id, and task_sensitivity are required"},
+                    )
+                    return
+                if human_approved is not True:
+                    self._write_json(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "ok": False,
+                            "error": "human_approved must be exactly true",
+                            "call_made": False,
+                            "output_text": "",
+                            "output_trusted": False,
+                        },
+                    )
+                    return
+                self._write_json(
+                    HTTPStatus.OK,
+                    execute_approved_model_call_once(
+                        provider_id=provider_id,
+                        model_id=model_id,
+                        task_sensitivity=task_sensitivity,
+                        user_prompt=user_prompt,
+                        human_approved=human_approved,
+                    ),
+                )
                 return
 
             self._write_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
