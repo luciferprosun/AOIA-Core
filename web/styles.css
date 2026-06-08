@@ -58,6 +58,8 @@ textarea {
 .panel,
 .hero-card,
 .metric-card,
+.catalog-panel,
+.catalog-card,
 .chat-log,
 .composer,
 .topbar {
@@ -72,20 +74,26 @@ textarea {
 .topbar,
 .hero-card,
 .metric-card,
+.catalog-panel,
+.catalog-card,
 .composer {
   padding: 18px;
 }
 
 .brand h1,
 .topbar h2,
-.hero-card h3 {
+.hero-card h3,
+.catalog-panel h3,
+.catalog-card h4 {
   margin: 0;
 }
 
 .subtitle,
 .note,
 .hint,
-.hero-copy {
+.hero-copy,
+.catalog-flags,
+.catalog-model-id {
   color: var(--muted);
 }
 
@@ -243,6 +251,61 @@ textarea {
 .hero-grid {
   display: grid;
   gap: 18px;
+}
+
+.catalog-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.catalog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.catalog-card {
+  display: grid;
+  gap: 10px;
+  box-shadow: none;
+}
+
+.catalog-model-id,
+.catalog-flags {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  word-break: break-word;
+}
+
+.catalog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.catalog-tag {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: rgba(27, 23, 20, 0.07);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+}
+
+.catalog-notes {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.86rem;
 }
 
 .metric-card {

@@ -10,6 +10,7 @@ from pathlib import Path
 from threading import Lock
 from urllib.parse import urlparse
 
+from model_catalog import get_static_model_catalog_payload
 from main import (
     DEBUG_RAW_RESPONSE,
     PROMPT_FILE,
@@ -86,6 +87,9 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                     "available_models": SERVICE.runtime.provider_manager.available_models(),
                 },
             )
+            return
+        if parsed.path == "/api/model-catalog":
+            self._write_json(HTTPStatus.OK, get_static_model_catalog_payload())
             return
         if parsed.path in {"/", "/index.html"}:
             self.path = "/index.html"

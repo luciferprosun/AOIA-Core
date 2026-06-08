@@ -19,6 +19,9 @@ const elements = {
   metricTools: document.querySelector("#metric-tools"),
   metricCommands: document.querySelector("#metric-commands"),
   metricOutputs: document.querySelector("#metric-outputs"),
+  catalogStatus: document.querySelector("#catalog-status"),
+  catalogNotice: document.querySelector("#catalog-notice"),
+  modelCatalog: document.querySelector("#model-catalog"),
 };
 
 async function jsonFetch(url, options = {}) {
@@ -67,6 +70,11 @@ async function refreshStatus() {
   const payload = await jsonFetch("/api/status");
   applyStatus(payload);
   hydrateModelSelect(payload.available_models, payload.model);
+}
+
+async function refreshModelCatalog() {
+  const payload = await jsonFetch("/api/model-catalog");
+  hydrateModelCatalog(payload);
 }
 
 function parseModelChoices(availableModels) {
@@ -126,6 +134,57 @@ function hydrateModelPicker(choices, currentModel) {
       }
     });
     elements.modelPicker.appendChild(button);
+  }
+}
+
+function hydrateModelCatalog(payload) {
+  elements.catalogStatus.textContent = payload.status || "preview only";
+  elements.catalogNotice.textContent =
+    payload.notice ||
+    "Preview only - no provider calls. Human approval required before any future provider call.";
+  elements.modelCatalog.innerHTML = "";
+
+  for (const model of payload.models || []) {
+    const article = document.createElement("article");
+    article.className = "catalog-card";
+
+    const title = document.createElement("h4");
+    title.textContent = model.display_name || model.model_id;
+
+    const modelId = document.createElement("p");
+    modelId.className = "catalog-model-id";
+    modelId.textContent = model.model_id;
+
+    const tags = document.createElement("div");
+    tags.className = "catalog-tags";
+    for (const value of [model.provider_class, model.trust_level, model.free_tier ? "FREE" : "", model.paid_tier ? "PAID" : ""]) {
+      if (!value) {
+        continue;
+      }
+      const tag = document.createElement("span");
+      tag.className = "catalog-tag";
+      tag.textContent = value;
+      tags.appendChild(tag);
+    }
+
+    const flags = document.createElement("p");
+    flags.className = "catalog-flags";
+    flags.textContent = [
+      model.enabled ? "enabled" : "disabled by default",
+      model.allows_sensitive_tasks ? "sensitive allowed" : "no sensitive tasks",
+      model.allows_canonical_tasks ? "canonical allowed" : "no canonical tasks",
+    ].join(" / ");
+
+    const notes = document.createElement("ul");
+    notes.className = "catalog-notes";
+    for (const note of model.notes || []) {
+      const item = document.createElement("li");
+      item.textContent = note;
+      notes.appendChild(item);
+    }
+
+    article.append(title, modelId, tags, flags, notes);
+    elements.modelCatalog.appendChild(article);
   }
 }
 
@@ -202,6 +261,7 @@ async function bootstrap() {
   );
   try {
     await refreshStatus();
+    await refreshModelCatalog();
   } catch (error) {
     addMessage("System", `Startup failed: ${error}`);
   }
