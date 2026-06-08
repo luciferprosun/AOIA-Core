@@ -21,6 +21,8 @@ from main import (
 
 PROJECT_DIR = Path(__file__).resolve().parent
 WEB_DIR = PROJECT_DIR / "web"
+if not WEB_DIR.exists():
+    WEB_DIR = PROJECT_DIR.parent / "web"
 HOST = os.getenv("APP2_WEB_HOST", "127.0.0.1")
 PORT = int(os.getenv("APP2_WEB_PORT", "4311"))
 
