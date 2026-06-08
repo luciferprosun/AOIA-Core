@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>App222 Operator Console</title>
+    <title>App222 Controlled Router</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,31 +18,25 @@
         <div class="brand">
           <p class="eyebrow">flAmeBornLLC</p>
           <h1>App222</h1>
-          <p class="subtitle">Codex-style operator shell for your local runtime.</p>
+          <p class="subtitle">Controlled Model Router</p>
         </div>
 
         <section class="panel">
           <div class="panel-head">
-            <h2>Model</h2>
+            <h2>Selected Router Model</h2>
             <span id="current-model-badge" class="badge">loading</span>
           </div>
-          <label class="label" for="model-select">Active model</label>
-          <select id="model-select" class="select"></select>
-          <button id="switch-model" class="button button-primary">Switch model</button>
-          <p id="model-note" class="note"></p>
-          <div id="model-picker" class="model-picker" aria-label="Model shortcuts"></div>
+          <p id="sidebar-selected-model" class="selected-model">No catalog model selected.</p>
+          <p class="note">Provider calls require human approval.</p>
+          <p id="provider-config-status" class="note">Checking provider configuration.</p>
         </section>
 
         <section class="panel">
           <div class="panel-head">
-            <h2>Quick commands</h2>
+            <h2>Router boundary</h2>
           </div>
-          <div class="quick-actions">
-            <button class="button button-ghost quick-action" data-prompt="/status">/status</button>
-            <button class="button button-ghost quick-action" data-prompt="/tools">/tools</button>
-            <button class="button button-ghost quick-action" data-prompt="/help">/help</button>
-            <button class="button button-ghost quick-action" data-prompt="open https://example.com">Open URL</button>
-          </div>
+          <p class="note">Proposal only. Provider output remains untrusted and non-canonical.</p>
+          <p class="note">OpenRouter Free stays blocked for callable use in this build.</p>
         </section>
 
         <section class="panel">
@@ -74,107 +68,187 @@
         <header class="topbar">
           <div>
             <p class="eyebrow">Operator Console</p>
-            <h2>Codex-shaped control surface</h2>
+            <h2>Controlled Model Router</h2>
           </div>
           <button id="refresh-status" class="button button-ghost">Refresh status</button>
         </header>
 
-        <section class="hero">
-          <div class="hero-card">
-            <p class="eyebrow">Session</p>
-            <h3 id="session-model">loading</h3>
-            <p id="session-summary" class="hero-copy">
-              Waiting for runtime status.
-            </p>
-          </div>
-          <div class="hero-grid">
-            <article class="metric-card">
-              <span>Tools</span>
-              <strong id="metric-tools">0</strong>
-            </article>
-            <article class="metric-card">
-              <span>Commands</span>
-              <strong id="metric-commands">0</strong>
-            </article>
-            <article class="metric-card">
-              <span>Recent outputs</span>
-              <strong id="metric-outputs">0</strong>
-            </article>
-          </div>
-        </section>
-
-        <section class="catalog-panel">
+        <section class="router-panel primary-router">
           <div class="catalog-head">
             <div>
-              <p class="eyebrow">Model Catalog</p>
-              <h3>Transparent Provider Preview</h3>
+              <p class="eyebrow">Controlled Model Router</p>
+              <h3>Model Choice</h3>
             </div>
             <span id="catalog-status" class="badge">preview only</span>
           </div>
-          <p id="catalog-notice" class="note">Preview only - no provider calls. Human approval required before any future provider call.</p>
-          <div id="model-catalog" class="catalog-grid" aria-live="polite"></div>
-        </section>
-
-        <section class="router-panel">
-          <div class="catalog-head">
-            <div>
-              <p class="eyebrow">Controlled Provider Call</p>
-              <h3>One-Shot Model Selection</h3>
-            </div>
-            <span id="provider-config-status" class="badge">checking keys</span>
-          </div>
+          <p id="catalog-notice" class="note">
+            Preview only - no provider calls. Human approval required before any future provider call.
+          </p>
           <p class="note">
             Provider response is untrusted. No automatic fallback. No canonical promotion.
             No execution from model output. Secrets are not displayed or logged.
           </p>
+
           <div class="router-grid">
             <div>
-              <label class="label" for="router-task-sensitivity">Task sensitivity</label>
-              <select id="router-task-sensitivity" class="select">
-                <option value="PUBLIC_DEV">PUBLIC_DEV</option>
-                <option value="INTERNAL_NON_CANONICAL">INTERNAL_NON_CANONICAL</option>
-                <option value="SENSITIVE">SENSITIVE</option>
-                <option value="CANONICAL">CANONICAL</option>
-                <option value="SECRET_ADJACENT">SECRET_ADJACENT</option>
-              </select>
+              <label class="label" for="router-provider-select">Provider</label>
+              <select id="router-provider-select" class="select"></select>
             </div>
             <div>
-              <label class="label" for="router-model-select">Selected provider/model</label>
+              <label class="label" for="router-model-select">Model</label>
               <select id="router-model-select" class="select"></select>
             </div>
+            <div>
+              <label class="label" for="router-task-mode">Task mode</label>
+              <select id="router-task-mode" class="select">
+                <option value="PUBLIC_DEV">Public development</option>
+                <option value="CODE">Code review</option>
+                <option value="AUDIT">Audit</option>
+                <option value="RESEARCH">Research</option>
+                <option value="SENSITIVE">Sensitive</option>
+                <option value="CANONICAL">Canonical</option>
+              </select>
+            </div>
+            <div class="choice-summary">
+              <span>Router mode</span>
+              <strong id="router-mode-label">Proposal only</strong>
+            </div>
           </div>
+
           <label class="label" for="router-prompt">Prompt for selected provider</label>
           <textarea
             id="router-prompt"
             rows="4"
             placeholder="Enter a prompt for one explicitly approved provider call."
           ></textarea>
+
+          <p class="field-heading">Human approval</p>
+          <label class="approval-check">
+            <input id="router-human-approval" type="checkbox" />
+            <span>I approve one provider call with this selected model</span>
+          </label>
+
           <div class="router-actions">
-            <button id="create-selection-proposal" type="button" class="button button-ghost">Create selection proposal</button>
-            <label class="approval-check">
-              <input id="router-human-approval" type="checkbox" />
-              <span>I approve this one provider call</span>
-            </label>
-            <button id="approve-and-call-provider" type="button" class="button button-primary">Approve and call selected provider once</button>
+            <button id="create-selection-proposal" type="button" class="button button-ghost">Prepare model choice</button>
+            <button id="approve-and-call-provider" type="button" class="button button-primary" disabled>
+              Send one approved provider call
+            </button>
           </div>
-          <pre id="router-proposal-result" class="router-output" aria-live="polite"></pre>
-          <pre id="router-call-result" class="router-output" aria-live="polite"></pre>
+          <p id="router-call-note" class="note">Provider call not enabled in this build.</p>
+
+          <div id="router-simple-result" class="result-panel" aria-live="polite">
+            <p class="field-heading">Router decision</p>
+            <dl class="status-list compact-status-list">
+              <div>
+                <dt>Status</dt>
+                <dd><span id="router-result-status" class="result-status">Blocked before provider call</span></dd>
+              </div>
+              <div>
+                <dt>Reason</dt>
+                <dd id="router-result-reason">Prepare a model choice to review policy status.</dd>
+              </div>
+            </dl>
+          </div>
         </section>
 
-        <section id="chat-log" class="chat-log" aria-live="polite"></section>
+        <details class="audit-details">
+          <summary>Advanced / Audit details</summary>
 
-        <form id="composer" class="composer">
-          <label class="label" for="prompt-input">Message</label>
-          <textarea
-            id="prompt-input"
-            rows="4"
-            placeholder="Ask the runtime to browse, write files, run tools, or switch context."
-          ></textarea>
-          <div class="composer-actions">
-            <span class="hint">Enter sends. Shift+Enter adds a newline.</span>
-            <button type="submit" class="button button-primary">Send</button>
-          </div>
-        </form>
+          <section class="catalog-panel">
+            <div class="catalog-head">
+              <div>
+                <p class="eyebrow">Model Catalog</p>
+                <h3>Transparent Provider Preview</h3>
+              </div>
+            </div>
+            <div id="model-catalog" class="catalog-grid" aria-live="polite"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Raw router JSON</h2>
+            </div>
+            <dl class="status-list">
+              <div>
+                <dt>Provider call</dt>
+                <dd id="audit-provider-call-permitted">Provider call is not permitted</dd>
+              </div>
+              <div>
+                <dt>Human approval</dt>
+                <dd id="audit-human-approved">Human approval is not granted</dd>
+              </div>
+              <div>
+                <dt>Output trust</dt>
+                <dd id="audit-output-trusted">Provider output is untrusted</dd>
+              </div>
+              <div>
+                <dt>Fallback</dt>
+                <dd id="audit-fallback">Automatic fallback is blocked</dd>
+              </div>
+            </dl>
+            <pre id="router-proposal-result" class="router-output" aria-live="polite"></pre>
+            <pre id="router-call-result" class="router-output" aria-live="polite"></pre>
+          </section>
+        </details>
+
+        <details class="legacy-details">
+          <summary>Advanced / Legacy runtime</summary>
+          <section class="panel warning-panel">
+            <p class="field-heading">Legacy runtime warning</p>
+            <p class="note">Legacy chat runtime. This is not the Controlled Model Router path.</p>
+          </section>
+
+          <section class="panel legacy-panel">
+            <div class="panel-head">
+              <h2>Legacy chat model</h2>
+              <span id="legacy-model-badge" class="badge">loading</span>
+            </div>
+            <label class="label" for="model-select">Legacy active model</label>
+            <select id="model-select" class="select"></select>
+            <button id="switch-model" class="button button-ghost">Switch legacy model</button>
+            <p id="model-note" class="note"></p>
+            <div id="model-picker" class="model-picker" aria-label="Legacy model shortcuts"></div>
+          </section>
+
+          <section class="hero legacy-hero">
+            <div class="hero-card">
+              <p class="eyebrow">Legacy runtime session</p>
+              <h3 id="session-model">loading</h3>
+              <p id="session-summary" class="hero-copy">
+                Waiting for runtime status.
+              </p>
+            </div>
+            <div class="hero-grid">
+              <article class="metric-card">
+                <span>Tools</span>
+                <strong id="metric-tools">0</strong>
+              </article>
+              <article class="metric-card">
+                <span>Commands</span>
+                <strong id="metric-commands">0</strong>
+              </article>
+              <article class="metric-card">
+                <span>Recent outputs</span>
+                <strong id="metric-outputs">0</strong>
+              </article>
+            </div>
+          </section>
+
+          <section id="chat-log" class="chat-log" aria-live="polite"></section>
+
+          <form id="composer" class="composer">
+            <label class="label" for="prompt-input">Legacy runtime message</label>
+            <textarea
+              id="prompt-input"
+              rows="4"
+              placeholder="Legacy chat runtime only. The Controlled Model Router is separate."
+            ></textarea>
+            <div class="composer-actions">
+              <span class="hint">Enter sends. Shift+Enter adds a newline.</span>
+              <button type="submit" class="button button-primary">Send legacy message</button>
+            </div>
+          </form>
+        </details>
       </main>
     </div>
 

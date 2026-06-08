@@ -1,12 +1,37 @@
 const state = {
-  currentModel: "",
+  currentLegacyModel: "",
   catalogModels: [],
+  selectedModel: {
+    providerId: "",
+    modelId: "",
+    source: "catalog",
+    mode: "proposal_only",
+  },
+  lastProposal: null,
+};
+
+const PROVIDER_LABELS = {
+  gemini: "Gemini",
+  openrouter: "OpenRouter",
+  local: "Local",
+  disabled: "Disabled",
+};
+
+const TASK_MODE_LABELS = {
+  PUBLIC_DEV: "Public development",
+  CODE: "Code review",
+  AUDIT: "Audit",
+  RESEARCH: "Research",
+  SENSITIVE: "Sensitive",
+  CANONICAL: "Canonical",
 };
 
 const elements = {
   modelSelect: document.querySelector("#model-select"),
   modelPicker: document.querySelector("#model-picker"),
   currentModelBadge: document.querySelector("#current-model-badge"),
+  legacyModelBadge: document.querySelector("#legacy-model-badge"),
+  sidebarSelectedModel: document.querySelector("#sidebar-selected-model"),
   modelNote: document.querySelector("#model-note"),
   chatLog: document.querySelector("#chat-log"),
   promptInput: document.querySelector("#prompt-input"),
@@ -24,12 +49,23 @@ const elements = {
   catalogNotice: document.querySelector("#catalog-notice"),
   modelCatalog: document.querySelector("#model-catalog"),
   providerConfigStatus: document.querySelector("#provider-config-status"),
-  routerTaskSensitivity: document.querySelector("#router-task-sensitivity"),
+  routerProviderSelect: document.querySelector("#router-provider-select"),
   routerModelSelect: document.querySelector("#router-model-select"),
+  routerTaskMode: document.querySelector("#router-task-mode"),
+  routerModeLabel: document.querySelector("#router-mode-label"),
   routerPrompt: document.querySelector("#router-prompt"),
   routerHumanApproval: document.querySelector("#router-human-approval"),
+  approveAndCallProvider: document.querySelector("#approve-and-call-provider"),
+  routerSimpleResult: document.querySelector("#router-simple-result"),
+  routerResultStatus: document.querySelector("#router-result-status"),
+  routerResultReason: document.querySelector("#router-result-reason"),
+  routerCallNote: document.querySelector("#router-call-note"),
   routerProposalResult: document.querySelector("#router-proposal-result"),
   routerCallResult: document.querySelector("#router-call-result"),
+  auditProviderCallPermitted: document.querySelector("#audit-provider-call-permitted"),
+  auditHumanApproved: document.querySelector("#audit-human-approved"),
+  auditOutputTrusted: document.querySelector("#audit-output-trusted"),
+  auditFallback: document.querySelector("#audit-fallback"),
 };
 
 async function jsonFetch(url, options = {}) {
@@ -59,12 +95,12 @@ function addMessage(role, body) {
 }
 
 function applyStatus(status) {
-  state.currentModel = status.model;
-  elements.currentModelBadge.textContent = status.model;
+  state.currentLegacyModel = status.model;
+  elements.legacyModelBadge.textContent = status.model;
   elements.sessionModel.textContent = status.model;
   elements.sessionSummary.textContent = status.browser_active
-    ? "Browser session is active and ready for follow-up actions."
-    : "Browser is idle. Shell and filesystem tools remain available.";
+    ? "Browser session is active in the legacy runtime path."
+    : "Legacy runtime is idle. Controlled router selection above is separate.";
   elements.statusCwd.textContent = status.cwd;
   elements.statusBrowser.textContent = status.browser_active ? "active" : "inactive";
   elements.statusUrl.textContent = status.current_url || "(none)";
@@ -77,7 +113,7 @@ function applyStatus(status) {
 async function refreshStatus() {
   const payload = await jsonFetch("/api/status");
   applyStatus(payload);
-  hydrateModelSelect(payload.available_models, payload.model);
+  hydrateLegacyModelSelect(payload.available_models, payload.model);
 }
 
 async function refreshModelCatalog() {
@@ -88,9 +124,29 @@ async function refreshModelCatalog() {
 async function refreshProviderConfigStatus() {
   const payload = await jsonFetch("/api/provider-config-status");
   elements.providerConfigStatus.textContent = [
-    `Gemini: ${payload.gemini_configured ? "configured" : "not configured"}`,
-    `OpenRouter: ${payload.openrouter_configured ? "configured" : "not configured"}`,
+    `Gemini: ${payload.gemini_configured ? "Configured" : "Not configured"}`,
+    `OpenRouter: ${payload.openrouter_configured ? "Configured" : "Not configured"}`,
   ].join(" / ");
+}
+
+function providerLabel(providerId) {
+  return PROVIDER_LABELS[providerId] || providerId || "Unknown provider";
+}
+
+function taskModeLabel(mode) {
+  return TASK_MODE_LABELS[mode] || mode || "Unknown mode";
+}
+
+function friendlyModelLabel(model) {
+  if (!model) {
+    return "No catalog model selected.";
+  }
+  const provider = providerLabel(model.provider_id || model.providerId || "");
+  const displayName = model.display_name || model.model_id || model.modelId || "";
+  if (!displayName) {
+    return provider;
+  }
+  return `${provider} - ${displayName}`;
 }
 
 function parseModelChoices(availableModels) {
@@ -103,7 +159,7 @@ function parseModelChoices(availableModels) {
   });
 }
 
-function hydrateModelSelect(availableModels, currentModel) {
+function hydrateLegacyModelSelect(availableModels, currentModel) {
   const choices = parseModelChoices(availableModels);
 
   elements.modelSelect.innerHTML = "";
@@ -123,10 +179,10 @@ function hydrateModelSelect(availableModels, currentModel) {
     elements.modelSelect.appendChild(option);
   }
 
-  hydrateModelPicker(choices, currentModel);
+  hydrateLegacyModelPicker(choices, currentModel);
 }
 
-function hydrateModelPicker(choices, currentModel) {
+function hydrateLegacyModelPicker(choices, currentModel) {
   elements.modelPicker.innerHTML = "";
   for (const choice of choices) {
     const button = document.createElement("button");
@@ -144,7 +200,7 @@ function hydrateModelPicker(choices, currentModel) {
     button.addEventListener("click", async () => {
       elements.modelSelect.value = choice.value;
       try {
-        await switchModel();
+        await switchLegacyModel();
       } catch (error) {
         elements.modelNote.textContent = String(error);
       }
@@ -154,15 +210,74 @@ function hydrateModelPicker(choices, currentModel) {
 }
 
 function hydrateModelCatalog(payload) {
-  elements.catalogStatus.textContent = payload.status || "preview only";
+  elements.catalogStatus.textContent = payload.status
+    ? policyStatusLabel({ status: payload.status })
+    : "Preview only";
   elements.catalogNotice.textContent =
     payload.notice ||
     "Preview only - no provider calls. Human approval required before any future provider call.";
   state.catalogModels = payload.models || [];
-  hydrateRouterModelSelect(state.catalogModels);
+  hydrateProviderSelect(state.catalogModels);
+  renderModelCatalog(state.catalogModels);
+}
+
+function hydrateProviderSelect(models) {
+  const providerIds = [...new Set((models || []).map((model) => model.provider_id))];
+  elements.routerProviderSelect.innerHTML = "";
+  for (const providerId of providerIds) {
+    const option = document.createElement("option");
+    option.value = providerId;
+    option.textContent = providerLabel(providerId);
+    elements.routerProviderSelect.appendChild(option);
+  }
+  if (providerIds.length > 0) {
+    elements.routerProviderSelect.value = state.selectedModel.providerId || providerIds[0];
+  }
+  hydrateRouterModelSelect();
+}
+
+function hydrateRouterModelSelect() {
+  const providerId = elements.routerProviderSelect.value;
+  const models = state.catalogModels.filter((model) => model.provider_id === providerId);
+  elements.routerModelSelect.innerHTML = "";
+  for (const model of models) {
+    const option = document.createElement("option");
+    option.value = model.model_id;
+    option.textContent = model.display_name || model.model_id;
+    elements.routerModelSelect.appendChild(option);
+  }
+  if (models.length > 0) {
+    const currentStillVisible = models.some((model) => model.model_id === state.selectedModel.modelId);
+    elements.routerModelSelect.value = currentStillVisible ? state.selectedModel.modelId : models[0].model_id;
+  }
+  updateSelectedModelFromCatalog();
+}
+
+function updateSelectedModelFromCatalog() {
+  const selectedCatalogModel = state.catalogModels.find(
+    (model) =>
+      model.provider_id === elements.routerProviderSelect.value &&
+      model.model_id === elements.routerModelSelect.value
+  );
+  state.selectedModel = {
+    providerId: elements.routerProviderSelect.value,
+    modelId: elements.routerModelSelect.value,
+    source: "catalog",
+    mode: "proposal_only",
+  };
+  elements.currentModelBadge.textContent = selectedCatalogModel?.display_name || "Preview only";
+  elements.sidebarSelectedModel.textContent = friendlyModelLabel(selectedCatalogModel);
+  elements.routerModeLabel.textContent = "Proposal only";
+  state.lastProposal = null;
+  renderSimpleResult("blocked", "Prepare a model choice to review policy status.");
+  updateAuditFields({});
+  updateCallButtonState();
+}
+
+function renderModelCatalog(models) {
   elements.modelCatalog.innerHTML = "";
 
-  for (const model of payload.models || []) {
+  for (const model of models || []) {
     const article = document.createElement("article");
     article.className = "catalog-card";
 
@@ -206,27 +321,136 @@ function hydrateModelCatalog(payload) {
   }
 }
 
-function hydrateRouterModelSelect(models) {
-  elements.routerModelSelect.innerHTML = "";
-  for (const model of models || []) {
-    const option = document.createElement("option");
-    option.value = model.model_id;
-    option.dataset.providerId = model.provider_id;
-    option.textContent = `${model.provider_id} -> ${model.display_name || model.model_id}`;
-    elements.routerModelSelect.appendChild(option);
-  }
+function selectedRouterModel() {
+  return {
+    provider_id: state.selectedModel.providerId,
+    model_id: state.selectedModel.modelId,
+  };
 }
 
-function selectedRouterModel() {
-  const option = elements.routerModelSelect.selectedOptions[0];
-  return {
-    model_id: elements.routerModelSelect.value,
-    provider_id: option ? option.dataset.providerId : "",
-  };
+function routerTaskSensitivity() {
+  const mode = elements.routerTaskMode.value;
+  if (mode === "CODE" || mode === "AUDIT" || mode === "RESEARCH") {
+    return "INTERNAL_NON_CANONICAL";
+  }
+  return mode;
 }
 
 function renderJson(element, payload) {
   element.textContent = JSON.stringify(payload, null, 2);
+}
+
+function resultTone(statusKey) {
+  if (statusKey === "allowed") {
+    return "allowed";
+  }
+  if (statusKey === "requires-human-approval") {
+    return "requires-human-approval";
+  }
+  if (statusKey === "rejected-by-policy") {
+    return "rejected-by-policy";
+  }
+  return "blocked";
+}
+
+function renderSimpleResult(status, reason) {
+  elements.routerResultStatus.textContent = status;
+  elements.routerResultStatus.className = `result-status result-${resultTone(status)}`;
+  elements.routerResultReason.textContent = reason;
+}
+
+function policyStatusLabel(decision) {
+  if (!decision) {
+    return "Blocked before provider call";
+  }
+  if (decision.status === "REQUIRES_HUMAN_APPROVAL") {
+    return "Requires human approval";
+  }
+  if (decision.status === "REJECTED_BY_POLICY") {
+    return "Rejected by policy";
+  }
+  if (decision.status === "ALLOWED") {
+    return "Allowed";
+  }
+  return "Blocked";
+}
+
+function policyStatusKey(decision) {
+  if (!decision) {
+    return "blocked";
+  }
+  if (decision.status === "REQUIRES_HUMAN_APPROVAL") {
+    return "requires-human-approval";
+  }
+  if (decision.status === "REJECTED_BY_POLICY") {
+    return "rejected-by-policy";
+  }
+  if (decision.status === "ALLOWED") {
+    return "allowed";
+  }
+  return "blocked";
+}
+
+function friendlyReason(decision) {
+  const reason = decision?.reason || "Policy status is not available.";
+  if (reason.includes("Generic OpenRouter free routes")) {
+    return "OpenRouter Free is preview-only and cannot be called.";
+  }
+  if (reason.includes("Disabled or unknown")) {
+    return "This provider is disabled or unknown.";
+  }
+  return reason;
+}
+
+function friendlyBoolean(value, trueLabel, falseLabel) {
+  return value ? trueLabel : falseLabel;
+}
+
+function updateAuditFields(payload) {
+  const proposal = payload.proposal || {};
+  const decision = payload.decision || {};
+  const approval = payload.approval || {};
+  const providerCallPermitted =
+    payload.provider_call_permitted ?? decision.provider_call_permitted ?? approval.provider_call_permitted ?? false;
+  const humanApproved = approval.human_approved ?? elements.routerHumanApproval.checked;
+  const outputTrusted = payload.output_trusted ?? false;
+  const fallbackEnabled =
+    proposal.automatic_fallback_permitted || decision.automatic_fallback_permitted || payload.automatic_fallback_used;
+
+  elements.auditProviderCallPermitted.textContent = String(
+    friendlyBoolean(providerCallPermitted, "Provider call is permitted", "Provider call is not permitted")
+  );
+  elements.auditHumanApproved.textContent = friendlyBoolean(
+    humanApproved,
+    "Human approval is granted",
+    "Human approval is not granted"
+  );
+  elements.auditOutputTrusted.textContent = friendlyBoolean(
+    outputTrusted,
+    "Provider output is trusted",
+    "Provider output is untrusted"
+  );
+  elements.auditFallback.textContent =
+    fallbackEnabled ? "Automatic fallback is enabled" : "Automatic fallback is blocked";
+}
+
+function updateCallButtonState() {
+  const decision = state.lastProposal?.decision;
+  const proposalAllowed = decision?.status === "REQUIRES_HUMAN_APPROVAL";
+  elements.approveAndCallProvider.disabled = !(proposalAllowed && elements.routerHumanApproval.checked);
+  if (!decision) {
+    elements.routerCallNote.textContent = "Provider call not enabled in this build.";
+    return;
+  }
+  if (decision.status === "REJECTED_BY_POLICY") {
+    elements.routerCallNote.textContent = "Provider call not enabled in this build.";
+    return;
+  }
+  if (!elements.routerHumanApproval.checked) {
+    elements.routerCallNote.textContent = "Human approval is required before any provider call.";
+    return;
+  }
+  elements.routerCallNote.textContent = "One approved provider call is enabled for this selected model.";
 }
 
 async function createSelectionProposal() {
@@ -236,11 +460,16 @@ async function createSelectionProposal() {
     body: JSON.stringify({
       provider_id: selected.provider_id,
       model_id: selected.model_id,
-      task_sensitivity: elements.routerTaskSensitivity.value,
+      task_sensitivity: routerTaskSensitivity(),
       user_prompt: elements.routerPrompt.value,
     }),
   });
+  state.lastProposal = payload;
   renderJson(elements.routerProposalResult, payload);
+  renderSimpleResult(policyStatusKey(payload.decision), friendlyReason(payload.decision));
+  elements.routerResultStatus.textContent = policyStatusLabel(payload.decision);
+  updateAuditFields(payload);
+  updateCallButtonState();
 }
 
 async function approveAndCallProviderOnce() {
@@ -250,24 +479,30 @@ async function approveAndCallProviderOnce() {
     body: JSON.stringify({
       provider_id: selected.provider_id,
       model_id: selected.model_id,
-      task_sensitivity: elements.routerTaskSensitivity.value,
+      task_sensitivity: routerTaskSensitivity(),
       user_prompt: elements.routerPrompt.value,
       human_approved: elements.routerHumanApproval.checked === true,
     }),
   });
   renderJson(elements.routerCallResult, payload);
+  renderSimpleResult(
+    payload.call_made ? "allowed" : policyStatusKey(payload.decision),
+    payload.error || friendlyReason(payload.decision)
+  );
+  elements.routerResultStatus.textContent = payload.call_made ? "Allowed" : policyStatusLabel(payload.decision);
+  updateAuditFields(payload);
 }
 
-async function switchModel() {
+async function switchLegacyModel() {
   const model = elements.modelSelect.value;
-  elements.modelNote.textContent = `Switching to ${model}...`;
+  elements.modelNote.textContent = `Switching legacy chat model to ${model}...`;
   const payload = await jsonFetch("/api/model", {
     method: "POST",
     body: JSON.stringify({ model }),
   });
-  elements.modelNote.textContent = payload.notice || `Model switched to ${payload.model}`;
+  elements.modelNote.textContent = payload.notice || `Legacy chat model switched to ${payload.model}`;
   applyStatus(payload.status);
-  hydrateModelSelect(payload.status.available_models, payload.status.model);
+  hydrateLegacyModelSelect(payload.status.available_models, payload.status.model);
 }
 
 async function sendPrompt(prompt) {
@@ -282,7 +517,7 @@ async function sendPrompt(prompt) {
 
 document.querySelector("#switch-model").addEventListener("click", async () => {
   try {
-    await switchModel();
+    await switchLegacyModel();
   } catch (error) {
     elements.modelNote.textContent = String(error);
   }
@@ -291,10 +526,24 @@ document.querySelector("#switch-model").addEventListener("click", async () => {
 document.querySelector("#refresh-status").addEventListener("click", async () => {
   try {
     await refreshStatus();
+    await refreshModelCatalog();
     await refreshProviderConfigStatus();
   } catch (error) {
     addMessage("System", `Refresh failed: ${error}`);
   }
+});
+
+elements.routerProviderSelect.addEventListener("change", hydrateRouterModelSelect);
+elements.routerModelSelect.addEventListener("change", updateSelectedModelFromCatalog);
+elements.routerTaskMode.addEventListener("change", () => {
+  state.lastProposal = null;
+  renderSimpleResult("blocked", "Prepare a model choice to review policy status.");
+  elements.routerResultStatus.textContent = "Blocked before provider call";
+  updateCallButtonState();
+});
+elements.routerHumanApproval.addEventListener("change", () => {
+  updateAuditFields(state.lastProposal || {});
+  updateCallButtonState();
 });
 
 document.querySelector("#create-selection-proposal").addEventListener("click", async () => {
@@ -302,6 +551,8 @@ document.querySelector("#create-selection-proposal").addEventListener("click", a
     await createSelectionProposal();
   } catch (error) {
     renderJson(elements.routerProposalResult, { ok: false, error: String(error) });
+    renderSimpleResult("blocked", String(error));
+    elements.routerResultStatus.textContent = "Blocked";
   }
 });
 
@@ -309,16 +560,13 @@ document.querySelector("#approve-and-call-provider").addEventListener("click", a
   try {
     await approveAndCallProviderOnce();
   } catch (error) {
-    renderJson(elements.routerCallResult, { ok: false, error: String(error), call_made: false, output_trusted: false });
+    const payload = { ok: false, error: String(error), call_made: false, output_trusted: false };
+    renderJson(elements.routerCallResult, payload);
+    renderSimpleResult("blocked", String(error));
+    elements.routerResultStatus.textContent = "Blocked";
+    updateAuditFields(payload);
   }
 });
-
-for (const button of document.querySelectorAll(".quick-action")) {
-  button.addEventListener("click", () => {
-    elements.promptInput.value = button.dataset.prompt || "";
-    elements.promptInput.focus();
-  });
-}
 
 elements.composer.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -330,7 +578,7 @@ elements.composer.addEventListener("submit", async (event) => {
   try {
     await sendPrompt(prompt);
   } catch (error) {
-    addMessage("System", `Request failed: ${error}`);
+    addMessage("System", `Legacy request failed: ${error}`);
   }
 });
 
@@ -344,7 +592,7 @@ elements.promptInput.addEventListener("keydown", async (event) => {
 async function bootstrap() {
   addMessage(
     "System",
-    "App222 web shell is ready. Use the model selector on the left, then send a prompt or a slash command."
+    "Controlled Model Router is ready. Use the main router controls for proposal-only model review."
   );
   try {
     await refreshStatus();
