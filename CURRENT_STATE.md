@@ -83,6 +83,10 @@ No tracked files were deleted. Runtime, tests, and web files were not changed by
 
 RED-1 remains checkpointed, not fully closed. Next cleanup must be dependency-aware because some `docs/audit` files are referenced by tests or current reviewer docs.
 
+M2-WHITEHAT-A adds a minimal inert Memory Hat control surface for AIOA White Hat. It exposes static read-only metadata for Hats 001-004 and keeps all hats non-executing, human-review-required, and non-authoritative.
+
+This does not add Critic Mode, helper bots, provider calls, browser automation, shell execution, or new knowledge ingestion.
+
 ## 5. What Is Documentation-Only Or Future-Planned
 
 The following remain documentation-only or future-planned unless separately implemented, tested, and reviewed:

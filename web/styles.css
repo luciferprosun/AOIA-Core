@@ -490,6 +490,42 @@ textarea {
   gap: 6px;
 }
 
+.memory-hats-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.memory-hats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.memory-hat-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(35, 97, 79, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.memory-hat-card h3,
+.memory-hat-card p {
+  margin: 0;
+}
+
+.memory-hat-status {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: var(--control-soft);
+  color: var(--control);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .catalog-tag {
   display: inline-flex;
   border-radius: 999px;

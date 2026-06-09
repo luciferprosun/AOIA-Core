@@ -10,15 +10,8 @@ from pathlib import Path
 from threading import Lock
 from urllib.parse import urlparse
 
-from model_router import create_model_selection_proposal, evaluate_model_selection_policy, execute_approved_model_call_once
 from model_catalog import get_static_model_catalog_payload
-from main import (
-    DEBUG_RAW_RESPONSE,
-    PROMPT_FILE,
-    AgentRuntime,
-    ProviderManager,
-    load_prompt_template,
-)
+from memory_hat_registry import get_memory_hat_payload
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -33,6 +26,14 @@ class WebRuntimeService:
     """Shared runtime adapter used by the local web UI."""
 
     def __init__(self) -> None:
+        from main import (
+            DEBUG_RAW_RESPONSE,
+            PROMPT_FILE,
+            AgentRuntime,
+            ProviderManager,
+            load_prompt_template,
+        )
+
         self.runtime = AgentRuntime(
             provider_manager=ProviderManager(PROJECT_DIR),
             prompt_template=load_prompt_template(PROMPT_FILE),
@@ -66,7 +67,17 @@ class WebRuntimeService:
             }
 
 
-SERVICE = WebRuntimeService()
+SERVICE: WebRuntimeService | None = None
+SERVICE_INIT_LOCK = Lock()
+
+
+def get_service() -> WebRuntimeService:
+    global SERVICE
+    if SERVICE is None:
+        with SERVICE_INIT_LOCK:
+            if SERVICE is None:
+                SERVICE = WebRuntimeService()
+    return SERVICE
 
 
 class CodexStyleHandler(SimpleHTTPRequestHandler):
@@ -78,19 +89,23 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/api/status":
-            self._write_json(HTTPStatus.OK, SERVICE.status_payload())
+            self._write_json(HTTPStatus.OK, get_service().status_payload())
             return
         if parsed.path == "/api/models":
+            service = get_service()
             self._write_json(
                 HTTPStatus.OK,
                 {
-                    "current_model": SERVICE.runtime.provider_manager.describe(),
-                    "available_models": SERVICE.runtime.provider_manager.available_models(),
+                    "current_model": service.runtime.provider_manager.describe(),
+                    "available_models": service.runtime.provider_manager.available_models(),
                 },
             )
             return
         if parsed.path == "/api/model-catalog":
             self._write_json(HTTPStatus.OK, get_static_model_catalog_payload())
+            return
+        if parsed.path == "/api/memory-hats":
+            self._write_json(HTTPStatus.OK, get_memory_hat_payload())
             return
         if parsed.path == "/api/provider-config-status":
             from provider_config import get_provider_config_status
@@ -113,7 +128,7 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 if not prompt:
                     self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "prompt is required"})
                     return
-                self._write_json(HTTPStatus.OK, SERVICE.run_prompt(prompt))
+                self._write_json(HTTPStatus.OK, get_service().run_prompt(prompt))
                 return
 
             if parsed.path == "/api/model":
@@ -121,10 +136,12 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 if not model_name:
                     self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "model is required"})
                     return
-                self._write_json(HTTPStatus.OK, SERVICE.switch_model(model_name))
+                self._write_json(HTTPStatus.OK, get_service().switch_model(model_name))
                 return
 
             if parsed.path == "/api/model-selection/propose":
+                from model_router import create_model_selection_proposal, evaluate_model_selection_policy
+
                 provider_id = str(payload.get("provider_id", "")).strip()
                 model_id = str(payload.get("model_id", "")).strip()
                 task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
@@ -156,6 +173,8 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 return
 
             if parsed.path == "/api/model-selection/approve-and-call":
+                from model_router import execute_approved_model_call_once
+
                 provider_id = str(payload.get("provider_id", "")).strip()
                 model_id = str(payload.get("model_id", "")).strip()
                 task_sensitivity = str(payload.get("task_sensitivity", "")).strip()

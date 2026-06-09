@@ -48,6 +48,8 @@ const elements = {
   catalogStatus: document.querySelector("#catalog-status"),
   catalogNotice: document.querySelector("#catalog-notice"),
   modelCatalog: document.querySelector("#model-catalog"),
+  memoryHatsStatus: document.querySelector("#memory-hats-status"),
+  memoryHatsList: document.querySelector("#memory-hats-list"),
   providerConfigStatus: document.querySelector("#provider-config-status"),
   routerProviderSelect: document.querySelector("#router-provider-select"),
   routerModelSelect: document.querySelector("#router-model-select"),
@@ -127,6 +129,11 @@ async function refreshProviderConfigStatus() {
     `Gemini: ${payload.gemini_configured ? "Configured" : "Not configured"}`,
     `OpenRouter: ${payload.openrouter_configured ? "Configured" : "Not configured"}`,
   ].join(" / ");
+}
+
+async function refreshMemoryHats() {
+  const payload = await jsonFetch("/api/memory-hats");
+  renderMemoryHats(payload);
 }
 
 function providerLabel(providerId) {
@@ -318,6 +325,39 @@ function renderModelCatalog(models) {
 
     article.append(title, modelId, tags, flags, notes);
     elements.modelCatalog.appendChild(article);
+  }
+}
+
+function renderMemoryHats(payload) {
+  const hats = payload.hats || [];
+  elements.memoryHatsStatus.textContent = `${hats.length} hats`;
+  elements.memoryHatsList.innerHTML = "";
+
+  for (const hat of hats) {
+    const article = document.createElement("article");
+    article.className = "memory-hat-card";
+
+    const title = document.createElement("h3");
+    title.textContent = hat.name;
+
+    const status = document.createElement("p");
+    status.className = "memory-hat-status";
+    status.textContent = hat.status;
+
+    const purpose = document.createElement("p");
+    purpose.className = "note";
+    purpose.textContent = hat.purpose;
+
+    const flags = document.createElement("p");
+    flags.className = "catalog-flags";
+    flags.textContent = [
+      hat.domain,
+      hat.execution_allowed ? "execution allowed" : "no execution",
+      hat.human_review_required ? "human review required" : "human review not required",
+    ].join(" / ");
+
+    article.append(title, status, purpose, flags);
+    elements.memoryHatsList.appendChild(article);
   }
 }
 
@@ -527,6 +567,7 @@ document.querySelector("#refresh-status").addEventListener("click", async () => 
   try {
     await refreshStatus();
     await refreshModelCatalog();
+    await refreshMemoryHats();
     await refreshProviderConfigStatus();
   } catch (error) {
     addMessage("System", `Refresh failed: ${error}`);
@@ -597,6 +638,7 @@ async function bootstrap() {
   try {
     await refreshStatus();
     await refreshModelCatalog();
+    await refreshMemoryHats();
     await refreshProviderConfigStatus();
   } catch (error) {
     addMessage("System", `Startup failed: ${error}`);
