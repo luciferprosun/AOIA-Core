@@ -75,6 +75,14 @@ Recent RED-1 cleanup checkpoint:
 - Current checkpoint: 618 tests OK, 4 skipped; GitHub Actions green; HEAD `0e258c01204644fb7b0401aa25547bcbfec5f888`.
 - This does not close RED-1 globally. Legacy runtime and public entrypoint surfaces remain open for framework cleanup.
 
+## Framework Cleanup Checkpoint
+
+Framework cleanup has started. The docs/audit top-level was reduced to 70 files by moving historical checkpoints, model-review artifacts, and future/planning artifacts into `docs/audit/archive/` subfolders.
+
+No tracked files were deleted. Runtime, tests, and web files were not changed by the cleanup move-sets.
+
+RED-1 remains checkpointed, not fully closed. Next cleanup must be dependency-aware because some `docs/audit` files are referenced by tests or current reviewer docs.
+
 ## 5. What Is Documentation-Only Or Future-Planned
 
 The following remain documentation-only or future-planned unless separately implemented, tested, and reviewed:
