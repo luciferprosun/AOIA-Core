@@ -77,6 +77,42 @@ LSC, MHLM, MDLH, SCEMDA, HNC, Gary-related, and other research or collaborator
 materials are historical context unless explicitly promoted by governance. They
 are not AOIA-Core runtime authority.
 
+## Project Status and Collaboration
+
+AOIA-Core is an actively developed local-first AI safety and auditability
+project focused on controlled model routing, human approval, provenance, and
+pre-execution inspection.
+
+Recent work completed:
+
+- Controlled Model Router M1 checkpoint
+- reviewer-facing documentation
+- boundary validation tests
+- safety and audit checkpoints
+- public development history with reproducible validation reports
+
+The project is currently being developed with limited resources and tool
+availability, so progress is intentionally incremental and checkpoint-driven.
+
+We are interested in connecting with contributors who share an interest in:
+
+- AI safety
+- local-first systems
+- Linux and systems engineering
+- Python development
+- security and auditability
+- open-source infrastructure
+- human-in-the-loop AI workflows
+
+If you find the project interesting and would like to contribute ideas, reviews,
+testing, documentation, research, or development support, we would be happy to
+hear from you.
+
+The current focus remains on building a transparent, auditable,
+human-controlled system rather than maximizing automation.
+
+Roadmap discussions, technical reviews, and constructive feedback are welcome.
+
 ## Reviewer Start Here
 
 Read these files first:
