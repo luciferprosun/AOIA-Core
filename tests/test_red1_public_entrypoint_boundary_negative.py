@@ -16,6 +16,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import unittest
 import urllib.request
 import webbrowser
@@ -130,16 +131,21 @@ def import_or_reload_webapp():
                 pass
 
 
-def import_webapp_or_skip_if_entrypoint_writes_report():
+def load_knowledge_router_class():
+    runtime_path = str(RUNTIME_DIR)
+    inserted = False
+    if runtime_path not in sys.path:
+        sys.path.insert(0, runtime_path)
+        inserted = True
     try:
-        return import_or_reload_webapp()
-    except AssertionError as exc:
-        if str(exc) == "Path.write_text called":
-            raise unittest.SkipTest(
-                "runtime.webapp import performs Path.write_text via KnowledgeRouter report initialization; "
-                "RED-1-F keeps the public entrypoint blocker open."
-            ) from exc
-        raise
+        module = importlib.import_module("orchestrator.knowledge_router")
+        return module.KnowledgeRouter
+    finally:
+        if inserted:
+            try:
+                sys.path.remove(runtime_path)
+            except ValueError:
+                pass
 
 
 class Red1PublicEntrypointBoundaryNegativeTests(unittest.TestCase):
@@ -157,12 +163,32 @@ class Red1PublicEntrypointBoundaryNegativeTests(unittest.TestCase):
         stack, mocks = dangerous_primitive_patches()
 
         with stack:
-            module = import_webapp_or_skip_if_entrypoint_writes_report()
+            module = import_or_reload_webapp()
 
         self.assertTrue(hasattr(module, "CodexStyleHandler"))
         self.assertTrue(hasattr(module, "main"))
         for mock in mocks.values():
             mock.assert_not_called()
+
+    def test_knowledge_router_construction_does_not_write_report(self) -> None:
+        KnowledgeRouter = load_knowledge_router_class()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.object(Path, "write_text", side_effect=AssertionError("Path.write_text called")) as write_text:
+                router = KnowledgeRouter(Path(tmpdir), retriever=lambda query: None)
+
+        self.assertTrue(str(router.report_path).endswith("token_savings_report.json"))
+        write_text.assert_not_called()
+
+    def test_explicit_token_savings_report_method_writes_once(self) -> None:
+        KnowledgeRouter = load_knowledge_router_class()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            router = KnowledgeRouter(Path(tmpdir), retriever=lambda query: None)
+            with patch.object(Path, "write_text") as write_text:
+                router.write_token_savings_report()
+
+        write_text.assert_called_once()
 
     def test_runtime_main_is_statically_inspected_not_imported(self) -> None:
         main_loaded_before = "main" in sys.modules
@@ -183,7 +209,7 @@ class Red1PublicEntrypointBoundaryNegativeTests(unittest.TestCase):
         stack, mocks = dangerous_primitive_patches()
 
         with stack:
-            import_webapp_or_skip_if_entrypoint_writes_report()
+            import_or_reload_webapp()
 
         after = loaded_browser_modules()
         self.assertFalse(after - before, f"runtime.webapp import loaded browser modules: {sorted(after - before)}")
@@ -194,7 +220,7 @@ class Red1PublicEntrypointBoundaryNegativeTests(unittest.TestCase):
         stack, mocks = dangerous_primitive_patches()
 
         with stack:
-            import_webapp_or_skip_if_entrypoint_writes_report()
+            import_or_reload_webapp()
 
         mocks["urlopen"].assert_not_called()
         mocks["socket"].assert_not_called()
@@ -209,7 +235,7 @@ class Red1PublicEntrypointBoundaryNegativeTests(unittest.TestCase):
         stack, mocks = dangerous_primitive_patches()
 
         with stack:
-            import_webapp_or_skip_if_entrypoint_writes_report()
+            import_or_reload_webapp()
 
         mocks["write_text"].assert_not_called()
         mocks["unlink"].assert_not_called()

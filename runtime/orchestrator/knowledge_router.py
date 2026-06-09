@@ -82,7 +82,6 @@ class KnowledgeRouter:
             self.retrieve = lambda query: retrieve_linux_knowledge(query, max_results=6, project_dir=project_dir)
         self.report_path = runtime_state_dir(project_dir) / "state" / "token_savings_report.json"
         self.report_path.parent.mkdir(parents=True, exist_ok=True)
-        self._ensure_report()
 
     def route(self, user_request: str, active_hat: dict[str, Any] | None = None) -> KnowledgeDecision:
         if not self._looks_linux_operational(user_request, active_hat):
@@ -165,26 +164,27 @@ class KnowledgeRouter:
             return len(results)
         return len(getattr(hit, "commands", ()))
 
-    def _ensure_report(self) -> None:
-        if self.report_path.exists():
-            return
-        self._write_report(
-            {
-                "created_at": dt.datetime.now().isoformat(),
-                "api_calls_avoided": 0,
-                "local_retrieval_hits": 0,
-                "local_retrieval_misses": 0,
-                "command_reuse_frequency": 0,
-                "workflow_reuse": 0,
-            }
-        )
+    def write_token_savings_report(self) -> None:
+        """Explicitly create or refresh the token savings report on disk."""
+        self._write_report(self._read_report())
 
     def _read_report(self) -> dict[str, Any]:
         try:
             return json.loads(self.report_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
-            return {}
+            return self._default_report()
 
     def _write_report(self, payload: dict[str, Any]) -> None:
         payload["updated_at"] = dt.datetime.now().isoformat()
         self.report_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    @staticmethod
+    def _default_report() -> dict[str, Any]:
+        return {
+            "created_at": dt.datetime.now().isoformat(),
+            "api_calls_avoided": 0,
+            "local_retrieval_hits": 0,
+            "local_retrieval_misses": 0,
+            "command_reuse_frequency": 0,
+            "workflow_reuse": 0,
+        }
