@@ -96,6 +96,31 @@ Moved to `docs/audit/archive/historical_checkpoints/`:
 - `NLNET_FINAL_CLEANLINESS_CHECKPOINT_REPORT_04_JUNE_2026.md` — historical checkpoint
 - `NLNET_REVIEWER_READINESS_CHECKPOINT_REPORT_05_JUNE_2026.md` — historical checkpoint
 
+### FRAMEWORK-CLEANUP-4 moved set
+
+Moved to `docs/audit/archive/historical_checkpoints/`:
+
+- `GT_RUNTIME_1_FIX_BOOT_BLOCKERS_REPORT_01_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_2_MOVE_GENERATED_STATE_OUT_OF_REPO_REPORT_01_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_3_RESPOND_MESSAGE_SHELL_SAFETY_FILTER_REPORT_01_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_4_SHELL_ADVICE_APPROVAL_WARNING_GATE_REPORT_01_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_5_SINGLE_EVENT_LEDGER_PROTOTYPE_REPORT_01_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_6_SHELL_SAFETY_METRICS_HARNESS_REPORT_02_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_7A_DOCS_ONLY_HONESTY_PACK_REPORT_02_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_7A_ENTRY_BLOCKER_RESOLUTION_02_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_7B_COMMAND_PROPOSAL_SCHEMA_REPORT_02_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_7C_APPROVAL_GATE_CONTROL_FLOW_REPORT_02_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_7D_ADVERSARIAL_CORPUS_STUB_REPORT_02_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_7E_LEDGER_SCHEMA_DOCS_REPORT_02_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_7F_CLOSURE_PHASE_GATE_REPORT_02_JUNE_2026.md` — historical checkpoint
+- `GT_HAT_1_MEMORY_HATS_TAGS_REPORT_1_JUNE_2026.md` — historical planning note
+- `GT_HAT_2_MEMORY_HATS_DEDUP_REPORT_1_JUNE_2026.md` — historical planning note
+- `GT_HAT_3_MEMORY_HATS_LEAF_ROUTES_REPORT_1_JUNE_2026.md` — historical planning note
+- `GT_HAT_3B_MEMORY_HATS_INIT_CANONICALIZATION_REPORT_1_JUNE_2026.md` — historical planning note
+- `GT_HAT_4_MEMORY_HATS_SQLITE_STORAGE_REPORT_1_JUNE_2026.md` — historical planning note
+- `GT_HAT_5_MEMORY_HATS_ADVISORY_REPORT_1_JUNE_2026.md` — historical planning note
+- `GT_HAT_6_MEMORY_HATS_RHCSA_INTEGRATION_REPORT_1_JUNE_2026.md` — historical planning note
+
 ## 6. External Model Review Artifacts
 
 The following groups are model/external review evidence and should be classified as `MODEL_REVIEW_ARTIFACT`:
