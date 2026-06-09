@@ -87,6 +87,16 @@ M2-WHITEHAT-A adds a minimal inert Memory Hat control surface for AIOA White Hat
 
 This does not add Critic Mode, helper bots, provider calls, browser automation, shell execution, or new knowledge ingestion.
 
+## Post-Cleanup Stability Checkpoint
+
+- AOIA-Core is a solo-developed research prototype being tightened into a reviewer-facing framework.
+- Historical audit, model-review, and future-planning artifacts were moved into `docs/audit/archive/` subfolders without deleting tracked files.
+- The docs/audit top-level currently has 70 files.
+- M2-WHITEHAT-A added an inert Memory Hat Control Surface and `GET /api/memory-hats`.
+- Local validation, app smoke tests, and GitHub Actions are green at this checkpoint.
+- Controlled model/proposal paths remain non-executing; live provider chat is not claimed unless explicitly tested through an approved safe path.
+- This checkpoint is stable, but framework cleanup and RED-1 hardening are not globally complete.
+
 ## 5. What Is Documentation-Only Or Future-Planned
 
 The following remain documentation-only or future-planned unless separately implemented, tested, and reviewed:
