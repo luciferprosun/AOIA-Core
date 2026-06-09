@@ -1,5 +1,7 @@
 # AIOA Whitehat / AOIA-Core
 
+> Current status: AOIA-Core is a research prototype / safety-core in progress, not a production autonomous-agent runtime. Start with [CURRENT_STATE.md](CURRENT_STATE.md).
+
 ## Current Public Scope
 
 AOIA-Core is a local-first, non-executing inspection and audit layer for
@@ -71,7 +73,7 @@ AOIA-Core is not:
 - a sandbox
 - cloud-first infrastructure
 - a validated science project
-- production-ready terminal security software
+- production terminal security software
 
 LSC, MHLM, MDLH, SCEMDA, HNC, Gary-related, and other research or collaborator
 materials are historical context unless explicitly promoted by governance. They
