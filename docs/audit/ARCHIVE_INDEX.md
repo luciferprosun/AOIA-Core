@@ -134,6 +134,16 @@ The following groups are model/external review evidence and should be classified
 
 Future external-model artifacts with patterns such as `CLAUDE*`, `GEMINI*`, `GROK*`, `KIMI*`, `META*`, `PERPLEXITY*`, `DEEPSEEK*`, or `SONNET*` should also be classified as `MODEL_REVIEW_ARTIFACT`.
 
+### FRAMEWORK-CLEANUP-5 moved set
+
+Moved to `docs/audit/archive/model_reviews/`:
+
+- `AOIA_CORE_FULL_REPOSITORY_SNAPSHOT_EXTERNAL_MODEL_AUDIT_04_JUNE_2026.md` — external model review artifact
+- `AOIA_CORE_POST_GT_RUNTIME_6_EXTERNAL_AUDIT_BASELINE_02_JUNE_2026.md` — external model review artifact
+- `AOIA_CORE_RUNTIME_ARCHITECTURE_FOR_BASH_MODULE_REVIEW_02_JUNE_2026.md` — external model review artifact
+- `EXTERNAL_AUDIT_INTAKE_CLAUDE_SONNET_GT_RUNTIME_6_02_JUNE_2026.md` — external model review artifact
+- `H17_EXTERNAL_REVIEW_CONSOLIDATION_REPORT.md` — external model review artifact
+
 ## 7. Future / Planning Documents
 
 The following groups are primarily future or planning material and should be classified as `FUTURE_PLANNING` unless they later become active blocker references:
