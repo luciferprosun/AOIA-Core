@@ -157,6 +157,24 @@ The following groups are primarily future or planning material and should be cla
 
 These files are useful planning history, but they should not be mistaken for current approved runtime behavior.
 
+### FRAMEWORK-CLEANUP-6 moved set
+
+Moved to `docs/audit/archive/future_planning/`:
+
+- `AOIA_FUTURE_COMPATIBILITY_NOTES.md` — future/planning artifact
+- `AOIA_RHCSA_KNOWLEDGE_SEPARATION_PLAN.md` — future/planning artifact
+- `AOIA_SINGLE_EVENT_LEDGER_PLAN.md` — future/planning artifact
+- `CHAT4_AGENTIC_READINESS_POLICY.md` — future/planning artifact
+- `CHAT4_BROWSER_BOT_BOUNDARY.md` — future/planning artifact
+- `CHAT4_C4C_CONSTRAINT_TESTS.md` — future/planning artifact
+- `CHAT4_H4_POST_M1_HELPER_BOT_PRODUCTION_PLAN.md` — future/planning artifact
+- `CHAT4_HAT_GROWTH_RULES.md` — future/planning artifact
+- `CHAT4_HELPER_BOT_BOUNDARIES.md` — future/planning artifact
+- `CHAT4_PROPOSAL_BASED_WORKFLOW.md` — future/planning artifact
+- `CHAT4_REVIEWER_WORDING_GUIDE.md` — future/planning artifact
+- `CHAT4_STOP_CONDITIONS.md` — future/planning artifact
+- `GT7_28_05_CONTROLLED_CLEANUP_PLAN.md` — future/planning artifact
+
 ## 8. Archive-Later Candidates
 
 The main archive-later candidates are:
