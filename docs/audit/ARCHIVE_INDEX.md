@@ -72,6 +72,30 @@ The following groups are primarily historical checkpoint material and should be 
 
 These files are evidence history, but they should not dominate the visible framework surface.
 
+### FRAMEWORK-CLEANUP-3 moved set
+
+Moved to `docs/audit/archive/historical_checkpoints/`:
+
+- `AIOA_WHITEHAT_STABLE_CHECKPOINT_01_JUNE_2026.md` — historical checkpoint
+- `GT2_28_05_BOOT_FIX_REPORT.md` — historical checkpoint
+- `GT3_28_05_CLOSURE_CHECK_REPORT.md` — historical checkpoint
+- `GT4_28_05_CLOSURE_REPORT.md` — historical checkpoint
+- `GT5_28_05_FINAL_COMMIT_PUSH_REPORT.md` — historical checkpoint
+- `GT6B_28_05_CLOSURE_CHECK_REPORT.md` — historical checkpoint
+- `GT6B_28_05_COMMIT_PUSH_FINAL_REPORT.md` — historical checkpoint
+- `GT6_28_05_CLOSURE_CHECK_REPORT.md` — historical checkpoint
+- `GT6_28_05_COMMIT_PUSH_FINAL_REPORT.md` — historical checkpoint
+- `GT7_28_05_BATCH1_ADR_RESOLUTION_REPORT.md` — historical checkpoint
+- `GT7_28_05_BATCH2_ROOT_STALE_MARKDOWN_RELOCATION_REPORT.md` — historical checkpoint
+- `GT7_28_05_BATCH3_FORENSIC_EXPORTS_ARCHIVE_REPORT.md` — historical checkpoint
+- `GT_RUNTIME_8_FINAL_PHASE_CLOSURE_REPORT.md` — historical checkpoint
+- `GT_RUNTIME_8_FINAL_SAVEPOINT.md` — historical checkpoint
+- `GT_RUNTIME_FULL_CLOSURE_REPORT_01_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_HARDENING_CLOSURE_REPORT_01_JUNE_2026.md` — historical checkpoint
+- `GT_RUNTIME_RESTART_SAFEPOINT_01_JUNE_2026.md` — historical checkpoint
+- `NLNET_FINAL_CLEANLINESS_CHECKPOINT_REPORT_04_JUNE_2026.md` — historical checkpoint
+- `NLNET_REVIEWER_READINESS_CHECKPOINT_REPORT_05_JUNE_2026.md` — historical checkpoint
+
 ## 6. External Model Review Artifacts
 
 The following groups are model/external review evidence and should be classified as `MODEL_REVIEW_ARTIFACT`:
