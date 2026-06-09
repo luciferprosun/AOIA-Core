@@ -36,6 +36,17 @@ _BLOCKED_SENSITIVITIES_FOR_FREE = {
     TaskSensitivity.CANONICAL,
     TaskSensitivity.SECRET_ADJACENT,
 }
+_UNTRUSTED_TRUE_APPROVAL_FIELDS = {
+    "approved",
+    "human_approved",
+    "provider_call_permitted",
+    "execution_permitted",
+    "canonical",
+    "canonical_promotion_permitted",
+    "canonical_promotion_triggered",
+    "provider_output_trusted",
+    "automatic_fallback_permitted",
+}
 
 
 def create_model_selection_proposal(
@@ -100,6 +111,8 @@ def evaluate_model_selection_policy(
     model_id: str | None = None,
     task_sensitivity: str | None = None,
 ) -> dict[str, object]:
+    if proposal is not None:
+        _reject_untrusted_approval_payload_fields(proposal, "proposal")
     provider = provider_id or str(proposal.get("requested_provider_id", "") if proposal else "")
     model = model_id or str(proposal.get("requested_model_id", "") if proposal else "")
     sensitivity_value = task_sensitivity or _proposal_sensitivity(proposal)
@@ -145,6 +158,8 @@ def approve_model_selection(
     decision: dict[str, object],
     human_approved: bool,
 ) -> dict[str, object]:
+    _reject_untrusted_approval_payload_fields(proposal, "proposal")
+    _reject_untrusted_approval_payload_fields(decision, "decision")
     permitted = (
         human_approved is True
         and decision.get("status") == RoutingDecisionStatus.REQUIRES_HUMAN_APPROVAL.value
@@ -264,6 +279,16 @@ def _blocked_call_reason(human_approved: bool, decision: dict[str, object]) -> s
     if human_approved is not True:
         return "human approval is required"
     return str(decision.get("reason", "provider call is not permitted"))
+
+
+def _reject_untrusted_approval_payload_fields(payload: dict[str, object], label: str) -> None:
+    for field in _UNTRUSTED_TRUE_APPROVAL_FIELDS:
+        if payload.get(field) is True:
+            raise ValueError(f"{label} cannot self-authorize via {field}")
+    if str(payload.get("approval_state", "")).strip().lower() == "approved":
+        raise ValueError(f"{label} cannot self-authorize via approval_state")
+    if payload.get("require_approval") is False:
+        raise ValueError(f"{label} cannot disable approval via require_approval")
 
 
 def _proposal_to_dict(proposal: ModelSelectionProposal) -> dict[str, object]:
