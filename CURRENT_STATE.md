@@ -64,7 +64,16 @@ Current tests cover:
 - shell safety parser and approval-gate behavior
 - memory-hats and provenance-related invariants in their current scoped tests
 
-The current expected suite count is 584 tests with 4 skipped at this checkpoint.
+The current expected suite count is 618 tests with 4 skipped at this checkpoint.
+
+Recent RED-1 cleanup checkpoint:
+
+- RED-1-C through RED-1-I added diagnostic negative tests and three narrow runtime hardening changes.
+- RED-1-G removed the `KnowledgeRouter` import-time `token_savings_report.json` write from the `runtime.webapp` path.
+- RED-1-H hardened `runtime/main.py` browser approval exposure and removed the legacy "Autonomous local runtime" wording.
+- RED-1-I hardened the model-router approval provenance boundary for untrusted proposal/decision payloads.
+- Current checkpoint: 618 tests OK, 4 skipped; GitHub Actions green; HEAD `0e258c01204644fb7b0401aa25547bcbfec5f888`.
+- This does not close RED-1 globally. Legacy runtime and public entrypoint surfaces remain open for framework cleanup.
 
 ## 5. What Is Documentation-Only Or Future-Planned
 

@@ -14,7 +14,7 @@ This register records blocking issues found during RED-1 adversarial review. It 
 
 ## BLOCKER-01 — runtime/main.py browser paths may bypass approval
 
-Status: OPEN
+Status: PARTIALLY MITIGATED / OPEN
 
 Severity: CRITICAL
 
@@ -28,11 +28,11 @@ Fix type: explicit legacy guard, approval gate mapping, or negative test coverag
 
 Must not be fixed by: deleting history, hiding browser references, or relabeling the path without proving the default block.
 
-Notes: Browser-like paths must remain outside helper-bot production until approval behavior is grep-verifiable or test-verifiable.
+Notes: RED-1-H changed browser-related `runtime/main.py` action calls from `require_approval=False` to `require_approval=True` and added a targeted regression test. Browser-like paths must remain outside helper-bot production until broader reachability is mapped and test-verifiable.
 
 ## BLOCKER-02 — runtime/main.py still presents legacy autonomous-runtime wording or behavior
 
-Status: OPEN
+Status: PARTIALLY MITIGATED / OPEN
 
 Severity: HIGH
 
@@ -46,7 +46,7 @@ Fix type: wording correction, explicit legacy labeling, or test-backed boundary 
 
 Must not be fixed by: broad README rewrites, maturity claims, or removing context needed by reviewers.
 
-Notes: Legacy wording can mislead reviewers even when safety boundaries exist elsewhere.
+Notes: RED-1-H removed the exact `Autonomous local runtime` wording from `runtime/main.py`. Legacy behavior and public-entrypoint reachability still require framework cleanup.
 
 ## BLOCKER-03 — legacy executor/shell surfaces remain visible in live tree
 
@@ -100,11 +100,11 @@ Fix type: gate coverage matrix, negative tests, or provider-call audit mapping.
 
 Must not be fixed by: claiming provider calls are safe, adding automatic fallback, or moving calls behind less visible wrappers.
 
-Notes: M1 proves some controlled router boundaries, but RED-1 requires complete coverage proof before helper-bot production.
+Notes: RED-1-D added provider/network negative diagnostics, and RED-1-I hardened model-router approval provenance for untrusted proposal/decision payloads. M1 proves some controlled router boundaries, but RED-1 still requires complete coverage proof before helper-bot production.
 
 ## BLOCKER-06 — file-write/delete/canonical-promotion surfaces require explicit guard mapping
 
-Status: OPEN
+Status: REDUCED / STILL OPEN
 
 Severity: HIGH
 
@@ -118,11 +118,11 @@ Fix type: file mutation surface register, canonical promotion guard map, or nega
 
 Must not be fixed by: broad cleanup, moving files, or treating draft helper-bot output as canonical.
 
-Notes: Canonical promotion must remain human-reviewed and separate from proposal generation.
+Notes: RED-1-G removed the `KnowledgeRouter` import-time `token_savings_report.json` write from the `runtime.webapp` path. RED-1-I added approval-provenance tests covering canonical/trusted-output claims in provider/router paths. Canonical promotion must remain human-reviewed and separate from proposal generation.
 
 ## BLOCKER-07 — helper-bot proposal boundary lacks negative tests
 
-Status: OPEN
+Status: REDUCED / STILL OPEN
 
 Severity: CRITICAL
 
@@ -136,10 +136,10 @@ Fix type: diagnostic negative tests for proposal-only helper-bot boundaries.
 
 Must not be fixed by: implementing bots first, adding schemas without tests, or relying on documentation-only assurances.
 
-Notes: Helper-bot production remains blocked until proposal-only behavior is test-verifiable.
+Notes: RED-1-C through RED-1-I added initial diagnostic negative coverage for helper-bot-style proposals, provider/network boundaries, browser/web-reader import-safe paths, public entrypoints, and approval provenance. Helper-bot production remains blocked until broader legacy reachability and framework cleanup are complete.
 
 ## Next Safe Steps
 
 1. Create a RED-1 execution surface register if more detailed primitive mapping is needed.
-2. Add diagnostic negative tests proving helper-bot proposals cannot reach execution, browser, provider, file-write, Git, or canonical-promotion surfaces.
-3. Only after those tests exist, consider minimal code-hardening such as source-provenance checks or explicit legacy guards.
+2. Extend diagnostic negative tests into a framework cleanup pass covering legacy execution, browser, provider, file-write, Git, and canonical-promotion reachability.
+3. Only after that framework cleanup exists, consider source-provenance checks or additional explicit legacy guards.
