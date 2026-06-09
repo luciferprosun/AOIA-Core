@@ -53,6 +53,13 @@ MAIN_EXPOSED_TERMS = (
     "git push",
     "require_approval=False",
 )
+BROWSER_ACTION_TERMS = (
+    "browser_open",
+    "browser_start",
+    "browser_get_visible_text",
+    "browser_tools",
+    "web_reader",
+)
 
 
 def loaded_browser_modules() -> set[str]:
@@ -158,6 +165,30 @@ class Red1PublicEntrypointBoundaryNegativeTests(unittest.TestCase):
             "runtime/main.py static scan should expose RED-1 diagnostic surfaces requiring later hardening; "
             "presence is diagnostic evidence, not proof of execution",
         )
+
+    def test_runtime_main_has_no_default_approved_browser_blocks(self) -> None:
+        source = MAIN_PATH.read_text(encoding="utf-8")
+        lines = source.splitlines()
+        offenders: list[tuple[int, str]] = []
+
+        for index, line in enumerate(lines):
+            if not any(term in line for term in BROWSER_ACTION_TERMS):
+                continue
+            window = "\n".join(lines[index : index + 8])
+            if "require_approval=False" in window or "require_approval = False" in window:
+                offenders.append((index + 1, line.strip()))
+
+        self.assertEqual(
+            offenders,
+            [],
+            "RED-1-H removes explicit default-approved browser exposure in runtime/main.py. "
+            "It does not prove all public entrypoint or legacy runtime surfaces are closed.",
+        )
+
+    def test_runtime_main_no_longer_uses_autonomous_runtime_phrase(self) -> None:
+        source = MAIN_PATH.read_text(encoding="utf-8")
+
+        self.assertNotIn("Autonomous local runtime", source)
 
     def test_runtime_webapp_import_does_not_trigger_dangerous_primitives(self) -> None:
         stack, mocks = dangerous_primitive_patches()

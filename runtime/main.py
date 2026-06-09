@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Autonomous local runtime for shell, filesystem, and browser actions.
+Local runtime components for proposal inspection, controlled routing, and audit-oriented workflows.
 
 Architecture:
 USER -> LLM -> structured JSON action -> executor -> result -> LLM -> final response
@@ -463,13 +463,13 @@ class AgentRuntime:
             try:
                 open_result = self.executor.execute(
                     {"action": "browser_open", "url": normalized_url},
-                    require_approval=False,
+                    require_approval=True,
                 )
                 self.print_result(open_result)
                 if open_result.get("success"):
                     visible_text = self.executor.execute(
                         {"action": "browser_get_visible_text"},
-                        require_approval=False,
+                        require_approval=True,
                     )
                     self.print_result(visible_text)
                 self.log_session_event(
@@ -937,7 +937,7 @@ class AgentRuntime:
             print(f"\n[INFO] Redirect URL unwrapped to: {normalized_url}")
 
         start_action = {"action": "browser_start", "reason": "Local URL bootstrap."}
-        start_result = self.executor.execute(start_action, require_approval=False)
+        start_result = self.executor.execute(start_action, require_approval=True)
         self.print_result(start_result)
         request_trace.append(
             {
@@ -952,7 +952,7 @@ class AgentRuntime:
             "url": normalized_url,
             "reason": "Local URL bootstrap.",
         }
-        open_result = self.executor.execute(open_action, require_approval=False)
+        open_result = self.executor.execute(open_action, require_approval=True)
         self.print_result(open_result)
         request_trace.append(
             {
@@ -968,7 +968,7 @@ class AgentRuntime:
                 "action": "browser_get_visible_text",
                 "reason": "Capture visible page text before analysis.",
             }
-            text_result = self.executor.execute(text_action, require_approval=False)
+            text_result = self.executor.execute(text_action, require_approval=True)
             self.print_result(text_result)
             snapshot_path = self.save_page_text_snapshot(normalized_url, text_result)
             if snapshot_path is not None:
