@@ -66,6 +66,23 @@ class CptSchemaTests(unittest.TestCase):
         self.assertEqual(payload["transformation_id"], decoded["transformation_id"])
         self.assertEqual("balanced_critic", decoded["critic_mode"])
 
+    def test_required_sections_and_forbidden_behaviors_cannot_be_empty(self) -> None:
+        record = transform_prompt("Review this deployment checklist.")
+
+        with self.assertRaises(ValueError):
+            replace(record, required_sections=())
+        with self.assertRaises(ValueError):
+            replace(record, forbidden_behaviors=())
+
+    def test_serialization_roundtrip_has_stable_expected_fields(self) -> None:
+        record = transform_prompt("Review this schema roundtrip.")
+        payload = record.to_dict()
+        decoded = json.loads(record.to_json())
+
+        self.assertEqual(set(payload), set(decoded))
+        self.assertEqual(tuple(decoded["required_sections"]), record.required_sections)
+        self.assertEqual(tuple(decoded["forbidden_behaviors"]), record.forbidden_behaviors)
+
 
 if __name__ == "__main__":
     unittest.main()

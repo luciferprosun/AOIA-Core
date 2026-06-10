@@ -12,6 +12,7 @@ CPT_DIR = PROJECT_ROOT / "runtime" / "cpt"
 
 FORBIDDEN_IMPORTS = {
     "subprocess",
+    "os",
     "socket",
     "urllib",
     "requests",
@@ -30,6 +31,12 @@ FORBIDDEN_IMPORTS = {
     "runtime.tools.shell_tools",
     "runtime.tools.browser_tools",
     "runtime.tools.executor",
+    "runtime.webapp",
+    "runtime.main",
+    "runtime.model_router",
+    "runtime.provider_audit",
+    "runtime.provider_clients",
+    "runtime.provider_config",
 }
 
 FORBIDDEN_CALL_NAMES = {"eval", "exec"}

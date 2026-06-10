@@ -5,6 +5,7 @@ TEMPLATE_VERSION = "cpt-a1-balanced-critic-template-v1"
 TRANSFORMATION_VERSION = "cpt-a1-transformer-v1"
 SCHEMA_VERSION = "cpt-a1-record-v1"
 DETERMINISTIC_CREATED_AT = "1970-01-01T00:00:00Z"
+MAX_TRANSFORMED_PROMPT_CHARS = 25_000
 
 REQUIRED_SECTIONS = (
     "Facts / Given Information",
@@ -32,7 +33,9 @@ PROVENANCE_NOTE = (
 
 DISCLAIMER = (
     "This is a transformed prompt for critical review. The critique generated from it is not "
-    "canonical truth. Treat all findings as hypotheses requiring human verification."
+    "canonical truth. Treat all findings as hypotheses requiring human verification. CPT is not "
+    "a security boundary, does not prevent hallucinations or unsafe downstream output, and must "
+    "never be used as execution-gating evidence without human review."
 )
 
 

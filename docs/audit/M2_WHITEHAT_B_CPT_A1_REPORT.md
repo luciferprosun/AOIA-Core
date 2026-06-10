@@ -11,7 +11,7 @@ CPT-A1 includes:
 - sanitizer for untrusted user prompts
 - one template mode: `balanced_critic`
 - deterministic transformer
-- explicit append-only JSONL audit writer
+- explicit append-only local JSONL transformation-log writer
 - focused tests
 - prior-art attribution note
 
@@ -42,6 +42,9 @@ CPT-A1 includes:
 - No automatic audit writing from `transform_prompt`.
 - No automatic truth or canonical promotion.
 - No third-party code copied into AOIA.
+- CPT-A1 is not a security boundary.
+- CPT-A1 output must not be used as execution-gating evidence without human review.
+- Human review remains mandatory as a workflow rule, not as a fully enforced runtime approval gate in CPT-A1.
 
 ## What Is Not Included
 
@@ -108,6 +111,10 @@ Forbidden import scan result:
 ## Known Limitations
 
 CPT-A1 changes critical framing only. It does not improve truth, verify facts, run security analysis, judge correctness, call a model, browse, execute commands, or authorize action.
+
+The JSONL writer records local structured transformations only. It is append-mode local logging, not tamper-proof provenance, not a cryptographic audit trail, and not evidence that a transformation is safe or correct.
+
+In CPT-A1, "Transformer" means deterministic prompt transformation, not neural Transformer architecture.
 
 ## RED-1 Warning
 

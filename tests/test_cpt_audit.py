@@ -54,6 +54,18 @@ class CptAuditTests(unittest.TestCase):
             self.assertTrue(audit_path.exists())
             self.assertFalse((Path(temp_dir) / "audit.jsonl").exists())
 
+    def test_directory_path_is_rejected(self) -> None:
+        record = transform_prompt("Review directory path handling.")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(ValueError, "file path"):
+                append_transformation_record(record, Path(temp_dir))
+
+    def test_parent_directory_traversal_path_is_rejected(self) -> None:
+        record = transform_prompt("Review traversal path handling.")
+
+        with self.assertRaisesRegex(ValueError, "traversal"):
+            append_transformation_record(record, Path("audit") / ".." / "cpt.jsonl")
+
     def test_invalid_status_is_rejected(self) -> None:
         record = transform_prompt("Review audit status.")
         forged = object.__new__(type(record))

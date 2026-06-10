@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import hashlib
 
-from runtime.cpt.sanitizer import quote_untrusted_prompt, sanitize_original_prompt
+from runtime.cpt.sanitizer import sanitize_original_prompt, wrap_untrusted_prompt
 from runtime.cpt.schema import CriticTransformationRecord
 from runtime.cpt.templates import (
     CRITIC_MODE_BALANCED,
     DETERMINISTIC_CREATED_AT,
     FORBIDDEN_BEHAVIORS,
+    MAX_TRANSFORMED_PROMPT_CHARS,
     PROVENANCE_NOTE,
     REQUIRED_SECTIONS,
     SCHEMA_VERSION,
@@ -22,9 +23,12 @@ def transform_prompt(original_prompt: str, mode: str = CRITIC_MODE_BALANCED) -> 
         raise ValueError("CPT-A1 supports only mode='balanced_critic'")
 
     sanitized_prompt = sanitize_original_prompt(original_prompt)
-    quoted_prompt = quote_untrusted_prompt(sanitized_prompt)
+    quoted_prompt = wrap_untrusted_prompt(sanitized_prompt)
     transformed_prompt = build_balanced_critic_prompt(quoted_prompt)
-    original_prompt_hash = _sha256_text(original_prompt)
+    if len(transformed_prompt) > MAX_TRANSFORMED_PROMPT_CHARS:
+        raise ValueError(f"transformed_prompt exceeds {MAX_TRANSFORMED_PROMPT_CHARS} characters")
+
+    original_prompt_hash = _sha256_text(sanitized_prompt)
     transformed_prompt_hash = _sha256_text(transformed_prompt)
     transformation_id = _build_transformation_id(sanitized_prompt, transformed_prompt)
 
