@@ -595,6 +595,17 @@ textarea {
   gap: 12px;
 }
 
+.cpt-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cpt-warning,
+.cpt-status {
+  margin: 0;
+}
+
 .composer-actions {
   display: flex;
   align-items: center;
@@ -628,6 +639,7 @@ textarea {
   }
 
   .composer-actions,
+  .cpt-control,
   .router-actions,
   .topbar {
     flex-direction: column;
