@@ -1,7 +1,9 @@
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from tools.executor import ExecutionEngine
 from tools.memory import MemoryStore
@@ -17,14 +19,15 @@ class ExecutorContainmentTests(unittest.TestCase):
 
             memory = MemoryStore(project_dir, project_dir)
             engine = ExecutionEngine(project_dir, memory)
-            result = engine.execute(
-                {
-                    "action": "create_folder",
-                    "path": str(desktop_dir / "AI_TEST"),
-                    "reason": "Create desktop folder.",
-                },
-                require_approval=False,
-            )
+            with patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}):
+                result = engine.execute(
+                    {
+                        "action": "create_folder",
+                        "path": str(desktop_dir / "AI_TEST"),
+                        "reason": "Create desktop folder.",
+                    },
+                    require_approval=False,
+                )
 
             self.assertTrue(result["success"])
             self.assertTrue((desktop_dir / "AI_TEST").is_dir())

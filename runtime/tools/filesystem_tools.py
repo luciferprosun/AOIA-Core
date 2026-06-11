@@ -1,7 +1,32 @@
 from __future__ import annotations
 
+"""Legacy transitional filesystem mutation surface.
+
+This module is not an approved runtime file-write/delete execution path. It
+must not be reachable from model/proposal/public runtime flow. Do not use it as
+an executor.
+"""
+
+import os
 import shutil
 from pathlib import Path
+
+LEGACY_FILESYSTEM_SURFACE = True
+APPROVED_RUNTIME_FILESYSTEM_FLOW = False
+FILESYSTEM_MUTATION_FROZEN = True
+AOIA_LEGACY_FILESYSTEM_ENABLED = os.environ.get("AOIA_LEGACY_FILESYSTEM_ENABLED") == "1"
+
+
+def _legacy_filesystem_enabled() -> bool:
+    return AOIA_LEGACY_FILESYSTEM_ENABLED or os.environ.get("AOIA_LEGACY_FILESYSTEM_ENABLED") == "1"
+
+
+def _require_legacy_filesystem_enabled() -> None:
+    if not _legacy_filesystem_enabled():
+        raise RuntimeError(
+            "Legacy filesystem mutation surface is frozen and not approved for runtime use. "
+            "Set AOIA_LEGACY_FILESYSTEM_ENABLED=1 only for isolated legacy/manual testing."
+        )
 
 
 def resolve_path(path_text: str, cwd: Path) -> Path:
@@ -14,11 +39,13 @@ def resolve_path(path_text: str, cwd: Path) -> Path:
 
 def ensure_parent(path: Path) -> None:
     """Create parent directories before writing files."""
+    _require_legacy_filesystem_enabled()
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def create_folder(path_text: str, cwd: Path) -> dict:
     """Create a directory and verify it exists."""
+    _require_legacy_filesystem_enabled()
     path = resolve_path(path_text, cwd)
     path.mkdir(parents=True, exist_ok=True)
     return {
@@ -30,6 +57,7 @@ def create_folder(path_text: str, cwd: Path) -> dict:
 
 def create_file(path_text: str, cwd: Path, content: str = "") -> dict:
     """Create a new text file with optional initial content."""
+    _require_legacy_filesystem_enabled()
     path = resolve_path(path_text, cwd)
     ensure_parent(path)
     path.write_text(content, encoding="utf-8")
@@ -43,6 +71,7 @@ def create_file(path_text: str, cwd: Path, content: str = "") -> dict:
 
 def write_file(path_text: str, content: str, cwd: Path) -> dict:
     """Overwrite a text file with exact content."""
+    _require_legacy_filesystem_enabled()
     path = resolve_path(path_text, cwd)
     ensure_parent(path)
     path.write_text(content, encoding="utf-8")
@@ -56,6 +85,7 @@ def write_file(path_text: str, content: str, cwd: Path) -> dict:
 
 def append_file(path_text: str, content: str, cwd: Path) -> dict:
     """Append text content to an existing file."""
+    _require_legacy_filesystem_enabled()
     path = resolve_path(path_text, cwd)
     ensure_parent(path)
     with path.open("a", encoding="utf-8") as handle:
@@ -82,6 +112,7 @@ def read_file(path_text: str, cwd: Path) -> dict:
 
 def move_file(src_text: str, dst_text: str, cwd: Path) -> dict:
     """Move or rename a file or directory."""
+    _require_legacy_filesystem_enabled()
     src = resolve_path(src_text, cwd)
     dst = resolve_path(dst_text, cwd)
     ensure_parent(dst)
@@ -96,6 +127,7 @@ def move_file(src_text: str, dst_text: str, cwd: Path) -> dict:
 
 def delete_file(path_text: str, cwd: Path) -> dict:
     """Delete a file or an empty directory."""
+    _require_legacy_filesystem_enabled()
     path = resolve_path(path_text, cwd)
     if path.is_dir():
         path.rmdir()

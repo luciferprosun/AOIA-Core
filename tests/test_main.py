@@ -93,13 +93,14 @@ class RuntimeArchitectureTests(unittest.TestCase):
             desktop_dir.mkdir()
             memory = MemoryStore(project_dir, project_dir)
             engine = ExecutionEngine(project_dir, memory)
-            result = engine.execute(
-                {
-                    "action": "create_folder",
-                    "path": str(desktop_dir / "AI_TEST"),
-                    "reason": "Create desktop folder.",
-                }
-            )
+            with patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}):
+                result = engine.execute(
+                    {
+                        "action": "create_folder",
+                        "path": str(desktop_dir / "AI_TEST"),
+                        "reason": "Create desktop folder.",
+                    }
+                )
             self.assertTrue(result["success"])
             self.assertTrue((desktop_dir / "AI_TEST").is_dir())
 
@@ -163,21 +164,22 @@ class RuntimeArchitectureTests(unittest.TestCase):
             target_file = desktop_dir / "AI_TEST" / "note.txt"
             memory = MemoryStore(project_dir, project_dir)
             engine = ExecutionEngine(project_dir, memory)
-            engine.execute(
-                {
-                    "action": "create_folder",
-                    "path": str(target_file.parent),
-                    "reason": "Create folder.",
-                }
-            )
-            result = engine.execute(
-                {
-                    "action": "write_file",
-                    "path": str(target_file),
-                    "content": "hello from agent\n",
-                    "reason": "Write file.",
-                }
-            )
+            with patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}):
+                engine.execute(
+                    {
+                        "action": "create_folder",
+                        "path": str(target_file.parent),
+                        "reason": "Create folder.",
+                    }
+                )
+                result = engine.execute(
+                    {
+                        "action": "write_file",
+                        "path": str(target_file),
+                        "content": "hello from agent\n",
+                        "reason": "Write file.",
+                    }
+                )
             self.assertTrue(result["success"])
             self.assertEqual(target_file.read_text(encoding="utf-8"), "hello from agent\n")
 
@@ -225,7 +227,10 @@ class RuntimeArchitectureTests(unittest.TestCase):
                 ]
             )
             runtime = main.AgentRuntime(provider, PROMPT_TEMPLATE, project_dir)
-            with patch("sys.stdout", new_callable=StringIO) as fake_stdout:
+            with (
+                patch("sys.stdout", new_callable=StringIO) as fake_stdout,
+                patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}),
+            ):
                 runtime.handle_user_request("zrob folder i plik")
             self.assertTrue((desktop_dir / "xxxxxxxxxxxx").is_dir())
             self.assertIn("Część operacji została już wykonana poprawnie", fake_stdout.getvalue())
@@ -271,7 +276,10 @@ class RuntimeArchitectureTests(unittest.TestCase):
             runtime = main.AgentRuntime(provider, PROMPT_TEMPLATE, project_dir)
             runtime.desktop_dir = desktop_dir
             runtime.local_router.desktop_dir = desktop_dir
-            with patch("sys.stdout", new_callable=StringIO):
+            with (
+                patch("sys.stdout", new_callable=StringIO),
+                patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}),
+            ):
                 runtime.handle_user_request("stworz folder AI_TEST na pulpicie")
             self.assertTrue((desktop_dir / "AI_TEST").is_dir())
             self.assertEqual(provider.calls, 0)
