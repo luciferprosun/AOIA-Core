@@ -5,10 +5,15 @@ import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from .base import ModelProvider
+from .base import ModelProvider, require_provider_calls_enabled
 from .gemini_provider import GeminiProvider
 from .openai_compatible import OpenAICompatibleProvider
 from runtime_paths import runtime_state_dir
+
+
+PROVIDER_NETWORK_SURFACE = True
+APPROVED_RUNTIME_PROVIDER_FLOW = False
+PROVIDER_CALLS_FROZEN = True
 
 
 DEFAULT_MODEL = "openrouter/google/gemma-3-27b-it"
@@ -95,6 +100,7 @@ class ProviderManager:
         return self.generate_with_fallback(prompt)
 
     def generate_with_fallback(self, prompt: str) -> str:
+        require_provider_calls_enabled()
         errors: list[str] = []
         tried: set[str] = set()
         for full_model in self._fallback_candidates():

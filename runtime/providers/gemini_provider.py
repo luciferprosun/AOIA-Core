@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import os
 
-from .base import ModelProvider
+from .base import ModelProvider, require_provider_calls_enabled
+
+
+PROVIDER_NETWORK_SURFACE = True
+APPROVED_RUNTIME_PROVIDER_FLOW = False
+PROVIDER_CALLS_FROZEN = True
 
 
 class GeminiProvider(ModelProvider):
@@ -22,6 +27,7 @@ class GeminiProvider(ModelProvider):
         self.client = genai.Client(api_key=api_key)
 
     def generate(self, prompt: str) -> str:
+        require_provider_calls_enabled()
         response = self.client.models.generate_content(
             model=self.model,
             contents=prompt,

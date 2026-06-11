@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import asdict, dataclass
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -9,6 +10,31 @@ try:
     from runtime.provider_config import _get_gemini_api_key, _get_openrouter_api_key
 except ModuleNotFoundError:  # pragma: no cover - script launch path
     from provider_config import _get_gemini_api_key, _get_openrouter_api_key
+
+
+"""Provider/network-capable surface.
+
+This module is not an approved autonomous runtime provider execution path.
+Provider calls must not be reachable from model/proposal/public runtime flow
+without an explicit controlled gateway and human approval policy.
+"""
+
+PROVIDER_NETWORK_SURFACE = True
+APPROVED_RUNTIME_PROVIDER_FLOW = False
+PROVIDER_CALLS_FROZEN = True
+AOIA_PROVIDER_CALLS_ENABLED = os.environ.get("AOIA_PROVIDER_CALLS_ENABLED") == "1"
+
+
+def _provider_calls_enabled() -> bool:
+    return AOIA_PROVIDER_CALLS_ENABLED or os.environ.get("AOIA_PROVIDER_CALLS_ENABLED") == "1"
+
+
+def _require_provider_calls_enabled() -> None:
+    if not _provider_calls_enabled():
+        raise RuntimeError(
+            "Provider/network calls are frozen by default and not approved for autonomous runtime use. "
+            "Set AOIA_PROVIDER_CALLS_ENABLED=1 only for explicit controlled manual testing."
+        )
 
 
 @dataclass(frozen=True)
@@ -45,6 +71,12 @@ def call_selected_provider_once(
         return _blocked(provider_id, model_id, "policy rejected this provider call")
     if not user_prompt.strip():
         return _blocked(provider_id, model_id, "prompt is required")
+    if not _provider_calls_enabled():
+        return _blocked(
+            provider_id,
+            model_id,
+            "Provider/network calls are frozen by default and not approved for autonomous runtime use.",
+        )
 
     if provider_id == "gemini":
         return _call_gemini_once(model_id=model_id, user_prompt=user_prompt)
@@ -67,6 +99,7 @@ def _blocked(provider_id: str, model_id: str, error: str) -> ProviderCallResult:
 
 
 def _call_gemini_once(*, model_id: str, user_prompt: str) -> ProviderCallResult:
+    _require_provider_calls_enabled()
     api_key = _get_gemini_api_key()
     if api_key is None:
         return _blocked("gemini", model_id, "Gemini provider is not configured")
@@ -88,6 +121,7 @@ def _call_gemini_once(*, model_id: str, user_prompt: str) -> ProviderCallResult:
 
 
 def _call_openrouter_once(*, model_id: str, user_prompt: str) -> ProviderCallResult:
+    _require_provider_calls_enabled()
     api_key = _get_openrouter_api_key()
     if api_key is None:
         return _blocked("openrouter", model_id, "OpenRouter provider is not configured")
@@ -116,6 +150,7 @@ def _call_openrouter_once(*, model_id: str, user_prompt: str) -> ProviderCallRes
 
 
 def _send_json_request(*, provider_id: str, model_id: str, request: Request, extractor) -> ProviderCallResult:
+    _require_provider_calls_enabled()
     try:
         with urlopen(request, timeout=60) as response:
             payload = json.loads(response.read().decode("utf-8"))

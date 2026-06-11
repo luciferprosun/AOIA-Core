@@ -5,7 +5,12 @@ import os
 import urllib.error
 import urllib.request
 
-from .base import ModelProvider
+from .base import ModelProvider, require_provider_calls_enabled
+
+
+PROVIDER_NETWORK_SURFACE = True
+APPROVED_RUNTIME_PROVIDER_FLOW = False
+PROVIDER_CALLS_FROZEN = True
 
 
 class OpenAICompatibleProvider(ModelProvider):
@@ -27,6 +32,7 @@ class OpenAICompatibleProvider(ModelProvider):
         self.base_url = base_url.rstrip("/")
 
     def generate(self, prompt: str) -> str:
+        require_provider_calls_enabled()
         body = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
