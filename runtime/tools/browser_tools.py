@@ -1,9 +1,31 @@
 from __future__ import annotations
 
-import time
+"""Legacy transitional browser surface.
+
+This module is not an approved H4 browser execution path. It must not be
+reachable from model/proposal/public runtime flow. Do not use it as an executor.
+"""
+
+import os
 import re
+import time
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+
+LEGACY_BROWSER_SURFACE = True
+APPROVED_RUNTIME_BROWSER_FLOW = False
+H4_APPROVED_BROWSER_FLOW = False
+BROWSER_EXECUTION_FROZEN = True
+AOIA_LEGACY_BROWSER_ENABLED = os.environ.get("AOIA_LEGACY_BROWSER_ENABLED") == "1"
+
+
+def _require_legacy_browser_enabled() -> None:
+    if not AOIA_LEGACY_BROWSER_ENABLED:
+        raise RuntimeError(
+            "Legacy browser surface is frozen and not approved for runtime use. "
+            "Set AOIA_LEGACY_BROWSER_ENABLED=1 only for isolated legacy/manual testing."
+        )
+
 
 try:
     from playwright.sync_api import BrowserContext, Page, TimeoutError, sync_playwright
@@ -41,6 +63,7 @@ class BrowserBridge:
 
     def browser_start(self) -> dict:
         """Start Playwright and keep a persistent browser context alive."""
+        _require_legacy_browser_enabled()
         if not PLAYWRIGHT_AVAILABLE:
             raise RuntimeError("Playwright is not installed. Install requirements to enable browser tools.")
         if self.context is not None:
@@ -80,6 +103,7 @@ class BrowserBridge:
 
     def browser_open(self, url: str) -> dict:
         """Open a URL in the current page."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             return self._fallback_open(url)
         page = self._ensure_page()
@@ -90,6 +114,7 @@ class BrowserBridge:
 
     def browser_click(self, selector: str) -> dict:
         """Click a visible element with retries and post-click waits."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             return self._fallback_click(selector)
         page = self._ensure_page()
@@ -102,6 +127,7 @@ class BrowserBridge:
 
     def browser_type(self, selector: str, text: str) -> dict:
         """Type or fill text into an input field."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             self.last_selector = selector
             self.fallback_typed_text = text
@@ -121,6 +147,7 @@ class BrowserBridge:
 
     def browser_press(self, key: str) -> dict:
         """Press one keyboard key on the active page."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             return self._fallback_press(key)
         page = self._ensure_page()
@@ -138,6 +165,7 @@ class BrowserBridge:
 
     def browser_read_html(self) -> dict:
         """Return full HTML for the current page."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             return {
                 **self._fallback_state("Read current page HTML."),
@@ -152,6 +180,7 @@ class BrowserBridge:
 
     def browser_get_visible_text(self) -> dict:
         """Return visible body text from the current page."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             return {
                 **self._fallback_state("Read visible page text."),
@@ -166,6 +195,7 @@ class BrowserBridge:
 
     def browser_screenshot(self, path: str | None = None) -> dict:
         """Save a screenshot of the current page."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             return self._fallback_screenshot(path)
         page = self._ensure_page()
@@ -186,6 +216,7 @@ class BrowserBridge:
 
     def browser_current_url(self) -> dict:
         """Return the current page URL."""
+        _require_legacy_browser_enabled()
         if self.fallback_active:
             return {
                 **self._fallback_state("Read current browser URL."),
@@ -199,6 +230,7 @@ class BrowserBridge:
 
     def browser_close(self) -> dict:
         """Close the persistent browser session cleanly."""
+        _require_legacy_browser_enabled()
         if self.context is not None:
             self.context.close()
         if self.playwright is not None:
@@ -367,40 +399,50 @@ def get_browser_bridge() -> BrowserBridge:
 
 
 def browser_start() -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_start()
 
 
 def browser_open(url: str) -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_open(url)
 
 
 def browser_click(selector: str) -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_click(selector)
 
 
 def browser_type(selector: str, text: str) -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_type(selector, text)
 
 
 def browser_press(key: str) -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_press(key)
 
 
 def browser_read_html() -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_read_html()
 
 
 def browser_get_visible_text() -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_get_visible_text()
 
 
 def browser_screenshot(path: str | None = None) -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_screenshot(path)
 
 
 def browser_close() -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_close()
 
 
 def browser_current_url() -> dict:
+    _require_legacy_browser_enabled()
     return get_browser_bridge().browser_current_url()
