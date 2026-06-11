@@ -36,6 +36,8 @@ const elements = {
   chatLog: document.querySelector("#chat-log"),
   promptInput: document.querySelector("#prompt-input"),
   composer: document.querySelector("#composer"),
+  criticTransform: document.querySelector("#critic-transform"),
+  cptStatus: document.querySelector("#cpt-status"),
   sessionModel: document.querySelector("#session-model"),
   sessionSummary: document.querySelector("#session-summary"),
   statusCwd: document.querySelector("#status-cwd"),
@@ -555,6 +557,39 @@ async function sendPrompt(prompt) {
   applyStatus(payload.status);
 }
 
+async function transformComposerPrompt() {
+  const prompt = elements.promptInput.value;
+  if (!prompt.trim()) {
+    elements.cptStatus.textContent = "Enter a prompt before running Critic Transform.";
+    return;
+  }
+
+  elements.criticTransform.disabled = true;
+  elements.cptStatus.textContent = "CPT transform running locally. Manual send required.";
+  try {
+    const payload = await jsonFetch("/api/cpt/transform", {
+      method: "POST",
+      body: JSON.stringify({
+        prompt,
+        mode: "balanced_critic",
+      }),
+    });
+    elements.promptInput.value = payload.record.transformed_prompt;
+    elements.promptInput.focus();
+    elements.cptStatus.textContent = [
+      "CPT transformed locally.",
+      payload.record.canonical_status,
+      "Human review required.",
+      "No provider call during transform.",
+      "Manual send required.",
+    ].join(" ");
+  } catch (error) {
+    elements.cptStatus.textContent = String(error);
+  } finally {
+    elements.criticTransform.disabled = false;
+  }
+}
+
 document.querySelector("#switch-model").addEventListener("click", async () => {
   try {
     await switchLegacyModel();
@@ -572,6 +607,10 @@ document.querySelector("#refresh-status").addEventListener("click", async () => 
   } catch (error) {
     addMessage("System", `Refresh failed: ${error}`);
   }
+});
+
+elements.criticTransform.addEventListener("click", async () => {
+  await transformComposerPrompt();
 });
 
 elements.routerProviderSelect.addEventListener("change", hydrateRouterModelSelect);

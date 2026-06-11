@@ -255,6 +255,11 @@
               rows="4"
               placeholder="Legacy chat runtime only. The Controlled Model Router is separate."
             ></textarea>
+            <div class="cpt-control">
+              <button id="critic-transform" type="button" class="button button-ghost">Critic Transform</button>
+              <p class="note cpt-warning">CPT improves critical framing, not truth. Review before sending. Manual send required.</p>
+            </div>
+            <p id="cpt-status" class="note cpt-status" aria-live="polite"></p>
             <div class="composer-actions">
               <span class="hint">Enter sends. Shift+Enter adds a newline.</span>
               <button type="submit" class="button button-primary">Send legacy message</button>

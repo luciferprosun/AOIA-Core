@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import traceback
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -20,6 +21,7 @@ if not WEB_DIR.exists():
     WEB_DIR = PROJECT_DIR.parent / "web"
 HOST = os.getenv("APP2_WEB_HOST", "127.0.0.1")
 PORT = int(os.getenv("APP2_WEB_PORT", "4311"))
+CPT_BALANCED_MODE = "balanced_critic"
 
 
 class WebRuntimeService:
@@ -80,6 +82,39 @@ def get_service() -> WebRuntimeService:
     return SERVICE
 
 
+def build_cpt_transform_payload(prompt: str, mode: str = CPT_BALANCED_MODE) -> dict:
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError("prompt is required")
+    if mode != CPT_BALANCED_MODE:
+        raise ValueError("mode must be balanced_critic")
+
+    transform_prompt = _load_cpt_transformer()
+    record = transform_prompt(prompt, mode=mode)
+    return {
+        "ok": True,
+        "record": {
+            "critic_mode": record.critic_mode,
+            "canonical_status": record.canonical_status,
+            "human_review_required": record.human_review_required,
+            "provider_call_permitted": record.provider_call_permitted,
+            "execution_permitted": record.execution_permitted,
+            "browser_action_permitted": record.browser_action_permitted,
+            "original_prompt_hash": record.original_prompt_hash,
+            "transformed_prompt_hash": record.transformed_prompt_hash,
+            "transformed_prompt": record.transformed_prompt,
+        },
+    }
+
+
+def _load_cpt_transformer():
+    project_parent = str(PROJECT_DIR.parent)
+    if project_parent not in sys.path:
+        sys.path.insert(0, project_parent)
+    from runtime.cpt.transformer import transform_prompt
+
+    return transform_prompt
+
+
 class CodexStyleHandler(SimpleHTTPRequestHandler):
     """Serve the static UI and a small JSON API."""
 
@@ -123,6 +158,19 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             return
 
         try:
+            if parsed.path == "/api/cpt/transform":
+                prompt = payload.get("prompt", "")
+                mode = payload.get("mode", CPT_BALANCED_MODE)
+                if mode is None:
+                    mode = CPT_BALANCED_MODE
+                try:
+                    response = build_cpt_transform_payload(prompt=prompt, mode=mode)
+                except (TypeError, ValueError) as error:
+                    self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+                    return
+                self._write_json(HTTPStatus.OK, response)
+                return
+
             if parsed.path == "/api/chat":
                 prompt = str(payload.get("prompt", "")).strip()
                 if not prompt:
