@@ -32,7 +32,11 @@ from .filesystem_tools import (
 )
 from .memory import MemoryStore
 from .project_scanner import scan_project
-from .shell_tools import shell_execute
+from .shell_tools import (
+    _legacy_shell_execution_enabled,
+    shell_execute,
+    shell_execution_blocked_result,
+)
 from .validator import classify_shell_command, validate_shell_command
 
 
@@ -49,7 +53,7 @@ class ToolSpec:
 
 
 class ExecutionEngine:
-    """Dispatch structured tool actions to shell, filesystem, or browser."""
+    """Dispatch structured legacy tool actions; execution surfaces are frozen by default."""
 
     def __init__(self, project_dir: Path, memory_store: MemoryStore) -> None:
         self.project_dir = project_dir
@@ -96,7 +100,7 @@ class ExecutionEngine:
     def _build_tool_registry(self) -> dict[str, ToolSpec]:
         return {
             "respond": ToolSpec("respond", self._respond, "Return a final answer."),
-            "shell_execute": ToolSpec("shell_execute", self._execute_shell_action, "Run a validated shell command."),
+            "shell_execute": ToolSpec("shell_execute", self._execute_shell_action, "Frozen legacy shell/executor surface."),
             "write_file": ToolSpec("write_file", lambda action: write_file(action["path"], action["content"], self.cwd), "Frozen legacy filesystem surface."),
             "append_file": ToolSpec("append_file", lambda action: append_file(action["path"], action["content"], self.cwd), "Frozen legacy filesystem surface."),
             "read_file": ToolSpec("read_file", lambda action: read_file(action["path"], self.cwd), "Read a text file."),
@@ -130,6 +134,9 @@ class ExecutionEngine:
 
     def _execute_shell_action(self, action: dict[str, Any]) -> dict[str, Any]:
         command = action["command"]
+        if not _legacy_shell_execution_enabled():
+            return shell_execution_blocked_result(command, self.cwd)
+
         allowed, reason = validate_shell_command(command)
         if not allowed:
             return {

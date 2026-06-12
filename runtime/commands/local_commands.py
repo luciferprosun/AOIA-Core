@@ -15,6 +15,7 @@ from retrieval.facade import (
     linux_load_topic,
     linux_low_level_results,
 )
+from tools.shell_tools import _legacy_shell_execution_enabled
 from tools.validator import validate_action
 
 SCEMDA_ZIP = Path.home() / ".local" / "share" / "aoia" / "kimi agetn..zip"
@@ -319,6 +320,12 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
         return CommandResult(True, json_dump(payload))
 
     if command == "build":
+        if not _legacy_shell_execution_enabled():
+            return CommandResult(
+                True,
+                "RHCSA build is a frozen legacy shell/subprocess tooling surface. "
+                "It is not approved by default in AOIA production flow.",
+            )
         answer = input("Press ENTER to build/update the RHCSA library, or type n/cancel to reject: ").strip().lower()
         if answer in {"n", "no", "cancel", "reject", "stop"}:
             return CommandResult(True, "RHCSA library build cancelled.")
@@ -430,6 +437,12 @@ def cmd_scemda(args: str, runtime) -> CommandResult:
         return CommandResult(True, "SCEMDA run cancelled.")
 
     command = [sys.executable, str(script_path), *shlex.split(args)]
+    if not _legacy_shell_execution_enabled():
+        return CommandResult(
+            True,
+            "SCEMDA run is a frozen legacy shell/subprocess surface. "
+            "It is not approved by default in AOIA production flow.",
+        )
     result = subprocess.run(
         command,
         cwd=str(runtime.project_dir),

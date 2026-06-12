@@ -71,6 +71,9 @@ shell_execute:
   "reason": "Inspect the current directory.",
   "requires_confirmation": true
 }
+Shell execution is a frozen legacy surface in AOIA production flow. A proposed
+shell_execute action may be inspected, but allowed=True or human approval does
+not authorize command execution.
 
 terminal_command is accepted as an alias for shell_execute:
 {

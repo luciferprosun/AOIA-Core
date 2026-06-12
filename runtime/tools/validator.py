@@ -230,7 +230,7 @@ def validate_shell_command(command: str) -> tuple[bool, str]:
 
 
 def classify_shell_command(command: str) -> PermissionDecision:
-    """Classify commands into safe, advanced, and dangerous execution modes."""
+    """Classify command text for inspection; this does not authorize execution."""
     lowered = command.lower().strip()
 
     for pattern in DANGEROUS_PATTERNS:
