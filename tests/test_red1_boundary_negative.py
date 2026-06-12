@@ -86,65 +86,61 @@ def post_cpt_transform(payload: dict, webapp=None):
 @contextmanager
 def patched_dangerous_primitives():
     stack = ExitStack()
-    mocks = {
-        "subprocess_run": stack.enter_context(
-            patch.object(subprocess, "run", side_effect=AssertionError("subprocess.run called"))
-        ),
-        "subprocess_popen": stack.enter_context(
-            patch.object(subprocess, "Popen", side_effect=AssertionError("subprocess.Popen called"))
-        ),
-        "os_system": stack.enter_context(
-            patch.object(os, "system", side_effect=AssertionError("os.system called"))
-        ),
-        "urlopen": stack.enter_context(
-            patch.object(
-                urllib.request,
-                "urlopen",
-                side_effect=AssertionError("urllib.request.urlopen called"),
-            )
-        ),
-        "socket": stack.enter_context(
-            patch.object(
-                socket,
-                "create_connection",
-                side_effect=AssertionError("socket.create_connection called"),
-            )
-        ),
-        "webbrowser": stack.enter_context(
-            patch.object(webbrowser, "open", side_effect=AssertionError("webbrowser.open called"))
-        ),
-        "write_text": stack.enter_context(
-            patch.object(Path, "write_text", side_effect=AssertionError("Path.write_text called"))
-        ),
-        "write_bytes": stack.enter_context(
-            patch.object(Path, "write_bytes", side_effect=AssertionError("Path.write_bytes called"))
-        ),
-        "unlink": stack.enter_context(
-            patch.object(Path, "unlink", side_effect=AssertionError("Path.unlink called"))
-        ),
-        "shutil_move": stack.enter_context(
-            patch.object(shutil, "move", side_effect=AssertionError("shutil.move called"))
-        ),
-        "shutil_rmtree": stack.enter_context(
-            patch.object(shutil, "rmtree", side_effect=AssertionError("shutil.rmtree called"))
-        ),
-    }
-
     try:
-        importlib.util.find_spec("requests")
-    except ModuleNotFoundError:
-        requests = None
-    else:
-        requests = importlib.import_module("requests")
-    if requests is not None:
-        mocks["requests_get"] = stack.enter_context(
-            patch.object(requests, "get", side_effect=AssertionError("requests.get called"))
-        )
-        mocks["requests_post"] = stack.enter_context(
-            patch.object(requests, "post", side_effect=AssertionError("requests.post called"))
-        )
+        mocks = {
+            "subprocess_run": stack.enter_context(
+                patch.object(subprocess, "run", side_effect=AssertionError("subprocess.run called"))
+            ),
+            "subprocess_popen": stack.enter_context(
+                patch.object(subprocess, "Popen", side_effect=AssertionError("subprocess.Popen called"))
+            ),
+            "os_system": stack.enter_context(
+                patch.object(os, "system", side_effect=AssertionError("os.system called"))
+            ),
+            "urlopen": stack.enter_context(
+                patch.object(
+                    urllib.request,
+                    "urlopen",
+                    side_effect=AssertionError("urllib.request.urlopen called"),
+                )
+            ),
+            "socket": stack.enter_context(
+                patch.object(
+                    socket,
+                    "create_connection",
+                    side_effect=AssertionError("socket.create_connection called"),
+                )
+            ),
+            "webbrowser": stack.enter_context(
+                patch.object(webbrowser, "open", side_effect=AssertionError("webbrowser.open called"))
+            ),
+            "write_text": stack.enter_context(
+                patch.object(Path, "write_text", side_effect=AssertionError("Path.write_text called"))
+            ),
+            "write_bytes": stack.enter_context(
+                patch.object(Path, "write_bytes", side_effect=AssertionError("Path.write_bytes called"))
+            ),
+            "unlink": stack.enter_context(
+                patch.object(Path, "unlink", side_effect=AssertionError("Path.unlink called"))
+            ),
+            "shutil_move": stack.enter_context(
+                patch.object(shutil, "move", side_effect=AssertionError("shutil.move called"))
+            ),
+            "shutil_rmtree": stack.enter_context(
+                patch.object(shutil, "rmtree", side_effect=AssertionError("shutil.rmtree called"))
+            ),
+        }
 
-    try:
+        requests_spec = importlib.util.find_spec("requests")
+        if requests_spec is not None:
+            requests = importlib.import_module("requests")
+            mocks["requests_get"] = stack.enter_context(
+                patch.object(requests, "get", side_effect=AssertionError("requests.get called"))
+            )
+            mocks["requests_post"] = stack.enter_context(
+                patch.object(requests, "post", side_effect=AssertionError("requests.post called"))
+            )
+
         yield stack, mocks
     finally:
         stack.close()
