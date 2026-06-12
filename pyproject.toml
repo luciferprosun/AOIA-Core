@@ -22,6 +22,7 @@ include = [
     "memory*",
     "memory_hats*",
     "orchestrator*",
+    "provider_critic*",
     "providers*",
     "retrieval*",
     "router*",
