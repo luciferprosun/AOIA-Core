@@ -19,6 +19,9 @@ class SandboxArtifactState(str, Enum):
     INVALID = "INVALID"
 
 
+SANDBOX_ARTIFACT_CONTRACT_VERSION = "AOIA_SANDBOX_ARTIFACT_CONTRACT_V1"
+
+
 def _utc_now_iso() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
@@ -61,10 +64,18 @@ class SandboxArtifactRequest:
     dry_run_trace_id: str
     audit_event_id: str
     notes: str
+    artifact_contract_version: str = ""
+    artifact_write_allowed: bool = False
+    approval_decision_id: str = ""
+    sandbox_policy_decision_id: str = ""
+    sandbox_result_state: str = ""
+    contract_payload_hash: str = ""
+    contract_audit_event_id: str = ""
 
     def __post_init__(self) -> None:
         artifact_type = SandboxArtifactType(self.artifact_type)
         content_text = _coerce_text("content_text", self.content_text)
+        content_hash = _hash_text(content_text)
         object.__setattr__(self, "artifact_request_id", _coerce_text("artifact_request_id", self.artifact_request_id))
         object.__setattr__(self, "created_at", _coerce_text("created_at", self.created_at))
         object.__setattr__(self, "run_id", _coerce_text("run_id", self.run_id))
@@ -73,12 +84,43 @@ class SandboxArtifactRequest:
         object.__setattr__(self, "artifact_type", artifact_type)
         object.__setattr__(self, "relative_output_path", _coerce_text("relative_output_path", self.relative_output_path))
         object.__setattr__(self, "content_text", content_text)
-        object.__setattr__(self, "content_hash", _hash_text(content_text))
+        object.__setattr__(self, "content_hash", content_hash)
         object.__setattr__(self, "requested_by", _coerce_text("requested_by", self.requested_by))
         object.__setattr__(self, "human_approved", _coerce_bool("human_approved", self.human_approved))
         object.__setattr__(self, "dry_run_trace_id", _coerce_text("dry_run_trace_id", self.dry_run_trace_id))
         object.__setattr__(self, "audit_event_id", _coerce_text("audit_event_id", self.audit_event_id))
         object.__setattr__(self, "notes", _coerce_text("notes", self.notes))
+        object.__setattr__(
+            self,
+            "artifact_contract_version",
+            _coerce_text("artifact_contract_version", self.artifact_contract_version),
+        )
+        object.__setattr__(
+            self,
+            "artifact_write_allowed",
+            _coerce_bool("artifact_write_allowed", self.artifact_write_allowed),
+        )
+        object.__setattr__(self, "approval_decision_id", _coerce_text("approval_decision_id", self.approval_decision_id))
+        object.__setattr__(
+            self,
+            "sandbox_policy_decision_id",
+            _coerce_text("sandbox_policy_decision_id", self.sandbox_policy_decision_id),
+        )
+        object.__setattr__(
+            self,
+            "sandbox_result_state",
+            _coerce_text("sandbox_result_state", self.sandbox_result_state),
+        )
+        object.__setattr__(
+            self,
+            "contract_payload_hash",
+            _coerce_text("contract_payload_hash", self.contract_payload_hash),
+        )
+        object.__setattr__(
+            self,
+            "contract_audit_event_id",
+            _coerce_text("contract_audit_event_id", self.contract_audit_event_id),
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -96,6 +138,13 @@ class SandboxArtifactRequest:
             "dry_run_trace_id": self.dry_run_trace_id,
             "audit_event_id": self.audit_event_id,
             "notes": self.notes,
+            "artifact_contract_version": self.artifact_contract_version,
+            "artifact_write_allowed": self.artifact_write_allowed,
+            "approval_decision_id": self.approval_decision_id,
+            "sandbox_policy_decision_id": self.sandbox_policy_decision_id,
+            "sandbox_result_state": self.sandbox_result_state,
+            "contract_payload_hash": self.contract_payload_hash,
+            "contract_audit_event_id": self.contract_audit_event_id,
         }
 
 
@@ -171,6 +220,13 @@ def create_sandbox_artifact_request(
     dry_run_trace_id: str,
     audit_event_id: str = "",
     notes: str = "",
+    artifact_contract_version: str = SANDBOX_ARTIFACT_CONTRACT_VERSION,
+    artifact_write_allowed: bool | None = None,
+    approval_decision_id: str = "",
+    sandbox_policy_decision_id: str = "",
+    sandbox_result_state: str = "NOT_IMPLEMENTED",
+    contract_payload_hash: str = "",
+    contract_audit_event_id: str = "",
     created_at: str | None = None,
     artifact_request_id: str | None = None,
 ) -> SandboxArtifactRequest:
@@ -181,6 +237,13 @@ def create_sandbox_artifact_request(
         "\n".join([run_id, sandbox_request_id, sandbox_result_id, relative_output_path, content, timestamp])
     )[:24]
     event_id = audit_event_id or "sandbox-artifact-audit-" + _hash_text(record_id)[:24]
+    payload_hash = _hash_text(content)
+    decision_id = approval_decision_id or "approval-decision-" + _hash_text(run_id + "\n" + record_id)[:24]
+    policy_decision_id = sandbox_policy_decision_id or "sandbox-decision-" + _hash_text(
+        sandbox_request_id + "\n" + sandbox_result_id
+    )[:24]
+    contract_event_id = contract_audit_event_id or event_id
+    write_allowed = human_approved if artifact_write_allowed is None else artifact_write_allowed
     return SandboxArtifactRequest(
         artifact_request_id=record_id,
         created_at=timestamp,
@@ -190,12 +253,19 @@ def create_sandbox_artifact_request(
         artifact_type=artifact_type_value,
         relative_output_path=relative_output_path,
         content_text=content,
-        content_hash=_hash_text(content),
+        content_hash=payload_hash,
         requested_by=requested_by,
         human_approved=human_approved,
         dry_run_trace_id=dry_run_trace_id,
         audit_event_id=event_id,
         notes=notes,
+        artifact_contract_version=artifact_contract_version,
+        artifact_write_allowed=write_allowed,
+        approval_decision_id=decision_id,
+        sandbox_policy_decision_id=policy_decision_id,
+        sandbox_result_state=sandbox_result_state,
+        contract_payload_hash=contract_payload_hash or payload_hash,
+        contract_audit_event_id=contract_event_id,
     )
 
 

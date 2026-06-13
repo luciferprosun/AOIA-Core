@@ -9,6 +9,7 @@ from runtime.safety.sandbox_workspace import (
     assert_safe_artifact_write_path,
 )
 from runtime.schemas.sandbox_artifact import (
+    SANDBOX_ARTIFACT_CONTRACT_VERSION,
     SandboxArtifactRequest,
     SandboxArtifactResult,
     create_blocked_sandbox_artifact_result,
@@ -27,6 +28,9 @@ class SandboxArtifactWriteBlockedError(RuntimeError):
     pass
 
 
+_ELIGIBLE_SANDBOX_RESULT_STATES = frozenset({"BLOCKED", "NOT_IMPLEMENTED"})
+
+
 def write_sandbox_artifact(
     request: SandboxArtifactRequest,
     workspace_root: str,
@@ -34,6 +38,14 @@ def write_sandbox_artifact(
 ) -> SandboxArtifactResult:
     if not isinstance(request, SandboxArtifactRequest):
         raise TypeError("request must be a SandboxArtifactRequest")
+    contract_violation = _artifact_contract_violation_reason(request)
+    if contract_violation:
+        return create_blocked_sandbox_artifact_result(
+            request,
+            workspace_root=workspace_root,
+            blocked_reason=contract_violation,
+            notes="2A-2 artifact contract guard blocked artifact write",
+        )
     if not request.human_approved:
         return create_blocked_sandbox_artifact_result(
             request,
@@ -191,3 +203,29 @@ def _fsync_parent_directory(output_path: Path) -> None:
         posix.fsync(fd)
     finally:
         posix.close(fd)
+
+
+def _artifact_contract_violation_reason(request: SandboxArtifactRequest) -> str:
+    if request.artifact_contract_version != SANDBOX_ARTIFACT_CONTRACT_VERSION:
+        return "artifact contract version is invalid"
+    if request.artifact_write_allowed is not True:
+        return "artifact contract does not allow workspace write"
+    if not request.human_approved:
+        return "sandbox artifact request requires explicit human approval"
+    if not request.run_id or not request.dry_run_trace_id:
+        return "artifact contract requires dry-run identifiers"
+    if not request.approval_decision_id:
+        return "artifact contract requires approval decision id"
+    if not request.sandbox_request_id or not request.sandbox_result_id:
+        return "artifact contract requires sandbox request and result ids"
+    if not request.sandbox_policy_decision_id:
+        return "artifact contract requires sandbox policy decision id"
+    if request.sandbox_result_state not in _ELIGIBLE_SANDBOX_RESULT_STATES:
+        return "sandbox result state is not eligible for artifact write"
+    if request.contract_payload_hash != request.content_hash:
+        return "artifact content hash must match contract payload hash"
+    if not request.audit_event_id or not request.contract_audit_event_id:
+        return "artifact contract requires audit event ids"
+    if request.audit_event_id != request.contract_audit_event_id:
+        return "artifact audit event must match contract audit event"
+    return ""

@@ -148,6 +148,9 @@ def create_artifact_request_from_dry_run(
         ) + "\n"
     else:
         content_text = build_agent_demo_artifact_content(trace, sandbox_request, sandbox_decision, sandbox_result)
+    sandbox_policy_decision_id = (
+        sandbox_decision.decision_id if sandbox_decision is not None else sandbox_result.policy_decision_id
+    )
     return create_sandbox_artifact_request(
         run_id=trace.run_id,
         sandbox_request_id=sandbox_request.sandbox_request_id,
@@ -160,6 +163,11 @@ def create_artifact_request_from_dry_run(
         dry_run_trace_id=trace.run_id,
         audit_event_id=sandbox_result.audit_event_id,
         notes=notes,
+        artifact_write_allowed=sandbox_request.human_approved,
+        approval_decision_id=trace.decision_id,
+        sandbox_policy_decision_id=sandbox_policy_decision_id,
+        sandbox_result_state=sandbox_result.result_state.value,
+        contract_audit_event_id=sandbox_result.audit_event_id,
     )
 
 
