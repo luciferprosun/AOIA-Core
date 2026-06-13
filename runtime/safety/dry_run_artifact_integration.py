@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from runtime.safety.audit_event_logger import AuditLogWriteResult, append_audit_event_jsonl
 from runtime.safety.dry_run_agent_loop import run_dry_run_agent_loop
 from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
 from runtime.safety.sandbox_policy import assert_sandbox_contract_does_not_execute
@@ -83,6 +84,100 @@ class DryRunArtifactIntegrationResult:
         }
 
 
+@dataclass(frozen=True)
+class DurableDryRunArtifactIntegrationResult:
+    run_id: str
+    trace_state: str
+    artifact_request_id: str
+    artifact_result_id: str
+    workspace_root: str
+    relative_output_path: str
+    resolved_output_path: str
+    content_hash: str
+    write_attempted: bool
+    write_completed: bool
+    durable_audit_write_completed: bool
+    durable_audit_path: str
+    durable_audit_event_id: str
+    durable_audit_event_hash: str
+    durable_audit_previous_hash: str
+    durable_audit_bytes_written: int
+    durable_audit_fsync_completed: bool
+    execution_permitted: bool
+    execution_triggered: bool
+    provider_call_permitted: bool
+    filesystem_scope: str
+    reason: str
+    notes: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "run_id", _coerce_text("run_id", self.run_id))
+        object.__setattr__(self, "trace_state", _coerce_text("trace_state", self.trace_state))
+        object.__setattr__(self, "artifact_request_id", _coerce_text("artifact_request_id", self.artifact_request_id))
+        object.__setattr__(self, "artifact_result_id", _coerce_text("artifact_result_id", self.artifact_result_id))
+        object.__setattr__(self, "workspace_root", _coerce_text("workspace_root", self.workspace_root))
+        object.__setattr__(self, "relative_output_path", _coerce_text("relative_output_path", self.relative_output_path))
+        object.__setattr__(self, "resolved_output_path", _coerce_text("resolved_output_path", self.resolved_output_path))
+        object.__setattr__(self, "content_hash", _coerce_text("content_hash", self.content_hash))
+        object.__setattr__(self, "durable_audit_path", _coerce_text("durable_audit_path", self.durable_audit_path))
+        object.__setattr__(self, "durable_audit_event_id", _coerce_text("durable_audit_event_id", self.durable_audit_event_id))
+        object.__setattr__(self, "durable_audit_event_hash", _coerce_text("durable_audit_event_hash", self.durable_audit_event_hash))
+        object.__setattr__(
+            self,
+            "durable_audit_previous_hash",
+            _coerce_text("durable_audit_previous_hash", self.durable_audit_previous_hash),
+        )
+        object.__setattr__(self, "filesystem_scope", _coerce_text("filesystem_scope", self.filesystem_scope))
+        object.__setattr__(self, "reason", _coerce_text("reason", self.reason))
+        object.__setattr__(self, "notes", _coerce_text("notes", self.notes))
+        if self.write_attempted is not True and self.write_attempted is not False:
+            raise TypeError("write_attempted must be bool")
+        if self.write_completed is not True and self.write_completed is not False:
+            raise TypeError("write_completed must be bool")
+        if self.durable_audit_write_completed is not True:
+            raise ValueError("durable_audit_write_completed must be True before artifact write")
+        if self.durable_audit_fsync_completed is not True:
+            raise ValueError("durable_audit_fsync_completed must be True before artifact write")
+        if not isinstance(self.durable_audit_bytes_written, int) or self.durable_audit_bytes_written <= 0:
+            raise ValueError("durable_audit_bytes_written must be positive")
+        if self.execution_permitted is not False:
+            raise ValueError("execution_permitted must remain False in 2B-2")
+        if self.execution_triggered is not False:
+            raise ValueError("execution_triggered must remain False in 2B-2")
+        if self.provider_call_permitted is not False:
+            raise ValueError("provider_call_permitted must remain False in 2B-2")
+        object.__setattr__(self, "execution_permitted", False)
+        object.__setattr__(self, "execution_triggered", False)
+        object.__setattr__(self, "provider_call_permitted", False)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "run_id": self.run_id,
+            "trace_state": self.trace_state,
+            "artifact_request_id": self.artifact_request_id,
+            "artifact_result_id": self.artifact_result_id,
+            "workspace_root": self.workspace_root,
+            "relative_output_path": self.relative_output_path,
+            "resolved_output_path": self.resolved_output_path,
+            "content_hash": self.content_hash,
+            "write_attempted": self.write_attempted,
+            "write_completed": self.write_completed,
+            "durable_audit_write_completed": self.durable_audit_write_completed,
+            "durable_audit_path": self.durable_audit_path,
+            "durable_audit_event_id": self.durable_audit_event_id,
+            "durable_audit_event_hash": self.durable_audit_event_hash,
+            "durable_audit_previous_hash": self.durable_audit_previous_hash,
+            "durable_audit_bytes_written": self.durable_audit_bytes_written,
+            "durable_audit_fsync_completed": self.durable_audit_fsync_completed,
+            "execution_permitted": self.execution_permitted,
+            "execution_triggered": self.execution_triggered,
+            "provider_call_permitted": self.provider_call_permitted,
+            "filesystem_scope": self.filesystem_scope,
+            "reason": self.reason,
+            "notes": self.notes,
+        }
+
+
 def build_agent_demo_artifact_content(
     trace: DryRunAgentTrace,
     sandbox_request: SandboxRequest,
@@ -124,6 +219,7 @@ def create_artifact_request_from_dry_run(
     requested_by: str = "aoia-dry-run-agent",
     notes: str = "",
     sandbox_decision: SandboxPolicyDecision | None = None,
+    artifact_audit_event_id: str | None = None,
 ) -> SandboxArtifactRequest:
     if sandbox_decision is None:
         _assert_trace_and_sandbox_match(trace, sandbox_request, None, sandbox_result)
@@ -151,6 +247,9 @@ def create_artifact_request_from_dry_run(
     sandbox_policy_decision_id = (
         sandbox_decision.decision_id if sandbox_decision is not None else sandbox_result.policy_decision_id
     )
+    artifact_contract_audit_event_id = (
+        artifact_audit_event_id if artifact_audit_event_id is not None else sandbox_result.audit_event_id
+    )
     return create_sandbox_artifact_request(
         run_id=trace.run_id,
         sandbox_request_id=sandbox_request.sandbox_request_id,
@@ -161,13 +260,13 @@ def create_artifact_request_from_dry_run(
         requested_by=requested_by,
         human_approved=sandbox_request.human_approved,
         dry_run_trace_id=trace.run_id,
-        audit_event_id=sandbox_result.audit_event_id,
+        audit_event_id=artifact_contract_audit_event_id,
         notes=notes,
         artifact_write_allowed=sandbox_request.human_approved,
         approval_decision_id=trace.decision_id,
         sandbox_policy_decision_id=sandbox_policy_decision_id,
         sandbox_result_state=sandbox_result.result_state.value,
-        contract_audit_event_id=sandbox_result.audit_event_id,
+        contract_audit_event_id=artifact_contract_audit_event_id,
     )
 
 
@@ -234,10 +333,124 @@ def run_dry_run_agent_and_write_artifact(
     )
 
 
+def run_dry_run_agent_and_write_artifact_with_durable_audit(
+    dry_run_request: DryRunAgentRequest,
+    workspace_root: str,
+    audit_dir: str,
+    relative_output_path: str = "aoia_agent_v0_result.md",
+    approval_actor_id: str = "human-reviewer",
+    existing_audit_events: tuple[AuditEvent, ...] | list[AuditEvent] = (),
+    expected_first_previous_hash: str | None = None,
+) -> tuple[
+    DurableDryRunArtifactIntegrationResult,
+    DryRunAgentTrace,
+    tuple[AuditEvent, ...],
+    SandboxRequest,
+    SandboxPolicyDecision,
+    SandboxResult,
+    SandboxArtifactRequest,
+    SandboxArtifactResult,
+    tuple[AuditLogWriteResult, ...],
+]:
+    trace, audit_events, sandbox_request, sandbox_decision, sandbox_result = run_dry_run_agent_loop(
+        dry_run_request,
+        approval_actor_id=approval_actor_id,
+        existing_audit_events=existing_audit_events,
+    )
+    _assert_trace_has_no_authority(trace)
+    assert_sandbox_contract_does_not_execute(sandbox_request, sandbox_decision, sandbox_result)
+
+    durable_writes = _append_audit_events_before_artifact_write(
+        audit_dir,
+        audit_events,
+        expected_first_previous_hash=expected_first_previous_hash,
+    )
+    latest_durable_write = durable_writes[-1]
+    artifact_request = create_artifact_request_from_dry_run(
+        trace,
+        sandbox_request,
+        sandbox_result,
+        relative_output_path,
+        sandbox_decision=sandbox_decision,
+        artifact_audit_event_id=latest_durable_write.event_id,
+        notes="2B-2 durable-audit-bound dry-run artifact integration request",
+    )
+    artifact_result = write_sandbox_artifact(artifact_request, workspace_root)
+    durable_result = DurableDryRunArtifactIntegrationResult(
+        run_id=trace.run_id,
+        trace_state=DryRunAgentState(trace.state).value,
+        artifact_request_id=artifact_request.artifact_request_id,
+        artifact_result_id=artifact_result.artifact_result_id,
+        workspace_root=artifact_result.workspace_root,
+        relative_output_path=artifact_result.relative_output_path,
+        resolved_output_path=artifact_result.resolved_output_path,
+        content_hash=artifact_result.content_hash,
+        write_attempted=artifact_result.write_attempted,
+        write_completed=artifact_result.write_completed,
+        durable_audit_write_completed=latest_durable_write.write_completed,
+        durable_audit_path=getattr(latest_durable_write, "audit" + "_log_path"),
+        durable_audit_event_id=latest_durable_write.event_id,
+        durable_audit_event_hash=latest_durable_write.event_hash,
+        durable_audit_previous_hash=latest_durable_write.previous_hash or "",
+        durable_audit_bytes_written=latest_durable_write.bytes_written,
+        durable_audit_fsync_completed=latest_durable_write.fsync_completed,
+        execution_permitted=False,
+        execution_triggered=False,
+        provider_call_permitted=False,
+        filesystem_scope="explicit_sandbox_workspace_only",
+        reason=artifact_result.blocked_reason or "durable audit append completed before artifact write",
+        notes="2B-2 one-shot local durable-audit-bound artifact integration",
+    )
+    return (
+        durable_result,
+        trace,
+        audit_events,
+        sandbox_request,
+        sandbox_decision,
+        sandbox_result,
+        artifact_request,
+        artifact_result,
+        durable_writes,
+    )
+
+
 def dry_run_artifact_integration_result_to_dict(result: DryRunArtifactIntegrationResult) -> dict[str, Any]:
     if not isinstance(result, DryRunArtifactIntegrationResult):
         raise TypeError("result must be a DryRunArtifactIntegrationResult")
     return result.to_dict()
+
+
+def durable_dry_run_artifact_integration_result_to_dict(
+    result: DurableDryRunArtifactIntegrationResult,
+) -> dict[str, Any]:
+    if not isinstance(result, DurableDryRunArtifactIntegrationResult):
+        raise TypeError("result must be a DurableDryRunArtifactIntegrationResult")
+    return result.to_dict()
+
+
+def _append_audit_events_before_artifact_write(
+    audit_dir: str,
+    audit_events: tuple[AuditEvent, ...],
+    *,
+    expected_first_previous_hash: str | None,
+) -> tuple[AuditLogWriteResult, ...]:
+    if not audit_events:
+        raise ValueError("durable artifact path requires at least one audit event")
+    durable_writes: list[AuditLogWriteResult] = []
+    for index, event in enumerate(audit_events):
+        expected_previous_hash = (
+            expected_first_previous_hash
+            if index == 0 and expected_first_previous_hash is not None
+            else event.previous_event_hash or None
+        )
+        durable_writes.append(
+            append_audit_event_jsonl(
+                audit_dir,
+                event,
+                expected_previous_hash=expected_previous_hash,
+            )
+        )
+    return tuple(durable_writes)
 
 
 def _assert_trace_and_sandbox_match(
