@@ -341,6 +341,7 @@ def run_dry_run_agent_and_write_artifact_with_durable_audit(
     approval_actor_id: str = "human-reviewer",
     existing_audit_events: tuple[AuditEvent, ...] | list[AuditEvent] = (),
     expected_first_previous_hash: str | None = None,
+    append_existing_audit_events: bool = True,
 ) -> tuple[
     DurableDryRunArtifactIntegrationResult,
     DryRunAgentTrace,
@@ -352,17 +353,19 @@ def run_dry_run_agent_and_write_artifact_with_durable_audit(
     SandboxArtifactResult,
     tuple[AuditLogWriteResult, ...],
 ]:
+    existing_events = tuple(existing_audit_events)
     trace, audit_events, sandbox_request, sandbox_decision, sandbox_result = run_dry_run_agent_loop(
         dry_run_request,
         approval_actor_id=approval_actor_id,
-        existing_audit_events=existing_audit_events,
+        existing_audit_events=existing_events,
     )
     _assert_trace_has_no_authority(trace)
     assert_sandbox_contract_does_not_execute(sandbox_request, sandbox_decision, sandbox_result)
 
+    events_to_append = audit_events if append_existing_audit_events else audit_events[len(existing_events) :]
     durable_writes = _append_audit_events_before_artifact_write(
         audit_dir,
-        audit_events,
+        events_to_append,
         expected_first_previous_hash=expected_first_previous_hash,
     )
     latest_durable_write = durable_writes[-1]
