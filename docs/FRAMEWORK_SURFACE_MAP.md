@@ -91,11 +91,11 @@ These files should define the visible framework story more than dated checkpoint
 
 The following areas are important history, but they should not dominate the framework surface:
 
-- `docs/audit/` — `ARCHIVE_LATER`
-- `archive/forensic_exports/` — `ARCHIVE_LATER`
+- `docs/audit/` — current safety references plus archived history
+- `archive/forensic_exports/` — `ARCHIVED`
 - `docs/stress_tests/` — `MOVE_LATER`
-- `docs/refactor/` — `MOVE_LATER`
-- `docs/future/` — `MOVE_LATER`
+- `archive/historical_planning/docs_refactor/` — `ARCHIVED`
+- `archive/historical_planning/docs_future/` — `ARCHIVED`
 - `docs/nms/` — `MOVE_LATER`
 - embedded PDFs — `ARCHIVE_LATER`
 - dated checkpoint reports — `ARCHIVE_LATER`
@@ -111,8 +111,8 @@ The following areas should later be isolated as optional research or knowledge p
 - `runtime/knowledge/` — `MOVE_LATER`
 - `knowledge/hats/hat_003_python/` — `MOVE_LATER`
 - `knowledge/languages/python/` — `MOVE_LATER`
-- `MHLM_MHSR/` — `MOVE_LATER`
-- `experiments/` — `MOVE_LATER`
+- `archive/quarantine/MHLM_MHSR/` — `ARCHIVED`
+- `archive/quarantine/experiments/` — `ARCHIVED`
 
 These areas are not invalid. They are simply not the clean framework core surface.
 

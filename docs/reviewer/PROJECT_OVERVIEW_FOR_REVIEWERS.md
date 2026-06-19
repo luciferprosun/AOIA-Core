@@ -100,7 +100,7 @@ Reviewers can verify the repository by checking:
 - `docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md` for external model output policy
 - `docs/stress_tests/README.md` for clarity on stress-test research context
 - `LICENSE` for licensing status
-- `MHLM_MHSR/README.md` for research background context if present
+- `archive/quarantine/MHLM_MHSR/README.md` for archived research background context
 
 This repo should be read as a review-oriented engineering runtime, not as a validated AI product.
 
