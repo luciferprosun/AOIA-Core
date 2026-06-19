@@ -5,6 +5,8 @@ import json
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any, Iterable
 
+from runtime.knowledge.tetrad import TetradRecord
+
 if TYPE_CHECKING:
     from runtime.local_visible_flow import LocalVisibleFlowResult
 
@@ -26,6 +28,7 @@ class ReadOnlyKnowledgeAttachment:
     can_write: bool
     canonical: bool
     evidence: bool
+    tetrad_records: tuple[TetradRecord, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -41,6 +44,21 @@ class ReadOnlyKnowledgeAttachment:
             "can_write": self.can_write,
             "canonical": self.canonical,
             "evidence": self.evidence,
+            "tetrad_context": {
+                "tetrad_records_present": bool(self.tetrad_records),
+                "tetrad_record_count": len(self.tetrad_records),
+                "tetrad_ids": [
+                    record.tetrad_id for record in self.tetrad_records
+                ],
+                "records": [
+                    record.to_dict() for record in self.tetrad_records
+                ],
+                "read_only": True,
+                "advisory_only": True,
+                "can_affect_approval": False,
+                "can_affect_write": False,
+                "can_affect_execution": False,
+            },
         }
 
 
@@ -50,17 +68,22 @@ def create_read_only_knowledge_attachment(
     source_label: str,
     content_summary: str,
     labels: Iterable[str] = (),
+    tetrad_records: Iterable[TetradRecord] | None = None,
 ) -> ReadOnlyKnowledgeAttachment:
     normalized_title = _required_text("title", title)
     normalized_source = _required_text("source_label", source_label)
     normalized_summary = _required_text("content_summary", content_summary)
     normalized_labels = _labels(labels)
+    normalized_tetrads = _tetrad_records(tetrad_records)
     material = json.dumps(
         {
             "title": normalized_title,
             "source_label": normalized_source,
             "content_summary": normalized_summary,
             "labels": normalized_labels,
+            "tetrad_ids": [
+                record.tetrad_id for record in normalized_tetrads
+            ],
         },
         ensure_ascii=False,
         separators=(",", ":"),
@@ -80,6 +103,7 @@ def create_read_only_knowledge_attachment(
         can_write=False,
         canonical=False,
         evidence=False,
+        tetrad_records=normalized_tetrads,
     )
 
 
@@ -107,6 +131,11 @@ def is_read_only_knowledge_attachment(value: Any) -> bool:
         and value.can_write is False
         and value.canonical is False
         and value.evidence is False
+        and isinstance(value.tetrad_records, tuple)
+        and all(
+            isinstance(record, TetradRecord) and record.read_only is True
+            for record in value.tetrad_records
+        )
     )
 
 
@@ -125,3 +154,19 @@ def _labels(values: Iterable[str]) -> tuple[str, ...]:
         if label not in normalized:
             normalized.append(label)
     return tuple(normalized)
+
+
+def _tetrad_records(
+    values: Iterable[TetradRecord] | None,
+) -> tuple[TetradRecord, ...]:
+    if values is None:
+        return ()
+    if isinstance(values, (str, bytes)):
+        raise TypeError("tetrad_records must be an iterable of TetradRecord values")
+    records = tuple(values)
+    if not all(
+        isinstance(record, TetradRecord) and record.read_only is True
+        for record in records
+    ):
+        raise TypeError("tetrad_records must contain only read-only TetradRecord values")
+    return records

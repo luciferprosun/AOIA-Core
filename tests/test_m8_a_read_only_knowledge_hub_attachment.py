@@ -238,7 +238,6 @@ class M8AReadOnlyKnowledgeHubAttachmentTests(unittest.TestCase):
             "ex" + "ec(",
         )
         deferred_structure_terms = (
-            "tet" + "rad",
             "geo" + "metry",
             "tri" + "angle",
             "pyra" + "mid",
