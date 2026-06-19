@@ -44,21 +44,7 @@ class ReadOnlyKnowledgeAttachment:
             "can_write": self.can_write,
             "canonical": self.canonical,
             "evidence": self.evidence,
-            "tetrad_context": {
-                "tetrad_records_present": bool(self.tetrad_records),
-                "tetrad_record_count": len(self.tetrad_records),
-                "tetrad_ids": [
-                    record.tetrad_id for record in self.tetrad_records
-                ],
-                "records": [
-                    record.to_dict() for record in self.tetrad_records
-                ],
-                "read_only": True,
-                "advisory_only": True,
-                "can_affect_approval": False,
-                "can_affect_write": False,
-                "can_affect_execution": False,
-            },
+            "tetrad_context": _tetrad_context_projection(self.tetrad_records),
         }
 
 
@@ -170,3 +156,38 @@ def _tetrad_records(
     ):
         raise TypeError("tetrad_records must contain only read-only TetradRecord values")
     return records
+
+
+def _tetrad_context_projection(
+    records: tuple[TetradRecord, ...],
+) -> dict[str, Any]:
+    return {
+        "tetrad_records_present": bool(records),
+        "tetrad_record_count": len(records),
+        "tetrad_ids": [record.tetrad_id for record in records],
+        "records": [record.to_dict() for record in records],
+        "core_delta": [_tetrad_core_delta_projection(record) for record in records],
+        "read_only": True,
+        "advisory_only": True,
+        "authoritative": False,
+        "requires_human_review": True,
+        "can_affect_approval": False,
+        "can_affect_write": False,
+        "can_affect_execution": False,
+        "can_affect_gate": False,
+    }
+
+
+def _tetrad_core_delta_projection(record: TetradRecord) -> dict[str, Any]:
+    return {
+        "tetrad_id": record.tetrad_id,
+        "conflicts": list(record.core.conflicts),
+        "open_questions": list(record.core.open_questions),
+        "read_only": True,
+        "authoritative": False,
+        "requires_human_review": True,
+        "can_affect_approval": False,
+        "can_affect_write": False,
+        "can_affect_execution": False,
+        "can_affect_gate": False,
+    }
