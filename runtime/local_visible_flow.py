@@ -14,6 +14,10 @@ from runtime.human_decision_end_to_end_demo import (
     LocalApprovalArtifactDemoResult,
     run_local_approval_to_artifact_demo,
 )
+from runtime.knowledge_hub_attachment import (
+    ReadOnlyKnowledgeAttachment,
+    is_read_only_knowledge_attachment,
+)
 from runtime.proposal_intake import PROPOSAL_ACCEPTED_FOR_REVIEW, UNTRUSTED
 from runtime.proposal_review_packet import (
     REVIEW_PACKET_READY,
@@ -32,6 +36,7 @@ BLOCKED_CANDIDATE = "BLOCKED_CANDIDATE"
 BLOCKED_PROPOSAL = "BLOCKED_PROPOSAL"
 BLOCKED_REVIEW_PACKET = "BLOCKED_REVIEW_PACKET"
 BLOCKED_APPROVAL_PATH = "BLOCKED_APPROVAL_PATH"
+BLOCKED_KNOWLEDGE_ATTACHMENT = "BLOCKED_KNOWLEDGE_ATTACHMENT"
 ERROR_FAIL_CLOSED = "ERROR_FAIL_CLOSED"
 
 
@@ -66,6 +71,7 @@ class LocalVisibleFlowResult:
     canonical: bool
     execution_occurred: bool
     requires_human_review: bool
+    knowledge_attachment: ReadOnlyKnowledgeAttachment | None
     blocking: bool
     reason: str
 
@@ -100,6 +106,11 @@ class LocalVisibleFlowResult:
             "canonical": self.canonical,
             "execution_occurred": self.execution_occurred,
             "requires_human_review": self.requires_human_review,
+            "knowledge_attachment": (
+                self.knowledge_attachment.to_dict()
+                if self.knowledge_attachment is not None
+                else None
+            ),
             "blocking": self.blocking,
             "reason": self.reason,
         }
@@ -119,7 +130,17 @@ def run_local_visible_flow(
     expected_artifact_hash: str | None = None,
     human_actor: str = "local-human-reviewer",
     metadata: Mapping[str, Any] | None = None,
+    knowledge_attachment: ReadOnlyKnowledgeAttachment | None = None,
 ) -> LocalVisibleFlowResult:
+    if (
+        knowledge_attachment is not None
+        and not is_read_only_knowledge_attachment(knowledge_attachment)
+    ):
+        return _blocked(
+            status=BLOCKED_KNOWLEDGE_ATTACHMENT,
+            candidate_status="NOT_STARTED",
+            reason="knowledge attachment must be immutable read-only untrusted context",
+        )
     candidate = create_provider_proposer_candidate(
         provider_label=candidate_source,
         model_label="external-model-candidate",
@@ -223,6 +244,7 @@ def run_local_visible_flow(
         conversion=conversion,
         packet=packet,
         approval_flow=approval_flow,
+        knowledge_attachment=knowledge_attachment,
     )
 
 
@@ -232,6 +254,7 @@ def _completed_or_blocked(
     conversion: Any,
     packet: Any,
     approval_flow: LocalApprovalArtifactDemoResult,
+    knowledge_attachment: ReadOnlyKnowledgeAttachment | None,
 ) -> LocalVisibleFlowResult:
     completed = approval_flow.status == DEMO_COMPLETED
     rejected = approval_flow.decision == "REJECT"
@@ -271,6 +294,7 @@ def _completed_or_blocked(
         canonical=False,
         execution_occurred=False,
         requires_human_review=True,
+        knowledge_attachment=knowledge_attachment,
         blocking=approval_flow.blocking,
         reason=approval_flow.reason,
     )
@@ -322,6 +346,7 @@ def _blocked(
         canonical=False,
         execution_occurred=False,
         requires_human_review=True,
+        knowledge_attachment=None,
         blocking=True,
         reason=reason,
     )
