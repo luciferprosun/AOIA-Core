@@ -7,6 +7,7 @@ try:
     from runtime.model_catalog import get_static_model_catalog
     from runtime.provider_audit import make_provider_audit_event
     from runtime.provider_clients import call_selected_provider_once
+    from runtime.provider_registry import provider_live_call_allowed
     from runtime.schemas.model_router import (
         ModelRoutingDecision,
         ModelSelectionProposal,
@@ -20,6 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover - script launch path
     from model_catalog import get_static_model_catalog
     from provider_audit import make_provider_audit_event
     from provider_clients import call_selected_provider_once
+    from provider_registry import provider_live_call_allowed
     from schemas.model_router import (
         ModelRoutingDecision,
         ModelSelectionProposal,
@@ -202,14 +204,23 @@ def execute_approved_model_call_once(
         RoutingDecisionStatus.DISABLED.value,
     }
 
-    if approval["provider_call_permitted"] is not True:
+    legacy_live_call = provider_call_func is call_selected_provider_once
+    registry_allowed = provider_live_call_allowed(provider_id)
+    if (
+        approval["provider_call_permitted"] is not True
+        or (legacy_live_call and registry_allowed is not True)
+    ):
         result = {
             "provider_id": provider_id,
             "model_id": model_id,
             "call_made": False,
             "output_text": "",
             "output_trusted": False,
-            "error": _blocked_call_reason(human_approved, decision),
+            "error": (
+                _blocked_call_reason(human_approved, decision)
+                if approval["provider_call_permitted"] is not True
+                else "Provider registry does not allow this live provider call."
+            ),
         }
     else:
         call_result = provider_call_func(

@@ -106,6 +106,15 @@ def build_cpt_transform_payload(prompt: str, mode: str = CPT_BALANCED_MODE) -> d
     }
 
 
+def execute_webapp_approved_model_call(**kwargs) -> dict[str, object]:
+    try:
+        from runtime.model_router import execute_approved_model_call_once
+    except ModuleNotFoundError:  # pragma: no cover - script launch path
+        from model_router import execute_approved_model_call_once
+
+    return execute_approved_model_call_once(**kwargs)
+
+
 def _load_cpt_transformer():
     project_parent = str(PROJECT_DIR.parent)
     if project_parent not in sys.path:
@@ -221,8 +230,6 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 return
 
             if parsed.path == "/api/model-selection/approve-and-call":
-                from model_router import execute_approved_model_call_once
-
                 provider_id = str(payload.get("provider_id", "")).strip()
                 model_id = str(payload.get("model_id", "")).strip()
                 task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
@@ -248,7 +255,7 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                     return
                 self._write_json(
                     HTTPStatus.OK,
-                    execute_approved_model_call_once(
+                    execute_webapp_approved_model_call(
                         provider_id=provider_id,
                         model_id=model_id,
                         task_sensitivity=task_sensitivity,

@@ -12,6 +12,8 @@ from contextlib import ExitStack, contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
+from runtime.model_router import execute_approved_model_call_once
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DIR = PROJECT_ROOT / "runtime"
@@ -140,27 +142,98 @@ class Red1ProviderNetworkGatewaySeparationTests(unittest.TestCase):
                     policy_rejected=False,
                 )
 
-                with self.assertRaisesRegex(RuntimeError, "Provider/network calls are frozen"):
+                with self.assertRaisesRegex(RuntimeError, "provider registry"):
                     provider_clients._call_gemini_once(
                         model_id="gemini/gemini-2.5-flash",
                         user_prompt="public diagnostic prompt",
                     )
 
         self.assertFalse(result.call_made)
-        self.assertIn("frozen by default", result.error)
+        self.assertIn("provider registry", result.error)
         for mock in mocks.values():
             mock.assert_not_called()
 
-    def test_provider_manager_fallback_is_guarded_before_provider_build_or_network(self) -> None:
-        with patch.dict(os.environ, {"AOIA_PROVIDER_CALLS_ENABLED": ""}, clear=False):
+    def test_environment_flag_alone_cannot_enable_provider_clients(self) -> None:
+        with patch.dict(os.environ, {"AOIA_PROVIDER_CALLS_ENABLED": "1"}, clear=False):
+            provider_clients = import_or_reload("runtime.provider_clients")
+            with patched_network_primitives() as mocks:
+                result = provider_clients.call_selected_provider_once(
+                    provider_id="gemini",
+                    model_id="gemini/fake-model",
+                    user_prompt="public diagnostic prompt",
+                    human_approved=True,
+                    provider_call_permitted=True,
+                    policy_rejected=False,
+                )
+
+        self.assertFalse(result.call_made)
+        self.assertIn("provider registry", result.error)
+        for mock in mocks.values():
+            mock.assert_not_called()
+
+    def test_provider_manager_fallback_is_guarded_before_secrets_build_or_network(self) -> None:
+        with patch.dict(os.environ, {"AOIA_PROVIDER_CALLS_ENABLED": "1"}, clear=False):
             provider_config = import_or_reload("runtime.providers.config")
 
             with tempfile.TemporaryDirectory() as raw_tmp:
-                manager = provider_config.ProviderManager(Path(raw_tmp))
-                with patched_network_primitives() as mocks:
-                    with self.assertRaisesRegex(RuntimeError, "Provider/network calls are frozen"):
-                        manager.generate_with_fallback("public diagnostic prompt")
+                with patch.object(provider_config, "load_api_environment") as load_env:
+                    manager = provider_config.ProviderManager(Path(raw_tmp))
+                    with patch.object(manager, "_build_provider") as build_provider:
+                        with patched_network_primitives() as mocks:
+                            with self.assertRaisesRegex(RuntimeError, "provider registry"):
+                                manager.generate_with_fallback("public diagnostic prompt")
 
+                load_env.assert_not_called()
+                build_provider.assert_not_called()
+
+        for mock in mocks.values():
+            mock.assert_not_called()
+
+    def test_legacy_provider_classes_require_registry_permission_before_network(self) -> None:
+        gemma_provider = import_or_reload("providers.gemma_provider")
+        openai_compatible = import_or_reload("providers.openai_compatible")
+        with patch.dict(os.environ, {"AOIA_PROVIDER_CALLS_ENABLED": "1"}, clear=False):
+            providers = (
+                openai_compatible.OpenAICompatibleProvider(
+                    provider="fake-provider",
+                    api_key="fake-key",
+                    model="fake-model",
+                    base_url="https://invalid.example",
+                ),
+                gemma_provider.GemmaProvider(model="fake-model"),
+            )
+            with patched_network_primitives() as mocks:
+                for provider in providers:
+                    with self.subTest(provider=provider.provider):
+                        with self.assertRaisesRegex(RuntimeError, "provider registry"):
+                            provider.generate("public diagnostic prompt")
+
+        for mock in mocks.values():
+            mock.assert_not_called()
+
+    def test_model_router_and_webapp_bridge_cannot_bypass_registry(self) -> None:
+        with patch.dict(os.environ, {"AOIA_PROVIDER_CALLS_ENABLED": "1"}, clear=False):
+            with patched_network_primitives() as mocks:
+                router_result = execute_approved_model_call_once(
+                    provider_id="gemini",
+                    model_id="gemini/gemini-2.5-flash",
+                    task_sensitivity="PUBLIC_DEV",
+                    user_prompt="public diagnostic prompt",
+                    human_approved=True,
+                )
+                webapp = import_or_reload("runtime.webapp")
+                web_result = webapp.execute_webapp_approved_model_call(
+                    provider_id="gemini",
+                    model_id="gemini/gemini-2.5-flash",
+                    task_sensitivity="PUBLIC_DEV",
+                    user_prompt="public diagnostic prompt",
+                    human_approved=True,
+                )
+
+        self.assertFalse(router_result["call_made"])
+        self.assertFalse(web_result["call_made"])
+        self.assertIn("registry", router_result["error"])
+        self.assertIn("registry", web_result["error"])
         for mock in mocks.values():
             mock.assert_not_called()
 

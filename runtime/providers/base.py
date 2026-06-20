@@ -3,6 +3,11 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+try:
+    from runtime.provider_registry import require_provider_live_call_allowed
+except ModuleNotFoundError:  # pragma: no cover - script launch path
+    from provider_registry import require_provider_live_call_allowed
+
 
 PROVIDER_NETWORK_SURFACE = True
 APPROVED_RUNTIME_PROVIDER_FLOW = False
@@ -14,7 +19,8 @@ def provider_calls_enabled() -> bool:
     return AOIA_PROVIDER_CALLS_ENABLED or os.environ.get("AOIA_PROVIDER_CALLS_ENABLED") == "1"
 
 
-def require_provider_calls_enabled() -> None:
+def require_provider_calls_enabled(provider_id: str) -> None:
+    require_provider_live_call_allowed(provider_id)
     if not provider_calls_enabled():
         raise RuntimeError(
             "Provider/network calls are frozen by default and not approved for autonomous runtime use. "

@@ -29,6 +29,8 @@ from runtime.provider_registry import (
     create_provider_response_envelope,
     get_provider_profile,
     normalize_provider_response_envelope,
+    provider_live_call_allowed,
+    require_provider_live_call_allowed,
 )
 from runtime.review_packet_projection import (
     REVIEW_PACKET_PROJECTION_READY,
@@ -78,6 +80,17 @@ class ProviderRouterARegistryContractTests(unittest.TestCase):
                 self.assertFalse(profile.network_allowed)
                 with self.assertRaises(FrozenInstanceError):
                     profile.enabled = True
+
+    def test_registry_is_the_fail_closed_live_call_authority(self):
+        for profile in DEFAULT_PROVIDER_PROFILES:
+            with self.subTest(provider_id=profile.provider_id):
+                self.assertFalse(provider_live_call_allowed(profile.provider_id))
+                with self.assertRaisesRegex(RuntimeError, "not explicitly enabled"):
+                    require_provider_live_call_allowed(profile.provider_id)
+
+        self.assertFalse(provider_live_call_allowed("fake-provider"))
+        with self.assertRaisesRegex(RuntimeError, "not explicitly enabled"):
+            require_provider_live_call_allowed("fake-provider")
 
     def test_profiles_contain_no_credentials_or_callbacks(self):
         field_names = {item.name.lower() for item in fields(ProviderProfile)}

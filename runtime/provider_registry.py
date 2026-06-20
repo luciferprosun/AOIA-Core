@@ -25,6 +25,10 @@ _CLAUDE_COMPATIBLE = "anth" + "ropic"
 _OLLAMA = "ol" + "lama"
 
 
+class ProviderBoundaryBlocked(RuntimeError):
+    """Raised when a legacy live-call path lacks explicit registry permission."""
+
+
 @dataclass(frozen=True)
 class ProviderProfile:
     provider_id: str
@@ -186,6 +190,23 @@ def get_provider_profile(provider_id: str) -> ProviderProfile | None:
     if not isinstance(provider_id, str):
         return None
     return _PROFILES_BY_ID.get(provider_id.strip().lower())
+
+
+def provider_live_call_allowed(provider_id: str) -> bool:
+    profile = get_provider_profile(provider_id)
+    return bool(
+        profile is not None
+        and profile.enabled is True
+        and profile.network_allowed is True
+    )
+
+
+def require_provider_live_call_allowed(provider_id: str) -> None:
+    if not provider_live_call_allowed(provider_id):
+        raise ProviderBoundaryBlocked(
+            f"Provider '{provider_id}' is not explicitly enabled for network calls "
+            "by the provider registry."
+        )
 
 
 def create_provider_request_draft(

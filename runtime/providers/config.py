@@ -86,7 +86,6 @@ class ProviderManager:
     """Cloud-provider manager with fallback routing and no fake offline mode."""
 
     def __init__(self, project_dir: Path) -> None:
-        load_api_environment()
         self.project_dir = project_dir
         state_dir = runtime_state_dir(project_dir)
         self.config_path = state_dir / "state" / "model_config.json"
@@ -100,7 +99,6 @@ class ProviderManager:
         return self.generate_with_fallback(prompt)
 
     def generate_with_fallback(self, prompt: str) -> str:
-        require_provider_calls_enabled()
         errors: list[str] = []
         tried: set[str] = set()
         for full_model in self._fallback_candidates():
@@ -108,6 +106,9 @@ class ProviderManager:
                 continue
             tried.add(full_model)
             try:
+                provider_id = full_model.split("/", 1)[0]
+                require_provider_calls_enabled(provider_id)
+                load_api_environment()
                 provider = self._build_provider(full_model)
                 response = provider.generate(prompt)
                 self.provider = provider
@@ -262,6 +263,7 @@ class ProviderManager:
 
     def _build_provider(self, model_name: str) -> ModelProvider:
         provider, model = model_name.split("/", 1)
+        require_provider_calls_enabled(provider)
 
         if provider == "gemini":
             api_key = os.getenv("GEMINI_API_KEY")

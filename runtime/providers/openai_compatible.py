@@ -32,7 +32,7 @@ class OpenAICompatibleProvider(ModelProvider):
         self.base_url = base_url.rstrip("/")
 
     def generate(self, prompt: str) -> str:
-        require_provider_calls_enabled()
+        require_provider_calls_enabled(self.provider)
         body = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],

@@ -26,7 +26,7 @@ class GemmaProvider(ModelProvider):
         self.openai_api_key = os.getenv("GEMMA_OPENAI_API_KEY", "").strip()
 
     def generate(self, prompt: str) -> str:
-        require_provider_calls_enabled()
+        require_provider_calls_enabled(self.provider)
         errors: list[str] = []
 
         try:
@@ -58,7 +58,7 @@ class GemmaProvider(ModelProvider):
         )
 
     def _generate_ollama(self, prompt: str) -> str:
-        require_provider_calls_enabled()
+        require_provider_calls_enabled("ollama")
         body = {
             "model": self.model,
             "prompt": prompt,
@@ -75,7 +75,7 @@ class GemmaProvider(ModelProvider):
         return str(payload.get("response", "")).strip()
 
     def _generate_huggingface(self, prompt: str) -> str:
-        require_provider_calls_enabled()
+        require_provider_calls_enabled(self.provider)
         body = {
             "inputs": prompt,
             "parameters": {

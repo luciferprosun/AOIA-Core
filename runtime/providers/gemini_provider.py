@@ -27,7 +27,7 @@ class GeminiProvider(ModelProvider):
         self.client = genai.Client(api_key=api_key)
 
     def generate(self, prompt: str) -> str:
-        require_provider_calls_enabled()
+        require_provider_calls_enabled(self.provider)
         response = self.client.models.generate_content(
             model=self.model,
             contents=prompt,
