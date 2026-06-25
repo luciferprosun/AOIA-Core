@@ -28,6 +28,10 @@ class ControlledTestExecutionStatus(str, Enum):
     BLOCKED_UNSUPPORTED_COMMAND = "BLOCKED_UNSUPPORTED_COMMAND"
     BLOCKED_INVALID_SANDBOX_ENVELOPE = "BLOCKED_INVALID_SANDBOX_ENVELOPE"
     BLOCKED_INVALID_TEST_CONTROLLER_PREVIEW = "BLOCKED_INVALID_TEST_CONTROLLER_PREVIEW"
+    BLOCKED_MISSING_EXECUTION_BARRIER = "BLOCKED_MISSING_EXECUTION_BARRIER"
+    BLOCKED_EXECUTION_BARRIER_NOT_PASSED = "BLOCKED_EXECUTION_BARRIER_NOT_PASSED"
+    BLOCKED_EXECUTION_BARRIER_HASH_MISMATCH = "BLOCKED_EXECUTION_BARRIER_HASH_MISMATCH"
+    BLOCKED_EXECUTION_BARRIER_STALE_OR_INVALID = "BLOCKED_EXECUTION_BARRIER_STALE_OR_INVALID"
     MALFORMED_REQUEST = "MALFORMED_REQUEST"
     INTERNAL_EXECUTION_ERROR = "INTERNAL_EXECUTION_ERROR"
 
@@ -60,6 +64,14 @@ class ControlledTestExecutionFlag(str, Enum):
     SANDBOX_METADATA_ACCEPTED = "SANDBOX_METADATA_ACCEPTED"
     TEST_CONTROLLER_METADATA_ACCEPTED = "TEST_CONTROLLER_METADATA_ACCEPTED"
     POLICY_METADATA_ONLY = "POLICY_METADATA_ONLY"
+    HUMAN_EXECUTION_BARRIER_REQUIRED = "HUMAN_EXECUTION_BARRIER_REQUIRED"
+    HUMAN_EXECUTION_BARRIER_PRESENT = "HUMAN_EXECUTION_BARRIER_PRESENT"
+    HUMAN_EXECUTION_BARRIER_VERIFIED = "HUMAN_EXECUTION_BARRIER_VERIFIED"
+    HUMAN_EXECUTION_BARRIER_HASH_BOUND = "HUMAN_EXECUTION_BARRIER_HASH_BOUND"
+    HUMAN_EXECUTION_BARRIER_MISSING = "HUMAN_EXECUTION_BARRIER_MISSING"
+    HUMAN_EXECUTION_BARRIER_NOT_PASSED = "HUMAN_EXECUTION_BARRIER_NOT_PASSED"
+    HUMAN_EXECUTION_BARRIER_HASH_MISMATCH = "HUMAN_EXECUTION_BARRIER_HASH_MISMATCH"
+    NO_BARRIER_BYPASS = "NO_BARRIER_BYPASS"
     INTERNAL_EXECUTION_ERROR = "INTERNAL_EXECUTION_ERROR"
 
 
@@ -97,6 +109,16 @@ class ControlledTestExecutionRequest:
     source_sandbox_envelope_status: str | None = None
     source_policy_check_id: str | None = None
     source_policy_check_hash: str | None = None
+    source_execution_barrier_id: str | None = None
+    source_execution_barrier_hash: str | None = None
+    source_execution_barrier_status: str | None = None
+    source_execution_barrier_passed: bool = False
+    barrier_bound_command_hash: str | None = None
+    barrier_bound_test_runner_control_hash: str | None = None
+    barrier_bound_sandbox_envelope_hash: str | None = None
+    barrier_bound_policy_check_hash: str | None = None
+    source_human_decision_id: str | None = None
+    source_human_decision_hash: str | None = None
     human_review_required: bool = True
     risk_flags: tuple[str, ...] | list[str] = ()
     schema_version: str = CONTROLLED_TEST_EXECUTION_SCHEMA_VERSION
@@ -126,6 +148,14 @@ class ControlledTestExecutionResult:
     source_sandbox_envelope_hash: str | None
     source_policy_check_id: str | None
     source_policy_check_hash: str | None
+    source_execution_barrier_id: str | None
+    source_execution_barrier_hash: str | None
+    source_execution_barrier_status: str | None
+    source_execution_barrier_passed: bool
+    source_human_decision_id: str | None
+    source_human_decision_hash: str | None
+    barrier_verified: bool
+    barrier_hashes_matched: bool
     flags: tuple[ControlledTestExecutionFlag, ...]
     risk_notes: tuple[str, ...]
     display_summary: str
@@ -177,6 +207,20 @@ class ControlledTestExecutionResult:
         object.__setattr__(self, "source_sandbox_envelope_hash", _optional_text(self.source_sandbox_envelope_hash))
         object.__setattr__(self, "source_policy_check_id", _optional_text(self.source_policy_check_id))
         object.__setattr__(self, "source_policy_check_hash", _optional_text(self.source_policy_check_hash))
+        object.__setattr__(self, "source_execution_barrier_id", _optional_text(self.source_execution_barrier_id))
+        object.__setattr__(self, "source_execution_barrier_hash", _optional_text(self.source_execution_barrier_hash))
+        object.__setattr__(self, "source_execution_barrier_status", _optional_text(self.source_execution_barrier_status))
+        object.__setattr__(self, "source_execution_barrier_passed", bool(self.source_execution_barrier_passed))
+        object.__setattr__(self, "source_human_decision_id", _optional_text(self.source_human_decision_id))
+        object.__setattr__(self, "source_human_decision_hash", _optional_text(self.source_human_decision_hash))
+        barrier_verified = self.status in {
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_FAILED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_TIMEOUT,
+            ControlledTestExecutionStatus.INTERNAL_EXECUTION_ERROR,
+        }
+        object.__setattr__(self, "barrier_verified", barrier_verified)
+        object.__setattr__(self, "barrier_hashes_matched", barrier_verified)
         object.__setattr__(self, "flags", _flag_tuple(self.flags))
         object.__setattr__(self, "risk_notes", _text_tuple("risk_notes", self.risk_notes))
         object.__setattr__(self, "display_summary", _bounded_text(_text("display_summary", self.display_summary), 420))
@@ -239,6 +283,14 @@ class ControlledTestExecutionResult:
             "source_sandbox_envelope_hash": self.source_sandbox_envelope_hash,
             "source_policy_check_id": self.source_policy_check_id,
             "source_policy_check_hash": self.source_policy_check_hash,
+            "source_execution_barrier_id": self.source_execution_barrier_id,
+            "source_execution_barrier_hash": self.source_execution_barrier_hash,
+            "source_execution_barrier_status": self.source_execution_barrier_status,
+            "source_execution_barrier_passed": self.source_execution_barrier_passed,
+            "source_human_decision_id": self.source_human_decision_id,
+            "source_human_decision_hash": self.source_human_decision_hash,
+            "barrier_verified": self.barrier_verified,
+            "barrier_hashes_matched": self.barrier_hashes_matched,
             "flags": [flag.value for flag in self.flags],
             "risk_notes": list(self.risk_notes),
             "display_summary": self.display_summary,
@@ -358,6 +410,21 @@ def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> Cont
             risk_notes=tuple(risk_notes + ["Command is not in the controlled local Python test allowlist."]),
             executed_args=args,
         )
+
+    barrier_status, barrier_flags, barrier_notes = _barrier_status(request_data)
+    flags |= barrier_flags
+    risk_notes.extend(barrier_notes)
+    if barrier_status is not None:
+        return _blocked_result(
+            request_data=request_data,
+            status=barrier_status,
+            command_kind=command_kind,
+            flags=flags,
+            risk_notes=tuple(risk_notes),
+            executed_args=args,
+        )
+    flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_VERIFIED)
+    flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_HASH_BOUND)
 
     try:
         completed = subprocess.run(
@@ -481,6 +548,8 @@ def _execution_result(
         ControlledTestExecutionFlag.OUTPUT_BOUNDED,
         ControlledTestExecutionFlag.TIMEOUT_ENFORCED,
         ControlledTestExecutionFlag.POLICY_METADATA_ONLY,
+        ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_REQUIRED,
+        ControlledTestExecutionFlag.NO_BARRIER_BYPASS,
     }
     all_flags = base_flags | set(flags)
     ordered_flags = tuple(sorted(all_flags, key=lambda flag: flag.value))
@@ -492,6 +561,7 @@ def _execution_result(
         "command_kind": command_kind.value,
         "requested_command": request_data["requested_command"],
         "normalized_command": normalized_command,
+        "command_hash": request_data["command_hash"],
         "executed_args_preview": list(executed_args),
         "repo_root": request_data["repo_root"],
         "exit_code": exit_code,
@@ -507,6 +577,26 @@ def _execution_result(
         "source_sandbox_envelope_hash": request_data["source_sandbox_envelope_hash"],
         "source_policy_check_id": request_data["source_policy_check_id"],
         "source_policy_check_hash": request_data["source_policy_check_hash"],
+        "source_execution_barrier_id": request_data["source_execution_barrier_id"],
+        "source_execution_barrier_hash": request_data["source_execution_barrier_hash"],
+        "source_execution_barrier_status": request_data["source_execution_barrier_status"],
+        "source_execution_barrier_passed": request_data["source_execution_barrier_passed"],
+        "source_human_decision_id": request_data["source_human_decision_id"],
+        "source_human_decision_hash": request_data["source_human_decision_hash"],
+        "barrier_verified": status
+        in {
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_FAILED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_TIMEOUT,
+            ControlledTestExecutionStatus.INTERNAL_EXECUTION_ERROR,
+        },
+        "barrier_hashes_matched": status
+        in {
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_FAILED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_TIMEOUT,
+            ControlledTestExecutionStatus.INTERNAL_EXECUTION_ERROR,
+        },
         "flags": [flag.value for flag in ordered_flags],
         "risk_notes": list(ordered_notes),
     }
@@ -534,6 +624,26 @@ def _execution_result(
         source_sandbox_envelope_hash=request_data["source_sandbox_envelope_hash"],
         source_policy_check_id=request_data["source_policy_check_id"],
         source_policy_check_hash=request_data["source_policy_check_hash"],
+        source_execution_barrier_id=request_data["source_execution_barrier_id"],
+        source_execution_barrier_hash=request_data["source_execution_barrier_hash"],
+        source_execution_barrier_status=request_data["source_execution_barrier_status"],
+        source_execution_barrier_passed=request_data["source_execution_barrier_passed"],
+        source_human_decision_id=request_data["source_human_decision_id"],
+        source_human_decision_hash=request_data["source_human_decision_hash"],
+        barrier_verified=status
+        in {
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_FAILED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_TIMEOUT,
+            ControlledTestExecutionStatus.INTERNAL_EXECUTION_ERROR,
+        },
+        barrier_hashes_matched=status
+        in {
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_FAILED,
+            ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_TIMEOUT,
+            ControlledTestExecutionStatus.INTERNAL_EXECUTION_ERROR,
+        },
         flags=ordered_flags,
         risk_notes=ordered_notes,
         display_summary=_summary(status, command_kind, exit_code, timeout_expired),
@@ -545,6 +655,7 @@ def _request_data(request: ControlledTestExecutionRequest) -> dict[str, Any]:
         "schema_version": _text("schema_version", request.schema_version),
         "requested_command": _text("requested_command", request.requested_command),
         "normalized_command": _normalize_command(request.requested_command),
+        "command_hash": _hash_text(_normalize_command(request.requested_command)),
         "command_kind": _normalize_command_kind(request.command_kind).value,
         "repo_root": _safe_repo_root_text(request.repo_root),
         "timeout_seconds": _positive_int("timeout_seconds", request.timeout_seconds),
@@ -559,6 +670,16 @@ def _request_data(request: ControlledTestExecutionRequest) -> dict[str, Any]:
         "source_sandbox_envelope_status": _optional_text(request.source_sandbox_envelope_status),
         "source_policy_check_id": _optional_text(request.source_policy_check_id),
         "source_policy_check_hash": _optional_text(request.source_policy_check_hash),
+        "source_execution_barrier_id": _optional_text(request.source_execution_barrier_id),
+        "source_execution_barrier_hash": _optional_text(request.source_execution_barrier_hash),
+        "source_execution_barrier_status": _optional_text(request.source_execution_barrier_status),
+        "source_execution_barrier_passed": bool(request.source_execution_barrier_passed),
+        "barrier_bound_command_hash": _optional_text(request.barrier_bound_command_hash),
+        "barrier_bound_test_runner_control_hash": _optional_text(request.barrier_bound_test_runner_control_hash),
+        "barrier_bound_sandbox_envelope_hash": _optional_text(request.barrier_bound_sandbox_envelope_hash),
+        "barrier_bound_policy_check_hash": _optional_text(request.barrier_bound_policy_check_hash),
+        "source_human_decision_id": _optional_text(request.source_human_decision_id),
+        "source_human_decision_hash": _optional_text(request.source_human_decision_hash),
         "human_review_required": bool(request.human_review_required),
         "risk_flags": tuple(value.upper() for value in _text_tuple("risk_flags", request.risk_flags)),
     }
@@ -569,6 +690,7 @@ def _empty_request_data() -> dict[str, Any]:
         "schema_version": CONTROLLED_TEST_EXECUTION_SCHEMA_VERSION,
         "requested_command": "",
         "normalized_command": "",
+        "command_hash": None,
         "command_kind": ControlledTestCommandKind.UNKNOWN.value,
         "repo_root": "",
         "timeout_seconds": _DEFAULT_TIMEOUT_SECONDS,
@@ -583,6 +705,16 @@ def _empty_request_data() -> dict[str, Any]:
         "source_sandbox_envelope_status": None,
         "source_policy_check_id": None,
         "source_policy_check_hash": None,
+        "source_execution_barrier_id": None,
+        "source_execution_barrier_hash": None,
+        "source_execution_barrier_status": None,
+        "source_execution_barrier_passed": False,
+        "barrier_bound_command_hash": None,
+        "barrier_bound_test_runner_control_hash": None,
+        "barrier_bound_sandbox_envelope_hash": None,
+        "barrier_bound_policy_check_hash": None,
+        "source_human_decision_id": None,
+        "source_human_decision_hash": None,
         "human_review_required": True,
         "risk_flags": (),
     }
@@ -718,6 +850,61 @@ def _valid_sandbox_metadata(request_data: dict[str, Any]) -> bool:
     )
 
 
+def _barrier_status(
+    request_data: dict[str, Any],
+) -> tuple[ControlledTestExecutionStatus | None, set[ControlledTestExecutionFlag], tuple[str, ...]]:
+    flags: set[ControlledTestExecutionFlag] = set()
+    notes: list[str] = []
+    if not request_data["source_execution_barrier_id"] or not request_data["source_execution_barrier_hash"]:
+        flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_MISSING)
+        notes.append("Hash-bound human execution barrier metadata is required before controlled test execution.")
+        return ControlledTestExecutionStatus.BLOCKED_MISSING_EXECUTION_BARRIER, flags, tuple(notes)
+
+    flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_PRESENT)
+    if not _looks_like_sha256(request_data["source_execution_barrier_hash"]):
+        flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_HASH_MISMATCH)
+        notes.append("Human execution barrier hash is malformed.")
+        return ControlledTestExecutionStatus.BLOCKED_EXECUTION_BARRIER_STALE_OR_INVALID, flags, tuple(notes)
+
+    if not request_data["source_human_decision_id"] or not _looks_like_sha256(request_data["source_human_decision_hash"]):
+        notes.append("Human decision metadata from the execution barrier is missing or malformed.")
+        return ControlledTestExecutionStatus.BLOCKED_EXECUTION_BARRIER_STALE_OR_INVALID, flags, tuple(notes)
+
+    barrier_status = (request_data["source_execution_barrier_status"] or "").upper()
+    if barrier_status != "EXECUTION_BARRIER_PASSED" or not request_data["source_execution_barrier_passed"]:
+        flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_NOT_PASSED)
+        notes.append("Human execution barrier did not pass for this controlled test execution.")
+        return ControlledTestExecutionStatus.BLOCKED_EXECUTION_BARRIER_NOT_PASSED, flags, tuple(notes)
+
+    expected_pairs = (
+        ("command", request_data["barrier_bound_command_hash"], request_data["command_hash"]),
+        (
+            "test-runner controller",
+            request_data["barrier_bound_test_runner_control_hash"],
+            request_data["source_test_runner_control_hash"],
+        ),
+        (
+            "sandbox envelope",
+            request_data["barrier_bound_sandbox_envelope_hash"],
+            request_data["source_sandbox_envelope_hash"],
+        ),
+    )
+    for label, barrier_hash, current_hash in expected_pairs:
+        if barrier_hash != current_hash or not _looks_like_sha256(barrier_hash):
+            flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_HASH_MISMATCH)
+            notes.append(f"Human execution barrier {label} hash binding does not match this request.")
+            return ControlledTestExecutionStatus.BLOCKED_EXECUTION_BARRIER_HASH_MISMATCH, flags, tuple(notes)
+
+    policy_hash = request_data["source_policy_check_hash"]
+    if policy_hash and request_data["barrier_bound_policy_check_hash"] != policy_hash:
+        flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_HASH_MISMATCH)
+        notes.append("Human execution barrier local policy hash binding does not match this request.")
+        return ControlledTestExecutionStatus.BLOCKED_EXECUTION_BARRIER_HASH_MISMATCH, flags, tuple(notes)
+
+    notes.append("Hash-bound human execution barrier verified for controlled test-runner metadata.")
+    return None, flags, tuple(notes)
+
+
 def _provider_untrusted(source_trust: str) -> bool:
     return source_trust in {
         ControlledTestSourceTrust.UNTRUSTED_PROVIDER_OUTPUT.value,
@@ -846,6 +1033,10 @@ def _flag_tuple(values: tuple[ControlledTestExecutionFlag, ...]) -> tuple[Contro
 
 def _hash_json(value: dict[str, Any]) -> str:
     return hashlib.sha256(_canonical_json(value).encode("utf-8")).hexdigest()
+
+
+def _hash_text(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def _canonical_json(value: Any) -> str:

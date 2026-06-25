@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import subprocess
 import sys
 from dataclasses import FrozenInstanceError, replace
@@ -419,6 +420,8 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
         self.assertIn("shell=false", lowered)
 
     def request(self, command="python -m unittest tests.test_action_proposal_1a -v", **overrides):
+        normalized_command = " ".join(command.strip().split()).casefold()
+        command_hash = hashlib.sha256(normalized_command.encode("utf-8")).hexdigest()
         base = {
             "requested_command": command,
             "repo_root": str(REPO_ROOT),
@@ -434,6 +437,16 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
             "source_sandbox_envelope_status": "REVIEW_REQUIRED",
             "source_policy_check_id": "local-policy-check-example",
             "source_policy_check_hash": "c" * 64,
+            "source_execution_barrier_id": "human-exec-barrier-example",
+            "source_execution_barrier_hash": "d" * 64,
+            "source_execution_barrier_status": "EXECUTION_BARRIER_PASSED",
+            "source_execution_barrier_passed": True,
+            "barrier_bound_command_hash": command_hash,
+            "barrier_bound_test_runner_control_hash": "a" * 64,
+            "barrier_bound_sandbox_envelope_hash": "b" * 64,
+            "barrier_bound_policy_check_hash": "c" * 64,
+            "source_human_decision_id": "human-decision-example",
+            "source_human_decision_hash": "e" * 64,
             "human_review_required": True,
             "risk_flags": (),
         }
