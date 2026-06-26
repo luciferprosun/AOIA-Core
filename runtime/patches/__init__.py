@@ -20,6 +20,17 @@ from runtime.patches.patch_preview import (
     canonical_patch_preview_json,
     compute_patch_preview_hash,
 )
+from runtime.patches.patch_policy import (
+    PATCH_POLICY_BLOCK,
+    PATCH_POLICY_NEEDS_REVIEW,
+    PATCH_POLICY_PASS,
+    PatchPolicyCheckResult,
+    PatchPolicyFinding,
+    PatchPolicyProfile,
+    canonical_patch_policy_json,
+    check_patch_local_policy,
+    compute_patch_policy_hash,
+)
 
 __all__ = [
     "MAX_PATCH_PREVIEW_DIFF_CHARS",
@@ -39,7 +50,16 @@ __all__ = [
     "PatchPreview",
     "PatchPreviewFile",
     "PatchPreviewResult",
+    "PATCH_POLICY_BLOCK",
+    "PATCH_POLICY_NEEDS_REVIEW",
+    "PATCH_POLICY_PASS",
+    "PatchPolicyCheckResult",
+    "PatchPolicyFinding",
+    "PatchPolicyProfile",
     "build_patch_preview",
+    "canonical_patch_policy_json",
     "canonical_patch_preview_json",
+    "check_patch_local_policy",
+    "compute_patch_policy_hash",
     "compute_patch_preview_hash",
 ]
