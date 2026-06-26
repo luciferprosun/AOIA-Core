@@ -7,10 +7,12 @@ from typing import Any, Callable, Mapping
 from runtime.artifact_preview import ArtifactPreview, ArtifactPreviewStatus
 from runtime.human_decision_gated_artifact_write import (
     BLOCKED_STALE_OR_MISMATCHED_STATE,
+    BLOCKED_WRITE_KILL_SWITCH,
     ERROR_FAIL_CLOSED,
     HumanDecisionGatedArtifactWriteResult,
     write_artifact_after_human_gate,
 )
+from runtime.safety.write_kill_switch import check_write_kill_switch_file
 from runtime.schemas.sandbox_artifact import (
     SandboxArtifactRequest,
     SandboxArtifactType,
@@ -48,6 +50,8 @@ def write_preview_artifact_after_human_gate(
     expected_artifact_hash: str | None = None,
     metadata: Mapping[str, Any] | None = None,
     gated_writer: GatedArtifactWriter = write_artifact_after_human_gate,
+    write_kill_switch_path: str | None = None,
+    write_kill_switch_directory: str | None = None,
 ) -> HumanDecisionGatedArtifactWriteResult:
     del metadata
     try:
@@ -98,6 +102,16 @@ def write_preview_artifact_after_human_gate(
                 CONTROL_WRITE_BLOCKED_MISSING_HUMAN_GATE,
                 "human gate evidence lacks approval or audit binding",
             )
+        if write_kill_switch_path is not None:
+            kill_switch = check_write_kill_switch_file(
+                write_kill_switch_path,
+                allowed_switch_directory=write_kill_switch_directory,
+            )
+            if not kill_switch.writes_allowed:
+                return _blocked(
+                    BLOCKED_WRITE_KILL_SWITCH,
+                    kill_switch.reason,
+                )
 
         artifact_request = _build_artifact_request(
             preview=preview,

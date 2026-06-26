@@ -8,6 +8,7 @@ from runtime.safety.sandbox_workspace import (
     SandboxWorkspaceViolationError,
     assert_safe_artifact_write_path,
 )
+from runtime.safety.write_kill_switch import check_write_kill_switch_file
 from runtime.schemas.sandbox_artifact import (
     SANDBOX_ARTIFACT_CONTRACT_VERSION,
     SandboxArtifactRequest,
@@ -35,9 +36,23 @@ def write_sandbox_artifact(
     request: SandboxArtifactRequest,
     workspace_root: str,
     allow_overwrite: bool = False,
+    write_kill_switch_path: str | None = None,
+    write_kill_switch_directory: str | None = None,
 ) -> SandboxArtifactResult:
     if not isinstance(request, SandboxArtifactRequest):
         raise TypeError("request must be a SandboxArtifactRequest")
+    if write_kill_switch_path is not None:
+        kill_switch = check_write_kill_switch_file(
+            write_kill_switch_path,
+            allowed_switch_directory=write_kill_switch_directory,
+        )
+        if not kill_switch.writes_allowed:
+            return create_blocked_sandbox_artifact_result(
+                request,
+                workspace_root=workspace_root,
+                blocked_reason=kill_switch.reason,
+                notes="Step 15 global write kill-switch blocked artifact write",
+            )
     contract_violation = _artifact_contract_violation_reason(request)
     if contract_violation:
         return create_blocked_sandbox_artifact_result(

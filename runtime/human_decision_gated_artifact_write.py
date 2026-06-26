@@ -9,6 +9,7 @@ from runtime.human_decision_gate_integration import (
 )
 from runtime.safety.approval_artifact_gate import PreArtifactApprovalGateResult
 from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
+from runtime.safety.write_kill_switch import check_write_kill_switch_file
 from runtime.schemas.sandbox_artifact import (
     SandboxArtifactRequest,
     SandboxArtifactResult,
@@ -23,6 +24,7 @@ BLOCKED_MISSING_PACKET_HASH = "BLOCKED_MISSING_PACKET_HASH"
 BLOCKED_STALE_OR_MISMATCHED_STATE = "BLOCKED_STALE_OR_MISMATCHED_STATE"
 BLOCKED_ARTIFACT_REQUEST_MISMATCH = "BLOCKED_ARTIFACT_REQUEST_MISMATCH"
 BLOCKED_CONTROLLED_WRITE = "BLOCKED_CONTROLLED_WRITE"
+BLOCKED_WRITE_KILL_SWITCH = "BLOCKED_WRITE_KILL_SWITCH"
 ERROR_FAIL_CLOSED = "ERROR_FAIL_CLOSED"
 
 ArtifactWriter = Callable[..., SandboxArtifactResult]
@@ -77,6 +79,8 @@ def write_artifact_after_human_gate(
     expected_artifact_hash: str | None = None,
     metadata: Mapping[str, Any] | None = None,
     artifact_writer: ArtifactWriter = write_sandbox_artifact,
+    write_kill_switch_path: str | None = None,
+    write_kill_switch_directory: str | None = None,
 ) -> HumanDecisionGatedArtifactWriteResult:
     del metadata
     try:
@@ -131,6 +135,18 @@ def write_artifact_after_human_gate(
             nested_gate=nested_gate,
             artifact_hash=artifact_hash,
         )
+        if write_kill_switch_path is not None:
+            kill_switch = check_write_kill_switch_file(
+                write_kill_switch_path,
+                allowed_switch_directory=write_kill_switch_directory,
+            )
+            if not kill_switch.writes_allowed:
+                return _blocked(
+                    status=BLOCKED_WRITE_KILL_SWITCH,
+                    packet_hash=packet_hash,
+                    artifact_hash=artifact_hash,
+                    reason=kill_switch.reason,
+                )
 
         artifact_result = artifact_writer(artifact_request, workspace_root)
         if not isinstance(artifact_result, SandboxArtifactResult):
