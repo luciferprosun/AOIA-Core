@@ -9,6 +9,19 @@ from runtime.bridges.proposal_to_preview import (
     ProposalToPreviewBridgeResult,
     build_preview_from_action_proposal,
 )
+from runtime.bridges.proposal_preview_gate_binding import (
+    PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_GATE_MISMATCH,
+    PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_GATE_UNSAFE,
+    PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_INVALID_PREVIEW,
+    PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_INVALID_PROPOSAL,
+    PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_METADATA_MISMATCH,
+    PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_TARGET_MISMATCH,
+    PROPOSAL_PREVIEW_GATE_BINDING_READY,
+    ProposalPreviewGateBindingResult,
+    build_proposal_preview_gate_binding,
+    canonical_binding_json,
+    compute_proposal_preview_gate_binding_hash,
+)
 
 __all__ = [
     "PROPOSAL_PREVIEW_BLOCKED_INVALID_CONTENT",
@@ -19,5 +32,16 @@ __all__ = [
     "PROPOSAL_PREVIEW_BLOCKED_UNSUPPORTED_KIND",
     "PROPOSAL_PREVIEW_READY",
     "ProposalToPreviewBridgeResult",
+    "PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_GATE_MISMATCH",
+    "PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_GATE_UNSAFE",
+    "PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_INVALID_PREVIEW",
+    "PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_INVALID_PROPOSAL",
+    "PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_METADATA_MISMATCH",
+    "PROPOSAL_PREVIEW_GATE_BINDING_BLOCKED_TARGET_MISMATCH",
+    "PROPOSAL_PREVIEW_GATE_BINDING_READY",
+    "ProposalPreviewGateBindingResult",
     "build_preview_from_action_proposal",
+    "build_proposal_preview_gate_binding",
+    "canonical_binding_json",
+    "compute_proposal_preview_gate_binding_hash",
 ]
