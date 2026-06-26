@@ -3,11 +3,8 @@ from __future__ import annotations
 import posix
 from pathlib import Path
 
-from runtime.safety.sandbox_workspace import (
-    SandboxOverwriteBlockedError,
-    SandboxWorkspaceViolationError,
-    assert_safe_artifact_write_path,
-)
+from runtime.safety.sandbox_workspace import SandboxWorkspaceViolationError
+from runtime.safety.workspace_guard import validate_workspace_target_path
 from runtime.safety.write_kill_switch import check_write_kill_switch_file
 from runtime.schemas.sandbox_artifact import (
     SANDBOX_ARTIFACT_CONTRACT_VERSION,
@@ -76,16 +73,17 @@ def write_sandbox_artifact(
             blocked_reason="sandbox artifact content exceeds M8-A size limit",
             notes="M8-A artifact write blocked before filesystem access",
         )
-    try:
-        resolved_output_path = assert_safe_artifact_write_path(workspace_root, request.relative_output_path)
-    except SandboxWorkspaceViolationError as exc:
+    workspace_guard = validate_workspace_target_path(workspace_root, request.relative_output_path)
+    if not workspace_guard.allowed:
         return create_blocked_sandbox_artifact_result(
             request,
             workspace_root=workspace_root,
-            blocked_reason=str(exc),
+            resolved_output_path=workspace_guard.resolved_absolute_target_path or "",
+            blocked_reason=workspace_guard.reason,
             notes="M8-A workspace guard blocked artifact write",
         )
 
+    resolved_output_path = workspace_guard.resolved_absolute_target_path or ""
     output_path = Path(resolved_output_path)
     if output_path.is_symlink():
         return create_blocked_sandbox_artifact_result(
@@ -114,7 +112,10 @@ def write_sandbox_artifact(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     try:
-        resolved_output_path = assert_safe_artifact_write_path(workspace_root, request.relative_output_path)
+        workspace_guard = validate_workspace_target_path(workspace_root, request.relative_output_path)
+        if not workspace_guard.allowed:
+            raise SandboxWorkspaceViolationError(workspace_guard.reason)
+        resolved_output_path = workspace_guard.resolved_absolute_target_path or ""
         output_path = Path(resolved_output_path)
         if output_path.is_symlink():
             return create_blocked_sandbox_artifact_result(
@@ -132,7 +133,13 @@ def write_sandbox_artifact(
                 blocked_reason="sandbox artifact overwrite blocked by default",
                 notes="M8-A artifact write blocked before opening output path",
             )
-        _write_text_artifact_atomically(output_path, content_bytes, allow_overwrite)
+        _write_text_artifact_atomically(
+            output_path,
+            content_bytes,
+            allow_overwrite,
+            workspace_root,
+            request.relative_output_path,
+        )
     except FileExistsError as exc:
         return create_blocked_sandbox_artifact_result(
             request,
@@ -161,7 +168,14 @@ def write_sandbox_artifact(
     )
 
 
-def _write_text_artifact_atomically(output_path: Path, content_bytes: bytes, allow_overwrite: bool) -> None:
+def _write_text_artifact_atomically(
+    output_path: Path,
+    content_bytes: bytes,
+    allow_overwrite: bool,
+    workspace_root: str,
+    relative_output_path: str,
+) -> None:
+    output_path = _rechecked_output_path(output_path, workspace_root, relative_output_path)
     temp_path = _temporary_artifact_path(output_path)
     flags = posix.O_CREAT | posix.O_EXCL | posix.O_WRONLY
     if hasattr(posix, "O_NOFOLLOW"):
@@ -188,6 +202,7 @@ def _write_text_artifact_atomically(output_path: Path, content_bytes: bytes, all
             posix.close(fd)
 
     try:
+        output_path = _rechecked_output_path(output_path, workspace_root, relative_output_path)
         if allow_overwrite:
             if output_path.is_symlink():
                 raise SandboxWorkspaceViolationError("sandbox artifact output path is a symlink")
@@ -199,6 +214,24 @@ def _write_text_artifact_atomically(output_path: Path, content_bytes: bytes, all
     except Exception:
         _remove_temp_artifact(temp_path)
         raise
+
+
+def _rechecked_output_path(
+    expected_output_path: Path,
+    workspace_root: str,
+    relative_output_path: str,
+) -> Path:
+    workspace_guard = validate_workspace_target_path(workspace_root, relative_output_path)
+    if not workspace_guard.allowed:
+        raise SandboxWorkspaceViolationError(workspace_guard.reason)
+    resolved_output_path = Path(workspace_guard.resolved_absolute_target_path or "")
+    if resolved_output_path != expected_output_path:
+        raise SandboxWorkspaceViolationError("workspace guard target path changed before artifact write")
+    if resolved_output_path.parent.is_symlink():
+        raise SandboxWorkspaceViolationError("artifact parent path contains a symlink")
+    if resolved_output_path.is_symlink():
+        raise SandboxWorkspaceViolationError("sandbox artifact output path is a symlink")
+    return resolved_output_path
 
 
 def _temporary_artifact_path(output_path: Path) -> Path:
