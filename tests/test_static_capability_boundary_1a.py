@@ -45,6 +45,18 @@ NO_AUTHORITY_MODULES = tuple(
 )
 
 PROVIDER_GATEWAY = REPO_ROOT / "runtime/providers/gateway.py"
+POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime/patches/post_patch_controlled_test_integration.py"
+
+PATCH_METADATA_BOUNDARY_MODULES = tuple(
+    REPO_ROOT / item
+    for item in (
+        "runtime/patches/patch_preview.py",
+        "runtime/patches/patch_policy.py",
+        "runtime/patches/patch_barrier.py",
+        "runtime/patches/controlled_patch_apply.py",
+        "runtime/patches/post_patch_verification_plan.py",
+    )
+)
 
 FORBIDDEN_IMPORT_PREFIXES = (
     "subprocess",
@@ -255,6 +267,52 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
                         if matches_any_prefix(module_name, bypass_prefixes)
                     ],
                 )
+
+    def test_post_patch_subprocess_exception_is_narrow(self):
+        self.assertTrue(POST_PATCH_CONTROLLED_TEST_INTEGRATION.exists())
+        step_26_scan = scan_module(POST_PATCH_CONTROLLED_TEST_INTEGRATION)
+        self.assertIn("subprocess", step_26_scan.imports)
+        self.assertIn("subprocess.run", step_26_scan.calls)
+        self.assertNotIn("subprocess.Popen", step_26_scan.calls)
+        source = POST_PATCH_CONTROLLED_TEST_INTEGRATION.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", source)
+
+        forbidden_patch_imports = (
+            "subprocess",
+            "socket",
+            "urllib",
+            "requests",
+            "httpx",
+            "webbrowser",
+            "selenium",
+            "playwright",
+            "git",
+            "openai",
+            "anthropic",
+            "runtime.providers.gateway",
+            "runtime.execution",
+        )
+        forbidden_patch_calls = (
+            "subprocess.run",
+            "subprocess.Popen",
+            "subprocess.call",
+            "subprocess.check_call",
+            "subprocess.check_output",
+            "os.system",
+            "Popen",
+        )
+        for path in PATCH_METADATA_BOUNDARY_MODULES:
+            with self.subTest(path=self.relative(path)):
+                scan = scan_module(path)
+                self.assertEqual(
+                    [],
+                    [
+                        module_name
+                        for module_name in scan.imports
+                        if matches_any_prefix(module_name, forbidden_patch_imports)
+                    ],
+                )
+                self.assertEqual([], [call_name for call_name in scan.calls if call_name in forbidden_patch_calls])
 
     def assert_no_authority_surface(self, relative_path: str) -> None:
         scan = scan_module(REPO_ROOT / relative_path)

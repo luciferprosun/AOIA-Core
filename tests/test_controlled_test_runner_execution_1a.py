@@ -22,6 +22,7 @@ from runtime.execution.controlled_test_runner import (
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CONTROLLED_TEST_RUNNER = REPO_ROOT / "runtime" / "execution" / "controlled_test_runner.py"
+POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime" / "patches" / "post_patch_controlled_test_integration.py"
 HASH = "a" * 64
 
 
@@ -30,7 +31,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
         matches = sorted(
             path
             for path in (REPO_ROOT / "runtime").rglob("*controlled*test*")
-            if path.is_file() and path.suffix == ".py" and path != CONTROLLED_TEST_RUNNER
+            if path.is_file() and path.suffix == ".py" and path not in (CONTROLLED_TEST_RUNNER, POST_PATCH_CONTROLLED_TEST_INTEGRATION)
         )
 
         self.assertEqual([], matches)
