@@ -47,6 +47,7 @@ NO_AUTHORITY_MODULES = tuple(
 PROVIDER_GATEWAY = REPO_ROOT / "runtime/providers/gateway.py"
 POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime/patches/post_patch_controlled_test_integration.py"
 GIT_READ_ADAPTER = REPO_ROOT / "runtime/git_ops/git_read.py"
+GIT_READ_GOVERNANCE = REPO_ROOT / "runtime/git_ops/git_governance.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
     REPO_ROOT / item
@@ -287,6 +288,16 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("shell=true", git_source)
         self.assertNotIn("os.environ", git_source)
         self.assertNotIn("getenv", git_source)
+
+        self.assertTrue(GIT_READ_GOVERNANCE.exists())
+        governance_scan = scan_module(GIT_READ_GOVERNANCE)
+        self.assertNotIn("subprocess", governance_scan.imports)
+        self.assertNotIn("subprocess.run", governance_scan.calls)
+        self.assertNotIn("subprocess.Popen", governance_scan.calls)
+        governance_source = GIT_READ_GOVERNANCE.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", governance_source)
+        self.assertNotIn("os.environ", governance_source)
+        self.assertNotIn("getenv", governance_source)
 
         forbidden_patch_imports = (
             "subprocess",
