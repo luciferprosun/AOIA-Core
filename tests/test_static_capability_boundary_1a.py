@@ -46,6 +46,7 @@ NO_AUTHORITY_MODULES = tuple(
 
 PROVIDER_GATEWAY = REPO_ROOT / "runtime/providers/gateway.py"
 POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime/patches/post_patch_controlled_test_integration.py"
+GIT_READ_ADAPTER = REPO_ROOT / "runtime/git_ops/git_read.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
     REPO_ROOT / item
@@ -268,7 +269,7 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
                     ],
                 )
 
-    def test_post_patch_subprocess_exception_is_narrow(self):
+    def test_post_patch_and_git_read_subprocess_exceptions_are_narrow(self):
         self.assertTrue(POST_PATCH_CONTROLLED_TEST_INTEGRATION.exists())
         step_26_scan = scan_module(POST_PATCH_CONTROLLED_TEST_INTEGRATION)
         self.assertIn("subprocess", step_26_scan.imports)
@@ -276,6 +277,16 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("subprocess.Popen", step_26_scan.calls)
         source = POST_PATCH_CONTROLLED_TEST_INTEGRATION.read_text(encoding="utf-8").casefold()
         self.assertNotIn("shell=true", source)
+
+        self.assertTrue(GIT_READ_ADAPTER.exists())
+        git_scan = scan_module(GIT_READ_ADAPTER)
+        self.assertIn("subprocess", git_scan.imports)
+        self.assertIn("subprocess.run", git_scan.calls)
+        self.assertNotIn("subprocess.Popen", git_scan.calls)
+        git_source = GIT_READ_ADAPTER.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", git_source)
+        self.assertNotIn("os.environ", git_source)
+        self.assertNotIn("getenv", git_source)
 
         forbidden_patch_imports = (
             "subprocess",
