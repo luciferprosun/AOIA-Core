@@ -27,6 +27,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/provider_request_review.py",
     "runtime/provider_config_review.py",
     "runtime/provider_live_readiness_review.py",
+    "runtime/git_ops/git_checkpoint.py",
     "runtime/secret_boundary_review.py",
     "runtime/human_review_decision.py",
     "runtime/human_review_decision_validator.py",
@@ -48,6 +49,7 @@ PROVIDER_GATEWAY = REPO_ROOT / "runtime/providers/gateway.py"
 POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime/patches/post_patch_controlled_test_integration.py"
 GIT_READ_ADAPTER = REPO_ROOT / "runtime/git_ops/git_read.py"
 GIT_READ_GOVERNANCE = REPO_ROOT / "runtime/git_ops/git_governance.py"
+GIT_STATE_CHECKPOINT = REPO_ROOT / "runtime/git_ops/git_checkpoint.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
     REPO_ROOT / item
@@ -298,6 +300,16 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("shell=true", governance_source)
         self.assertNotIn("os.environ", governance_source)
         self.assertNotIn("getenv", governance_source)
+
+        self.assertTrue(GIT_STATE_CHECKPOINT.exists())
+        checkpoint_scan = scan_module(GIT_STATE_CHECKPOINT)
+        self.assertNotIn("subprocess", checkpoint_scan.imports)
+        self.assertNotIn("subprocess.run", checkpoint_scan.calls)
+        self.assertNotIn("subprocess.Popen", checkpoint_scan.calls)
+        checkpoint_source = GIT_STATE_CHECKPOINT.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", checkpoint_source)
+        self.assertNotIn("os.environ", checkpoint_source)
+        self.assertNotIn("getenv", checkpoint_source)
 
         forbidden_patch_imports = (
             "subprocess",
