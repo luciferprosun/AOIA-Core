@@ -28,6 +28,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/provider_config_review.py",
     "runtime/provider_live_readiness_review.py",
     "runtime/git_ops/git_checkpoint.py",
+    "runtime/git_ops/git_write_preview.py",
     "runtime/secret_boundary_review.py",
     "runtime/human_review_decision.py",
     "runtime/human_review_decision_validator.py",
@@ -50,6 +51,7 @@ POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime/patches/post_patch
 GIT_READ_ADAPTER = REPO_ROOT / "runtime/git_ops/git_read.py"
 GIT_READ_GOVERNANCE = REPO_ROOT / "runtime/git_ops/git_governance.py"
 GIT_STATE_CHECKPOINT = REPO_ROOT / "runtime/git_ops/git_checkpoint.py"
+GIT_WRITE_PREVIEW = REPO_ROOT / "runtime/git_ops/git_write_preview.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
     REPO_ROOT / item
@@ -310,6 +312,16 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("shell=true", checkpoint_source)
         self.assertNotIn("os.environ", checkpoint_source)
         self.assertNotIn("getenv", checkpoint_source)
+
+        self.assertTrue(GIT_WRITE_PREVIEW.exists())
+        write_preview_scan = scan_module(GIT_WRITE_PREVIEW)
+        self.assertNotIn("subprocess", write_preview_scan.imports)
+        self.assertNotIn("subprocess.run", write_preview_scan.calls)
+        self.assertNotIn("subprocess.Popen", write_preview_scan.calls)
+        write_preview_source = GIT_WRITE_PREVIEW.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", write_preview_source)
+        self.assertNotIn("os.environ", write_preview_source)
+        self.assertNotIn("getenv", write_preview_source)
 
         forbidden_patch_imports = (
             "subprocess",
