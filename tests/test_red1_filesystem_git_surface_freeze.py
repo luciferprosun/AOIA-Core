@@ -14,6 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DIR = PROJECT_ROOT / "runtime"
 FILESYSTEM_TOOLS_PATH = RUNTIME_DIR / "tools" / "filesystem_tools.py"
 EXECUTOR_PATH = RUNTIME_DIR / "tools" / "executor.py"
+CONTROLLED_GIT_COMMIT_PATH = RUNTIME_DIR / "git_ops" / "controlled_git_commit.py"
 
 FILESYSTEM_ACTIONS = {
     "write_file",
@@ -136,6 +137,8 @@ class Red1FilesystemGitSurfaceFreezeTests(unittest.TestCase):
         for path in live_runtime_code_files():
             text = path.read_text(encoding="utf-8")
             for fragment in forbidden_fragments:
+                if path == CONTROLLED_GIT_COMMIT_PATH and fragment == "git commit":
+                    continue
                 if fragment in text:
                     findings.append((str(path), fragment))
 

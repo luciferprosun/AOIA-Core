@@ -87,6 +87,12 @@ from runtime.git_ops.git_commit_barrier import (
     GitCommitBarrierResult,
     evaluate_git_commit_barrier,
 )
+from runtime.git_ops.controlled_git_commit import (
+    CONTROLLED_GIT_COMMIT_BLOCKED,
+    CONTROLLED_GIT_COMMIT_COMMITTED,
+    ControlledGitCommitResult,
+    controlled_git_commit,
+)
 
 __all__ = [
     "GIT_GOVERNANCE_BLOCK",
@@ -113,6 +119,8 @@ __all__ = [
     "GIT_COMMIT_BARRIER_BLOCKED",
     "GIT_COMMIT_BARRIER_ELIGIBLE",
     "GIT_COMMIT_BARRIER_SCHEMA_VERSION",
+    "CONTROLLED_GIT_COMMIT_BLOCKED",
+    "CONTROLLED_GIT_COMMIT_COMMITTED",
     "GIT_READ_BLOCKED",
     "GIT_READ_ERROR",
     "GIT_READ_READY",
@@ -137,6 +145,7 @@ __all__ = [
     "GitCommitPreviewResult",
     "GitCommitBarrierRequest",
     "GitCommitBarrierResult",
+    "ControlledGitCommitResult",
     "GitReadCommand",
     "GitReadRequest",
     "GitReadResult",
@@ -156,6 +165,7 @@ __all__ = [
     "create_git_commit_preview",
     "create_git_write_preview",
     "evaluate_git_commit_barrier",
+    "controlled_git_commit",
     "evaluate_git_read_governance",
     "read_local_git_state",
     "redact_git_secrets",

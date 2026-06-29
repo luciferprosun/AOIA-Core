@@ -56,6 +56,7 @@ GIT_STATE_CHECKPOINT = REPO_ROOT / "runtime/git_ops/git_checkpoint.py"
 GIT_WRITE_PREVIEW = REPO_ROOT / "runtime/git_ops/git_write_preview.py"
 GIT_COMMIT_PREVIEW = REPO_ROOT / "runtime/git_ops/git_commit_preview.py"
 GIT_COMMIT_BARRIER = REPO_ROOT / "runtime/git_ops/git_commit_barrier.py"
+CONTROLLED_GIT_COMMIT = REPO_ROOT / "runtime/git_ops/controlled_git_commit.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
     REPO_ROOT / item
@@ -336,6 +337,29 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("shell=true", commit_preview_source)
         self.assertNotIn("os.environ", commit_preview_source)
         self.assertNotIn("getenv", commit_preview_source)
+
+        self.assertTrue(CONTROLLED_GIT_COMMIT.exists())
+        controlled_commit_scan = scan_module(CONTROLLED_GIT_COMMIT)
+        self.assertIn("subprocess", controlled_commit_scan.imports)
+        self.assertIn("subprocess.run", controlled_commit_scan.calls)
+        self.assertNotIn("subprocess.Popen", controlled_commit_scan.calls)
+        controlled_commit_source = CONTROLLED_GIT_COMMIT.read_text(encoding="utf-8").casefold()
+        for forbidden in (
+            "shell=true",
+            "os.environ",
+            "getenv",
+            "api.github.com",
+            "git push",
+            "ls-remote",
+            "requests",
+            "httpx",
+            "webbrowser",
+            "selenium",
+            "playwright",
+            "openai",
+            "anthropic",
+        ):
+            self.assertNotIn(forbidden, controlled_commit_source)
 
         forbidden_patch_imports = (
             "subprocess",

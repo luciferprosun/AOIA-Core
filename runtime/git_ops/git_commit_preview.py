@@ -59,6 +59,7 @@ GIT_COMMIT_PREVIEW_BLOCKED_SKIP_CI = "GIT_COMMIT_PREVIEW_BLOCKED_SKIP_CI"
 GIT_COMMIT_PREVIEW_BLOCKED_RAW_COMMAND_TEXT = "GIT_COMMIT_PREVIEW_BLOCKED_RAW_COMMAND_TEXT"
 GIT_COMMIT_PREVIEW_BLOCKED_SHELL_TEXT = "GIT_COMMIT_PREVIEW_BLOCKED_SHELL_TEXT"
 GIT_COMMIT_PREVIEW_BLOCKED_AUTHORITY_CLAIM = "GIT_COMMIT_PREVIEW_BLOCKED_AUTHORITY_CLAIM"
+GIT_COMMIT_PREVIEW_BLOCKED_STAGED_DIFF_HASH = "GIT_COMMIT_PREVIEW_BLOCKED_STAGED_DIFF_HASH"
 GIT_COMMIT_PREVIEW_BLOCKED_HASH_MISMATCH = "GIT_COMMIT_PREVIEW_BLOCKED_HASH_MISMATCH"
 GIT_COMMIT_PREVIEW_BLOCKED_REPLAY_MISMATCH = "GIT_COMMIT_PREVIEW_BLOCKED_REPLAY_MISMATCH"
 GIT_COMMIT_PREVIEW_VALID_EVIDENCE_ONLY = "GIT_COMMIT_PREVIEW_VALID_EVIDENCE_ONLY"
@@ -146,6 +147,7 @@ class GitCommitPreviewRequest:
     checkpoint: Any
     commit_message: str | None
     target_paths: tuple[str, ...] | list[str] | None = None
+    reviewed_staged_diff_hash: str | None = None
     created_at: str = ""
     preview_nonce: str | None = None
     policy: GitCommitPreviewPolicy | None = None
@@ -195,6 +197,7 @@ class GitCommitPreview:
     risk_flags: tuple[str, ...]
     created_at: str
     preview_nonce: str | None = None
+    reviewed_staged_diff_hash: str | None = None
     can_approve: bool = False
     can_write: bool = False
     can_execute: bool = False
@@ -254,6 +257,7 @@ class GitCommitPreview:
             "risk_flags": self.risk_flags,
             "created_at": self.created_at,
             "preview_nonce": self.preview_nonce,
+            "reviewed_staged_diff_hash": self.reviewed_staged_diff_hash,
             **{field_name: getattr(self, field_name) for field_name in _AUTHORITY_FIELDS},
         }
 
@@ -300,6 +304,8 @@ def create_git_commit_preview(request: GitCommitPreviewRequest) -> GitCommitPrev
     findings.extend(path_findings)
     message, message_findings = _commit_message_findings(request.commit_message, policy)
     findings.extend(message_findings)
+    reviewed_staged_diff_hash, staged_diff_findings = _staged_diff_hash_findings(request.reviewed_staged_diff_hash)
+    findings.extend(staged_diff_findings)
     findings.extend(_metadata_findings(request.metadata))
     if _authority_claim_present(request.claims or {}):
         findings.append(_finding(GIT_COMMIT_PREVIEW_BLOCK, GIT_COMMIT_PREVIEW_BLOCKED_AUTHORITY_CLAIM, "Commit preview request contains authority-like claims."))
@@ -315,6 +321,7 @@ def create_git_commit_preview(request: GitCommitPreviewRequest) -> GitCommitPrev
         checkpoint=checkpoint,
         target_paths=normalized_paths,
         commit_message=message,
+        reviewed_staged_diff_hash=reviewed_staged_diff_hash,
         policy=policy,
         findings=sorted_findings,
         created_at=request.created_at,
@@ -361,6 +368,9 @@ def verify_git_commit_preview(preview: GitCommitPreview | Mapping[str, Any] | An
     message = _text(preview_mapping.get("normalized_commit_message_preview")) or ""
     if preview_mapping.get("commit_message_hash") != compute_commit_message_hash(message):
         reasons.append(GIT_COMMIT_PREVIEW_BLOCKED_HASH_MISMATCH)
+    staged_diff_hash = preview_mapping.get("reviewed_staged_diff_hash")
+    if staged_diff_hash is not None and not _hash_like(_text(staged_diff_hash)):
+        reasons.append(GIT_COMMIT_PREVIEW_BLOCKED_STAGED_DIFF_HASH)
     if preview_mapping.get("operation_kind") != GitWriteIntent.LOCAL_COMMIT_INTENT.value:
         reasons.append(GIT_COMMIT_PREVIEW_BLOCKED_UNSUPPORTED_OPERATION_KIND)
     if reasons:
@@ -515,12 +525,22 @@ def _metadata_findings(metadata: Mapping[str, Any] | None) -> tuple[GitCommitPre
     return tuple(findings)
 
 
+def _staged_diff_hash_findings(value: str | None) -> tuple[str | None, tuple[GitCommitPreviewFinding, ...]]:
+    if value is None:
+        return None, ()
+    text = _text(value)
+    if not _hash_like(text):
+        return None, (_finding(GIT_COMMIT_PREVIEW_BLOCK, GIT_COMMIT_PREVIEW_BLOCKED_STAGED_DIFF_HASH, "Reviewed staged diff hash must be a SHA-256 hex digest."),)
+    return text.lower(), ()
+
+
 def _preview_material(
     *,
     write_preview: Mapping[str, Any],
     checkpoint: Mapping[str, Any],
     target_paths: tuple[str, ...],
     commit_message: str,
+    reviewed_staged_diff_hash: str | None,
     policy: GitCommitPreviewPolicy,
     findings: tuple[GitCommitPreviewFinding, ...],
     created_at: str,
@@ -541,6 +561,7 @@ def _preview_material(
         "target_paths_hash": compute_git_commit_preview_hash(target_paths),
         "commit_message_hash": compute_commit_message_hash(commit_message),
         "normalized_commit_message_preview": commit_message,
+        "reviewed_staged_diff_hash": reviewed_staged_diff_hash,
         "author_policy_id": _text(author_policy_id) or "",
         "author_policy_name": _text(author_policy_name) or "",
         "author_policy_version": _text(author_policy_version) or "",
