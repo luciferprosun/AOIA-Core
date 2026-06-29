@@ -30,6 +30,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/git_ops/git_checkpoint.py",
     "runtime/git_ops/git_write_preview.py",
     "runtime/git_ops/git_commit_preview.py",
+    "runtime/git_ops/git_commit_barrier.py",
     "runtime/secret_boundary_review.py",
     "runtime/human_review_decision.py",
     "runtime/human_review_decision_validator.py",
@@ -54,6 +55,7 @@ GIT_READ_GOVERNANCE = REPO_ROOT / "runtime/git_ops/git_governance.py"
 GIT_STATE_CHECKPOINT = REPO_ROOT / "runtime/git_ops/git_checkpoint.py"
 GIT_WRITE_PREVIEW = REPO_ROOT / "runtime/git_ops/git_write_preview.py"
 GIT_COMMIT_PREVIEW = REPO_ROOT / "runtime/git_ops/git_commit_preview.py"
+GIT_COMMIT_BARRIER = REPO_ROOT / "runtime/git_ops/git_commit_barrier.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
     REPO_ROOT / item
