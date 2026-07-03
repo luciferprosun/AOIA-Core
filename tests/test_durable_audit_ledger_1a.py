@@ -8,6 +8,17 @@ from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from runtime.audit_ledger import (
+    AUDIT_LEDGER_GENESIS_PREVIOUS_HASH,
+    AUDIT_LEDGER_SCHEMA_VERSION,
+    AuditLedgerAppendResult,
+    AuditLedgerEntry,
+    AuditLedgerVerificationResult,
+    append_audit_entry,
+    canonical_audit_json as audit_ledger_canonical_json,
+    compute_audit_entry_hash,
+    verify_audit_ledger,
+)
 from runtime.audit.durable_log import (
     DURABLE_AUDIT_SCHEMA_VERSION,
     DurableAuditAppendResult,
@@ -480,5 +491,340 @@ class DurableAuditLedger1ATests(unittest.TestCase):
             any(text in issue for issue in result.issues),
             f"expected issue containing {text!r}, got {result.issues!r}",
         )
+
+
+class AuditLedger1ATests(unittest.TestCase):
+    def test_append_first_entry_uses_sequence_one_and_genesis_previous_hash(self):
+        with TemporaryDirectory() as tmp:
+            result = append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"artifact": "file.txt"},
+            )
+            records = self.read_records(tmp, filename="ledger.jsonl")
+            verified = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+            )
+
+        self.assertTrue(result.appended)
+        self.assertFalse(result.blocking)
+        self.assertIsNotNone(result.entry)
+        self.assertEqual(1, result.entry.sequence)
+        self.assertIsNone(result.entry.previous_hash)
+        self.assertEqual(AUDIT_LEDGER_SCHEMA_VERSION, result.entry.schema_version)
+        self.assertEqual(AUDIT_LEDGER_GENESIS_PREVIOUS_HASH, records[0]["previous_hash"])
+        self.assertEqual(result.entry.entry_hash, verified.final_entry_hash)
+
+    def test_append_second_entry_chain_links_previous_entry_hash(self):
+        with TemporaryDirectory() as tmp:
+            first = append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"step": 1},
+            )
+            second = append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"step": 2},
+            )
+            result = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+            )
+
+        self.assertTrue(first.appended)
+        self.assertTrue(second.appended)
+        self.assertEqual(first.entry.entry_hash, second.entry.previous_hash)
+        self.assertTrue(result.valid)
+        self.assertEqual(2, result.event_count)
+        self.assertEqual(second.entry.entry_hash, result.final_entry_hash)
+
+    def test_append_and_verify_reject_tampered_evidence_and_previous_hash(self):
+        with TemporaryDirectory() as tmp:
+            append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"path": "a"},
+            )
+            append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"path": "b"},
+            )
+            records = self.read_records(tmp, filename="ledger.jsonl")
+            records[1]["evidence"]["path"] = "tampered"
+            self.write_records(tmp, records, filename="ledger.jsonl")
+            tampered = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+            )
+
+            records[1]["previous_hash"] = "0" * 64
+            self.write_records(tmp, records, filename="ledger.jsonl")
+            previous_mismatch = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+            )
+
+        self.assertFalse(tampered.valid)
+        self.assertTrue(any("entry_hash mismatch" in issue for issue in tampered.issues))
+        self.assertFalse(previous_mismatch.valid)
+        self.assertTrue(any("previous_hash mismatch" in issue for issue in previous_mismatch.issues))
+
+    def test_detect_malformed_json_and_missing_required_field(self):
+        with TemporaryDirectory() as tmp:
+            (Path(tmp) / "ledger.jsonl").write_text("{not-json}\n", encoding="utf-8")
+            malformed = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+            )
+
+            (Path(tmp) / "ledger.jsonl").write_text('{"schema_version":"bad"}\n', encoding="utf-8")
+            missing_field = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+            )
+
+        self.assertFalse(malformed.valid)
+        self.assertTrue(any("malformed JSONL" in issue for issue in malformed.issues))
+        self.assertFalse(missing_field.valid)
+        self.assertTrue(any("missing required field" in issue for issue in missing_field.issues))
+
+    def test_truncation_is_detected_with_expected_final_hash(self):
+        with TemporaryDirectory() as tmp:
+            first = append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"step": 1},
+            )
+            second = append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"step": 2},
+            )
+            records = self.read_records(tmp, filename="ledger.jsonl")
+            self.write_records(tmp, records[:1], filename="ledger.jsonl")
+
+            truncated = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                expected_final_entry_hash=second.entry_hash,
+            )
+
+        self.assertFalse(truncated.valid)
+        self.assertTrue(any("final hash" in issue for issue in truncated.issues))
+
+    def test_append_fails_closed_when_expected_sequence_or_chain_tampered(self):
+        with TemporaryDirectory() as tmp:
+            append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"step": 1},
+            )
+            append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"step": 2},
+            )
+            records = self.read_records(tmp, filename="ledger.jsonl")
+            records[1]["sequence"] = 10
+            self.write_records(tmp, records, filename="ledger.jsonl")
+
+            result = append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"step": 3},
+            )
+            records_after = self.read_records(tmp, filename="ledger.jsonl")
+
+        self.assertFalse(result.appended)
+        self.assertTrue(result.blocking)
+        self.assertEqual(2, len(records_after))
+
+    def test_invalid_ledger_path_is_rejected(self):
+        invalid_filenames = (
+            "",
+            "../escape.jsonl",
+            "/absolute.jsonl",
+            "nested/events.jsonl",
+            "nested\\events.jsonl",
+            "bad\x00name.jsonl",
+            ".hidden.jsonl",
+        )
+        with TemporaryDirectory() as tmp:
+            for filename in invalid_filenames:
+                with self.subTest(filename=repr(filename)):
+                    append_result = append_audit_entry(
+                        ledger_dir=tmp,
+                        ledger_filename=filename,
+                        event_type="AUDIT_EVENT",
+                        evidence={"blocked": True},
+                    )
+                    verify_result = verify_audit_ledger(
+                        ledger_dir=tmp,
+                        ledger_filename=filename,
+                    )
+                    self.assertFalse(append_result.appended)
+                    self.assertTrue(append_result.blocking)
+                    self.assertFalse(verify_result.valid)
+
+    def test_static_no_new_capability_scan_for_audit_ledger_module(self):
+        source = (Path(__file__).resolve().parents[1] / "runtime" / "audit_ledger.py").read_text(encoding="utf-8")
+        tree = ast.parse(source)
+
+        imports: list[str] = []
+        forbidden_imports = {
+            "subprocess",
+            "socket",
+            "webbrowser",
+            "selenium",
+            "playwright",
+            "requests",
+            "httpx",
+            "git",
+            "openai",
+            "anthropic",
+            "google.generativeai",
+            "google.cloud",
+            "langchain",
+            "litellm",
+        }
+        called_names: set[str] = set()
+        called_attrs: set[tuple[str | None, str]] = set()
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imports.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imports.append(node.module)
+            elif isinstance(node, ast.Call):
+                if isinstance(node.func, ast.Name):
+                    called_names.add(node.func.id)
+                elif isinstance(node.func, ast.Attribute):
+                    owner = node.func.value.id if isinstance(node.func.value, ast.Name) else None
+                    called_attrs.add((owner, node.func.attr))
+
+        forbidden_calls = {
+            ("os", "system"),
+            ("subprocess", "run"),
+            ("subprocess", "Popen"),
+            ("subprocess", "call"),
+            ("subprocess", "check_call"),
+            ("subprocess", "check_output"),
+            ("webbrowser", "open"),
+        }
+        forbidden_names = {
+            "Popen",
+            "exec",
+            "eval",
+            "dispatch",
+            "install_package",
+            "approval_bypass",
+        }
+
+        for module_name in imports:
+            self.assertFalse(
+                any(
+                    module_name == forbidden
+                    or module_name.startswith(forbidden + ".")
+                    for forbidden in forbidden_imports
+                ),
+                module_name,
+            )
+        self.assertTrue(forbidden_calls.isdisjoint(called_attrs))
+        self.assertTrue(forbidden_names.isdisjoint(called_names))
+
+    def test_entry_structure_cannot_authorize_actions(self):
+        with TemporaryDirectory() as tmp:
+            result = append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"artifact": "file.txt"},
+            )
+
+        entry = result.entry
+        self.assertIsNotNone(entry)
+        self.assertIsInstance(entry, AuditLedgerEntry)
+        self.assertIsNone(getattr(entry, "can_approve", None))
+        self.assertIsNone(getattr(entry, "can_write", None))
+        self.assertIsNone(getattr(entry, "can_execute", None))
+        self.assertIsNone(getattr(entry, "approve", None))
+        self.assertIsNone(getattr(entry, "execute", None))
+        self.assertEqual(AUDIT_LEDGER_SCHEMA_VERSION, entry.schema_version)
+
+    def test_entry_hash_is_deterministic_for_same_material(self):
+        left = {
+            "event_type": "AUDIT_EVENT",
+            "sequence": 1,
+            "previous_hash": None,
+            "evidence": {"a": 1, "b": 2},
+            "schema_version": AUDIT_LEDGER_SCHEMA_VERSION,
+        }
+        right = {
+            "schema_version": AUDIT_LEDGER_SCHEMA_VERSION,
+            "sequence": 1,
+            "previous_hash": None,
+            "event_type": "AUDIT_EVENT",
+            "evidence": {"b": 2, "a": 1},
+        }
+        self.assertEqual(
+            compute_audit_entry_hash(left),
+            compute_audit_entry_hash(right),
+        )
+        with TemporaryDirectory() as tmp:
+            append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"a": 1},
+            )
+            append_audit_entry(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+                event_type="AUDIT_EVENT",
+                evidence={"a": 1},
+            )
+            records = self.read_records(tmp, filename="ledger.jsonl")
+            records[1]["sequence"] = 1
+            self.write_records(tmp, records, filename="ledger.jsonl")
+            result = verify_audit_ledger(
+                ledger_dir=tmp,
+                ledger_filename="ledger.jsonl",
+            )
+
+        self.assertFalse(result.valid)
+        self.assertTrue(any("sequence mismatch" in issue for issue in result.issues))
+
+    def read_records(self, ledger_dir: str, filename: str = "events.jsonl") -> list[dict]:
+        path = Path(ledger_dir) / filename
+        return [
+            json.loads(line)
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+    def write_records(
+        self,
+        ledger_dir: str,
+        records: list[dict],
+        filename: str = "events.jsonl",
+    ) -> None:
+        path = Path(ledger_dir) / filename
+        text = "".join(audit_ledger_canonical_json(record) + "\n" for record in records)
+        path.write_text(text, encoding="utf-8")
+
+
 if __name__ == "__main__":
     unittest.main()
