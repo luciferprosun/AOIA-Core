@@ -36,10 +36,12 @@ GIT_PUSH_PREVIEW_BLOCKED_UNSAFE_REMOTE_NAME = "GIT_PUSH_PREVIEW_BLOCKED_UNSAFE_R
 GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_REF = "GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_REF"
 GIT_PUSH_PREVIEW_BLOCKED_UNSAFE_REMOTE_REF = "GIT_PUSH_PREVIEW_BLOCKED_UNSAFE_REMOTE_REF"
 GIT_PUSH_PREVIEW_BLOCKED_TAG_REF = "GIT_PUSH_PREVIEW_BLOCKED_TAG_REF"
+GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD = "GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD"
 GIT_PUSH_PREVIEW_BLOCKED_REMOTE_HEAD = "GIT_PUSH_PREVIEW_BLOCKED_REMOTE_HEAD"
 GIT_PUSH_PREVIEW_BLOCKED_COMMIT_EVIDENCE = "GIT_PUSH_PREVIEW_BLOCKED_COMMIT_EVIDENCE"
 GIT_PUSH_PREVIEW_BLOCKED_DUPLICATE_COMMIT = "GIT_PUSH_PREVIEW_BLOCKED_DUPLICATE_COMMIT"
 GIT_PUSH_PREVIEW_BLOCKED_AUTHORITY_CLAIM = "GIT_PUSH_PREVIEW_BLOCKED_AUTHORITY_CLAIM"
+GIT_PUSH_PREVIEW_BLOCKED_DIRTY_WORKTREE = "GIT_PUSH_PREVIEW_BLOCKED_DIRTY_WORKTREE"
 GIT_PUSH_PREVIEW_BLOCKED_RAW_COMMAND_TEXT = "GIT_PUSH_PREVIEW_BLOCKED_RAW_COMMAND_TEXT"
 GIT_PUSH_PREVIEW_BLOCKED_SHELL_TEXT = "GIT_PUSH_PREVIEW_BLOCKED_SHELL_TEXT"
 GIT_PUSH_PREVIEW_BLOCKED_HASH_MISMATCH = "GIT_PUSH_PREVIEW_BLOCKED_HASH_MISMATCH"
@@ -299,6 +301,13 @@ def verify_git_push_preview(preview: GitPushPreview | Mapping[str, Any] | Any, c
     for key, value in expected.items():
         if preview_mapping.get(key) != value:
             reasons.append(GIT_PUSH_PREVIEW_BLOCKED_REPLAY_MISMATCH)
+    if _checkpoint_is_dirty(checkpoint_mapping):
+        reasons.append(GIT_PUSH_PREVIEW_BLOCKED_DIRTY_WORKTREE)
+    remote_head = _text(preview_mapping.get("remote_head"))
+    if remote_head is None:
+        reasons.append(GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD)
+    elif not _hash_like(remote_head, allow_sha1=True):
+        reasons.append(GIT_PUSH_PREVIEW_BLOCKED_REMOTE_HEAD)
     if not _sequence_hashes_ok(preview_mapping.get("commits_ahead")) or not _sequence_hashes_ok(preview_mapping.get("commits_behind")):
         reasons.append(GIT_PUSH_PREVIEW_BLOCKED_COMMIT_EVIDENCE)
     if preview_mapping.get("requires_human_barrier") is not True:
@@ -338,6 +347,8 @@ def _checkpoint_findings(checkpoint: dict[str, Any] | None, policy: GitPushPrevi
         findings.append(_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_BLOCKED_MISSING_BRANCH, "Branch evidence is missing."))
     if checkpoint.get("detached_head") is True and policy.block_detached_head:
         findings.append(_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_BLOCKED_DETACHED_HEAD, "Detached HEAD is blocked by default."))
+    if _checkpoint_is_dirty(checkpoint):
+        findings.append(_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_BLOCKED_DIRTY_WORKTREE, "Dirty working tree or uncommitted changes block push preview."))
     if _authority_claim_present(checkpoint):
         findings.append(_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_BLOCKED_AUTHORITY_CLAIM, "Checkpoint contains authority-like claims."))
     return tuple(findings)
@@ -390,7 +401,7 @@ def _remote_ref_findings(value: str | None) -> tuple[str | None, tuple[GitPushPr
 def _remote_head_findings(value: str | None) -> tuple[str | None, tuple[GitPushPreviewFinding, ...]]:
     text = _text(value)
     if text is None:
-        return None, ()
+        return None, (_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD, "Remote HEAD evidence is missing or unavailable."),)
     if not _hash_like(text, allow_sha1=True):
         return text, (_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_BLOCKED_REMOTE_HEAD, "Remote HEAD evidence is malformed."),)
     return text.lower(), ()
@@ -419,10 +430,8 @@ def _relationship_findings(
     policy: GitPushPreviewPolicy,
 ) -> tuple[GitPushPreviewFinding, ...]:
     findings: list[GitPushPreviewFinding] = []
-    if remote_head is None and not policy.allow_new_remote_ref:
-        findings.append(_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_REVIEW_NO_REMOTE_HEAD, "Remote HEAD is missing and new remote refs are disabled."))
-    elif remote_head is None:
-        findings.append(_finding(GIT_PUSH_PREVIEW_NEEDS_REVIEW, GIT_PUSH_PREVIEW_REVIEW_NO_REMOTE_HEAD, "Remote HEAD is missing; preview treats this as new remote-ref evidence."))
+    if remote_head is None:
+        findings.append(_finding(GIT_PUSH_PREVIEW_BLOCK, GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD, "Remote HEAD evidence is required for push preview."))
     if commits_behind and not policy.allow_diverged_remote:
         findings.append(_finding(GIT_PUSH_PREVIEW_NEEDS_REVIEW, GIT_PUSH_PREVIEW_REVIEW_REMOTE_DIVERGED, "Remote contains commits not present locally."))
     if not commits_ahead and not policy.allow_noop_preview:
@@ -511,6 +520,15 @@ def _preview_hash_material(preview: Mapping[str, Any]) -> dict[str, Any]:
     for field_name in _AUTHORITY_FIELDS:
         material.pop(field_name, None)
     return material
+
+
+def _checkpoint_is_dirty(checkpoint: Mapping[str, Any]) -> bool:
+    return (
+        checkpoint.get("clean") is not True
+        or bool(_sequence(checkpoint.get("staged_paths")))
+        or bool(_sequence(checkpoint.get("unstaged_paths")))
+        or bool(_sequence(checkpoint.get("untracked_paths")))
+    )
 
 
 def _finding(severity: str, reason_code: str, message: str) -> GitPushPreviewFinding:

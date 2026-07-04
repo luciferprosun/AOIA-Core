@@ -16,6 +16,7 @@ from runtime.git_ops.git_push_preview import (
     GIT_PUSH_PREVIEW_BLOCKED_CHECKPOINT_INVALID,
     GIT_PUSH_PREVIEW_BLOCKED_COMMIT_EVIDENCE,
     GIT_PUSH_PREVIEW_BLOCKED_DETACHED_HEAD,
+    GIT_PUSH_PREVIEW_BLOCKED_DIRTY_WORKTREE,
     GIT_PUSH_PREVIEW_BLOCKED_DUPLICATE_COMMIT,
     GIT_PUSH_PREVIEW_BLOCKED_GOVERNANCE_BLOCK,
     GIT_PUSH_PREVIEW_BLOCKED_GOVERNANCE_REVIEW,
@@ -24,6 +25,7 @@ from runtime.git_ops.git_push_preview import (
     GIT_PUSH_PREVIEW_BLOCKED_MISSING_CHECKPOINT,
     GIT_PUSH_PREVIEW_BLOCKED_MISSING_CHECKPOINT_HASH,
     GIT_PUSH_PREVIEW_BLOCKED_MISSING_LOCAL_HEAD,
+    GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD,
     GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_NAME,
     GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_REF,
     GIT_PUSH_PREVIEW_BLOCKED_RAW_COMMAND_TEXT,
@@ -33,10 +35,10 @@ from runtime.git_ops.git_push_preview import (
     GIT_PUSH_PREVIEW_BLOCKED_TAG_REF,
     GIT_PUSH_PREVIEW_BLOCKED_UNSAFE_REMOTE_NAME,
     GIT_PUSH_PREVIEW_BLOCKED_UNSAFE_REMOTE_REF,
+    GIT_PUSH_PREVIEW_BLOCKED,
     GIT_PUSH_PREVIEW_CREATED,
     GIT_PUSH_PREVIEW_NEEDS_REVIEW,
     GIT_PUSH_PREVIEW_REVIEW_NO_AHEAD_COMMITS,
-    GIT_PUSH_PREVIEW_REVIEW_NO_REMOTE_HEAD,
     GIT_PUSH_PREVIEW_REVIEW_REMOTE_DIVERGED,
     GIT_PUSH_PREVIEW_VALID,
     GitPushPreviewPolicy,
@@ -150,15 +152,17 @@ class GitPushGovernancePreview1ATests(unittest.TestCase):
                 result = self.preview(**case)
                 self.assertIn(code, result.reason_codes)
 
-    def test_new_remote_ref_diverged_remote_and_noop_are_review_metadata(self):
-        new_remote = self.preview(remote_head=None)
+    def test_missing_remote_head_fails_closed_without_acceptable_preview(self):
+        result = self.preview(remote_head=None)
+
+        self.assertEqual(GIT_PUSH_PREVIEW_BLOCKED, result.status)
+        self.assertIn(GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD, result.reason_codes)
+        self.assertIsNone(result.preview)
+        self.assert_authority_false(result)
+
+    def test_diverged_remote_and_noop_are_review_metadata(self):
         diverged = self.preview(commits_behind=("3" * 40,))
         noop = self.preview(commits_ahead=())
-
-        self.assertEqual(GIT_PUSH_PREVIEW_CREATED, new_remote.status)
-        self.assertEqual(GIT_PUSH_PREVIEW_NEEDS_REVIEW, new_remote.preview.status)
-        self.assertIn(GIT_PUSH_PREVIEW_REVIEW_NO_REMOTE_HEAD, new_remote.preview.risk_flags)
-        self.assertFalse(new_remote.preview.push_would_be_fast_forward)
 
         self.assertEqual(GIT_PUSH_PREVIEW_CREATED, diverged.status)
         self.assertEqual(GIT_PUSH_PREVIEW_NEEDS_REVIEW, diverged.preview.status)
@@ -169,6 +173,16 @@ class GitPushGovernancePreview1ATests(unittest.TestCase):
         self.assertEqual(GIT_PUSH_PREVIEW_NEEDS_REVIEW, noop.preview.status)
         self.assertIn(GIT_PUSH_PREVIEW_REVIEW_NO_AHEAD_COMMITS, noop.preview.risk_flags)
         self.assertFalse(noop.preview.push_would_update_remote)
+
+    def test_dirty_working_tree_fails_closed_without_acceptable_preview(self):
+        dirty = self.checkpoint(clean=False, unstaged_paths=("runtime/git_ops/git_push_preview.py",))
+
+        result = self.preview(checkpoint=dirty)
+
+        self.assertEqual(GIT_PUSH_PREVIEW_BLOCKED, result.status)
+        self.assertIn(GIT_PUSH_PREVIEW_BLOCKED_DIRTY_WORKTREE, result.reason_codes)
+        self.assertIsNone(result.preview)
+        self.assert_authority_false(result)
 
     def test_authority_raw_command_and_shell_metadata_block(self):
         cases = {
@@ -217,7 +231,9 @@ class GitPushGovernancePreview1ATests(unittest.TestCase):
             verify_git_push_preview({**preview.to_dict(), "checkpoint_hash": changed_checkpoint.checkpoint_hash}, checkpoint),
             verify_git_push_preview({**preview.to_dict(), "git_read_hash": "e" * 64}, checkpoint),
             verify_git_push_preview({**preview.to_dict(), "requires_human_barrier": False}, checkpoint),
+            verify_git_push_preview({**preview.to_dict(), "remote_head": None}, checkpoint),
             verify_git_push_preview(preview, changed_checkpoint),
+            verify_git_push_preview(preview, self.checkpoint(clean=False, untracked_paths=("dirty.txt",))),
         )
 
         self.assertEqual(GIT_PUSH_PREVIEW_VALID, valid.status)
@@ -226,6 +242,8 @@ class GitPushGovernancePreview1ATests(unittest.TestCase):
             self.assertTrue(
                 GIT_PUSH_PREVIEW_BLOCKED_HASH_MISMATCH in result.reason_codes
                 or GIT_PUSH_PREVIEW_BLOCKED_REPLAY_MISMATCH in result.reason_codes
+                or GIT_PUSH_PREVIEW_BLOCKED_MISSING_REMOTE_HEAD in result.reason_codes
+                or GIT_PUSH_PREVIEW_BLOCKED_DIRTY_WORKTREE in result.reason_codes
             )
 
     def test_push_preview_cannot_satisfy_control_write_gate_or_future_authority(self):
@@ -278,6 +296,8 @@ class GitPushGovernancePreview1ATests(unittest.TestCase):
         source = PREVIEW_MODULE.read_text(encoding="utf-8").casefold()
         for forbidden in ("shell=true", "api.github.com", "os.environ", "getenv", "api_key", "subprocess.", "requests", "httpx"):
             self.assertNotIn(forbidden, source)
+        for forbidden_function in ("controlled_git_push", "execute_git_push", "dispatch_git_push", "authorize_git_push"):
+            self.assertNotIn(f"def {forbidden_function}", source)
 
     def preview(
         self,
@@ -321,6 +341,10 @@ class GitPushGovernancePreview1ATests(unittest.TestCase):
         governance_hash="b" * 64,
         head_sha="1" * 40,
         branch_name=BRANCH,
+        clean=True,
+        staged_paths=(),
+        unstaged_paths=(),
+        untracked_paths=(),
     ):
         git_read = GitReadResult(
             status=GIT_READ_READY,
@@ -329,10 +353,10 @@ class GitPushGovernancePreview1ATests(unittest.TestCase):
             head_sha=head_sha,
             branch_name=branch_name,
             detached_head=False,
-            clean=True,
-            staged_paths=(),
-            unstaged_paths=(),
-            untracked_paths=(),
+            clean=clean,
+            staged_paths=staged_paths,
+            unstaged_paths=unstaged_paths,
+            untracked_paths=untracked_paths,
             command_evidence=(self.evidence(),),
             reason_codes=("GIT_READ_READY_EVIDENCE_ONLY",),
             reason="evidence only",
