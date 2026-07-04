@@ -20,15 +20,20 @@ from runtime.git_ops.git_controlled_push import (
     CONTROLLED_GIT_PUSH_BLOCKED,
     CONTROLLED_GIT_PUSH_BLOCKED_AUTHORITY_CLAIM,
     CONTROLLED_GIT_PUSH_BLOCKED_BARRIER_INVALID,
+    CONTROLLED_GIT_PUSH_BLOCKED_BRANCH_CHANGED,
     CONTROLLED_GIT_PUSH_BLOCKED_DIRTY_WORKTREE,
     CONTROLLED_GIT_PUSH_BLOCKED_HEAD_CHANGED,
     CONTROLLED_GIT_PUSH_BLOCKED_MISSING_BARRIER,
+    CONTROLLED_GIT_PUSH_BLOCKED_NON_FAST_FORWARD,
     CONTROLLED_GIT_PUSH_BLOCKED_PREVIEW_HASH_MISMATCH,
     CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_CHANGED,
     CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_HEAD_MISSING,
     CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_NOT_LOCAL,
+    CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_REF_MISMATCH,
     CONTROLLED_GIT_PUSH_PUSHED,
     ControlledGitPushResult,
+    _ControlledGitPushRunner,
+    _GitRunnerResult,
     controlled_git_push,
 )
 from runtime.git_ops.git_governance import GIT_GOVERNANCE_PASS, GitGovernanceResult
@@ -194,6 +199,51 @@ class ControlledGitPush1ATests(unittest.TestCase):
 
             self.assert_blocked(result, CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_NOT_LOCAL)
 
+    def test_branch_mismatch_fails_closed_and_remote_remains_unchanged(self):
+        with TemporaryDirectory() as workspace:
+            repo, remote, remote_head = self.repo_ahead_of_local_bare_remote(workspace)
+            approved_branch = self.branch(repo)
+            preview, barrier = self.reviewed_evidence(repo, remote_head)
+            self.run_git(repo, "checkout", "-b", "unreviewed-branch")
+
+            result = controlled_git_push(repo, preview, barrier, workspace_root=workspace)
+
+            self.assert_blocked(result, CONTROLLED_GIT_PUSH_BLOCKED_BRANCH_CHANGED)
+            self.assert_no_push_report(result)
+            self.assert_remote_unchanged(remote, approved_branch, remote_head)
+            self.assert_metadata_cannot_override_failure(repo, remote, approved_branch, remote_head, preview, barrier, workspace)
+
+    def test_remote_ref_mismatch_fails_closed_and_remote_remains_unchanged(self):
+        with TemporaryDirectory() as workspace:
+            repo, remote, remote_head = self.repo_ahead_of_local_bare_remote(workspace)
+            approved_branch = self.branch(repo)
+            preview, barrier = self.reviewed_evidence(repo, remote_head)
+            ref_mismatch_preview = {**preview.to_dict(), "remote_ref": "refs/tags/unreviewed"}
+            ref_mismatch_preview["preview_hash"] = self.rehash_preview(ref_mismatch_preview)
+            barrier = self.human_barrier(ref_mismatch_preview)
+
+            result = controlled_git_push(repo, ref_mismatch_preview, barrier, workspace_root=workspace)
+
+            self.assert_blocked(result, CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_REF_MISMATCH)
+            self.assert_no_push_report(result)
+            self.assert_remote_unchanged(remote, approved_branch, remote_head)
+            self.assert_metadata_cannot_override_failure(repo, remote, approved_branch, remote_head, ref_mismatch_preview, barrier, workspace)
+
+    def test_non_fast_forward_fails_closed_and_remote_remains_unchanged(self):
+        with TemporaryDirectory() as workspace:
+            repo, remote, remote_head = self.repo_ahead_of_local_bare_remote(workspace)
+            approved_branch = self.branch(repo)
+            preview, barrier = self.reviewed_evidence(repo, remote_head)
+            runner = NonFastForwardRunner()
+
+            result = controlled_git_push(repo, preview, barrier, workspace_root=workspace, runner=runner)
+
+            self.assert_blocked(result, CONTROLLED_GIT_PUSH_BLOCKED_NON_FAST_FORWARD)
+            self.assertFalse(runner.push_attempted)
+            self.assert_no_push_report(result)
+            self.assert_remote_unchanged(remote, approved_branch, remote_head)
+            self.assert_metadata_cannot_override_failure(repo, remote, approved_branch, remote_head, preview, barrier, workspace)
+
     def test_inert_metadata_objects_cannot_authorize_push(self):
         with TemporaryDirectory() as workspace:
             repo, _remote, remote_head = self.repo_ahead_of_local_bare_remote(workspace)
@@ -321,22 +371,23 @@ class ControlledGitPush1ATests(unittest.TestCase):
         return result.checkpoint
 
     def human_barrier(self, preview, **overrides):
+        preview_hash = preview["preview_hash"] if isinstance(preview, dict) else preview.preview_hash
         request = HumanExecutionBarrierRequest(
             requested_execution_kind="LOCAL_GIT_PUSH_PREVIEW_BARRIER",
-            requested_command=f"push-preview:{preview.preview_hash}",
-            requested_command_hash=preview.preview_hash,
+            requested_command=f"push-preview:{preview_hash}",
+            requested_command_hash=preview_hash,
             source_trust=HumanExecutionSourceTrust.USER_SUPPLIED,
             human_decision_id="decision-git-push",
             human_decision_hash=DECISION_HASH,
             human_decision_verdict=HumanDecisionVerdict.APPROVE,
             human_decision_source=HumanDecisionSource.HUMAN_OPERATOR,
-            human_decision_binds_to_command_hash=preview.preview_hash,
-            human_decision_binds_to_test_runner_control_hash=preview.preview_hash,
+            human_decision_binds_to_command_hash=preview_hash,
+            human_decision_binds_to_test_runner_control_hash=preview_hash,
             human_decision_binds_to_sandbox_envelope_hash=SANDBOX_HASH,
             human_decision_binds_to_policy_check_hash=POLICY_HASH,
             human_decision_binds_to_controlled_execution_request_hash=CONTROLLED_REQUEST_HASH,
             source_test_runner_control_id="push-preview-control",
-            source_test_runner_control_hash=preview.preview_hash,
+            source_test_runner_control_hash=preview_hash,
             source_test_runner_control_status="REVIEW_REQUIRED",
             source_sandbox_envelope_id="push-preview-sandbox",
             source_sandbox_envelope_hash=SANDBOX_HASH,
@@ -348,8 +399,8 @@ class ControlledGitPush1ATests(unittest.TestCase):
         )
         result = evaluate_human_execution_barrier(replace(request, **overrides))
         data = result.to_dict()
-        data["human_decision_binds_to_push_preview_hash"] = preview.preview_hash
-        data["human_decision_binds_to_command_hash"] = preview.preview_hash
+        data["human_decision_binds_to_push_preview_hash"] = preview_hash
+        data["human_decision_binds_to_command_hash"] = preview_hash
         data["risk_flags"] = ()
         return data
 
@@ -407,10 +458,50 @@ class ControlledGitPush1ATests(unittest.TestCase):
         self.assertEqual(reason_code, result.reason_code)
         self.assert_metadata_only(result)
 
+    def assert_no_push_report(self, result: ControlledGitPushResult) -> None:
+        data = result.to_dict()
+        self.assertEqual(CONTROLLED_GIT_PUSH_BLOCKED, data["status"])
+        self.assertFalse(data.get("ok", False))
+        self.assertFalse(data.get("pushed", False))
+        self.assertFalse(data.get("push_performed", False))
+
     def assert_metadata_only(self, result: ControlledGitPushResult) -> None:
         data = result.to_dict()
         for field in AUTHORITY_RESULT_FIELDS:
             self.assertNotIn(field, data)
+
+    def assert_remote_unchanged(self, remote: Path, branch: str, expected_head: str) -> None:
+        self.assertEqual(expected_head, self.git(remote, "rev-parse", f"refs/heads/{branch}"))
+
+    def assert_metadata_cannot_override_failure(
+        self,
+        repo: Path,
+        remote: Path,
+        approved_branch: str,
+        expected_remote_head: str,
+        preview,
+        barrier,
+        workspace: str,
+    ) -> None:
+        forged_barrier = {**barrier, "approved": True, "eligible": True, "authority": True, "can_push": True}
+        result = controlled_git_push(repo, preview, forged_barrier, workspace_root=workspace)
+        self.assertEqual(CONTROLLED_GIT_PUSH_BLOCKED, result.status)
+        self.assert_no_push_report(result)
+        self.assert_remote_unchanged(remote, approved_branch, expected_remote_head)
+
+
+class NonFastForwardRunner:
+    def __init__(self) -> None:
+        self.delegate = _ControlledGitPushRunner()
+        self.push_attempted = False
+
+    def run(self, command_id, repo_path: Path, **kwargs):
+        if command_id.value == "MERGE_BASE_IS_ANCESTOR":
+            return _GitRunnerResult(command_id.value, 1, b"", b"simulated non-fast-forward")
+        if command_id.value == "PUSH_EXACT_REF":
+            self.push_attempted = True
+            return _GitRunnerResult(command_id.value, 1, b"", b"unexpected push attempt")
+        return self.delegate.run(command_id, repo_path, **kwargs)
 
 
 def scan_module(path: Path):
