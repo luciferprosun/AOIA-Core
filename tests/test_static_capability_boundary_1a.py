@@ -13,6 +13,7 @@ CORE_NO_AUTHORITY_MODULES = (
     "runtime/providers/critic.py",
     "runtime/providers/critic_taxonomy.py",
     "runtime/providers/critic_adversarial_corpus.py",
+    "runtime/providers/provider_gateway_guard.py",
     "runtime/schemas/action_proposal.py",
     "runtime/audit/durable_log.py",
 )
