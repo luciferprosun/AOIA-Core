@@ -355,6 +355,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
             STEP26_MODULE,
             GIT_READ_MODULE,
             REPO_ROOT / "runtime" / "git_ops" / "controlled_git_commit.py",
+            REPO_ROOT / "runtime" / "git_ops" / "git_controlled_push.py",
             REPO_ROOT / "runtime" / "execution" / "controlled_test_runner.py",
             REPO_ROOT / "runtime" / "commands" / "local_commands.py",
             REPO_ROOT / "runtime" / "tools" / "build_rhcsa_library.py",

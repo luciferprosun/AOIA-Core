@@ -32,6 +32,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/git_ops/git_commit_preview.py",
     "runtime/git_ops/git_commit_barrier.py",
     "runtime/git_ops/git_push_preview.py",
+    "runtime/git_ops/git_push_barrier.py",
     "runtime/secret_boundary_review.py",
     "runtime/human_review_decision.py",
     "runtime/human_review_decision_validator.py",
@@ -58,7 +59,9 @@ GIT_WRITE_PREVIEW = REPO_ROOT / "runtime/git_ops/git_write_preview.py"
 GIT_COMMIT_PREVIEW = REPO_ROOT / "runtime/git_ops/git_commit_preview.py"
 GIT_COMMIT_BARRIER = REPO_ROOT / "runtime/git_ops/git_commit_barrier.py"
 GIT_PUSH_PREVIEW = REPO_ROOT / "runtime/git_ops/git_push_preview.py"
+GIT_PUSH_BARRIER = REPO_ROOT / "runtime/git_ops/git_push_barrier.py"
 CONTROLLED_GIT_COMMIT = REPO_ROOT / "runtime/git_ops/controlled_git_commit.py"
+CONTROLLED_GIT_PUSH = REPO_ROOT / "runtime/git_ops/git_controlled_push.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
     REPO_ROOT / item
@@ -350,6 +353,16 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("os.environ", push_preview_source)
         self.assertNotIn("getenv", push_preview_source)
 
+        self.assertTrue(GIT_PUSH_BARRIER.exists())
+        push_barrier_scan = scan_module(GIT_PUSH_BARRIER)
+        self.assertNotIn("subprocess", push_barrier_scan.imports)
+        self.assertNotIn("subprocess.run", push_barrier_scan.calls)
+        self.assertNotIn("subprocess.Popen", push_barrier_scan.calls)
+        push_barrier_source = GIT_PUSH_BARRIER.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", push_barrier_source)
+        self.assertNotIn("os.environ", push_barrier_source)
+        self.assertNotIn("getenv", push_barrier_source)
+
         self.assertTrue(CONTROLLED_GIT_COMMIT.exists())
         controlled_commit_scan = scan_module(CONTROLLED_GIT_COMMIT)
         self.assertIn("subprocess", controlled_commit_scan.imports)
@@ -372,6 +385,27 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
             "anthropic",
         ):
             self.assertNotIn(forbidden, controlled_commit_source)
+
+        self.assertTrue(CONTROLLED_GIT_PUSH.exists())
+        controlled_push_scan = scan_module(CONTROLLED_GIT_PUSH)
+        self.assertIn("subprocess", controlled_push_scan.imports)
+        self.assertIn("subprocess.run", controlled_push_scan.calls)
+        self.assertNotIn("subprocess.Popen", controlled_push_scan.calls)
+        controlled_push_source = CONTROLLED_GIT_PUSH.read_text(encoding="utf-8").casefold()
+        for forbidden in (
+            "shell=true",
+            "os.environ",
+            "getenv",
+            "api.github.com",
+            "requests",
+            "httpx",
+            "webbrowser",
+            "selenium",
+            "playwright",
+            "openai",
+            "anthropic",
+        ):
+            self.assertNotIn(forbidden, controlled_push_source)
 
         forbidden_patch_imports = (
             "subprocess",
