@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 CORE_NO_AUTHORITY_MODULES = (
     "runtime/artifact_preview.py",
     "runtime/providers/critic.py",
+    "runtime/providers/critic_taxonomy.py",
     "runtime/schemas/action_proposal.py",
     "runtime/audit/durable_log.py",
 )
