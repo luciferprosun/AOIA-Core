@@ -31,6 +31,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/git_ops/git_write_preview.py",
     "runtime/git_ops/git_commit_preview.py",
     "runtime/git_ops/git_commit_barrier.py",
+    "runtime/git_ops/git_push_preview.py",
     "runtime/secret_boundary_review.py",
     "runtime/human_review_decision.py",
     "runtime/human_review_decision_validator.py",
@@ -56,6 +57,7 @@ GIT_STATE_CHECKPOINT = REPO_ROOT / "runtime/git_ops/git_checkpoint.py"
 GIT_WRITE_PREVIEW = REPO_ROOT / "runtime/git_ops/git_write_preview.py"
 GIT_COMMIT_PREVIEW = REPO_ROOT / "runtime/git_ops/git_commit_preview.py"
 GIT_COMMIT_BARRIER = REPO_ROOT / "runtime/git_ops/git_commit_barrier.py"
+GIT_PUSH_PREVIEW = REPO_ROOT / "runtime/git_ops/git_push_preview.py"
 CONTROLLED_GIT_COMMIT = REPO_ROOT / "runtime/git_ops/controlled_git_commit.py"
 
 PATCH_METADATA_BOUNDARY_MODULES = tuple(
@@ -337,6 +339,16 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("shell=true", commit_preview_source)
         self.assertNotIn("os.environ", commit_preview_source)
         self.assertNotIn("getenv", commit_preview_source)
+
+        self.assertTrue(GIT_PUSH_PREVIEW.exists())
+        push_preview_scan = scan_module(GIT_PUSH_PREVIEW)
+        self.assertNotIn("subprocess", push_preview_scan.imports)
+        self.assertNotIn("subprocess.run", push_preview_scan.calls)
+        self.assertNotIn("subprocess.Popen", push_preview_scan.calls)
+        push_preview_source = GIT_PUSH_PREVIEW.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", push_preview_source)
+        self.assertNotIn("os.environ", push_preview_source)
+        self.assertNotIn("getenv", push_preview_source)
 
         self.assertTrue(CONTROLLED_GIT_COMMIT.exists())
         controlled_commit_scan = scan_module(CONTROLLED_GIT_COMMIT)
