@@ -17,6 +17,7 @@ CORE_NO_AUTHORITY_MODULES = (
     "runtime/providers/provider_gateway_guard.py",
     "runtime/providers/provider_payload_governance.py",
     "runtime/providers/provider_response_schema.py",
+    "runtime/package_ops/package_install_proposal.py",
     "runtime/schemas/action_proposal.py",
     "runtime/audit/durable_log.py",
 )
