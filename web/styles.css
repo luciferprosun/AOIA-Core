@@ -382,6 +382,54 @@ textarea {
   word-break: break-word;
 }
 
+.commit-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.commit-table-wrap {
+  max-height: 560px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.commit-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+  font-size: 0.84rem;
+}
+
+.commit-table th,
+.commit-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.commit-table th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-strong);
+  color: var(--accent-deep);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.commit-table td {
+  word-break: break-word;
+}
+
+.commit-sha {
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--control);
+  white-space: nowrap;
+}
+
 .result-panel {
   display: grid;
   gap: 8px;

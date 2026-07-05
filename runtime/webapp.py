@@ -115,6 +115,58 @@ def execute_webapp_approved_model_call(**kwargs) -> dict[str, object]:
     return execute_approved_model_call_once(**kwargs)
 
 
+def get_commit_history_payload() -> dict[str, object]:
+    try:
+        from runtime.git_ops.git_read import GIT_READ_COMMAND_PASS, GitReadCommand, GitReadRequest, run_allowlisted_git_read
+    except ModuleNotFoundError:  # pragma: no cover - script launch path
+        from git_ops.git_read import GIT_READ_COMMAND_PASS, GitReadCommand, GitReadRequest, run_allowlisted_git_read
+
+    evidence = run_allowlisted_git_read(
+        GitReadRequest(workspace_root=PROJECT_DIR.parent, max_output_bytes=50_000),
+        GitReadCommand.COMMIT_LOG,
+    )
+    if evidence.status != GIT_READ_COMMAND_PASS:
+        return {
+            "ok": False,
+            "commits": [],
+            "commit_count": 0,
+            "all_commits_returned": False,
+            "reason_code": evidence.reason_code,
+            "can_commit": False,
+            "can_push": False,
+        }
+
+    commits = _parse_commit_log_output(evidence.stdout_preview)
+    return {
+        "ok": True,
+        "commits": commits,
+        "commit_count": len(commits),
+        "all_commits_returned": True,
+        "reason_code": evidence.reason_code,
+        "can_commit": False,
+        "can_push": False,
+    }
+
+
+def _parse_commit_log_output(output: str) -> list[dict[str, str]]:
+    commits: list[dict[str, str]] = []
+    for line in output.splitlines():
+        parts = line.split("\t", 4)
+        if len(parts) != 5:
+            continue
+        full_sha, short_sha, committed_at, author, subject = parts
+        commits.append(
+            {
+                "sha": full_sha,
+                "short_sha": short_sha,
+                "committed_at": committed_at,
+                "author": author,
+                "subject": subject,
+            }
+        )
+    return commits
+
+
 def _load_cpt_transformer():
     project_parent = str(PROJECT_DIR.parent)
     if project_parent not in sys.path:
@@ -155,6 +207,9 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             from provider_config import get_provider_config_status
 
             self._write_json(HTTPStatus.OK, get_provider_config_status())
+            return
+        if parsed.path == "/api/commits":
+            self._write_json(HTTPStatus.OK, get_commit_history_payload())
             return
         if parsed.path in {"/", "/index.html"}:
             self.path = "/index.html"

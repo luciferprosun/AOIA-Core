@@ -201,6 +201,34 @@
             <pre id="router-proposal-result" class="router-output" aria-live="polite"></pre>
             <pre id="router-call-result" class="router-output" aria-live="polite"></pre>
           </section>
+
+          <section class="panel commit-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Repository</p>
+                <h2>Commit History</h2>
+              </div>
+              <span id="commit-count" class="badge">loading</span>
+            </div>
+            <p id="commit-status" class="note">Reading local commit history.</p>
+            <div class="commit-table-wrap">
+              <table class="commit-table">
+                <thead>
+                  <tr>
+                    <th>Commit</th>
+                    <th>Date</th>
+                    <th>Author</th>
+                    <th>Subject</th>
+                  </tr>
+                </thead>
+                <tbody id="commit-table-body">
+                  <tr>
+                    <td colspan="4">Loading commits.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </details>
 
         <details class="legacy-details">

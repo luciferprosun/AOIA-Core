@@ -70,6 +70,9 @@ const elements = {
   auditHumanApproved: document.querySelector("#audit-human-approved"),
   auditOutputTrusted: document.querySelector("#audit-output-trusted"),
   auditFallback: document.querySelector("#audit-fallback"),
+  commitCount: document.querySelector("#commit-count"),
+  commitStatus: document.querySelector("#commit-status"),
+  commitTableBody: document.querySelector("#commit-table-body"),
 };
 
 async function jsonFetch(url, options = {}) {
@@ -136,6 +139,11 @@ async function refreshProviderConfigStatus() {
 async function refreshMemoryHats() {
   const payload = await jsonFetch("/api/memory-hats");
   renderMemoryHats(payload);
+}
+
+async function refreshCommitHistory() {
+  const payload = await jsonFetch("/api/commits");
+  renderCommitHistory(payload);
 }
 
 function providerLabel(providerId) {
@@ -360,6 +368,46 @@ function renderMemoryHats(payload) {
 
     article.append(title, status, purpose, flags);
     elements.memoryHatsList.appendChild(article);
+  }
+}
+
+function renderCommitHistory(payload) {
+  const commits = payload.commits || [];
+  elements.commitCount.textContent = payload.ok ? `${commits.length} commits` : "blocked";
+  elements.commitStatus.textContent = payload.ok
+    ? "All local commits returned by the read-only Git adapter."
+    : `Commit history blocked: ${payload.reason_code || "unknown reason"}`;
+  elements.commitTableBody.innerHTML = "";
+
+  if (!payload.ok || commits.length === 0) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = payload.ok ? "No commits found." : "Commit history is unavailable.";
+    row.appendChild(cell);
+    elements.commitTableBody.appendChild(row);
+    return;
+  }
+
+  for (const commit of commits) {
+    const row = document.createElement("tr");
+
+    const sha = document.createElement("td");
+    sha.className = "commit-sha";
+    sha.textContent = commit.short_sha || "";
+    sha.title = commit.sha || "";
+
+    const committedAt = document.createElement("td");
+    committedAt.textContent = commit.committed_at || "";
+
+    const author = document.createElement("td");
+    author.textContent = commit.author || "";
+
+    const subject = document.createElement("td");
+    subject.textContent = commit.subject || "";
+
+    row.append(sha, committedAt, author, subject);
+    elements.commitTableBody.appendChild(row);
   }
 }
 
@@ -604,6 +652,7 @@ document.querySelector("#refresh-status").addEventListener("click", async () => 
     await refreshModelCatalog();
     await refreshMemoryHats();
     await refreshProviderConfigStatus();
+    await refreshCommitHistory();
   } catch (error) {
     addMessage("System", `Refresh failed: ${error}`);
   }
@@ -679,6 +728,7 @@ async function bootstrap() {
     await refreshModelCatalog();
     await refreshMemoryHats();
     await refreshProviderConfigStatus();
+    await refreshCommitHistory();
   } catch (error) {
     addMessage("System", `Startup failed: ${error}`);
   }

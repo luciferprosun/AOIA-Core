@@ -86,6 +86,7 @@ class GitReadCommand(str, Enum):
     DIFF_NAME_STATUS = "DIFF_NAME_STATUS"
     DIFF_CACHED_NAME_STATUS = "DIFF_CACHED_NAME_STATUS"
     LS_FILES_OTHERS = "LS_FILES_OTHERS"
+    COMMIT_LOG = "COMMIT_LOG"
 
 
 _ALLOWLIST: dict[GitReadCommand, tuple[str, ...]] = {
@@ -96,6 +97,7 @@ _ALLOWLIST: dict[GitReadCommand, tuple[str, ...]] = {
     GitReadCommand.DIFF_NAME_STATUS: ("git", "diff", "--name-status"),
     GitReadCommand.DIFF_CACHED_NAME_STATUS: ("git", "diff", "--cached", "--name-status"),
     GitReadCommand.LS_FILES_OTHERS: ("git", "ls-files", "--others", "--exclude-standard"),
+    GitReadCommand.COMMIT_LOG: ("git", "log", "--format=%H%x09%h%x09%ad%x09%an%x09%s", "--date=iso-strict"),
 }
 
 
