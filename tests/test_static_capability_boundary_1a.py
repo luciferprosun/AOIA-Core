@@ -31,6 +31,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/schemas/download_manager_governance.py",
     "runtime/schemas/statement_manager_governance.py",
     "runtime/schemas/browser_governance.py",
+    "runtime/browser_ops/browser_automation_preview.py",
     "runtime/provider_request_review.py",
     "runtime/provider_config_review.py",
     "runtime/provider_live_readiness_review.py",
