@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-import sys
 import venv
 from dataclasses import dataclass
 from pathlib import Path
@@ -41,6 +40,8 @@ CONTROLLED_PACKAGE_INSTALL_BLOCKED_UNSAFE_TARGET = "CONTROLLED_PACKAGE_INSTALL_B
 CONTROLLED_PACKAGE_INSTALL_BLOCKED_APT_UNSUPPORTED = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_APT_UNSUPPORTED"
 CONTROLLED_PACKAGE_INSTALL_BLOCKED_UNSUPPORTED_ECOSYSTEM = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_UNSUPPORTED_ECOSYSTEM"
 CONTROLLED_PACKAGE_INSTALL_BLOCKED_EXECUTION_FAILED = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_EXECUTION_FAILED"
+CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_MISSING = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_MISSING"
+CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_UNSAFE = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_UNSAFE"
 
 _HEX = frozenset("0123456789abcdef")
 _MAX_OUTPUT_CHARS = 4000
@@ -348,6 +349,12 @@ class _VenvEnvironmentBuilder:
         venv.EnvBuilder(with_pip=True, clear=False).create(str(target_path))
 
 
+class _SandboxInterpreterBlocked(Exception):
+    def __init__(self, reason_code: str) -> None:
+        super().__init__(reason_code)
+        self.reason_code = reason_code
+
+
 def create_package_install_human_barrier(
     *,
     proposal_hash: str,
@@ -506,6 +513,21 @@ def execute_controlled_package_install(
             target_environment_hash=state.target_environment_hash,
             stderr_preview=type(exc).__name__,
         )
+    except _SandboxInterpreterBlocked as exc:
+        return _result(
+            status=CONTROLLED_PACKAGE_INSTALL_BLOCKED,
+            reason_codes=(exc.reason_code,),
+            ecosystem=validation.ecosystem,
+            package_name=validation.package_name,
+            package_version=validation.version,
+            proposal_hash=proposal_hash,
+            validation_hash=validation.proposal_hash,
+            barrier_hash=barrier.barrier_hash,
+            source_artifact_hash=source_hash,
+            target_path_hash=target_hash,
+            dependency_context_hash=state.dependency_context_hash,
+            target_environment_hash=state.target_environment_hash,
+        )
 
     status = CONTROLLED_PACKAGE_INSTALL_COMPLETED if completed.exit_code == 0 and not completed.timeout_expired else CONTROLLED_PACKAGE_INSTALL_FAILED
     reason = (
@@ -545,9 +567,7 @@ def _prepare_pip_install(
 ) -> tuple[tuple[str, ...], Path]:
     target_path.mkdir(parents=True, exist_ok=True)
     environment_builder.create(target_path)
-    python_bin = target_path / ("Scripts/python.exe" if sys.platform.startswith("win") else "bin/python")
-    if not python_bin.exists():
-        python_bin = Path(sys.executable)
+    python_bin = _sandbox_python_bin(target_path)
     return (
         str(python_bin),
         "-m",
@@ -558,6 +578,27 @@ def _prepare_pip_install(
         "--disable-pip-version-check",
         str(source_path),
     ), target_path
+
+
+def _sandbox_python_bin(target_path: Path) -> Path:
+    try:
+        target_root = target_path.resolve(strict=True)
+    except (OSError, RuntimeError, ValueError) as exc:
+        raise _SandboxInterpreterBlocked(CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_UNSAFE) from exc
+    for candidate in (
+        target_path / "bin" / "python",
+        target_path / "Scripts" / "python.exe",
+    ):
+        try:
+            resolved = candidate.resolve(strict=True)
+        except (OSError, RuntimeError, ValueError):
+            continue
+        if not resolved.is_file():
+            continue
+        if not _is_relative_to(resolved, target_root):
+            raise _SandboxInterpreterBlocked(CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_UNSAFE)
+        return resolved
+    raise _SandboxInterpreterBlocked(CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_MISSING)
 
 
 def _prepare_npm_install(*, source_path: Path, target_path: Path) -> tuple[tuple[str, ...], Path]:

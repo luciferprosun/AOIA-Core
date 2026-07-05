@@ -18,6 +18,8 @@ from runtime.package_ops.controlled_package_install import (
     CONTROLLED_PACKAGE_INSTALL_BLOCKED_HASH_MISMATCH,
     CONTROLLED_PACKAGE_INSTALL_BLOCKED_MALFORMED_EVIDENCE,
     CONTROLLED_PACKAGE_INSTALL_BLOCKED_NON_OFFLINE,
+    CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_MISSING,
+    CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_UNSAFE,
     CONTROLLED_PACKAGE_INSTALL_BLOCKED_UNSAFE_SOURCE,
     CONTROLLED_PACKAGE_INSTALL_BLOCKED_UNSAFE_TARGET,
     CONTROLLED_PACKAGE_INSTALL_COMPLETED,
@@ -65,6 +67,31 @@ class ControlledPackageInstall1ATests(unittest.TestCase):
             self.assertNotIn("apt", argv)
             self.assertEqual(evidence.target, runner.calls[0]["cwd"])
             self.assert_metadata_only(result.to_dict(), attempted=True, completed=True)
+
+    def test_pip_install_fails_closed_when_sandbox_interpreter_is_missing_or_unsafe(self):
+        cases = (
+            (MissingVenvBuilder(), CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_MISSING),
+            (UnsafeVenvBuilder(), CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_UNSAFE),
+        )
+        for builder, reason in cases:
+            with self.subTest(reason=reason), self.evidence() as evidence:
+                runner = FakeRunner(exit_code=0)
+                result = execute_controlled_package_install(
+                    proposal=evidence.proposal_request,
+                    validation_result=evidence.validation_result,
+                    human_barrier=evidence.barrier,
+                    current_state=evidence.current_state,
+                    source_artifact_path=str(evidence.source),
+                    target_path=str(evidence.target),
+                    runner=runner,
+                    environment_builder=builder,
+                )
+
+                self.assertEqual(CONTROLLED_PACKAGE_INSTALL_BLOCKED, result.status)
+                self.assertIn(reason, result.reason_codes)
+                self.assertEqual([], runner.calls)
+                self.assertEqual((), result.executed_args_preview)
+                self.assert_metadata_only(result.to_dict())
 
     def test_valid_npm_install_uses_offline_temp_project_only(self):
         with self.evidence(ecosystem="npm", package_name="left-pad", version="1.3.0", source_name="left-pad-1.3.0.tgz") as evidence:
@@ -339,6 +366,7 @@ class ControlledPackageInstall1ATests(unittest.TestCase):
         self.assertNotIn("subprocess.Popen", scan.calls)
         for forbidden_import in (
             "os",
+            "sys",
             "socket",
             "urllib",
             "requests",
@@ -365,6 +393,7 @@ class ControlledPackageInstall1ATests(unittest.TestCase):
             "curl ",
             "wget ",
             "api_key",
+            "sys.executable",
         ):
             self.assertNotIn(forbidden_text, source)
 
@@ -520,6 +549,20 @@ class FakeVenvBuilder:
         bin_dir = target_path / "bin"
         bin_dir.mkdir(parents=True, exist_ok=True)
         (bin_dir / "python").write_text("# fake python\n", encoding="utf-8")
+
+
+class MissingVenvBuilder:
+    def create(self, target_path: Path) -> None:
+        target_path.mkdir(parents=True, exist_ok=True)
+
+
+class UnsafeVenvBuilder:
+    def create(self, target_path: Path) -> None:
+        bin_dir = target_path / "bin"
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        outside_python = target_path.parent.parent / "outside-python"
+        outside_python.write_text("# outside python\n", encoding="utf-8")
+        (bin_dir / "python").symlink_to(outside_python)
 
 
 def scan_module(path: Path):
