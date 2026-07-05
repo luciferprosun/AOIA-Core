@@ -36,6 +36,7 @@ GIT_READ_MODULE = REPO_ROOT / "runtime" / "git_ops" / "git_read.py"
 GIT_ENV_MODULE = REPO_ROOT / "runtime" / "git_ops" / "git_env.py"
 GIT_SANITIZE_MODULE = REPO_ROOT / "runtime" / "git_ops" / "git_sanitize.py"
 STEP26_MODULE = REPO_ROOT / "runtime" / "patches" / "post_patch_controlled_test_integration.py"
+CONTROLLED_PACKAGE_INSTALL_MODULE = REPO_ROOT / "runtime" / "package_ops" / "controlled_package_install.py"
 AUTHORITY_FIELDS = (
     "can_approve",
     "can_write",
@@ -359,6 +360,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
             REPO_ROOT / "runtime" / "execution" / "controlled_test_runner.py",
             REPO_ROOT / "runtime" / "commands" / "local_commands.py",
             REPO_ROOT / "runtime" / "tools" / "build_rhcsa_library.py",
+            CONTROLLED_PACKAGE_INSTALL_MODULE,
         }
         findings = []
         for path in runtime_files():
