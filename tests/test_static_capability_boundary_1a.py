@@ -34,6 +34,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/browser_ops/browser_automation_preview.py",
     "runtime/browser_ops/browser_automation_governance.py",
     "runtime/browser_ops/controlled_browser_automation.py",
+    "runtime/integration_boundaries/coding_assistant_boundary.py",
     "runtime/provider_request_review.py",
     "runtime/provider_config_review.py",
     "runtime/provider_live_readiness_review.py",
