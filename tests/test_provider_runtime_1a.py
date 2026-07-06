@@ -54,6 +54,15 @@ class ProviderRuntime1ATests(unittest.TestCase):
         network.assert_not_called()
         self.assertEqual("future-model", build_provider_payload(envelope)["model"])
 
+    def test_kimi_dry_run_builds_payload_without_network(self) -> None:
+        envelope = self.make_envelope(provider_id="kimi_chat", model_id="moonshot-v1-8k")
+        with patch("runtime.providers.gateway.urlopen") as network:
+            result = run_provider_request(envelope)
+        self.assertEqual(DRY_RUN_PREVIEW, result.status)
+        self.assertIsNone(result.response_text)
+        network.assert_not_called()
+        self.assertEqual("moonshot-v1-8k", build_provider_payload(envelope)["model"])
+
     def test_gemini_dry_run_builds_payload_without_network(self) -> None:
         envelope = self.make_envelope(provider_id="gemini_chat")
         with patch("runtime.providers.gateway.urlopen") as network:
@@ -175,6 +184,20 @@ class ProviderRuntime1ATests(unittest.TestCase):
             result = self.run_live(envelope)
         self.assertEqual(LIVE_SUCCESS, result.status)
         self.assertEqual("mocked remote text", result.response_text)
+        network.assert_called_once()
+
+    def test_mocked_kimi_live_call_uses_single_gateway_call(self) -> None:
+        envelope = self.make_envelope(provider_id="kimi_chat", model_id="moonshot-v1-8k", dry_run=False)
+        response = self.fake_response(
+            {"choices": [{"message": {"content": "mocked kimi text"}}]}
+        )
+        with (
+            patch("runtime.providers.gateway._read_api_key", return_value="placeholder"),
+            patch("runtime.providers.gateway.urlopen", return_value=response) as network,
+        ):
+            result = self.run_live(envelope)
+        self.assertEqual(LIVE_SUCCESS, result.status)
+        self.assertEqual("mocked kimi text", result.response_text)
         network.assert_called_once()
 
     def test_mocked_gemini_live_call_uses_single_gateway_call(self) -> None:

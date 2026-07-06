@@ -14,6 +14,7 @@ ERROR = "error"
 
 class ProviderId(str, Enum):
     MOCK_CHAT = "mock_chat"
+    KIMI_CHAT = "kimi_chat"
     OPENROUTER_CHAT = "openrouter_chat"
     GEMINI_CHAT = "gemini_chat"
     OPENAI_CHAT = "openai_chat"

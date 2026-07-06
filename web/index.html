@@ -67,8 +67,8 @@
                 <article class="message message-system">
                   <p class="message-role">System</p>
                   <p>
-                    This console is ready for local operator previews. Provider calls are disabled in this build;
-                    messages produce inert route evidence only.
+                    This console is ready for local operator chat. If the Kimi key is configured, Send performs one
+                    controlled non-streaming provider call and keeps the response untrusted.
                   </p>
                 </article>
               </div>
@@ -76,7 +76,7 @@
                 <textarea
                   id="chat-input"
                   rows="4"
-                  placeholder="Type a message for AOIA. This creates a safe local preview; no provider request is sent."
+                  placeholder="Type a message for AOIA. Send performs one controlled Kimi call when configured."
                 ></textarea>
                 <div class="chat-actions">
                   <button id="send-chat" class="button button-primary" type="submit">Send</button>
@@ -92,9 +92,9 @@
                 <div><dt>Model</dt><dd id="chat-model">-</dd></div>
                 <div><dt>Mode</dt><dd id="chat-mode">-</dd></div>
                 <div><dt>Callable</dt><dd id="chat-callable">No</dd></div>
-                <div><dt>Reason</dt><dd id="chat-disabled-reason">Provider call disabled in this build.</dd></div>
+                <div><dt>Reason</dt><dd id="chat-disabled-reason">Kimi key status is being checked.</dd></div>
               </dl>
-              <p class="blocked-note">Preview only - no controlled execution path connected.</p>
+              <p class="blocked-note">Provider output remains untrusted and cannot execute anything.</p>
               <button class="button button-disabled full-width" type="button" disabled>No execution available</button>
             </aside>
           </div>
@@ -171,7 +171,10 @@
                 <button id="critic-transform" type="button" class="button button-subtle">Critic Transform</button>
               </div>
               <p class="helper-text">CPT improves critical framing, not truth. Human review required. Manual send required.</p>
-              <p class="helper-text">Preview only - no provider calls. Human approval required before any future provider call.</p>
+              <p class="helper-text">
+                Model catalog and router preview: no provider calls. Human approval required before any future provider call.
+                Use Chat Send for one controlled manual call.
+              </p>
               <p id="cpt-status" class="helper-text" aria-live="polite"></p>
             </form>
 
@@ -187,7 +190,7 @@
               <button id="provider-call-button" class="button button-disabled full-width" type="button" disabled>
                 Provider call disabled
               </button>
-              <p class="blocked-note">Provider call disabled in this build. No provider request was sent.</p>
+              <p class="blocked-note">Router preview never sends provider requests. Chat Send is the controlled manual call path.</p>
             </article>
           </div>
           <pre id="router-proposal-result" class="code-panel" aria-live="polite"></pre>

@@ -18,8 +18,8 @@ from runtime.providers.user_config import ProviderSelectorConfig
 
 DRY_RUN = "dry_run"
 LIVE_REQUESTED = "live_requested"
-_RUNTIME_SUPPORTED_IDS = frozenset({"mock_chat", "openrouter_chat", "gemini_chat"})
-_LIVE_AVAILABLE_IDS = frozenset({"openrouter_chat", "gemini_chat"})
+_RUNTIME_SUPPORTED_IDS = frozenset({"mock_chat", "kimi_chat", "openrouter_chat", "gemini_chat"})
+_LIVE_AVAILABLE_IDS = frozenset({"kimi_chat", "openrouter_chat", "gemini_chat"})
 _SELECTION_SOURCES = frozenset({"operator", "manual", "config"})
 
 

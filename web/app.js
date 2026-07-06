@@ -12,8 +12,12 @@ const state = {
 const PROVIDER_LABELS = {
   disabled: "Disabled",
   gemini: "Gemini",
+  gemini_chat: "Gemini",
+  kimi: "Kimi",
+  kimi_chat: "Kimi",
   local: "Local",
   openrouter: "OpenRouter",
+  openrouter_chat: "OpenRouter",
 };
 
 const MODE_LABELS = {
@@ -244,8 +248,9 @@ function renderRouterStatus(payload) {
   elements.safeNextStep.textContent =
     payload.safe_next_step || "Review inert preview evidence; do not execute provider calls from this UI.";
   elements.providerCallButton.disabled = true;
-  elements.providerCallButton.textContent = "Provider call disabled";
+  elements.providerCallButton.textContent = "Use Chat Send";
   elements.providerConfigStatus.textContent = [
+    `Kimi: ${configured.kimi_chat || configured.kimi ? "configured" : "not configured"}`,
     `Gemini: ${configured.gemini ? "configured" : "not configured"}`,
     `OpenRouter: ${configured.openrouter ? "configured" : "not configured"}`,
   ].join(" / ");
@@ -427,18 +432,18 @@ async function previewChatMessage() {
   elements.chatInput.value = "";
 
   try {
-    elements.promptInput.value = prompt;
-    const payload = await previewRouterSelection();
-    appendMessage("assistant", "No provider request was sent. AOIA prepared a local route preview only.", [
-      `Status: ${payload.status || "blocked_preview_only"}`,
+    const payload = await callOperatorChat(prompt);
+    appendMessage("assistant", payload.response_text || "Provider returned no text.", [
+      `Status: ${payload.status || "unknown"}`,
       `Model: ${state.selectedModel || "-"}`,
-      `Preview hash: ${payload.preview_hash || "missing"}`,
-      `Reason: ${payload.disabled_reason || "Blocked: preview only."}`,
+      `Provider call made: ${payload.call_made ? "yes" : "no"}`,
+      `Trust: ${payload.trust_status || "UNTRUSTED"}`,
+      `Authority: output is not authority`,
     ]);
     showView("chat");
     elements.chatState.textContent = "Idle";
   } catch (error) {
-    appendMessage("assistant", "The local preview was blocked before any provider call.", [
+    appendMessage("assistant", "The provider call was blocked or failed before a trusted result was created.", [
       `Reason: ${String(error)}`,
     ]);
     elements.chatState.textContent = "Blocked";
@@ -447,6 +452,29 @@ async function previewChatMessage() {
     elements.runStatus.textContent = "Idle";
     elements.sendChat.disabled = false;
   }
+}
+
+async function callOperatorChat(prompt) {
+  const payload = await jsonFetch("/api/operator/chat", {
+    method: "POST",
+    body: JSON.stringify({
+      provider_id: state.selectedProvider || "kimi_chat",
+      model_id: state.selectedModel || "moonshot-v1-8k",
+      prompt,
+    }),
+  });
+  elements.promptInput.value = prompt;
+  renderJson(elements.routerProposalResult, payload);
+  elements.evidenceState.textContent = payload.ok ? "live_untrusted" : "blocked";
+  elements.requestHash.textContent = "provider-runtime-live";
+  elements.previewHash.textContent = payload.status || "missing";
+  elements.governanceHash.textContent = "manual-provider-runtime-1a";
+  elements.barrierHash.textContent = "manual-send";
+  elements.resultHash.textContent = payload.trust_status || "UNTRUSTED";
+  elements.evidenceReasons.textContent = payload.ok
+    ? "AOIA_PROVIDER_OUTPUT_UNTRUSTED"
+    : payload.error || "AOIA_PROVIDER_CALL_BLOCKED";
+  return payload;
 }
 
 async function sendPrompt(prompt) {
@@ -539,7 +567,7 @@ elements.routerPreview.addEventListener("click", async () => {
   }
 });
 elements.providerCallButton.addEventListener("click", () => {
-  elements.disabledReason.textContent = "Blocked: provider calls are disabled in this preview-only console.";
+  elements.disabledReason.textContent = "Use the Chat Send button for one controlled manual provider call.";
 });
 elements.criticTransform.addEventListener("click", async () => {
   await transformComposerPrompt();

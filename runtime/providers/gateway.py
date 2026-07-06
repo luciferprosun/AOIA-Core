@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -24,7 +25,9 @@ from runtime.providers.runtime_policy import ProviderRuntimePolicy
 
 
 _OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
+_KIMI_ENDPOINT = "https://api.moonshot.ai/v1/chat/completions"
 _GEMINI_ENDPOINT_PREFIX = "https://generativelanguage.googleapis.com/v1beta/models/"
+_DEFAULT_KIMI_KEY_FILE_PARTS = ("Desktop", "API TOKENy", "kimi kodex")
 
 
 def run_provider_request(
@@ -91,6 +94,12 @@ def run_provider_request(
 
 
 def _read_api_key(provider_id: str) -> str:
+    if provider_id == "kimi_chat":
+        return (
+            os.environ.get("KIMI_API_KEY", "").strip()
+            or os.environ.get("MOONSHOT_API_KEY", "").strip()
+            or _read_api_key_file(os.environ.get("KIMI_API_KEY_FILE") or _default_kimi_key_file())
+        )
     if provider_id == "openrouter_chat":
         return os.environ.get("OPENROUTER_API_KEY", "").strip()
     if provider_id == "gemini_chat":
@@ -101,6 +110,20 @@ def _read_api_key(provider_id: str) -> str:
     return ""
 
 
+def _read_api_key_file(path_text: str) -> str:
+    path = Path(path_text).expanduser()
+    try:
+        if not path.is_file():
+            return ""
+        return path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+
+
+def _default_kimi_key_file() -> str:
+    return str(Path.home().joinpath(*_DEFAULT_KIMI_KEY_FILE_PARTS))
+
+
 def _perform_live_http_call(
     envelope: ProviderRequestEnvelope,
     *,
@@ -109,7 +132,14 @@ def _perform_live_http_call(
 ) -> str:
     payload = build_provider_payload(envelope)
     body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-    if envelope.provider_id == "openrouter_chat":
+    if envelope.provider_id == "kimi_chat":
+        request = Request(
+            _KIMI_ENDPOINT,
+            data=body,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            method="POST",
+        )
+    elif envelope.provider_id == "openrouter_chat":
         request = Request(
             _OPENROUTER_ENDPOINT,
             data=body,
@@ -137,7 +167,7 @@ def _perform_live_http_call(
 
 def _extract_response_text(provider_id: str, payload: object) -> str:
     try:
-        if provider_id == "openrouter_chat":
+        if provider_id in {"kimi_chat", "openrouter_chat"}:
             value = payload["choices"][0]["message"]["content"]  # type: ignore[index]
         else:
             value = payload["candidates"][0]["content"]["parts"][0]["text"]  # type: ignore[index]

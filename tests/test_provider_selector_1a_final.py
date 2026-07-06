@@ -34,7 +34,7 @@ class ProviderSelector1AFinalTests(unittest.TestCase):
         second = list_available_providers()
         self.assertEqual(first, second)
         self.assertEqual(
-            ("mock_chat", "openrouter_chat", "gemini_chat"),
+            ("mock_chat", "kimi_chat", "openrouter_chat", "gemini_chat"),
             tuple(item.provider_id for item in first),
         )
         self.assertTrue(all(item.runtime_supported for item in first))
@@ -51,7 +51,7 @@ class ProviderSelector1AFinalTests(unittest.TestCase):
         self.assertEqual(UNTRUSTED, metadata.output_trust)
 
     def test_dry_run_selector_calls_are_network_and_key_free(self) -> None:
-        for provider_id in ("mock_chat", "openrouter_chat", "gemini_chat"):
+        for provider_id in ("mock_chat", "kimi_chat", "openrouter_chat", "gemini_chat"):
             with self.subTest(provider_id=provider_id):
                 with (
                     patch("runtime.providers.gateway._read_api_key") as key_read,
@@ -193,7 +193,7 @@ class ProviderSelector1AFinalTests(unittest.TestCase):
         with redirect_stdout(output):
             self.assertEqual(0, cli_main(["--list"]))
         listed = json.loads(output.getvalue())
-        self.assertEqual(3, len(listed))
+        self.assertEqual(4, len(listed))
 
         output = StringIO()
         with (

@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from http import HTTPStatus
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from runtime.webapp import route_get_payload, route_post_payload
 
@@ -40,16 +41,14 @@ class WebOperatorConsole1ATests(unittest.TestCase):
             self.assertFalse(boundary["can_dispatch"])
             self.assertTrue(boundary["requires_human_review"])
 
-    def test_router_status_endpoint_is_preview_only_and_explains_disabled_state(self) -> None:
+    def test_router_status_endpoint_reports_manual_chat_gateway_state(self) -> None:
         status, payload = route_get_payload("/api/router/status")
 
         self.assertEqual(HTTPStatus.OK, status)
-        self.assertTrue(payload["provider_call_disabled"])
-        self.assertFalse(payload["provider_call_permitted"])
-        self.assertFalse(payload["connection_callable"])
+        self.assertIn("kimi_chat", payload["provider_configured"])
+        self.assertIn("manual", payload["safe_next_step"].casefold())
         self.assertFalse(payload["human_barrier_connected"])
-        self.assertIn("Provider call disabled in this build", payload["notice"])
-        self.assertIn("Preview only", payload["reason"])
+        self.assertIn("No automatic fallback", payload["notice"])
 
     def test_router_preview_does_not_call_provider_and_returns_inert_metadata(self) -> None:
         status, payload = route_post_payload(
@@ -72,6 +71,35 @@ class WebOperatorConsole1ATests(unittest.TestCase):
         self.assertFalse(payload["human_barrier_connected"])
         self.assertIn("AOIA_ROUTER_PREVIEW_ONLY", payload["reason_codes"])
         self.assertIn("preview_hash", payload)
+
+    def test_operator_chat_uses_controlled_provider_gateway_and_keeps_output_untrusted(self) -> None:
+        with (
+            patch("runtime.providers.gateway._read_api_key", return_value="placeholder"),
+            patch("runtime.providers.gateway.urlopen") as network,
+        ):
+            response = MagicMock()
+            response.__enter__.return_value = response
+            response.read.return_value = b'{"choices":[{"message":{"content":"mocked kimi reply"}}]}'
+            network.return_value = response
+            status, payload = route_post_payload(
+                "/api/operator/chat",
+                {
+                    "provider_id": "kimi_chat",
+                    "model_id": "moonshot-v1-8k",
+                    "prompt": "hello",
+                },
+            )
+
+        self.assertEqual(HTTPStatus.OK, status)
+        self.assertTrue(payload["ok"])
+        self.assertTrue(payload["call_made"])
+        self.assertEqual("mocked kimi reply", payload["response_text"])
+        self.assertFalse(payload["output_trusted"])
+        self.assertFalse(payload["automatic_fallback_used"])
+        self.assertFalse(payload["streaming_used"])
+        self.assertFalse(payload["tool_call_used"])
+        self.assertFalse(payload["execution_triggered"])
+        self.assertFalse(payload["dispatch_triggered"])
 
     def test_unsafe_mutation_and_execution_endpoints_do_not_exist(self) -> None:
         forbidden_paths = (
@@ -115,8 +143,8 @@ class WebOperatorConsole1ATests(unittest.TestCase):
         self.assertIn('id="chat-history"', combined)
         self.assertIn('id="chat-input"', combined)
         self.assertIn('id="send-chat"', combined)
-        self.assertIn("Provider call disabled in this build", combined)
-        self.assertIn("No provider request was sent", combined)
+        self.assertIn("/api/operator/chat", combined)
+        self.assertIn("Provider output remains untrusted", combined)
         self.assertIn("Preview only", combined)
         self.assertIn("UI checkbox is not a hash-bound human barrier", RUNTIME_WEBAPP.read_text(encoding="utf-8"))
         self.assertNotIn("BEGIN PRIVATE KEY", combined)
@@ -129,6 +157,7 @@ class WebOperatorConsole1ATests(unittest.TestCase):
         app_source = (WEB_DIR / "app.js").read_text(encoding="utf-8")
 
         self.assertIn('"/api/router/preview"', app_source)
+        self.assertIn('"/api/operator/chat"', app_source)
         self.assertNotIn('"/api/provider/call"', app_source)
         self.assertNotIn('"/api/execute"', app_source)
         self.assertNotIn('"/api/dispatch"', app_source)

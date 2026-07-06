@@ -13,7 +13,7 @@ from runtime.providers.contracts import (
 from runtime.providers.redaction import redact_provider_data
 
 
-_PAYLOAD_PROVIDER_IDS = {"mock_chat", "openrouter_chat", "gemini_chat"}
+_PAYLOAD_PROVIDER_IDS = {"mock_chat", "kimi_chat", "openrouter_chat", "gemini_chat"}
 _METADATA_ONLY_PROVIDER_IDS = {
     "openai_chat",
     "anthropic_chat",
@@ -104,7 +104,7 @@ def build_provider_payload_values(
         raise ValueError("provider is metadata-only in Provider Runtime 1A")
     message_values = _message_values(prompt, messages)
     param_values = dict(params)
-    if provider in {"mock_chat", "openrouter_chat"}:
+    if provider in {"mock_chat", "kimi_chat", "openrouter_chat"}:
         payload: dict[str, Any] = {"model": model_id, "messages": message_values}
         if "max_tokens" in param_values:
             payload["max_tokens"] = param_values["max_tokens"]

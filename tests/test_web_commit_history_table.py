@@ -67,7 +67,7 @@ class WebCommitHistoryTableTests(unittest.TestCase):
         self.assertIn('id="agent-loop"', index_source)
         self.assertIn('id="audit"', index_source)
         self.assertIn('id="prompt-input"', index_source)
-        self.assertIn("Provider call disabled in this build", index_source)
+        self.assertIn("Use Chat Send for one controlled manual call", index_source)
         self.assertNotIn("<summary>Advanced / Diagnostics</summary>", index_source)
         self.assertIn('id="router-proposal-result"', index_source)
 

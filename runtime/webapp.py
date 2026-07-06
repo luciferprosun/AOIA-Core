@@ -260,25 +260,34 @@ def get_router_status_payload() -> dict[str, object]:
     config = get_provider_config_status()
     catalog = get_static_model_catalog_payload()
     provider_configured = {
+        "kimi": bool(config.get("kimi_configured")),
+        "kimi_chat": bool(config.get("kimi_configured")),
         "gemini": bool(config.get("gemini_configured")),
+        "gemini_chat": bool(config.get("gemini_configured")),
         "openrouter": bool(config.get("openrouter_configured")),
+        "openrouter_chat": bool(config.get("openrouter_configured")),
         "local": False,
         "disabled": False,
     }
+    manual_chat_available = bool(config.get("kimi_configured"))
     return {
         "ok": True,
         "schema_version": "AOIA_ROUTER_STATUS_1A",
-        "status": "preview_only",
-        "provider_call_disabled": True,
-        "provider_call_permitted": False,
-        "connection_callable": False,
+        "status": "manual_live_available" if manual_chat_available else "provider_key_missing",
+        "provider_call_disabled": not manual_chat_available,
+        "provider_call_permitted": manual_chat_available,
+        "connection_callable": manual_chat_available,
         "human_approval_required": True,
         "human_barrier_connected": False,
-        "reason": "Preview only - no controlled execution path connected.",
-        "safe_next_step": "Review inert router preview evidence; do not execute provider calls from this UI.",
+        "reason": (
+            "Kimi key detected; manual chat can call the controlled Provider Runtime 1A gateway."
+            if manual_chat_available
+            else "Kimi provider key is not configured."
+        ),
+        "safe_next_step": "Use Chat Send for one manual non-streaming provider call; output remains untrusted.",
         "provider_configured": provider_configured,
         "models": catalog["models"],
-        "notice": "Provider call disabled in this build. No provider request was sent.",
+        "notice": "No automatic fallback, streaming, tools, dispatch, or execution is connected.",
     }
 
 
@@ -397,15 +406,59 @@ def get_audit_status_payload() -> dict[str, object]:
         "ok": True,
         "schema_version": "AOIA_AUDIT_STATUS_1A",
         "messages": (
-            "Operator console is preview-only.",
+            "Operator console supports manual controlled provider chat when a key is configured.",
             "Provider output is never authority.",
             "UI checkbox is not a hash-bound human barrier.",
-            "No provider request was sent.",
+            "Provider requests are only sent by explicit Chat Send.",
             "No execution or dispatch endpoint is connected.",
         ),
         "can_execute": False,
         "can_dispatch": False,
         "can_call_provider": False,
+    }
+
+
+def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]:
+    try:
+        from runtime.providers.contracts import LIVE_SUCCESS, ProviderActivationStatus
+        from runtime.providers.selector import run_selected_provider
+    except ModuleNotFoundError:  # pragma: no cover - script launch path
+        from providers.contracts import LIVE_SUCCESS, ProviderActivationStatus
+        from providers.selector import run_selected_provider
+
+    provider_id = str(payload.get("provider_id", "kimi_chat")).strip() or "kimi_chat"
+    model_id = str(payload.get("model_id", "moonshot-v1-8k")).strip() or "moonshot-v1-8k"
+    prompt = str(payload.get("prompt", "")).strip()
+    if not prompt:
+        raise ValueError("prompt is required")
+    result = run_selected_provider(
+        provider_id=provider_id,
+        model_id=model_id,
+        prompt=prompt,
+        max_tokens=512,
+        live=True,
+        acknowledge_live_provider_test=True,
+        activation_status=ProviderActivationStatus.LIVE_ALLOWED_FOR_MANUAL_TEST,
+        selected_by="operator",
+        created_at="operator-chat-manual",
+    )
+    result_payload = result.to_dict()
+    return {
+        "ok": result.status == LIVE_SUCCESS,
+        "schema_version": "AOIA_OPERATOR_CHAT_1A",
+        "provider_id": result.provider_id,
+        "model_id": result.model_id,
+        "call_made": result.status == LIVE_SUCCESS,
+        "status": result.status,
+        "response_text": result.response_text or "",
+        "error": result.error_message or "",
+        "output_trusted": False,
+        "automatic_fallback_used": False,
+        "streaming_used": False,
+        "tool_call_used": False,
+        "execution_triggered": False,
+        "dispatch_triggered": False,
+        "trust_status": result_payload["trust_status"],
     }
 
 
@@ -444,6 +497,12 @@ def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
 
 
 def route_post_payload(path: str, payload: dict[str, object]) -> tuple[HTTPStatus, dict[str, object]]:
+    if path == "/api/operator/chat":
+        try:
+            response = build_operator_chat_payload(payload)
+            return HTTPStatus.OK if response["ok"] else HTTPStatus.BAD_GATEWAY, response
+        except (TypeError, ValueError) as error:
+            return HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)}
     if path == "/api/router/preview":
         try:
             return HTTPStatus.OK, build_router_preview_payload(payload)
@@ -489,6 +548,11 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
         try:
             if parsed.path == "/api/router/preview":
+                status, response = route_post_payload(parsed.path, payload)
+                self._write_json(status, response)
+                return
+
+            if parsed.path == "/api/operator/chat":
                 status, response = route_post_payload(parsed.path, payload)
                 self._write_json(status, response)
                 return

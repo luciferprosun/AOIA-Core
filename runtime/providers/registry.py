@@ -9,6 +9,7 @@ from runtime.providers.contracts import (
 
 _RUNTIME_PROVIDER_DESCRIPTORS = (
     ProviderCapabilityDescriptor("mock_chat", supports_json=True),
+    ProviderCapabilityDescriptor("kimi_chat", supports_json=True),
     ProviderCapabilityDescriptor("openrouter_chat", supports_json=True),
     ProviderCapabilityDescriptor("gemini_chat", supports_json=True),
     ProviderCapabilityDescriptor("openai_chat", supports_json=True),
