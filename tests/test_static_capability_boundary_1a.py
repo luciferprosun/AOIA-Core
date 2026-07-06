@@ -39,6 +39,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/orchestration/async_io_orchestration.py",
     "runtime/orchestration/feedback_recovery_loop.py",
     "runtime/live_flows/codex_live_flow.py",
+    "runtime/agent_loops/local_agent_loop.py",
     "runtime/provider_request_review.py",
     "runtime/provider_config_review.py",
     "runtime/provider_live_readiness_review.py",
