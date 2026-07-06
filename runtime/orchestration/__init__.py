@@ -1,0 +1,1 @@
+"""Inert orchestration metadata boundaries."""
