@@ -14,6 +14,7 @@ from runtime.schemas.model_router import (
     RoutingDecisionStatus,
     TrustLevel,
 )
+from runtime.webapp import route_get_payload
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -81,10 +82,13 @@ class ModelCatalogPreviewTests(unittest.TestCase):
 
     def test_webapp_exposes_read_only_catalog_endpoint(self) -> None:
         source = WEBAPP_PATH.read_text(encoding="utf-8")
+        status, payload = route_get_payload("/api/model-catalog")
 
-        self.assertIn('parsed.path == "/api/model-catalog"', source)
+        self.assertEqual(200, status)
+        self.assertTrue(payload["models"])
+        self.assertIn('path == "/api/model-catalog"', source)
         self.assertIn("get_static_model_catalog_payload()", source)
-        self.assertNotIn('parsed.path == "/api/model-catalog":\n                prompt', source)
+        self.assertNotIn('"/api/model-catalog":\n                prompt', source)
 
     def test_frontend_contains_required_safety_wording(self) -> None:
         index_source = INDEX_PATH.read_text(encoding="utf-8")
@@ -93,7 +97,7 @@ class ModelCatalogPreviewTests(unittest.TestCase):
         self.assertIn("Preview only", index_source)
         self.assertIn("no provider calls", index_source)
         self.assertIn("Human approval required before any future provider call", index_source)
-        self.assertIn("/api/model-catalog", app_source)
+        self.assertIn("/api/router/status", app_source)
 
     def test_catalog_module_contains_no_forbidden_implementation_imports_or_terms(self) -> None:
         source = CATALOG_PATH.read_text(encoding="utf-8")

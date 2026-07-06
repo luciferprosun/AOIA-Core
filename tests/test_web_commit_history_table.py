@@ -3,13 +3,14 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from runtime.webapp import _parse_commit_log_output
+from runtime.webapp import _parse_commit_log_output, route_get_payload
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WEBAPP_PATH = REPO_ROOT / "runtime" / "webapp.py"
 APP_JS_PATH = REPO_ROOT / "web" / "app.js"
 INDEX_PATH = REPO_ROOT / "web" / "index.html"
+OPERATOR_CONFIG_PATH = REPO_ROOT / "web" / "operator_config.js"
 
 
 class WebCommitHistoryTableTests(unittest.TestCase):
@@ -29,8 +30,11 @@ class WebCommitHistoryTableTests(unittest.TestCase):
 
     def test_webapp_uses_read_only_git_adapter_for_commit_history(self) -> None:
         source = WEBAPP_PATH.read_text(encoding="utf-8")
+        status, payload = route_get_payload("/api/commits")
 
-        self.assertIn('parsed.path == "/api/commits"', source)
+        self.assertEqual(200, status)
+        self.assertIn("commits", payload)
+        self.assertIn('path == "/api/commits"', source)
         self.assertIn("GitReadCommand.COMMIT_LOG", source)
         self.assertIn("run_allowlisted_git_read", source)
         self.assertNotIn("git log --", source)
@@ -44,6 +48,40 @@ class WebCommitHistoryTableTests(unittest.TestCase):
         self.assertIn("for (const commit of commits)", app_source)
         self.assertNotIn(".slice(0", app_source)
         self.assertNotIn("MAX_COMMITS", app_source)
+
+    def test_operator_ui_is_chat_first_with_hidden_diagnostics(self) -> None:
+        index_source = INDEX_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("Operator Console", index_source)
+        self.assertIn('data-target="chat"', index_source)
+        self.assertIn('id="chat" class="view active-view"', index_source)
+        self.assertIn('id="chat-history"', index_source)
+        self.assertIn('id="chat-input"', index_source)
+        self.assertIn('id="send-chat"', index_source)
+        self.assertIn('id="new-chat"', index_source)
+        self.assertIn('id="stop-chat"', index_source)
+        self.assertIn('id="dashboard"', index_source)
+        self.assertIn('id="router"', index_source)
+        self.assertIn('id="evidence"', index_source)
+        self.assertIn('id="boundaries"', index_source)
+        self.assertIn('id="agent-loop"', index_source)
+        self.assertIn('id="audit"', index_source)
+        self.assertIn('id="prompt-input"', index_source)
+        self.assertIn("Provider call disabled in this build", index_source)
+        self.assertNotIn("<summary>Advanced / Diagnostics</summary>", index_source)
+        self.assertIn('id="router-proposal-result"', index_source)
+
+    def test_operator_models_are_centralized_in_frontend_config(self) -> None:
+        index_source = INDEX_PATH.read_text(encoding="utf-8")
+        app_source = APP_JS_PATH.read_text(encoding="utf-8")
+        config_source = OPERATOR_CONFIG_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('from "./operator_config.js"', app_source)
+        self.assertIn("openai/gpt-4.1-mini", config_source)
+        self.assertIn("openai/gpt-4.1-nano", config_source)
+        self.assertIn("openai/gpt-5.4-mini", config_source)
+        self.assertIn("openai/gpt-5.5", config_source)
+        self.assertNotIn("openai/gpt-5.5", index_source)
 
 
 if __name__ == "__main__":

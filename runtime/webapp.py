@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import hashlib
 import sys
 import traceback
 from http import HTTPStatus
@@ -107,6 +108,8 @@ def build_cpt_transform_payload(prompt: str, mode: str = CPT_BALANCED_MODE) -> d
 
 
 def execute_webapp_approved_model_call(**kwargs) -> dict[str, object]:
+    """Compatibility bridge for red-team registry tests; not exposed as a web endpoint."""
+
     try:
         from runtime.model_router import execute_approved_model_call_once
     except ModuleNotFoundError:  # pragma: no cover - script launch path
@@ -167,6 +170,288 @@ def _parse_commit_log_output(output: str) -> list[dict[str, str]]:
     return commits
 
 
+def _canonical_operator_json(value: object) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _operator_hash(value: object) -> str:
+    return hashlib.sha256(_canonical_operator_json(value).encode("utf-8")).hexdigest()
+
+
+def get_operator_status_payload() -> dict[str, object]:
+    try:
+        from runtime.git_ops.git_read import GitReadRequest, read_local_git_state
+    except ModuleNotFoundError:  # pragma: no cover - script launch path
+        from git_ops.git_read import GitReadRequest, read_local_git_state
+
+    git_state = read_local_git_state(GitReadRequest(workspace_root=PROJECT_DIR.parent))
+    git_payload = git_state.to_dict()
+    return {
+        "ok": True,
+        "schema_version": "AOIA_OPERATOR_STATUS_1A",
+        "app_name": "AOIA Operator Console",
+        "roadmap_block": "Steps 42-54 complete",
+        "prototype_freeze_status": "recorded locally if freeze commit is present",
+        "safety_mode": "preview-only operator console",
+        "git": {
+            "status": git_payload["status"],
+            "branch": git_payload["branch_name"],
+            "head": git_payload["head_sha"],
+            "clean": git_payload["clean"],
+            "staged_paths": git_payload["staged_paths"],
+            "unstaged_paths": git_payload["unstaged_paths"],
+            "untracked_paths": git_payload["untracked_paths"],
+            "reason_codes": git_payload["reason_codes"],
+            "can_commit": False,
+            "can_push": False,
+            "can_write": False,
+        },
+        "authority": {
+            "provider_output_is_authority": False,
+            "metadata_is_authority": False,
+            "ui_state_is_authority": False,
+            "dispatcher_present": False,
+            "human_review_required": True,
+        },
+    }
+
+
+def get_boundary_map_payload() -> dict[str, object]:
+    names = (
+        ("package_proposal", "Package proposal"),
+        ("controlled_package_install", "Controlled package install"),
+        ("browser_read", "Browser read"),
+        ("browser_preview", "Browser preview"),
+        ("browser_governance", "Browser governance"),
+        ("controlled_browser_simulation", "Controlled browser simulation"),
+        ("coding_assistant_boundary", "Codex/Aider boundary"),
+        ("mcp_boundary", "MCP boundary"),
+        ("async_orchestration", "Async orchestration"),
+        ("feedback_recovery", "Feedback/recovery"),
+        ("codex_live_flow", "Codex live-flow boundary"),
+        ("local_agent_loop", "Local agent loop boundary"),
+        ("provider_agent_loop", "Provider agent loop boundary"),
+    )
+    return {
+        "ok": True,
+        "schema_version": "AOIA_BOUNDARY_MAP_1A",
+        "boundaries": [
+            {
+                "id": boundary_id,
+                "label": label,
+                "status": "ready_metadata_only",
+                "inert_metadata": True,
+                "can_execute": False,
+                "can_dispatch": False,
+                "requires_human_review": True,
+                "reason_codes": ("AOIA_METADATA_ONLY", "AOIA_NO_AUTHORITY"),
+            }
+            for boundary_id, label in names
+        ],
+    }
+
+
+def get_router_status_payload() -> dict[str, object]:
+    try:
+        from provider_config import get_provider_config_status
+    except ModuleNotFoundError:  # pragma: no cover - script launch path
+        from runtime.provider_config import get_provider_config_status
+
+    config = get_provider_config_status()
+    catalog = get_static_model_catalog_payload()
+    provider_configured = {
+        "gemini": bool(config.get("gemini_configured")),
+        "openrouter": bool(config.get("openrouter_configured")),
+        "local": False,
+        "disabled": False,
+    }
+    return {
+        "ok": True,
+        "schema_version": "AOIA_ROUTER_STATUS_1A",
+        "status": "preview_only",
+        "provider_call_disabled": True,
+        "provider_call_permitted": False,
+        "connection_callable": False,
+        "human_approval_required": True,
+        "human_barrier_connected": False,
+        "reason": "Preview only - no controlled execution path connected.",
+        "safe_next_step": "Review inert router preview evidence; do not execute provider calls from this UI.",
+        "provider_configured": provider_configured,
+        "models": catalog["models"],
+        "notice": "Provider call disabled in this build. No provider request was sent.",
+    }
+
+
+def build_router_preview_payload(payload: dict[str, object]) -> dict[str, object]:
+    try:
+        from model_router import create_model_selection_proposal, evaluate_model_selection_policy
+    except ModuleNotFoundError:  # pragma: no cover - package import path
+        from runtime.model_router import create_model_selection_proposal, evaluate_model_selection_policy
+
+    provider_id = str(payload.get("provider_id", "")).strip()
+    model_id = str(payload.get("model_id", "")).strip()
+    task_sensitivity = str(payload.get("task_sensitivity", "PUBLIC_DEV")).strip() or "PUBLIC_DEV"
+    user_prompt = str(payload.get("user_prompt", ""))
+    if not provider_id or not model_id:
+        raise ValueError("provider_id and model_id are required")
+
+    request_material = {
+        "provider_id": provider_id,
+        "model_id": model_id,
+        "task_sensitivity": task_sensitivity,
+        "prompt_hash": _operator_hash({"prompt": user_prompt}),
+    }
+    proposal = create_model_selection_proposal(
+        provider_id=provider_id,
+        model_id=model_id,
+        task_sensitivity=task_sensitivity,
+        user_prompt=user_prompt,
+    )
+    decision = evaluate_model_selection_policy(proposal=proposal)
+    preview_material = {
+        "request_hash": _operator_hash(request_material),
+        "proposal": proposal,
+        "decision": decision,
+        "provider_call_permitted": False,
+        "call_made": False,
+        "output_trusted": False,
+    }
+    blocked_reason = decision.get("reason") or "Preview only - no controlled execution path connected."
+    return {
+        "ok": True,
+        "schema_version": "AOIA_ROUTER_PREVIEW_1A",
+        "request_hash": preview_material["request_hash"],
+        "preview_hash": _operator_hash(preview_material),
+        "proposal_hash": _operator_hash(proposal),
+        "decision_hash": _operator_hash(decision),
+        "proposal": proposal,
+        "decision": decision,
+        "status": "blocked_preview_only",
+        "provider_call_permitted": False,
+        "provider_call_disabled": True,
+        "call_made": False,
+        "output_trusted": False,
+        "human_barrier_connected": False,
+        "disabled_reason": f"Blocked: {blocked_reason}",
+        "safe_next_step": "Preview only - no controlled execution path connected.",
+        "reason_codes": (
+            "AOIA_ROUTER_PREVIEW_ONLY",
+            "AOIA_PROVIDER_CALL_DISABLED",
+            "AOIA_HUMAN_BARRIER_NOT_CONNECTED",
+        ),
+    }
+
+
+def get_evidence_sample_payload() -> dict[str, object]:
+    missing = "missing"
+    evidence = {
+        "request_hash": missing,
+        "preview_hash": missing,
+        "governance_hash": missing,
+        "barrier_hash": missing,
+        "result_hash": missing,
+        "status": "missing",
+        "reason_codes": ("AOIA_EVIDENCE_NOT_SELECTED", "AOIA_HASH_BOUND_APPROVAL_REQUIRED"),
+        "risk_codes": ("AOIA_PREVIEW_ONLY",),
+    }
+    return {
+        "ok": True,
+        "schema_version": "AOIA_EVIDENCE_INSPECTOR_1A",
+        "evidence": evidence,
+        "can_execute": False,
+        "can_dispatch": False,
+    }
+
+
+def get_agent_loop_status_payload() -> dict[str, object]:
+    return {
+        "ok": True,
+        "schema_version": "AOIA_AGENT_LOOP_STATUS_1A",
+        "local_loop": {
+            "objective_summary": "No live objective selected.",
+            "candidates": [],
+            "selected_candidate": None,
+            "blocked_candidates": [],
+            "risk_tier": "metadata_only",
+            "reason_codes": ("LOCAL_AGENT_LOOP_NON_AUTHORITY",),
+            "requires_human_review": True,
+            "requires_controlled_path": True,
+            "can_execute": False,
+        },
+        "provider_loop": {
+            "objective_summary": "Provider output is untrusted metadata only.",
+            "candidates": [],
+            "selected_candidate": None,
+            "blocked_candidates": [],
+            "risk_tier": "metadata_only",
+            "reason_codes": ("PROVIDER_AGENT_LOOP_PROVIDER_OUTPUT_UNTRUSTED",),
+            "requires_human_review": True,
+            "requires_controlled_path": True,
+            "can_execute": False,
+        },
+    }
+
+
+def get_audit_status_payload() -> dict[str, object]:
+    return {
+        "ok": True,
+        "schema_version": "AOIA_AUDIT_STATUS_1A",
+        "messages": (
+            "Operator console is preview-only.",
+            "Provider output is never authority.",
+            "UI checkbox is not a hash-bound human barrier.",
+            "No provider request was sent.",
+            "No execution or dispatch endpoint is connected.",
+        ),
+        "can_execute": False,
+        "can_dispatch": False,
+        "can_call_provider": False,
+    }
+
+
+def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
+    if path == "/api/status":
+        return HTTPStatus.OK, get_service().status_payload()
+    if path == "/api/models":
+        service = get_service()
+        return HTTPStatus.OK, {
+            "current_model": service.runtime.provider_manager.describe(),
+            "available_models": service.runtime.provider_manager.available_models(),
+        }
+    if path == "/api/model-catalog":
+        return HTTPStatus.OK, get_static_model_catalog_payload()
+    if path == "/api/memory-hats":
+        return HTTPStatus.OK, get_memory_hat_payload()
+    if path == "/api/provider-config-status":
+        from provider_config import get_provider_config_status
+
+        return HTTPStatus.OK, get_provider_config_status()
+    if path == "/api/commits":
+        return HTTPStatus.OK, get_commit_history_payload()
+    if path == "/api/operator/status":
+        return HTTPStatus.OK, get_operator_status_payload()
+    if path == "/api/boundaries":
+        return HTTPStatus.OK, get_boundary_map_payload()
+    if path == "/api/router/status":
+        return HTTPStatus.OK, get_router_status_payload()
+    if path == "/api/evidence/sample":
+        return HTTPStatus.OK, get_evidence_sample_payload()
+    if path == "/api/agent-loop/status":
+        return HTTPStatus.OK, get_agent_loop_status_payload()
+    if path == "/api/audit/status":
+        return HTTPStatus.OK, get_audit_status_payload()
+    return None
+
+
+def route_post_payload(path: str, payload: dict[str, object]) -> tuple[HTTPStatus, dict[str, object]]:
+    if path == "/api/router/preview":
+        try:
+            return HTTPStatus.OK, build_router_preview_payload(payload)
+        except (TypeError, ValueError) as error:
+            return HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)}
+    return HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"}
+
+
 def _load_cpt_transformer():
     project_parent = str(PROJECT_DIR.parent)
     if project_parent not in sys.path:
@@ -184,32 +469,13 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path == "/api/status":
-            self._write_json(HTTPStatus.OK, get_service().status_payload())
-            return
-        if parsed.path == "/api/models":
-            service = get_service()
-            self._write_json(
-                HTTPStatus.OK,
-                {
-                    "current_model": service.runtime.provider_manager.describe(),
-                    "available_models": service.runtime.provider_manager.available_models(),
-                },
-            )
-            return
-        if parsed.path == "/api/model-catalog":
-            self._write_json(HTTPStatus.OK, get_static_model_catalog_payload())
-            return
         if parsed.path == "/api/memory-hats":
             self._write_json(HTTPStatus.OK, get_memory_hat_payload())
             return
-        if parsed.path == "/api/provider-config-status":
-            from provider_config import get_provider_config_status
-
-            self._write_json(HTTPStatus.OK, get_provider_config_status())
-            return
-        if parsed.path == "/api/commits":
-            self._write_json(HTTPStatus.OK, get_commit_history_payload())
+        routed = route_get_payload(parsed.path)
+        if routed is not None:
+            status, payload = routed
+            self._write_json(status, payload)
             return
         if parsed.path in {"/", "/index.html"}:
             self.path = "/index.html"
@@ -222,6 +488,11 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             return
 
         try:
+            if parsed.path == "/api/router/preview":
+                status, response = route_post_payload(parsed.path, payload)
+                self._write_json(status, response)
+                return
+
             if parsed.path == "/api/cpt/transform":
                 prompt = payload.get("prompt", "")
                 mode = payload.get("mode", CPT_BALANCED_MODE)
@@ -281,42 +552,6 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                         "provider_call_permitted": False,
                         "output_trusted": False,
                     },
-                )
-                return
-
-            if parsed.path == "/api/model-selection/approve-and-call":
-                provider_id = str(payload.get("provider_id", "")).strip()
-                model_id = str(payload.get("model_id", "")).strip()
-                task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
-                user_prompt = str(payload.get("user_prompt", ""))
-                human_approved = payload.get("human_approved") is True
-                if not provider_id or not model_id or not task_sensitivity:
-                    self._write_json(
-                        HTTPStatus.BAD_REQUEST,
-                        {"ok": False, "error": "provider_id, model_id, and task_sensitivity are required"},
-                    )
-                    return
-                if human_approved is not True:
-                    self._write_json(
-                        HTTPStatus.FORBIDDEN,
-                        {
-                            "ok": False,
-                            "error": "human_approved must be exactly true",
-                            "call_made": False,
-                            "output_text": "",
-                            "output_trusted": False,
-                        },
-                    )
-                    return
-                self._write_json(
-                    HTTPStatus.OK,
-                    execute_webapp_approved_model_call(
-                        provider_id=provider_id,
-                        model_id=model_id,
-                        task_sensitivity=task_sensitivity,
-                        user_prompt=user_prompt,
-                        human_approved=human_approved,
-                    ),
                 )
                 return
 

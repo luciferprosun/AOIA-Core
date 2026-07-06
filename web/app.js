@@ -1,78 +1,99 @@
+import { OPERATOR_MODEL_OPTIONS } from "./operator_config.js";
+
 const state = {
-  currentLegacyModel: "",
-  catalogModels: [],
-  selectedModel: {
-    providerId: "",
-    modelId: "",
-    source: "catalog",
-    mode: "proposal_only",
-  },
-  lastProposal: null,
+  routerStatus: null,
+  models: [],
+  selectedProvider: "",
+  selectedModel: "",
+  selectedMode: "PUBLIC_DEV",
+  running: false,
 };
 
 const PROVIDER_LABELS = {
-  gemini: "Gemini",
-  openrouter: "OpenRouter",
-  local: "Local",
   disabled: "Disabled",
+  gemini: "Gemini",
+  local: "Local",
+  openrouter: "OpenRouter",
 };
 
-const TASK_MODE_LABELS = {
-  PUBLIC_DEV: "Public development",
-  CODE: "Code review",
-  AUDIT: "Audit",
-  RESEARCH: "Research",
-  SENSITIVE: "Sensitive",
-  CANONICAL: "Canonical",
+const MODE_LABELS = {
+  PUBLIC_DEV: "Chat / public dev",
+  SENSITIVE: "Safe Review",
+  CANONICAL: "Audit / canonical",
+  SECRET_ADJACENT: "Secret-adjacent",
 };
 
 const elements = {
-  modelSelect: document.querySelector("#model-select"),
-  modelPicker: document.querySelector("#model-picker"),
-  currentModelBadge: document.querySelector("#current-model-badge"),
-  legacyModelBadge: document.querySelector("#legacy-model-badge"),
-  sidebarSelectedModel: document.querySelector("#sidebar-selected-model"),
-  modelNote: document.querySelector("#model-note"),
-  chatLog: document.querySelector("#chat-log"),
-  promptInput: document.querySelector("#prompt-input"),
-  composer: document.querySelector("#composer"),
-  criticTransform: document.querySelector("#critic-transform"),
-  cptStatus: document.querySelector("#cpt-status"),
-  sessionModel: document.querySelector("#session-model"),
-  sessionSummary: document.querySelector("#session-summary"),
-  statusCwd: document.querySelector("#status-cwd"),
-  statusBrowser: document.querySelector("#status-browser"),
-  statusUrl: document.querySelector("#status-url"),
-  statusVault: document.querySelector("#status-vault"),
-  metricTools: document.querySelector("#metric-tools"),
-  metricCommands: document.querySelector("#metric-commands"),
-  metricOutputs: document.querySelector("#metric-outputs"),
-  catalogStatus: document.querySelector("#catalog-status"),
-  catalogNotice: document.querySelector("#catalog-notice"),
-  modelCatalog: document.querySelector("#model-catalog"),
-  memoryHatsStatus: document.querySelector("#memory-hats-status"),
-  memoryHatsList: document.querySelector("#memory-hats-list"),
-  providerConfigStatus: document.querySelector("#provider-config-status"),
+  navItems: document.querySelectorAll(".nav-item"),
+  views: document.querySelectorAll(".view"),
+  refreshAll: document.querySelector("#refresh-all"),
+  topBot: document.querySelector("#top-bot"),
+  topMode: document.querySelector("#top-mode"),
+  topModel: document.querySelector("#top-model"),
+  runStatus: document.querySelector("#run-status"),
+  connectionStatus: document.querySelector("#connection-status"),
+  safetyMode: document.querySelector("#safety-mode"),
+  chatState: document.querySelector("#chat-state"),
+  chatHistory: document.querySelector("#chat-history"),
+  chatForm: document.querySelector("#chat-form"),
+  chatInput: document.querySelector("#chat-input"),
+  sendChat: document.querySelector("#send-chat"),
+  newChat: document.querySelector("#new-chat"),
+  stopChat: document.querySelector("#stop-chat"),
+  chatProvider: document.querySelector("#chat-provider"),
+  chatModel: document.querySelector("#chat-model"),
+  chatMode: document.querySelector("#chat-mode"),
+  chatCallable: document.querySelector("#chat-callable"),
+  chatDisabledReason: document.querySelector("#chat-disabled-reason"),
+  dashboardState: document.querySelector("#dashboard-state"),
+  gitBranch: document.querySelector("#git-branch"),
+  gitHead: document.querySelector("#git-head"),
+  gitClean: document.querySelector("#git-clean"),
+  gitReasons: document.querySelector("#git-reasons"),
+  roadmapBlock: document.querySelector("#roadmap-block"),
+  freezeStatus: document.querySelector("#freeze-status"),
+  operatorSafetyMode: document.querySelector("#operator-safety-mode"),
   routerProviderSelect: document.querySelector("#router-provider-select"),
   routerModelSelect: document.querySelector("#router-model-select"),
   routerTaskMode: document.querySelector("#router-task-mode"),
-  routerModeLabel: document.querySelector("#router-mode-label"),
-  routerPrompt: document.querySelector("#router-prompt"),
-  routerHumanApproval: document.querySelector("#router-human-approval"),
-  approveAndCallProvider: document.querySelector("#approve-and-call-provider"),
-  routerSimpleResult: document.querySelector("#router-simple-result"),
-  routerResultStatus: document.querySelector("#router-result-status"),
-  routerResultReason: document.querySelector("#router-result-reason"),
-  routerCallNote: document.querySelector("#router-call-note"),
+  routerState: document.querySelector("#router-state"),
+  routerPreview: document.querySelector("#router-preview"),
+  providerConfigured: document.querySelector("#provider-configured"),
+  connectionCallable: document.querySelector("#connection-callable"),
+  humanBarrier: document.querySelector("#human-barrier"),
+  disabledReason: document.querySelector("#disabled-reason"),
+  safeNextStep: document.querySelector("#safe-next-step"),
+  providerCallButton: document.querySelector("#provider-call-button"),
+  composer: document.querySelector("#composer"),
+  promptInput: document.querySelector("#prompt-input"),
+  criticTransform: document.querySelector("#critic-transform"),
+  cptStatus: document.querySelector("#cpt-status"),
   routerProposalResult: document.querySelector("#router-proposal-result"),
-  routerCallResult: document.querySelector("#router-call-result"),
-  auditProviderCallPermitted: document.querySelector("#audit-provider-call-permitted"),
-  auditHumanApproved: document.querySelector("#audit-human-approved"),
-  auditOutputTrusted: document.querySelector("#audit-output-trusted"),
-  auditFallback: document.querySelector("#audit-fallback"),
+  requestHash: document.querySelector("#request-hash"),
+  previewHash: document.querySelector("#preview-hash"),
+  governanceHash: document.querySelector("#governance-hash"),
+  barrierHash: document.querySelector("#barrier-hash"),
+  resultHash: document.querySelector("#result-hash"),
+  evidenceState: document.querySelector("#evidence-state"),
+  evidenceReasons: document.querySelector("#evidence-reasons"),
+  boundaryCount: document.querySelector("#boundary-count"),
+  boundaryList: document.querySelector("#boundary-list"),
+  localObjective: document.querySelector("#local-objective"),
+  localSelected: document.querySelector("#local-selected"),
+  localRisk: document.querySelector("#local-risk"),
+  localReasons: document.querySelector("#local-reasons"),
+  providerObjective: document.querySelector("#provider-objective"),
+  providerSelected: document.querySelector("#provider-selected"),
+  providerRisk: document.querySelector("#provider-risk"),
+  providerReasons: document.querySelector("#provider-reasons"),
+  auditMessages: document.querySelector("#audit-messages"),
   commitCount: document.querySelector("#commit-count"),
   commitStatus: document.querySelector("#commit-status"),
   commitTableBody: document.querySelector("#commit-table-body"),
+  providerConfigStatus: document.querySelector("#provider-config-status"),
+  selectedProvider: document.querySelector("#selected-provider"),
+  selectedModel: document.querySelector("#selected-model"),
+  selectedMode: document.querySelector("#selected-mode"),
 };
 
 async function jsonFetch(url, options = {}) {
@@ -89,157 +110,78 @@ async function jsonFetch(url, options = {}) {
   return payload;
 }
 
-function addMessage(role, body) {
-  const template = document.querySelector("#message-template");
-  const node = template.content.firstElementChild.cloneNode(true);
-  node.querySelector(".message-role").textContent = role;
-  node.querySelector(".message-body").textContent = body || "(empty)";
-  if (role === "You") {
-    node.classList.add("message-user");
+function setConnectionStatus(label, tone = "ok") {
+  elements.connectionStatus.textContent = label;
+  elements.connectionStatus.className = `status-dot status-${tone}`;
+}
+
+function shortHash(value) {
+  if (!value || value === "missing") {
+    return "missing";
   }
-  elements.chatLog.appendChild(node);
-  elements.chatLog.scrollTop = elements.chatLog.scrollHeight;
-}
-
-function applyStatus(status) {
-  state.currentLegacyModel = status.model;
-  elements.legacyModelBadge.textContent = status.model;
-  elements.sessionModel.textContent = status.model;
-  elements.sessionSummary.textContent = status.browser_active
-    ? "Browser session is active in the legacy runtime path."
-    : "Legacy runtime is idle. Controlled router selection above is separate.";
-  elements.statusCwd.textContent = status.cwd;
-  elements.statusBrowser.textContent = status.browser_active ? "active" : "inactive";
-  elements.statusUrl.textContent = status.current_url || "(none)";
-  elements.statusVault.textContent = status.vault_dir;
-  elements.metricTools.textContent = String((status.tools || []).length);
-  elements.metricCommands.textContent = String((status.previous_commands || []).length);
-  elements.metricOutputs.textContent = String((status.recent_outputs || []).length);
-}
-
-async function refreshStatus() {
-  const payload = await jsonFetch("/api/status");
-  applyStatus(payload);
-  hydrateLegacyModelSelect(payload.available_models, payload.model);
-}
-
-async function refreshModelCatalog() {
-  const payload = await jsonFetch("/api/model-catalog");
-  hydrateModelCatalog(payload);
-}
-
-async function refreshProviderConfigStatus() {
-  const payload = await jsonFetch("/api/provider-config-status");
-  elements.providerConfigStatus.textContent = [
-    `Gemini: ${payload.gemini_configured ? "Configured" : "Not configured"}`,
-    `OpenRouter: ${payload.openrouter_configured ? "Configured" : "Not configured"}`,
-  ].join(" / ");
-}
-
-async function refreshMemoryHats() {
-  const payload = await jsonFetch("/api/memory-hats");
-  renderMemoryHats(payload);
-}
-
-async function refreshCommitHistory() {
-  const payload = await jsonFetch("/api/commits");
-  renderCommitHistory(payload);
+  return String(value);
 }
 
 function providerLabel(providerId) {
-  return PROVIDER_LABELS[providerId] || providerId || "Unknown provider";
+  return PROVIDER_LABELS[providerId] || providerId || "Unknown";
 }
 
-function taskModeLabel(mode) {
-  return TASK_MODE_LABELS[mode] || mode || "Unknown mode";
+function modeLabel(mode) {
+  return MODE_LABELS[mode] || mode || "Chat / public dev";
 }
 
-function friendlyModelLabel(model) {
-  if (!model) {
-    return "No catalog model selected.";
+function boolText(value, trueText = "Yes", falseText = "No") {
+  return value ? trueText : falseText;
+}
+
+function joinCodes(codes) {
+  if (!codes || codes.length === 0) {
+    return "-";
   }
-  const provider = providerLabel(model.provider_id || model.providerId || "");
-  const displayName = model.display_name || model.model_id || model.modelId || "";
-  if (!displayName) {
-    return provider;
-  }
-  return `${provider} - ${displayName}`;
+  return Array.from(codes).join(", ");
 }
 
-function parseModelChoices(availableModels) {
-  return (availableModels || []).map((line) => {
-    const [aliasPart, modelPart] = line.split("->").map((item) => item.trim());
-    return {
-      label: aliasPart,
-      value: modelPart,
-    };
+function uniqueModels(models) {
+  const byKey = new Map();
+  for (const model of [...(models || []), ...OPERATOR_MODEL_OPTIONS]) {
+    byKey.set(`${model.provider_id}:${model.model_id}`, model);
+  }
+  return [...byKey.values()].sort((a, b) => {
+    const providerOrder = providerLabel(a.provider_id).localeCompare(providerLabel(b.provider_id));
+    if (providerOrder !== 0) {
+      return providerOrder;
+    }
+    return (a.display_name || a.model_id).localeCompare(b.display_name || b.model_id);
   });
 }
 
-function hydrateLegacyModelSelect(availableModels, currentModel) {
-  const choices = parseModelChoices(availableModels);
-
-  elements.modelSelect.innerHTML = "";
-  for (const choice of choices) {
-    const option = document.createElement("option");
-    option.value = choice.value;
-    option.textContent = `${choice.label} -> ${choice.value}`;
-    option.selected = choice.value === currentModel;
-    elements.modelSelect.appendChild(option);
+function showView(targetId) {
+  for (const item of elements.navItems) {
+    item.classList.toggle("active", item.dataset.target === targetId);
   }
-
-  if (!choices.some((choice) => choice.value === currentModel)) {
-    const option = document.createElement("option");
-    option.value = currentModel;
-    option.textContent = currentModel;
-    option.selected = true;
-    elements.modelSelect.appendChild(option);
-  }
-
-  hydrateLegacyModelPicker(choices, currentModel);
-}
-
-function hydrateLegacyModelPicker(choices, currentModel) {
-  elements.modelPicker.innerHTML = "";
-  for (const choice of choices) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "model-pill";
-    button.dataset.model = choice.value;
-    button.textContent = choice.label;
-    button.title = choice.value;
-    if (choice.value === currentModel) {
-      button.classList.add("model-pill-active");
-      button.setAttribute("aria-pressed", "true");
-    } else {
-      button.setAttribute("aria-pressed", "false");
-    }
-    button.addEventListener("click", async () => {
-      elements.modelSelect.value = choice.value;
-      try {
-        await switchLegacyModel();
-      } catch (error) {
-        elements.modelNote.textContent = String(error);
-      }
-    });
-    elements.modelPicker.appendChild(button);
+  for (const view of elements.views) {
+    view.classList.toggle("active-view", view.id === targetId);
   }
 }
 
-function hydrateModelCatalog(payload) {
-  elements.catalogStatus.textContent = payload.status
-    ? policyStatusLabel({ status: payload.status })
-    : "Preview only";
-  elements.catalogNotice.textContent =
-    payload.notice ||
-    "Preview only - no provider calls. Human approval required before any future provider call.";
-  state.catalogModels = payload.models || [];
-  hydrateProviderSelect(state.catalogModels);
-  renderModelCatalog(state.catalogModels);
+function renderOperatorStatus(payload) {
+  const git = payload.git || {};
+  elements.dashboardState.textContent = payload.ok ? "ready" : "blocked";
+  elements.gitBranch.textContent = git.branch || "-";
+  elements.gitHead.textContent = git.head || "-";
+  elements.gitClean.textContent = git.clean === true ? "clean" : "dirty or unavailable";
+  elements.gitReasons.textContent = joinCodes(git.reason_codes);
+  elements.roadmapBlock.textContent = payload.roadmap_block || "Steps 42-54 complete";
+  elements.freezeStatus.textContent = payload.prototype_freeze_status || "unknown";
+  elements.operatorSafetyMode.textContent = payload.safety_mode || "preview-only";
+  elements.safetyMode.textContent = payload.safety_mode || "Preview-only";
 }
 
-function hydrateProviderSelect(models) {
-  const providerIds = [...new Set((models || []).map((model) => model.provider_id))];
+function hydrateRouterControls(payload) {
+  state.routerStatus = payload;
+  state.models = uniqueModels(payload.models || []);
+  const providerIds = [...new Set(state.models.map((model) => model.provider_id))];
+
   elements.routerProviderSelect.innerHTML = "";
   for (const providerId of providerIds) {
     const option = document.createElement("option");
@@ -247,127 +189,123 @@ function hydrateProviderSelect(models) {
     option.textContent = providerLabel(providerId);
     elements.routerProviderSelect.appendChild(option);
   }
-  if (providerIds.length > 0) {
-    elements.routerProviderSelect.value = state.selectedModel.providerId || providerIds[0];
-  }
-  hydrateRouterModelSelect();
+  state.selectedProvider = state.selectedProvider || providerIds[0] || "disabled";
+  elements.routerProviderSelect.value = state.selectedProvider;
+  hydrateModelSelect();
+  renderRouterStatus(payload);
 }
 
-function hydrateRouterModelSelect() {
+function hydrateModelSelect() {
   const providerId = elements.routerProviderSelect.value;
-  const models = state.catalogModels.filter((model) => model.provider_id === providerId);
+  const models = state.models.filter((model) => model.provider_id === providerId);
   elements.routerModelSelect.innerHTML = "";
   for (const model of models) {
     const option = document.createElement("option");
     option.value = model.model_id;
-    option.textContent = model.display_name || model.model_id;
+    option.textContent = model.display_name ? `${model.display_name} (${model.model_id})` : model.model_id;
     elements.routerModelSelect.appendChild(option);
   }
-  if (models.length > 0) {
-    const currentStillVisible = models.some((model) => model.model_id === state.selectedModel.modelId);
-    elements.routerModelSelect.value = currentStillVisible ? state.selectedModel.modelId : models[0].model_id;
-  }
-  updateSelectedModelFromCatalog();
+  state.selectedProvider = providerId;
+  state.selectedModel = models.some((model) => model.model_id === state.selectedModel)
+    ? state.selectedModel
+    : models[0]?.model_id || "";
+  elements.routerModelSelect.value = state.selectedModel;
+  syncSelectionReadout();
+  renderRouterStatus(state.routerStatus || {});
 }
 
-function updateSelectedModelFromCatalog() {
-  const selectedCatalogModel = state.catalogModels.find(
-    (model) =>
-      model.provider_id === elements.routerProviderSelect.value &&
-      model.model_id === elements.routerModelSelect.value
-  );
-  state.selectedModel = {
-    providerId: elements.routerProviderSelect.value,
-    modelId: elements.routerModelSelect.value,
-    source: "catalog",
-    mode: "proposal_only",
-  };
-  elements.currentModelBadge.textContent = selectedCatalogModel?.display_name || "Preview only";
-  elements.sidebarSelectedModel.textContent = friendlyModelLabel(selectedCatalogModel);
-  elements.routerModeLabel.textContent = "Proposal only";
-  state.lastProposal = null;
-  renderSimpleResult("blocked", "Prepare a model choice to review policy status.");
-  updateAuditFields({});
-  updateCallButtonState();
+function syncSelectionReadout() {
+  state.selectedProvider = elements.routerProviderSelect.value;
+  state.selectedModel = elements.routerModelSelect.value;
+  state.selectedMode = elements.routerTaskMode.value;
+  elements.selectedProvider.textContent = providerLabel(state.selectedProvider);
+  elements.selectedModel.textContent = state.selectedModel || "-";
+  elements.selectedMode.textContent = modeLabel(state.selectedMode);
+  elements.topBot.textContent = "Default";
+  elements.topMode.textContent = modeLabel(state.selectedMode);
+  elements.topModel.textContent = state.selectedModel || "-";
+  elements.chatProvider.textContent = providerLabel(state.selectedProvider);
+  elements.chatModel.textContent = state.selectedModel || "-";
+  elements.chatMode.textContent = modeLabel(state.selectedMode);
 }
 
-function renderModelCatalog(models) {
-  elements.modelCatalog.innerHTML = "";
+function renderRouterStatus(payload) {
+  const configured = payload.provider_configured || {};
+  const providerConfigured = configured[elements.routerProviderSelect.value] === true;
+  elements.routerState.textContent = payload.status || "preview_only";
+  elements.providerConfigured.textContent = boolText(providerConfigured, "Configured", "Not configured");
+  elements.connectionCallable.textContent = boolText(payload.connection_callable, "Callable", "No");
+  elements.chatCallable.textContent = boolText(payload.connection_callable, "Callable", "No");
+  elements.humanBarrier.textContent = payload.human_barrier_connected ? "Connected" : "Not connected";
+  elements.disabledReason.textContent =
+    payload.reason || "Preview only - no controlled execution path connected.";
+  elements.chatDisabledReason.textContent =
+    payload.notice || payload.reason || "Provider call disabled in this build.";
+  elements.safeNextStep.textContent =
+    payload.safe_next_step || "Review inert preview evidence; do not execute provider calls from this UI.";
+  elements.providerCallButton.disabled = true;
+  elements.providerCallButton.textContent = "Provider call disabled";
+  elements.providerConfigStatus.textContent = [
+    `Gemini: ${configured.gemini ? "configured" : "not configured"}`,
+    `OpenRouter: ${configured.openrouter ? "configured" : "not configured"}`,
+  ].join(" / ");
+}
 
-  for (const model of models || []) {
-    const article = document.createElement("article");
-    article.className = "catalog-card";
+function renderEvidence(payload) {
+  const evidence = payload.evidence || {};
+  elements.evidenceState.textContent = evidence.status || "missing";
+  elements.requestHash.textContent = shortHash(evidence.request_hash);
+  elements.previewHash.textContent = shortHash(evidence.preview_hash);
+  elements.governanceHash.textContent = shortHash(evidence.governance_hash);
+  elements.barrierHash.textContent = shortHash(evidence.barrier_hash);
+  elements.resultHash.textContent = shortHash(evidence.result_hash);
+  elements.evidenceReasons.textContent = joinCodes(evidence.reason_codes);
+}
 
+function renderBoundaryMap(payload) {
+  const boundaries = payload.boundaries || [];
+  elements.boundaryCount.textContent = `${boundaries.length} boundaries`;
+  elements.boundaryList.innerHTML = "";
+  for (const boundary of boundaries) {
+    const card = document.createElement("article");
+    card.className = "boundary-card";
     const title = document.createElement("h4");
-    title.textContent = model.display_name || model.model_id;
-
-    const modelId = document.createElement("p");
-    modelId.className = "catalog-model-id";
-    modelId.textContent = model.model_id;
-
-    const tags = document.createElement("div");
-    tags.className = "catalog-tags";
-    for (const value of [model.provider_class, model.trust_level, model.free_tier ? "FREE" : "", model.paid_tier ? "PAID" : ""]) {
-      if (!value) {
-        continue;
-      }
-      const tag = document.createElement("span");
-      tag.className = "catalog-tag";
-      tag.textContent = value;
-      tags.appendChild(tag);
-    }
-
-    const flags = document.createElement("p");
-    flags.className = "catalog-flags";
-    flags.textContent = [
-      model.enabled ? "enabled" : "disabled by default",
-      model.allows_sensitive_tasks ? "sensitive allowed" : "no sensitive tasks",
-      model.allows_canonical_tasks ? "canonical allowed" : "no canonical tasks",
-    ].join(" / ");
-
-    const notes = document.createElement("ul");
-    notes.className = "catalog-notes";
-    for (const note of model.notes || []) {
-      const item = document.createElement("li");
-      item.textContent = note;
-      notes.appendChild(item);
-    }
-
-    article.append(title, modelId, tags, flags, notes);
-    elements.modelCatalog.appendChild(article);
+    title.textContent = boundary.label;
+    const facts = document.createElement("dl");
+    facts.className = "mini-facts";
+    facts.innerHTML = `
+      <div><dt>Status</dt><dd>${boundary.status}</dd></div>
+      <div><dt>Metadata</dt><dd>${boolText(boundary.inert_metadata, "Inert", "Unknown")}</dd></div>
+      <div><dt>Can execute</dt><dd>${boolText(boundary.can_execute)}</dd></div>
+      <div><dt>Human review</dt><dd>${boolText(boundary.requires_human_review, "Required", "No")}</dd></div>
+    `;
+    const reason = document.createElement("p");
+    reason.className = "reason-line";
+    reason.textContent = joinCodes(boundary.reason_codes);
+    card.append(title, facts, reason);
+    elements.boundaryList.appendChild(card);
   }
 }
 
-function renderMemoryHats(payload) {
-  const hats = payload.hats || [];
-  elements.memoryHatsStatus.textContent = `${hats.length} hats`;
-  elements.memoryHatsList.innerHTML = "";
+function renderAgentLoop(payload) {
+  const local = payload.local_loop || {};
+  const provider = payload.provider_loop || {};
+  elements.localObjective.textContent = local.objective_summary || "-";
+  elements.localSelected.textContent = local.selected_candidate || "None";
+  elements.localRisk.textContent = local.risk_tier || "-";
+  elements.localReasons.textContent = joinCodes(local.reason_codes);
+  elements.providerObjective.textContent = provider.objective_summary || "-";
+  elements.providerSelected.textContent = provider.selected_candidate || "None";
+  elements.providerRisk.textContent = provider.risk_tier || "-";
+  elements.providerReasons.textContent = joinCodes(provider.reason_codes);
+}
 
-  for (const hat of hats) {
-    const article = document.createElement("article");
-    article.className = "memory-hat-card";
-
-    const title = document.createElement("h3");
-    title.textContent = hat.name;
-
-    const status = document.createElement("p");
-    status.className = "memory-hat-status";
-    status.textContent = hat.status;
-
-    const purpose = document.createElement("p");
-    purpose.className = "note";
-    purpose.textContent = hat.purpose;
-
-    const flags = document.createElement("p");
-    flags.className = "catalog-flags";
-    flags.textContent = [
-      hat.domain,
-      hat.execution_allowed ? "execution allowed" : "no execution",
-      hat.human_review_required ? "human review required" : "human review not required",
-    ].join(" / ");
-
-    article.append(title, status, purpose, flags);
-    elements.memoryHatsList.appendChild(article);
+function renderAudit(payload) {
+  elements.auditMessages.innerHTML = "";
+  for (const message of payload.messages || []) {
+    const item = document.createElement("li");
+    item.textContent = message;
+    elements.auditMessages.appendChild(item);
   }
 }
 
@@ -411,209 +349,125 @@ function renderCommitHistory(payload) {
   }
 }
 
-function selectedRouterModel() {
-  return {
-    provider_id: state.selectedModel.providerId,
-    model_id: state.selectedModel.modelId,
-  };
-}
-
-function routerTaskSensitivity() {
-  const mode = elements.routerTaskMode.value;
-  if (mode === "CODE" || mode === "AUDIT" || mode === "RESEARCH") {
-    return "INTERNAL_NON_CANONICAL";
-  }
-  return mode;
-}
-
 function renderJson(element, payload) {
   element.textContent = JSON.stringify(payload, null, 2);
 }
 
-function resultTone(statusKey) {
-  if (statusKey === "allowed") {
-    return "allowed";
+function appendMessage(role, text, details = []) {
+  const message = document.createElement("article");
+  message.className = `message message-${role}`;
+  const roleLabel = document.createElement("p");
+  roleLabel.className = "message-role";
+  roleLabel.textContent = role === "user" ? "You" : role === "assistant" ? "AOIA" : "System";
+  const body = document.createElement("p");
+  body.textContent = text;
+  message.append(roleLabel, body);
+
+  if (details.length > 0) {
+    const list = document.createElement("ul");
+    list.className = "message-details";
+    for (const detail of details) {
+      const item = document.createElement("li");
+      item.textContent = detail;
+      list.appendChild(item);
+    }
+    message.appendChild(list);
   }
-  if (statusKey === "requires-human-approval") {
-    return "requires-human-approval";
-  }
-  if (statusKey === "rejected-by-policy") {
-    return "rejected-by-policy";
-  }
-  return "blocked";
+
+  elements.chatHistory.appendChild(message);
+  elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
 }
 
-function renderSimpleResult(status, reason) {
-  elements.routerResultStatus.textContent = status;
-  elements.routerResultStatus.className = `result-status result-${resultTone(status)}`;
-  elements.routerResultReason.textContent = reason;
-}
-
-function policyStatusLabel(decision) {
-  if (!decision) {
-    return "Blocked before provider call";
-  }
-  if (decision.status === "REQUIRES_HUMAN_APPROVAL") {
-    return "Requires human approval";
-  }
-  if (decision.status === "REJECTED_BY_POLICY") {
-    return "Rejected by policy";
-  }
-  if (decision.status === "ALLOWED") {
-    return "Allowed";
-  }
-  return "Blocked";
-}
-
-function policyStatusKey(decision) {
-  if (!decision) {
-    return "blocked";
-  }
-  if (decision.status === "REQUIRES_HUMAN_APPROVAL") {
-    return "requires-human-approval";
-  }
-  if (decision.status === "REJECTED_BY_POLICY") {
-    return "rejected-by-policy";
-  }
-  if (decision.status === "ALLOWED") {
-    return "allowed";
-  }
-  return "blocked";
-}
-
-function friendlyReason(decision) {
-  const reason = decision?.reason || "Policy status is not available.";
-  if (reason.includes("Generic OpenRouter free routes")) {
-    return "OpenRouter Free is preview-only and cannot be called.";
-  }
-  if (reason.includes("Disabled or unknown")) {
-    return "This provider is disabled or unknown.";
-  }
-  return reason;
-}
-
-function friendlyBoolean(value, trueLabel, falseLabel) {
-  return value ? trueLabel : falseLabel;
-}
-
-function updateAuditFields(payload) {
-  const proposal = payload.proposal || {};
-  const decision = payload.decision || {};
-  const approval = payload.approval || {};
-  const providerCallPermitted =
-    payload.provider_call_permitted ?? decision.provider_call_permitted ?? approval.provider_call_permitted ?? false;
-  const humanApproved = approval.human_approved ?? elements.routerHumanApproval.checked;
-  const outputTrusted = payload.output_trusted ?? false;
-  const fallbackEnabled =
-    proposal.automatic_fallback_permitted || decision.automatic_fallback_permitted || payload.automatic_fallback_used;
-
-  elements.auditProviderCallPermitted.textContent = String(
-    friendlyBoolean(providerCallPermitted, "Provider call is permitted", "Provider call is not permitted")
+function resetChat() {
+  elements.chatHistory.innerHTML = "";
+  appendMessage(
+    "system",
+    "New local chat started. Messages create preview metadata only; no provider request is sent.",
   );
-  elements.auditHumanApproved.textContent = friendlyBoolean(
-    humanApproved,
-    "Human approval is granted",
-    "Human approval is not granted"
-  );
-  elements.auditOutputTrusted.textContent = friendlyBoolean(
-    outputTrusted,
-    "Provider output is trusted",
-    "Provider output is untrusted"
-  );
-  elements.auditFallback.textContent =
-    fallbackEnabled ? "Automatic fallback is enabled" : "Automatic fallback is blocked";
+  elements.chatState.textContent = "Preview only";
 }
 
-function updateCallButtonState() {
-  const decision = state.lastProposal?.decision;
-  const proposalAllowed = decision?.status === "REQUIRES_HUMAN_APPROVAL";
-  elements.approveAndCallProvider.disabled = !(proposalAllowed && elements.routerHumanApproval.checked);
-  if (!decision) {
-    elements.routerCallNote.textContent = "Provider call not enabled in this build.";
-    return;
-  }
-  if (decision.status === "REJECTED_BY_POLICY") {
-    elements.routerCallNote.textContent = "Provider call not enabled in this build.";
-    return;
-  }
-  if (!elements.routerHumanApproval.checked) {
-    elements.routerCallNote.textContent = "Human approval is required before any provider call.";
-    return;
-  }
-  elements.routerCallNote.textContent = "One approved provider call is enabled for this selected model.";
-}
-
-async function createSelectionProposal() {
-  const selected = selectedRouterModel();
-  const payload = await jsonFetch("/api/model-selection/propose", {
+async function previewRouterSelection() {
+  syncSelectionReadout();
+  const payload = await jsonFetch("/api/router/preview", {
     method: "POST",
     body: JSON.stringify({
-      provider_id: selected.provider_id,
-      model_id: selected.model_id,
-      task_sensitivity: routerTaskSensitivity(),
-      user_prompt: elements.routerPrompt.value,
+      provider_id: state.selectedProvider,
+      model_id: state.selectedModel,
+      task_sensitivity: state.selectedMode,
+      user_prompt: elements.promptInput.value,
     }),
   });
-  state.lastProposal = payload;
   renderJson(elements.routerProposalResult, payload);
-  renderSimpleResult(policyStatusKey(payload.decision), friendlyReason(payload.decision));
-  elements.routerResultStatus.textContent = policyStatusLabel(payload.decision);
-  updateAuditFields(payload);
-  updateCallButtonState();
+  elements.disabledReason.textContent = payload.disabled_reason || "Blocked: preview only.";
+  elements.safeNextStep.textContent = payload.safe_next_step || "Review inert preview evidence only.";
+  elements.requestHash.textContent = payload.request_hash || "missing";
+  elements.previewHash.textContent = payload.preview_hash || "missing";
+  elements.governanceHash.textContent = payload.decision_hash || "missing";
+  elements.barrierHash.textContent = "missing";
+  elements.resultHash.textContent = "missing";
+  elements.evidenceState.textContent = "preview";
+  elements.evidenceReasons.textContent = joinCodes(payload.reason_codes);
+  showView("evidence");
+  return payload;
 }
 
-async function approveAndCallProviderOnce() {
-  const selected = selectedRouterModel();
-  const payload = await jsonFetch("/api/model-selection/approve-and-call", {
-    method: "POST",
-    body: JSON.stringify({
-      provider_id: selected.provider_id,
-      model_id: selected.model_id,
-      task_sensitivity: routerTaskSensitivity(),
-      user_prompt: elements.routerPrompt.value,
-      human_approved: elements.routerHumanApproval.checked === true,
-    }),
-  });
-  renderJson(elements.routerCallResult, payload);
-  renderSimpleResult(
-    payload.call_made ? "allowed" : policyStatusKey(payload.decision),
-    payload.error || friendlyReason(payload.decision)
-  );
-  elements.routerResultStatus.textContent = payload.call_made ? "Allowed" : policyStatusLabel(payload.decision);
-  updateAuditFields(payload);
-}
+async function previewChatMessage() {
+  const prompt = elements.chatInput.value.trim();
+  if (!prompt || state.running) {
+    return;
+  }
 
-async function switchLegacyModel() {
-  const model = elements.modelSelect.value;
-  elements.modelNote.textContent = `Switching legacy chat model to ${model}...`;
-  const payload = await jsonFetch("/api/model", {
-    method: "POST",
-    body: JSON.stringify({ model }),
-  });
-  elements.modelNote.textContent = payload.notice || `Legacy chat model switched to ${payload.model}`;
-  applyStatus(payload.status);
-  hydrateLegacyModelSelect(payload.status.available_models, payload.status.model);
+  syncSelectionReadout();
+  state.running = true;
+  elements.runStatus.textContent = "Previewing";
+  elements.chatState.textContent = "Previewing";
+  elements.sendChat.disabled = true;
+  appendMessage("user", prompt);
+  elements.chatInput.value = "";
+
+  try {
+    elements.promptInput.value = prompt;
+    const payload = await previewRouterSelection();
+    appendMessage("assistant", "No provider request was sent. AOIA prepared a local route preview only.", [
+      `Status: ${payload.status || "blocked_preview_only"}`,
+      `Model: ${state.selectedModel || "-"}`,
+      `Preview hash: ${payload.preview_hash || "missing"}`,
+      `Reason: ${payload.disabled_reason || "Blocked: preview only."}`,
+    ]);
+    showView("chat");
+    elements.chatState.textContent = "Idle";
+  } catch (error) {
+    appendMessage("assistant", "The local preview was blocked before any provider call.", [
+      `Reason: ${String(error)}`,
+    ]);
+    elements.chatState.textContent = "Blocked";
+  } finally {
+    state.running = false;
+    elements.runStatus.textContent = "Idle";
+    elements.sendChat.disabled = false;
+  }
 }
 
 async function sendPrompt(prompt) {
-  addMessage("You", prompt);
+  state.running = true;
   const payload = await jsonFetch("/api/chat", {
     method: "POST",
     body: JSON.stringify({ prompt }),
   });
-  addMessage("Agent", payload.transcript);
-  applyStatus(payload.status);
+  state.running = false;
+  return payload;
 }
 
 async function transformComposerPrompt() {
   const prompt = elements.promptInput.value;
   if (!prompt.trim()) {
-    elements.cptStatus.textContent = "Enter a prompt before running Critic Transform.";
+    elements.cptStatus.textContent = "Enter a prompt before applying the transform.";
     return;
   }
 
   elements.criticTransform.disabled = true;
-  elements.cptStatus.textContent = "CPT transform running locally. Manual send required.";
+  elements.cptStatus.textContent = "Transform running locally. Manual send required.";
   try {
     const payload = await jsonFetch("/api/cpt/transform", {
       method: "POST",
@@ -625,10 +479,9 @@ async function transformComposerPrompt() {
     elements.promptInput.value = payload.record.transformed_prompt;
     elements.promptInput.focus();
     elements.cptStatus.textContent = [
-      "CPT transformed locally.",
+      "Transform applied.",
       payload.record.canonical_status,
       "Human review required.",
-      "No provider call during transform.",
       "Manual send required.",
     ].join(" ");
   } catch (error) {
@@ -638,100 +491,78 @@ async function transformComposerPrompt() {
   }
 }
 
-document.querySelector("#switch-model").addEventListener("click", async () => {
+async function refreshAll() {
+  setConnectionStatus("loading", "warn");
+  const [status, router, evidence, boundaries, agentLoop, audit, commits] = await Promise.all([
+    jsonFetch("/api/operator/status"),
+    jsonFetch("/api/router/status"),
+    jsonFetch("/api/evidence/sample"),
+    jsonFetch("/api/boundaries"),
+    jsonFetch("/api/agent-loop/status"),
+    jsonFetch("/api/audit/status"),
+    jsonFetch("/api/commits"),
+  ]);
+
+  renderOperatorStatus(status);
+  hydrateRouterControls(router);
+  renderEvidence(evidence);
+  renderBoundaryMap(boundaries);
+  renderAgentLoop(agentLoop);
+  renderAudit(audit);
+  renderCommitHistory(commits);
+  syncSelectionReadout();
+  setConnectionStatus("connected", "ok");
+}
+
+for (const item of elements.navItems) {
+  item.addEventListener("click", () => showView(item.dataset.target));
+}
+
+elements.refreshAll.addEventListener("click", async () => {
   try {
-    await switchLegacyModel();
+    await refreshAll();
   } catch (error) {
-    elements.modelNote.textContent = String(error);
+    setConnectionStatus("error", "error");
+    elements.disabledReason.textContent = String(error);
   }
 });
 
-document.querySelector("#refresh-status").addEventListener("click", async () => {
+elements.routerProviderSelect.addEventListener("change", hydrateModelSelect);
+elements.routerModelSelect.addEventListener("change", syncSelectionReadout);
+elements.routerTaskMode.addEventListener("change", syncSelectionReadout);
+elements.routerPreview.addEventListener("click", async () => {
   try {
-    await refreshStatus();
-    await refreshModelCatalog();
-    await refreshMemoryHats();
-    await refreshProviderConfigStatus();
-    await refreshCommitHistory();
+    await previewRouterSelection();
   } catch (error) {
-    addMessage("System", `Refresh failed: ${error}`);
+    elements.disabledReason.textContent = `Blocked: ${error}`;
+    renderJson(elements.routerProposalResult, { ok: false, error: String(error), call_made: false });
   }
 });
-
+elements.providerCallButton.addEventListener("click", () => {
+  elements.disabledReason.textContent = "Blocked: provider calls are disabled in this preview-only console.";
+});
 elements.criticTransform.addEventListener("click", async () => {
   await transformComposerPrompt();
 });
-
-elements.routerProviderSelect.addEventListener("change", hydrateRouterModelSelect);
-elements.routerModelSelect.addEventListener("change", updateSelectedModelFromCatalog);
-elements.routerTaskMode.addEventListener("change", () => {
-  state.lastProposal = null;
-  renderSimpleResult("blocked", "Prepare a model choice to review policy status.");
-  elements.routerResultStatus.textContent = "Blocked before provider call";
-  updateCallButtonState();
+elements.chatForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await previewChatMessage();
 });
-elements.routerHumanApproval.addEventListener("change", () => {
-  updateAuditFields(state.lastProposal || {});
-  updateCallButtonState();
-});
-
-document.querySelector("#create-selection-proposal").addEventListener("click", async () => {
-  try {
-    await createSelectionProposal();
-  } catch (error) {
-    renderJson(elements.routerProposalResult, { ok: false, error: String(error) });
-    renderSimpleResult("blocked", String(error));
-    elements.routerResultStatus.textContent = "Blocked";
-  }
-});
-
-document.querySelector("#approve-and-call-provider").addEventListener("click", async () => {
-  try {
-    await approveAndCallProviderOnce();
-  } catch (error) {
-    const payload = { ok: false, error: String(error), call_made: false, output_trusted: false };
-    renderJson(elements.routerCallResult, payload);
-    renderSimpleResult("blocked", String(error));
-    elements.routerResultStatus.textContent = "Blocked";
-    updateAuditFields(payload);
-  }
+elements.newChat.addEventListener("click", resetChat);
+elements.stopChat.addEventListener("click", () => {
+  elements.chatState.textContent = "No live provider call to stop";
 });
 
 elements.composer.addEventListener("submit", async (event) => {
   event.preventDefault();
   const prompt = elements.promptInput.value.trim();
-  if (!prompt) {
+  if (!prompt || state.running) {
     return;
   }
-  elements.promptInput.value = "";
-  try {
-    await sendPrompt(prompt);
-  } catch (error) {
-    addMessage("System", `Legacy request failed: ${error}`);
-  }
+  await sendPrompt(prompt);
 });
 
-elements.promptInput.addEventListener("keydown", async (event) => {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    elements.composer.requestSubmit();
-  }
+refreshAll().catch((error) => {
+  setConnectionStatus("error", "error");
+  elements.disabledReason.textContent = String(error);
 });
-
-async function bootstrap() {
-  addMessage(
-    "System",
-    "Controlled Model Router is ready. Use the main router controls for proposal-only model review."
-  );
-  try {
-    await refreshStatus();
-    await refreshModelCatalog();
-    await refreshMemoryHats();
-    await refreshProviderConfigStatus();
-    await refreshCommitHistory();
-  } catch (error) {
-    addMessage("System", `Startup failed: ${error}`);
-  }
-}
-
-bootstrap();

@@ -3,309 +3,317 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>App222 Controlled Router</title>
+    <title>AOIA Operator Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=operator-console-1a" />
   </head>
   <body>
-    <div class="shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <p class="eyebrow">flAmeBornLLC</p>
-          <h1>App222</h1>
-          <p class="subtitle">Controlled Model Router</p>
+    <div class="operator-shell">
+      <aside class="operator-sidebar" aria-label="Operator navigation">
+        <div class="brand-block">
+          <span class="brand-mark">AOIA</span>
+          <div>
+            <p class="eyebrow">Controlled Agent MVP</p>
+            <h1>Operator Console</h1>
+          </div>
         </div>
-
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Selected Router Model</h2>
-            <span id="current-model-badge" class="badge">loading</span>
-          </div>
-          <p id="sidebar-selected-model" class="selected-model">No catalog model selected.</p>
-          <p class="note">Provider calls require human approval.</p>
-          <p id="provider-config-status" class="note">Checking provider configuration.</p>
-        </section>
-
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Router boundary</h2>
-          </div>
-          <p class="note">Proposal only. Provider output remains untrusted and non-canonical.</p>
-          <p class="note">OpenRouter Free stays blocked for callable use in this build.</p>
-        </section>
-
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Runtime</h2>
-          </div>
-          <dl class="status-list">
-            <div>
-              <dt>Working directory</dt>
-              <dd id="status-cwd">-</dd>
-            </div>
-            <div>
-              <dt>Browser</dt>
-              <dd id="status-browser">-</dd>
-            </div>
-            <div>
-              <dt>Current URL</dt>
-              <dd id="status-url">-</dd>
-            </div>
-            <div>
-              <dt>Vault</dt>
-              <dd id="status-vault">-</dd>
-            </div>
-          </dl>
-        </section>
+        <nav class="section-nav">
+          <button class="nav-item active" type="button" data-target="chat">Chat</button>
+          <button class="nav-item" type="button" data-target="dashboard">Dashboard</button>
+          <button class="nav-item" type="button" data-target="router">Router</button>
+          <button class="nav-item" type="button" data-target="evidence">Evidence</button>
+          <button class="nav-item" type="button" data-target="boundaries">Boundaries</button>
+          <button class="nav-item" type="button" data-target="agent-loop">Agent Loop</button>
+          <button class="nav-item" type="button" data-target="audit">Audit</button>
+          <button class="nav-item" type="button" data-target="settings">Settings</button>
+        </nav>
+        <div class="sidebar-status">
+          <span id="connection-status" class="status-dot status-warn">loading</span>
+          <span id="safety-mode">Preview-only</span>
+        </div>
       </aside>
 
-      <main class="workspace">
-        <header class="topbar">
+      <main class="operator-main">
+        <header class="operator-topbar">
           <div>
-            <p class="eyebrow">Operator Console</p>
-            <h2>Controlled Model Router</h2>
+            <p class="eyebrow">Local operator console</p>
+            <h2>Human-controlled chat and safe previews</h2>
           </div>
-          <button id="refresh-status" class="button button-ghost">Refresh status</button>
+          <div class="topbar-actions">
+            <span class="status-pill">Bot <strong id="top-bot">Default</strong></span>
+            <span class="status-pill">Mode <strong id="top-mode">Chat / public dev</strong></span>
+            <span class="status-pill">Model <strong id="top-model">loading</strong></span>
+            <span class="status-pill">Status <strong id="run-status">Idle</strong></span>
+            <button id="refresh-all" class="button button-primary" type="button">Refresh</button>
+          </div>
         </header>
 
-        <section class="router-panel primary-router">
-          <div class="catalog-head">
-            <div>
-              <p class="eyebrow">Controlled Model Router</p>
-              <h3>Model Choice</h3>
+        <section id="chat" class="view active-view">
+          <div class="chat-shell">
+            <div class="chat-main">
+              <div class="view-head">
+                <div>
+                  <p class="eyebrow">Chat</p>
+                  <h3>AOIA operator conversation</h3>
+                </div>
+                <span id="chat-state" class="badge badge-blocked">Preview only</span>
+              </div>
+              <div id="chat-history" class="chat-history" aria-live="polite">
+                <article class="message message-system">
+                  <p class="message-role">System</p>
+                  <p>
+                    This console is ready for local operator previews. Provider calls are disabled in this build;
+                    messages produce inert route evidence only.
+                  </p>
+                </article>
+              </div>
+              <form id="chat-form" class="chat-composer">
+                <textarea
+                  id="chat-input"
+                  rows="4"
+                  placeholder="Type a message for AOIA. This creates a safe local preview; no provider request is sent."
+                ></textarea>
+                <div class="chat-actions">
+                  <button id="send-chat" class="button button-primary" type="submit">Send</button>
+                  <button id="new-chat" class="button button-subtle" type="button">New chat</button>
+                  <button id="stop-chat" class="button button-disabled" type="button" disabled>Stop</button>
+                </div>
+              </form>
             </div>
-            <span id="catalog-status" class="badge">preview only</span>
+            <aside class="chat-side status-card">
+              <h4>Current route</h4>
+              <dl class="fact-list">
+                <div><dt>Provider</dt><dd id="chat-provider">-</dd></div>
+                <div><dt>Model</dt><dd id="chat-model">-</dd></div>
+                <div><dt>Mode</dt><dd id="chat-mode">-</dd></div>
+                <div><dt>Callable</dt><dd id="chat-callable">No</dd></div>
+                <div><dt>Reason</dt><dd id="chat-disabled-reason">Provider call disabled in this build.</dd></div>
+              </dl>
+              <p class="blocked-note">Preview only - no controlled execution path connected.</p>
+              <button class="button button-disabled full-width" type="button" disabled>No execution available</button>
+            </aside>
           </div>
-          <p id="catalog-notice" class="note">
-            Preview only - no provider calls. Human approval required before any future provider call.
-          </p>
-          <p class="note">
-            Provider response is untrusted. No automatic fallback. No canonical promotion.
-            No execution from model output. Secrets are not displayed or logged.
-          </p>
+        </section>
 
-          <div class="router-grid">
+        <section id="dashboard" class="view">
+          <div class="view-head">
             <div>
+              <p class="eyebrow">Dashboard</p>
+              <h3>System status</h3>
+            </div>
+            <span id="dashboard-state" class="badge">loading</span>
+          </div>
+          <div class="card-grid">
+            <article class="status-card">
+              <h4>Git state</h4>
+              <dl class="fact-list">
+                <div><dt>Branch</dt><dd id="git-branch">-</dd></div>
+                <div><dt>HEAD</dt><dd id="git-head">-</dd></div>
+                <div><dt>Worktree</dt><dd id="git-clean">-</dd></div>
+                <div><dt>Reason</dt><dd id="git-reasons">-</dd></div>
+              </dl>
+            </article>
+            <article class="status-card">
+              <h4>Prototype block</h4>
+              <dl class="fact-list">
+                <div><dt>Roadmap</dt><dd id="roadmap-block">Steps 42-54 complete</dd></div>
+                <div><dt>Freeze</dt><dd id="freeze-status">checking</dd></div>
+                <div><dt>Safety mode</dt><dd id="operator-safety-mode">preview-only</dd></div>
+                <div><dt>Dispatcher</dt><dd>No dispatcher connected</dd></div>
+              </dl>
+            </article>
+            <article class="status-card warning-card">
+              <h4>AOIA invariants</h4>
+              <ul class="invariant-list">
+                <li>Provider output is never authority.</li>
+                <li>Metadata and UI state are not authority.</li>
+                <li>Preview is not permission.</li>
+                <li>Human approval must be hash-bound.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="router" class="view">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Model Router</p>
+              <h3>Preview selected route</h3>
+            </div>
+            <span id="router-state" class="badge badge-blocked">Preview only</span>
+          </div>
+          <div class="router-layout">
+            <form id="composer" class="status-card router-card">
               <label class="label" for="router-provider-select">Provider</label>
               <select id="router-provider-select" class="select"></select>
-            </div>
-            <div>
+
               <label class="label" for="router-model-select">Model</label>
               <select id="router-model-select" class="select"></select>
-            </div>
-            <div>
-              <label class="label" for="router-task-mode">Task mode</label>
+
+              <label class="label" for="router-task-mode">Mode</label>
               <select id="router-task-mode" class="select">
-                <option value="PUBLIC_DEV">Public development</option>
-                <option value="CODE">Code review</option>
-                <option value="AUDIT">Audit</option>
-                <option value="RESEARCH">Research</option>
-                <option value="SENSITIVE">Sensitive</option>
-                <option value="CANONICAL">Canonical</option>
+                <option value="PUBLIC_DEV">Chat / public dev</option>
+                <option value="SENSITIVE">Safe Review</option>
+                <option value="CANONICAL">Audit / canonical</option>
+                <option value="SECRET_ADJACENT">Secret-adjacent</option>
               </select>
-            </div>
-            <div class="choice-summary">
-              <span>Router mode</span>
-              <strong id="router-mode-label">Proposal only</strong>
-            </div>
-          </div>
 
-          <label class="label" for="router-prompt">Prompt for selected provider</label>
-          <textarea
-            id="router-prompt"
-            rows="4"
-            placeholder="Enter a prompt for one explicitly approved provider call."
-          ></textarea>
+              <label class="label" for="prompt-input">Prompt preview</label>
+              <textarea id="prompt-input" rows="5" placeholder="Write a prompt for preview. No provider request is sent."></textarea>
 
-          <p class="field-heading">Human approval</p>
-          <label class="approval-check">
-            <input id="router-human-approval" type="checkbox" />
-            <span>I approve one provider call with this selected model</span>
-          </label>
-
-          <div class="router-actions">
-            <button id="create-selection-proposal" type="button" class="button button-ghost">Prepare model choice</button>
-            <button id="approve-and-call-provider" type="button" class="button button-primary" disabled>
-              Send one approved provider call
-            </button>
-          </div>
-          <p id="router-call-note" class="note">Provider call not enabled in this build.</p>
-
-          <div id="router-simple-result" class="result-panel" aria-live="polite">
-            <p class="field-heading">Router decision</p>
-            <dl class="status-list compact-status-list">
-              <div>
-                <dt>Status</dt>
-                <dd><span id="router-result-status" class="result-status">Blocked before provider call</span></dd>
+              <div class="button-row">
+                <button id="router-preview" type="button" class="button button-primary">Preview route</button>
+                <button id="critic-transform" type="button" class="button button-subtle">Critic Transform</button>
               </div>
-              <div>
-                <dt>Reason</dt>
-                <dd id="router-result-reason">Prepare a model choice to review policy status.</dd>
-              </div>
-            </dl>
+              <p class="helper-text">CPT improves critical framing, not truth. Human review required. Manual send required.</p>
+              <p class="helper-text">Preview only - no provider calls. Human approval required before any future provider call.</p>
+              <p id="cpt-status" class="helper-text" aria-live="polite"></p>
+            </form>
+
+            <article class="status-card">
+              <h4>Route status</h4>
+              <dl class="fact-list">
+                <div><dt>Provider configured</dt><dd id="provider-configured">-</dd></div>
+                <div><dt>Connection callable</dt><dd id="connection-callable">No</dd></div>
+                <div><dt>Human barrier</dt><dd id="human-barrier">Not connected</dd></div>
+                <div><dt>Disabled reason</dt><dd id="disabled-reason">Preview only - no controlled execution path connected.</dd></div>
+                <div><dt>Safe next step</dt><dd id="safe-next-step">Review inert preview evidence only.</dd></div>
+              </dl>
+              <button id="provider-call-button" class="button button-disabled full-width" type="button" disabled>
+                Provider call disabled
+              </button>
+              <p class="blocked-note">Provider call disabled in this build. No provider request was sent.</p>
+            </article>
           </div>
+          <pre id="router-proposal-result" class="code-panel" aria-live="polite"></pre>
         </section>
 
-        <section class="panel memory-hats-panel">
-          <div class="panel-head">
+        <section id="evidence" class="view">
+          <div class="view-head">
             <div>
-              <p class="eyebrow">AIOA White Hat</p>
-              <h2>Memory Hats / White Hat Control Surface</h2>
+              <p class="eyebrow">Evidence</p>
+              <h3>Hash inspector</h3>
             </div>
-            <span id="memory-hats-status" class="badge">loading</span>
+            <span id="evidence-state" class="badge">missing</span>
           </div>
-          <p class="note">Memory Hats classify knowledge and review domains. They do not execute actions.</p>
-          <div id="memory-hats-list" class="memory-hats-grid" aria-live="polite"></div>
+          <div class="card-grid compact-grid">
+            <article class="status-card"><h4>Request hash</h4><p id="request-hash" class="hash-value">missing</p></article>
+            <article class="status-card"><h4>Preview hash</h4><p id="preview-hash" class="hash-value">missing</p></article>
+            <article class="status-card"><h4>Governance hash</h4><p id="governance-hash" class="hash-value">missing</p></article>
+            <article class="status-card"><h4>Barrier hash</h4><p id="barrier-hash" class="hash-value">missing</p></article>
+            <article class="status-card"><h4>Result hash</h4><p id="result-hash" class="hash-value">missing</p></article>
+            <article class="status-card"><h4>Reason codes</h4><p id="evidence-reasons">-</p></article>
+          </div>
         </section>
 
-        <details class="audit-details">
-          <summary>Advanced / Audit details</summary>
+        <section id="boundaries" class="view">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Boundaries</p>
+              <h3>Runtime boundary map</h3>
+            </div>
+            <span id="boundary-count" class="badge">loading</span>
+          </div>
+          <div id="boundary-list" class="boundary-grid" aria-live="polite"></div>
+        </section>
 
-          <section class="catalog-panel">
-            <div class="catalog-head">
-              <div>
-                <p class="eyebrow">Model Catalog</p>
-                <h3>Transparent Provider Preview</h3>
+        <section id="agent-loop" class="view">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Agent Loop</p>
+              <h3>Local/provider loop preview</h3>
+            </div>
+            <span class="badge badge-blocked">Metadata only</span>
+          </div>
+          <div class="card-grid">
+            <article class="status-card">
+              <h4>Local loop</h4>
+              <dl class="fact-list">
+                <div><dt>Objective</dt><dd id="local-objective">-</dd></div>
+                <div><dt>Selected candidate</dt><dd id="local-selected">None</dd></div>
+                <div><dt>Risk tier</dt><dd id="local-risk">-</dd></div>
+                <div><dt>Reason codes</dt><dd id="local-reasons">-</dd></div>
+              </dl>
+            </article>
+            <article class="status-card">
+              <h4>Provider loop</h4>
+              <dl class="fact-list">
+                <div><dt>Objective</dt><dd id="provider-objective">-</dd></div>
+                <div><dt>Selected candidate</dt><dd id="provider-selected">None</dd></div>
+                <div><dt>Risk tier</dt><dd id="provider-risk">-</dd></div>
+                <div><dt>Reason codes</dt><dd id="provider-reasons">-</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section id="audit" class="view">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Audit</p>
+              <h3>Local read-only audit view</h3>
+            </div>
+            <span id="commit-count" class="badge">loading</span>
+          </div>
+          <div class="card-grid">
+            <article class="status-card">
+              <h4>Audit messages</h4>
+              <ul id="audit-messages" class="audit-list"></ul>
+            </article>
+            <article class="status-card commit-card">
+              <h4>Commit history</h4>
+              <p id="commit-status" class="helper-text">Reading local commit history.</p>
+              <div class="commit-table-wrap">
+                <table class="commit-table">
+                  <thead>
+                    <tr>
+                      <th>Commit</th>
+                      <th>Date</th>
+                      <th>Author</th>
+                      <th>Subject</th>
+                    </tr>
+                  </thead>
+                  <tbody id="commit-table-body">
+                    <tr><td colspan="4">Loading commits.</td></tr>
+                  </tbody>
+                </table>
               </div>
-            </div>
-            <div id="model-catalog" class="catalog-grid" aria-live="polite"></div>
-          </section>
+            </article>
+          </div>
+        </section>
 
-          <section class="panel">
-            <div class="panel-head">
-              <h2>Raw router JSON</h2>
+        <section id="settings" class="view">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Settings</p>
+              <h3>Operator settings</h3>
             </div>
-            <dl class="status-list">
-              <div>
-                <dt>Provider call</dt>
-                <dd id="audit-provider-call-permitted">Provider call is not permitted</dd>
-              </div>
-              <div>
-                <dt>Human approval</dt>
-                <dd id="audit-human-approved">Human approval is not granted</dd>
-              </div>
-              <div>
-                <dt>Output trust</dt>
-                <dd id="audit-output-trusted">Provider output is untrusted</dd>
-              </div>
-              <div>
-                <dt>Fallback</dt>
-                <dd id="audit-fallback">Automatic fallback is blocked</dd>
-              </div>
-            </dl>
-            <pre id="router-proposal-result" class="router-output" aria-live="polite"></pre>
-            <pre id="router-call-result" class="router-output" aria-live="polite"></pre>
-          </section>
-
-          <section class="panel commit-panel">
-            <div class="panel-head">
-              <div>
-                <p class="eyebrow">Repository</p>
-                <h2>Commit History</h2>
-              </div>
-              <span id="commit-count" class="badge">loading</span>
-            </div>
-            <p id="commit-status" class="note">Reading local commit history.</p>
-            <div class="commit-table-wrap">
-              <table class="commit-table">
-                <thead>
-                  <tr>
-                    <th>Commit</th>
-                    <th>Date</th>
-                    <th>Author</th>
-                    <th>Subject</th>
-                  </tr>
-                </thead>
-                <tbody id="commit-table-body">
-                  <tr>
-                    <td colspan="4">Loading commits.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </details>
-
-        <details class="legacy-details">
-          <summary>Advanced / Legacy runtime</summary>
-          <section class="panel warning-panel">
-            <p class="field-heading">Legacy runtime warning</p>
-            <p class="note">Legacy chat runtime. This is not the Controlled Model Router path.</p>
-          </section>
-
-          <section class="panel legacy-panel">
-            <div class="panel-head">
-              <h2>Legacy chat model</h2>
-              <span id="legacy-model-badge" class="badge">loading</span>
-            </div>
-            <label class="label" for="model-select">Legacy active model</label>
-            <select id="model-select" class="select"></select>
-            <button id="switch-model" class="button button-ghost">Switch legacy model</button>
-            <p id="model-note" class="note"></p>
-            <div id="model-picker" class="model-picker" aria-label="Legacy model shortcuts"></div>
-          </section>
-
-          <section class="hero legacy-hero">
-            <div class="hero-card">
-              <p class="eyebrow">Legacy runtime session</p>
-              <h3 id="session-model">loading</h3>
-              <p id="session-summary" class="hero-copy">
-                Waiting for runtime status.
-              </p>
-            </div>
-            <div class="hero-grid">
-              <article class="metric-card">
-                <span>Tools</span>
-                <strong id="metric-tools">0</strong>
-              </article>
-              <article class="metric-card">
-                <span>Commands</span>
-                <strong id="metric-commands">0</strong>
-              </article>
-              <article class="metric-card">
-                <span>Recent outputs</span>
-                <strong id="metric-outputs">0</strong>
-              </article>
-            </div>
-          </section>
-
-          <section id="chat-log" class="chat-log" aria-live="polite"></section>
-
-          <form id="composer" class="composer">
-            <label class="label" for="prompt-input">Legacy runtime message</label>
-            <textarea
-              id="prompt-input"
-              rows="4"
-              placeholder="Legacy chat runtime only. The Controlled Model Router is separate."
-            ></textarea>
-            <div class="cpt-control">
-              <button id="critic-transform" type="button" class="button button-ghost">Critic Transform</button>
-              <p class="note cpt-warning">CPT improves critical framing, not truth. Review before sending. Manual send required.</p>
-            </div>
-            <p id="cpt-status" class="note cpt-status" aria-live="polite"></p>
-            <div class="composer-actions">
-              <span class="hint">Enter sends. Shift+Enter adds a newline.</span>
-              <button type="submit" class="button button-primary">Send legacy message</button>
-            </div>
-          </form>
-        </details>
+            <span class="badge">No secrets shown</span>
+          </div>
+          <div class="card-grid">
+            <article class="status-card">
+              <h4>API key status</h4>
+              <p id="provider-config-status">checking</p>
+              <p class="helper-text">Only configured/not configured status is displayed. Key values are never shown.</p>
+            </article>
+            <article class="status-card">
+              <h4>Current selection</h4>
+              <dl class="fact-list">
+                <div><dt>Provider</dt><dd id="selected-provider">-</dd></div>
+                <div><dt>Model</dt><dd id="selected-model">-</dd></div>
+                <div><dt>Mode</dt><dd id="selected-mode">-</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
       </main>
     </div>
 
-    <template id="message-template">
-      <article class="message">
-        <div class="message-meta">
-          <span class="message-role"></span>
-        </div>
-        <pre class="message-body"></pre>
-      </article>
-    </template>
-
-    <script src="/app.js" type="module"></script>
+    <script src="/app.js?v=operator-console-1a" type="module"></script>
   </body>
 </html>
