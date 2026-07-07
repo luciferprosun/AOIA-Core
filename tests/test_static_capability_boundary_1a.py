@@ -41,6 +41,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/live_flows/codex_live_flow.py",
     "runtime/agent_loops/local_agent_loop.py",
     "runtime/agent_loops/provider_agent_loop.py",
+    "runtime/memory/runtime_schemas.py",
     "runtime/provider_request_review.py",
     "runtime/provider_config_review.py",
     "runtime/provider_live_readiness_review.py",
