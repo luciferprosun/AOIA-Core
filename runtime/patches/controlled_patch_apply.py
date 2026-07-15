@@ -542,8 +542,18 @@ def _gated_writer_for_file(
 
 
 def _artifact_writer(allow_overwrite: bool) -> Callable[[SandboxArtifactRequest, str], SandboxArtifactResult]:
-    def artifact_writer(request: SandboxArtifactRequest, workspace_root: str) -> SandboxArtifactResult:
-        return write_sandbox_artifact(request, workspace_root, allow_overwrite=allow_overwrite)
+    def artifact_writer(
+        request: SandboxArtifactRequest,
+        workspace_root: str,
+        *,
+        approval_evidence: Any = None,
+    ) -> SandboxArtifactResult:
+        return write_sandbox_artifact(
+            request,
+            workspace_root,
+            allow_overwrite=allow_overwrite,
+            approval_evidence=approval_evidence,
+        )
 
     return artifact_writer
 

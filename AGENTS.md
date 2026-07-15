@@ -35,17 +35,13 @@ It is a repository-level working instruction for safer production work.
 
 ## 3. Current Production Roadmap
 
-Step 6 - Provider Runtime 1A: DONE
+Provider Runtime, Selector, Critic, Artifact Preview, controlled write,
+ActionProposal, Durable Audit Ledger, static capability boundaries, Knowledge
+Foundation, and the Linux/Bash/Python/UNIX Hat prototype are implemented and
+test-protected in the current development handoff.
 
-Step 7 - Provider Selector 1A / Chat Provider: DONE
-
-Step 8 - Provider Critic 1A: DONE
-
-Step 9 - Artifact Preview 1A: DONE
-
-Step 10 - Control Write 1A: DONE
-
-Step 11 - ActionProposal 1A: NEXT, but do not start unless explicitly instructed
+The next permitted repository step after Cleanup 1E is isolated clean-clone
+validation. Do not begin it unless explicitly instructed.
 
 ## 4. Production Discipline
 
@@ -166,33 +162,15 @@ Then run git diff --check.
 
 Run the full unittest suite when feasible.
 
-Known full-suite command from Step 10:
+Canonical installed full-suite command:
 
 ```bash
-PYTHONPATH=runtime:. python3 -m unittest discover -s tests -v
+CI=1 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test*.py' -q < /dev/null
 ```
 
-Note:
-
-```bash
-python3 -m unittest discover -v
-```
-
-from repo root may discover 0 tests.
-
-```bash
-python3 -m unittest discover -s tests -v
-```
-
-may fail due import path assumptions.
-
-Use:
-
-```bash
-PYTHONPATH=runtime:. python3 -m unittest discover -s tests -v
-```
-
-for the full suite unless the repo changes this later.
+Install the editable package first. The packaging metadata preserves both the
+canonical `runtime.*` namespace and required top-level compatibility imports;
+do not reintroduce an undocumented `PYTHONPATH` dependency.
 
 ## 10. Commit Discipline
 
@@ -213,13 +191,8 @@ Never combine unrelated work.
 
 Push only after tests/checks pass.
 
-## 11. Current Next Work After This AGENTS.md Task
+## 11. Current Next Work
 
-After this AGENTS.md task is committed and pushed, the next production planning
-target is:
-
-```text
-Step 11 - ActionProposal 1A
-```
-
-Do not implement Step 11 in this task.
+After successful Cleanup 1E validation, the next separately instructed target
+is Repository Production Cleanup 1F — isolated clean-clone and full-prototype
+validation. This instruction grants no commit, push, release, or deployment.

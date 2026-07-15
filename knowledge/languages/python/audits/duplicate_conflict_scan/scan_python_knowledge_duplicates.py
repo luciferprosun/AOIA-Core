@@ -3,18 +3,19 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[5]
 PYTHON_ROOT = PROJECT_ROOT / "knowledge" / "languages" / "python"
-OUTPUT_DIR = PYTHON_ROOT / "audits" / "duplicate_conflict_scan"
-RESULTS_PATH = OUTPUT_DIR / "H21_DUPLICATE_CONFLICT_SCAN_RESULTS.json"
-SUMMARY_PATH = OUTPUT_DIR / "H21_DUPLICATE_CONFLICT_SCAN_SUMMARY.md"
+RESULTS_FILENAME = "H21_DUPLICATE_CONFLICT_SCAN_RESULTS.json"
+SUMMARY_FILENAME = "H21_DUPLICATE_CONFLICT_SCAN_SUMMARY.md"
 
 DANGEROUS_TERMS = {
     "eval",
@@ -49,20 +50,83 @@ RISK_ORDER = {
 }
 
 
-def main() -> int:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    records, scanned_paths, templates_skipped = collect_records()
-    report = build_report(records, scanned_paths, templates_skipped)
-    RESULTS_PATH.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    SUMMARY_PATH.write_text(render_summary(report), encoding="utf-8")
+REQUIRED_REPORT_KEYS = frozenset(
+    {
+        "scanned_files",
+        "scanned_file_paths",
+        "total_records",
+        "templates_skipped",
+        "duplicate_ids",
+        "duplicate_terms",
+        "duplicate_titles",
+        "duplicate_unsafe_patterns",
+        "duplicate_corrected_patterns",
+        "status_conflicts",
+        "policy_conflicts",
+        "dangerous_low_risk_records",
+        "premature_promotions",
+        "official_docs_checked_without_gate",
+        "safe_to_execute_records",
+        "missing_source_refs",
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class DuplicateConflictReportPaths:
+    results_path: Path
+    summary_path: Path
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Build duplicate-conflict reports into an explicit output root.",
+        allow_abbrev=False,
+    )
+    parser.add_argument("--output-root", required=True)
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    arguments = build_parser().parse_args(argv)
+    report = scan_duplicate_conflicts()
+    outputs = write_duplicate_conflict_report(
+        report,
+        output_root=arguments.output_root,
+    )
     print(f"H21 duplicate/conflict scan complete: {report['total_records']} records")
-    print(f"Results: {RESULTS_PATH}")
-    print(f"Summary: {SUMMARY_PATH}")
+    print(f"Results: {outputs.results_path}")
+    print(f"Summary: {outputs.summary_path}")
     return 0
 
 
-def collect_records() -> tuple[list[dict[str, Any]], list[Path], int]:
-    paths = find_jsonl_paths()
+def scan_duplicate_conflicts(
+    python_root: str | Path = PYTHON_ROOT,
+    *,
+    path_root: str | Path | None = None,
+) -> dict[str, Any]:
+    """Return inert report data without creating directories or writing files."""
+
+    selected_python_root = Path(python_root).absolute()
+    selected_path_root = (
+        Path(path_root).absolute()
+        if path_root is not None
+        else PROJECT_ROOT if selected_python_root == PYTHON_ROOT else selected_python_root
+    )
+    records, scanned_paths, templates_skipped = collect_records(selected_python_root)
+    return build_duplicate_conflict_report(
+        records,
+        scanned_paths,
+        templates_skipped,
+        path_root=selected_path_root,
+    )
+
+
+def collect_records(
+    python_root: str | Path = PYTHON_ROOT,
+) -> tuple[list[dict[str, Any]], list[Path], int]:
+    selected_python_root = Path(python_root).absolute()
+    paths = find_jsonl_paths(selected_python_root)
     records: list[dict[str, Any]] = []
     templates_skipped = 0
     for path in paths:
@@ -73,15 +137,16 @@ def collect_records() -> tuple[list[dict[str, Any]], list[Path], int]:
             if is_template_record(record):
                 templates_skipped += 1
                 continue
-            record["_path"] = str(path.relative_to(PROJECT_ROOT))
+            record["_source_path"] = path
             record["_line"] = line_number
             records.append(record)
     return records, paths, templates_skipped
 
 
-def find_jsonl_paths() -> list[Path]:
+def find_jsonl_paths(python_root: str | Path = PYTHON_ROOT) -> list[Path]:
+    selected_python_root = Path(python_root).absolute()
     candidates: list[Path] = []
-    explicit = [PYTHON_ROOT / "examples.jsonl"]
+    explicit = [selected_python_root / "examples.jsonl"]
     for path in explicit:
         if path.exists():
             candidates.append(path)
@@ -90,7 +155,7 @@ def find_jsonl_paths() -> list[Path]:
         "advisory/**/*.jsonl",
         "official_docs_crosscheck/**/*.jsonl",
     ):
-        candidates.extend(PYTHON_ROOT.glob(pattern))
+        candidates.extend(selected_python_root.glob(pattern))
     return sorted({path.resolve() for path in candidates})
 
 
@@ -103,47 +168,63 @@ def is_template_record(record: dict[str, Any]) -> bool:
     )
 
 
-def build_report(records: list[dict[str, Any]], scanned_paths: list[Path], templates_skipped: int) -> dict[str, Any]:
-    duplicate_ids = duplicates(records, lambda record: str(record.get("id", "")))
-    duplicate_terms = duplicates(records, term_key)
-    duplicate_titles = duplicates(records, lambda record: normalize_text(str(record.get("title", ""))))
+def build_duplicate_conflict_report(
+    records: list[dict[str, Any]],
+    scanned_paths: list[Path],
+    templates_skipped: int,
+    *,
+    path_root: str | Path = PROJECT_ROOT,
+) -> dict[str, Any]:
+    selected_path_root = Path(path_root).absolute()
+    prepared_records: list[dict[str, Any]] = []
+    for value in records:
+        record = dict(value)
+        if "_source_path" in record:
+            source_path = record.pop("_source_path")
+            record["_path"] = _portable_source_path(source_path, selected_path_root)
+        prepared_records.append(record)
+    duplicate_ids = duplicates(prepared_records, lambda record: str(record.get("id", "")))
+    duplicate_terms = duplicates(prepared_records, term_key)
+    duplicate_titles = duplicates(prepared_records, lambda record: normalize_text(str(record.get("title", ""))))
     duplicate_unsafe = duplicates(
-        records,
+        prepared_records,
         lambda record: normalize_code(str(record.get("unsafe_or_wrong_pattern", ""))),
     )
     duplicate_corrected = duplicates(
-        records,
+        prepared_records,
         lambda record: normalize_code(str(record.get("corrected_pattern", ""))),
     )
 
-    review_conflicts = field_conflicts(records, ("id", "term"), "review_status")
-    promotion_conflicts = field_conflicts(records, ("id", "term"), "promotion_status")
-    execution_conflicts = field_conflicts(records, ("id", "term"), "execution_policy")
+    review_conflicts = field_conflicts(prepared_records, ("id", "term"), "review_status")
+    promotion_conflicts = field_conflicts(prepared_records, ("id", "term"), "promotion_status")
+    execution_conflicts = field_conflicts(prepared_records, ("id", "term"), "execution_policy")
     status_conflicts = review_conflicts + promotion_conflicts
     policy_conflicts = execution_conflicts
 
-    dangerous_low_risk_records = [summary(record) for record in records if is_dangerous_low_risk(record)]
+    dangerous_low_risk_records = [summary(record) for record in prepared_records if is_dangerous_low_risk(record)]
     premature_promotions = [
         summary(record)
-        for record in records
+        for record in prepared_records
         if record.get("review_status") == "promoted" or record.get("promotion_status") == "promoted_to_advisory"
     ]
     official_docs_checked_without_gate = [
         summary(record)
-        for record in records
+        for record in prepared_records
         if record.get("review_status") == "official_docs_checked"
     ]
     safe_to_execute_records = [
         summary(record)
-        for record in records
+        for record in prepared_records
         if record.get("execution_policy") == "safe_to_execute_in_test_sandbox"
     ]
-    missing_source_refs = [summary(record) for record in records if expects_source_ref(record) and not record.get("source_ref")]
+    missing_source_refs = [summary(record) for record in prepared_records if expects_source_ref(record) and not record.get("source_ref")]
 
     return {
         "scanned_files": len(scanned_paths),
-        "scanned_file_paths": [str(path.relative_to(PROJECT_ROOT)) for path in scanned_paths],
-        "total_records": len(records),
+        "scanned_file_paths": [
+            _portable_source_path(path, selected_path_root) for path in scanned_paths
+        ],
+        "total_records": len(prepared_records),
         "templates_skipped": templates_skipped,
         "duplicate_ids": duplicate_ids,
         "duplicate_terms": duplicate_terms,
@@ -158,6 +239,102 @@ def build_report(records: list[dict[str, Any]], scanned_paths: list[Path], templ
         "safe_to_execute_records": safe_to_execute_records,
         "missing_source_refs": missing_source_refs,
     }
+
+
+def serialize_duplicate_conflict_report(report: Mapping[str, Any]) -> bytes:
+    if not verify_duplicate_conflict_report(report):
+        raise ValueError("duplicate-conflict report is malformed")
+    return (
+        json.dumps(
+            report,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        + b"\n"
+    )
+
+
+def serialize_duplicate_conflict_summary(report: Mapping[str, Any]) -> bytes:
+    if not verify_duplicate_conflict_report(report):
+        raise ValueError("duplicate-conflict report is malformed")
+    return render_summary(dict(report)).encode("utf-8")
+
+
+def verify_duplicate_conflict_report(report: Mapping[str, Any]) -> bool:
+    if not isinstance(report, Mapping) or set(report) != REQUIRED_REPORT_KEYS:
+        return False
+    for name in ("scanned_files", "total_records", "templates_skipped"):
+        if type(report.get(name)) is not int or report[name] < 0:
+            return False
+    list_fields = REQUIRED_REPORT_KEYS - {
+        "scanned_files",
+        "total_records",
+        "templates_skipped",
+    }
+    if any(not isinstance(report.get(name), list) for name in list_fields):
+        return False
+    scanned_paths = report["scanned_file_paths"]
+    return (
+        report["scanned_files"] == len(scanned_paths)
+        and scanned_paths == sorted(set(scanned_paths))
+        and all(isinstance(value, str) and value for value in scanned_paths)
+    )
+
+
+def write_duplicate_conflict_report(
+    report: Mapping[str, Any],
+    *,
+    output_root: str | Path,
+) -> DuplicateConflictReportPaths:
+    """Explicitly materialize a verified report into an existing empty root."""
+
+    root = _validated_output_root(output_root)
+    results_path = root / RESULTS_FILENAME
+    summary_path = root / SUMMARY_FILENAME
+    if any(root.iterdir()):
+        raise ValueError("output root must be empty")
+    results_payload = serialize_duplicate_conflict_report(report)
+    summary_payload = serialize_duplicate_conflict_summary(report)
+    with results_path.open("xb") as stream:
+        stream.write(results_payload)
+        stream.flush()
+    with summary_path.open("xb") as stream:
+        stream.write(summary_payload)
+        stream.flush()
+    return DuplicateConflictReportPaths(
+        results_path=results_path,
+        summary_path=summary_path,
+    )
+
+
+def _validated_output_root(value: str | Path) -> Path:
+    candidate = Path(value)
+    if not candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError("output root must be an absolute traversal-free path")
+    absolute = candidate.absolute()
+    _assert_no_symlink_components(absolute)
+    if not absolute.is_dir() or absolute.is_symlink():
+        raise ValueError("output root must be an existing non-symbolic directory")
+    return absolute
+
+
+def _assert_no_symlink_components(path: Path) -> None:
+    for component in (path, *path.parents):
+        if component.exists() and component.is_symlink():
+            raise ValueError("symbolic-link output paths are forbidden")
+
+
+def _portable_source_path(path: Any, root: Path) -> str:
+    if not isinstance(path, Path):
+        raise ValueError("record source path is invalid")
+    resolved = path.resolve(strict=True)
+    base = root.resolve(strict=True)
+    try:
+        return resolved.relative_to(base).as_posix()
+    except ValueError as exc:
+        raise ValueError("record source path escapes the selected root") from exc
 
 
 def duplicates(records: list[dict[str, Any]], key_func) -> list[dict[str, Any]]:

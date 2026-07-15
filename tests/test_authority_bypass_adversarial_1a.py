@@ -297,10 +297,11 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
             self.assertFalse(any(Path(workspace).rglob("*")))
 
     def test_direct_sandbox_writer_accepts_only_existing_valid_contract_with_all_safety_fields(self):
-        request = self.sandbox_request()
+        gate = self.gate()
+        request = self.sandbox_request(gate_result=gate)
 
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
             output = Path(result.resolved_output_path)
 
             self.assertEqual(SandboxArtifactState.WRITTEN, result.state)
@@ -621,7 +622,10 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
         relative_output_path: str = "reports/authority-bypass.md",
         content_text: str = CONTENT,
         human_approved: bool = True,
+        gate_result=None,
     ):
+        nested_gate = (gate_result or self.gate()).gate_result
+        assert nested_gate is not None
         return create_sandbox_artifact_request(
             run_id="authority-bypass-run",
             sandbox_request_id="authority-bypass-sandbox-request",
@@ -632,10 +636,10 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
             requested_by="human-authority-reviewer",
             human_approved=human_approved,
             dry_run_trace_id="authority-bypass-dry-run",
-            audit_event_id="authority-bypass-audit-event",
-            approval_decision_id="authority-bypass-approval-decision",
+            audit_event_id=nested_gate.audit_event_id or "authority-bypass-audit-event",
+            approval_decision_id=nested_gate.approval_decision_id or "authority-bypass-approval-decision",
             sandbox_policy_decision_id="authority-bypass-policy-decision",
-            contract_audit_event_id="authority-bypass-audit-event",
+            contract_audit_event_id=nested_gate.audit_event_id or "authority-bypass-audit-event",
             notes="Authority bypass adversarial sandbox fixture.",
         )
 

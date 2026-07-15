@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import ast
+import tempfile
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
+
+from tests import static_capability_boundary_support_1a as step14
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -480,6 +483,365 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
     @staticmethod
     def relative(path: Path) -> str:
         return path.relative_to(REPO_ROOT).as_posix()
+
+
+class StaticCapabilityScannerStep14Tests(unittest.TestCase):
+    def scan(self, source: str, zone: str = "other_inert"):
+        return step14.scan_source_for_capabilities(
+            source,
+            path="runtime/synthetic_step14_fixture.py",
+            zone_name=zone,
+        )
+
+    def test_step14_detects_direct_forbidden_imports(self):
+        fixtures = {
+            "subprocess": "import subprocess",
+            "subprocess-alias": "import subprocess as sp",
+            "subprocess-from": "from subprocess import Popen",
+            "socket": "import socket",
+            "requests": "import requests",
+            "webbrowser": "import webbrowser",
+            "selenium": "import selenium",
+            "playwright": "import playwright",
+            "git": "import git",
+            "openai": "import openai",
+            "anthropic": "import anthropic",
+            "pip": "import pip",
+        }
+
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                self.assertTrue(self.scan(source))
+
+    def test_step14_detects_aliased_dangerous_calls(self):
+        fixtures = {
+            "subprocess-module-alias": "import subprocess as sp\nsp.run(['safe-test-data'])",
+            "subprocess-symbol-alias": "from subprocess import run as execute\nexecute(['safe-test-data'])",
+            "popen-symbol-alias": "from subprocess import Popen as launch\nlaunch(['safe-test-data'])",
+            "os-system": "import os\nos.system('inert')",
+            "os-module-alias": "import os as operating_system\noperating_system.system('inert')",
+            "os-symbol-alias": "from os import system as execute\nexecute('inert')",
+            "browser-alias": "import webbrowser as browser\nbrowser.open('https://invalid.example')",
+        }
+
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                findings = self.scan(source)
+                self.assertTrue(findings)
+                self.assertTrue(
+                    any(
+                        finding.category in {
+                            "dangerous-call",
+                            "dangerous-symbol-import",
+                        }
+                        for finding in findings
+                    )
+                )
+
+    def test_step14_detects_literal_and_unresolved_dynamic_imports(self):
+        fixtures = {
+            "literal-importlib": (
+                "import importlib as loader\n"
+                "loader.import_module('subprocess')"
+            ),
+            "literal-builtins": "__import__('socket')",
+            "from-import-alias": (
+                "from importlib import import_module as load\n"
+                "load('requests')"
+            ),
+            "unresolved": (
+                "import importlib as loader\n"
+                "module_name = 'pathlib'\n"
+                "loader.import_module(module_name)"
+            ),
+        }
+
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                findings = self.scan(source)
+                self.assertIn(
+                    "dynamic-import",
+                    {finding.category for finding in findings},
+                )
+
+    def test_step14_detects_shell_true_on_any_call(self):
+        findings = self.scan("runner(['inert'], shell=True)")
+        self.assertIn("shell-true", {finding.category for finding in findings})
+
+    def test_step14_detects_routing_dispatch_and_filesystem_writes(self):
+        fixtures = {
+            "injected-retrieval": "def route(self, query):\n    return self.retrieve(query)",
+            "callable-candidate": "def route(route_candidate):\n    return route_candidate()",
+            "generic-dispatch": "def route(dispatch):\n    return dispatch()",
+            "path-write-text": (
+                "from pathlib import Path\n"
+                "Path('token_savings_report.json').write_text('data')"
+            ),
+            "path-write-bytes": (
+                "from pathlib import Path\n"
+                "Path('token_savings_report.json').write_bytes(b'data')"
+            ),
+            "open-write": "open('token_savings_report.json', 'w')",
+            "open-append": "open('token_savings_report.json', mode='a')",
+        }
+
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                findings = self.scan(source, zone="knowledge_routing")
+                self.assertTrue(findings)
+                self.assertTrue(
+                    {finding.category for finding in findings}.intersection(
+                        {"routing-dispatch", "routing-filesystem-write"}
+                    )
+                )
+
+    def test_step14_routing_scan_ignores_inert_execution_looking_strings(self):
+        source = '''
+examples = (
+    "self.retrieve(query)",
+    "Path.write_text",
+    "token_savings_report.json",
+)
+# open("report.json", "w")
+'''
+        self.assertEqual((), self.scan(source, zone="knowledge_routing"))
+
+    def test_step14_detects_direct_authority_boundary_import(self):
+        findings = self.scan(
+            "from runtime.human_decision_gated_artifact_write "
+            "import write_artifact_after_human_gate"
+        )
+        self.assertIn(
+            "authority-boundary-import",
+            {finding.category for finding in findings},
+        )
+
+    def test_step14_ignores_comments_and_inert_strings(self):
+        source = """
+# import subprocess
+command = "sudo apt install curl"
+example = "import requests"
+gate_data = {"approved": True, "entry_hash": "metadata-only"}
+"""
+        self.assertEqual((), self.scan(source))
+
+    def test_step14_allows_inert_standard_library_operations(self):
+        fixtures = {
+            "url-parsing": "from urllib import parse\nparse.urlsplit('https://example.invalid')",
+            "audit-fsync": "import os\nos.fsync(1)",
+            "audit-flock": "import fcntl\nfcntl.flock(1, fcntl.LOCK_EX)",
+            "pathlib": "from pathlib import Path\nvalue = Path('inert')",
+            "hashlib": "import hashlib\nvalue = hashlib.sha256(b'inert').hexdigest()",
+            "dataclass": "from dataclasses import dataclass\n@dataclass(frozen=True)\nclass Record:\n    value: str",
+            "annotations": "from typing import Mapping\nvalue: Mapping[str, object]",
+            "canonical-json": "import json\njson.dumps({'b': 2, 'a': 1}, sort_keys=True)",
+            "safe-literal-dynamic-import": (
+                "import importlib\nimportlib.import_module('pathlib')"
+            ),
+        }
+
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                self.assertEqual((), self.scan(source, zone="audit"))
+
+    def test_step14_detects_imports_inside_functions_conditions_and_type_checking(self):
+        fixtures = {
+            "function": "def hidden():\n    import requests",
+            "conditional": "if False:\n    import subprocess",
+            "type-checking": (
+                "from typing import TYPE_CHECKING\n"
+                "if TYPE_CHECKING:\n"
+                "    import openai"
+            ),
+        }
+
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                self.assertTrue(self.scan(source))
+
+    def test_step14_syntax_errors_fail_closed(self):
+        findings = self.scan("def broken(:\n    pass")
+        self.assertEqual(1, len(findings))
+        self.assertEqual("syntax-error", findings[0].category)
+
+    def test_step14_invalid_utf8_fails_closed(self):
+        with tempfile.TemporaryDirectory() as root_name:
+            root = Path(root_name)
+            (root / "invalid.py").write_bytes(b"\xff\xfe")
+            findings = step14.scan_file_for_capabilities(
+                root,
+                step14.ProtectedRuntimeFile(
+                    path="invalid.py",
+                    zone="other_inert",
+                ),
+            )
+        self.assertEqual(1, len(findings))
+        self.assertEqual("invalid-utf8", findings[0].category)
+
+    def test_step14_findings_are_immutable_and_deterministically_sorted(self):
+        findings = self.scan("import socket\nimport subprocess\n")
+        self.assertEqual(tuple(sorted(findings)), findings)
+        self.assertEqual(
+            ["network-import", "process-import"],
+            [finding.category for finding in findings],
+        )
+        with self.assertRaises(AttributeError):
+            findings[0].line = 99
+
+    def test_step14_unknown_zone_fails_closed(self):
+        with self.assertRaises(step14.StaticCapabilityPolicyError):
+            step14.scan_source_for_capabilities(
+                "import pathlib",
+                path="runtime/synthetic.py",
+                zone_name="unknown-zone",
+            )
+
+    def test_step14_outside_and_symlink_escape_paths_fail_closed(self):
+        with self.assertRaises(step14.StaticCapabilityPolicyError):
+            step14.scan_file_for_capabilities(
+                REPO_ROOT,
+                step14.ProtectedRuntimeFile(
+                    path="/etc/hosts",
+                    zone="other_inert",
+                ),
+            )
+
+        with tempfile.TemporaryDirectory() as root_name:
+            root = Path(root_name)
+            escape = root / "escape.py"
+            escape.symlink_to(Path(__file__).resolve())
+            with self.assertRaises(step14.StaticCapabilityPolicyError):
+                step14.scan_file_for_capabilities(
+                    root,
+                    step14.ProtectedRuntimeFile(
+                        path="escape.py",
+                        zone="other_inert",
+                    ),
+                )
+
+
+class StaticCapabilityRepositoryStep14Tests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.protected_files = step14.resolve_protected_runtime_files(REPO_ROOT)
+
+    def test_step14_protected_zones_are_nonempty_unique_and_sorted(self):
+        self.assertEqual(
+            tuple(sorted(self.protected_files, key=lambda item: (item.path, item.zone))),
+            self.protected_files,
+        )
+        paths = [record.path for record in self.protected_files]
+        self.assertEqual(len(paths), len(set(paths)))
+        self.assertTrue(all((REPO_ROOT / path).is_file() for path in paths))
+
+        for zone in step14.PROTECTED_ZONE_NAMES:
+            with self.subTest(zone=zone):
+                self.assertTrue(
+                    [record for record in self.protected_files if record.zone == zone]
+                )
+
+    def test_step14_all_protected_repository_sources_are_clean(self):
+        findings = step14.scan_protected_repository(REPO_ROOT)
+        self.assertEqual("", step14.format_violations(findings))
+
+    def test_step14_each_role_specific_zone_is_clean(self):
+        for zone in step14.PROTECTED_ZONE_NAMES:
+            with self.subTest(zone=zone):
+                findings = step14.scan_protected_repository(REPO_ROOT, (zone,))
+                self.assertEqual("", step14.format_violations(findings))
+
+    def test_step14_audit_ledger_is_protected_and_local_durability_is_allowed(self):
+        audit_paths = {
+            record.path
+            for record in self.protected_files
+            if record.zone == "audit"
+        }
+        self.assertIn("runtime/audit/durable_audit_ledger.py", audit_paths)
+        self.assertEqual(
+            (),
+            step14.scan_source_for_capabilities(
+                "import fcntl\nimport os\nos.fsync(1)\nfcntl.flock(1, fcntl.LOCK_EX)",
+                path="runtime/audit/synthetic_local_durability.py",
+                zone_name="audit",
+            ),
+        )
+
+    def test_step14_dedicated_retrieval_hat_engine_and_routing_zones_exist(self):
+        expected_required_paths = {
+            "retrieval": "runtime/retrieval/facade.py",
+            "knowledge_engine": "runtime/knowledge/rhcsa_engine.py",
+            "unix_hat": "runtime/memory_hat_registry.py",
+            "knowledge_routing": "runtime/orchestrator/knowledge_router.py",
+        }
+        for zone, required_path in expected_required_paths.items():
+            with self.subTest(zone=zone):
+                resolved_paths = {
+                    record.path
+                    for record in self.protected_files
+                    if record.zone == zone
+                }
+                self.assertTrue(resolved_paths)
+                self.assertIn(required_path, resolved_paths)
+        retrieval_paths = {
+            record.path
+            for record in self.protected_files
+            if record.zone == "retrieval"
+        }
+        self.assertIn(
+            "runtime/retrieval/unix_runtime_adapter.py",
+            retrieval_paths,
+        )
+
+    def test_step14_knowledge_router_is_statically_no_dispatch_and_no_write(self):
+        findings = step14.scan_protected_repository(
+            REPO_ROOT,
+            ("knowledge_routing",),
+        )
+        self.assertEqual("", step14.format_violations(findings))
+
+    def test_step14_gateway_exception_is_exact_existing_and_not_protected(self):
+        exceptions = step14.validate_gateway_exceptions(
+            REPO_ROOT,
+            self.protected_files,
+        )
+        self.assertEqual(("runtime/providers/gateway.py",), exceptions)
+        protected_paths = {record.path for record in self.protected_files}
+        self.assertTrue(all("*" not in path for path in exceptions))
+        self.assertTrue(all((REPO_ROOT / path).is_file() for path in exceptions))
+        self.assertFalse(protected_paths.intersection(exceptions))
+
+    def test_step14_gateway_exception_policy_rejects_wildcards_and_protected_files(self):
+        with self.assertRaises(step14.StaticCapabilityPolicyError):
+            step14.validate_gateway_exceptions(
+                REPO_ROOT,
+                self.protected_files,
+                exceptions=("runtime/providers/*.py",),
+            )
+        with self.assertRaises(step14.StaticCapabilityPolicyError):
+            step14.validate_gateway_exceptions(
+                REPO_ROOT,
+                self.protected_files,
+                exceptions=("runtime/artifact_preview.py",),
+            )
+
+    def test_step14_policy_sets_are_nonempty(self):
+        self.assertTrue(step14.FORBIDDEN_IMPORT_ROOTS)
+        self.assertTrue(step14.FORBIDDEN_CALLS)
+        self.assertTrue(step14.FORBIDDEN_AUTHORITY_BOUNDARY_IMPORTS)
+
+    def test_step14_removing_audit_ledger_from_policy_fails_closed(self):
+        weakened = tuple(
+            record
+            for record in self.protected_files
+            if record.path != "runtime/audit/durable_audit_ledger.py"
+        )
+        with self.assertRaises(step14.StaticCapabilityPolicyError):
+            step14.validate_protected_policy(REPO_ROOT, weakened)
+
+    def test_step14_duplicate_policy_entries_fail_closed(self):
+        duplicated = (*self.protected_files, self.protected_files[0])
+        with self.assertRaises(step14.StaticCapabilityPolicyError):
+            step14.validate_protected_policy(REPO_ROOT, duplicated)
 
 
 def scan_module(path: Path) -> StaticModuleScan:

@@ -211,7 +211,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
 
     def test_target_symlink_swap_before_write_blocks(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
-            request = self.request(relative_output_path="reports/swap-target.txt")
+            gate = self.gate()
+            request = self.request(relative_output_path="reports/swap-target.txt", gate_result=gate)
             original_guard = sandbox_artifact_runner.validate_workspace_target_path
             calls = {"count": 0}
 
@@ -228,7 +229,11 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
                 "validate_workspace_target_path",
                 side_effect=swap_after_second_validation,
             ):
-                result = sandbox_artifact_runner.write_sandbox_artifact(request, workspace)
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    approval_evidence=gate,
+                )
 
             self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
             self.assertFalse(result.write_attempted)
@@ -237,7 +242,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
 
     def test_parent_symlink_swap_before_write_blocks(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
-            request = self.request(relative_output_path="reports/swap-parent.txt")
+            gate = self.gate()
+            request = self.request(relative_output_path="reports/swap-parent.txt", gate_result=gate)
             original_guard = sandbox_artifact_runner.validate_workspace_target_path
             calls = {"count": 0}
 
@@ -255,7 +261,11 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
                 "validate_workspace_target_path",
                 side_effect=swap_parent_after_second_validation,
             ):
-                result = sandbox_artifact_runner.write_sandbox_artifact(request, workspace)
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    approval_evidence=gate,
+                )
 
             self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
             self.assertFalse(result.write_attempted)
@@ -386,8 +396,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
             expected_artifact_hash=ARTIFACT_HASH,
         )
 
-    def request(self, *, relative_output_path: str = "reports/step16.txt"):
-        nested_gate = self.gate().gate_result
+    def request(self, *, relative_output_path: str = "reports/step16.txt", gate_result=None):
+        nested_gate = (gate_result or self.gate()).gate_result
         assert nested_gate is not None
         return create_sandbox_artifact_request(
             run_id="step-16-run",

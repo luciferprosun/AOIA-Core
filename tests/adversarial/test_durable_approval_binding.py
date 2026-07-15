@@ -26,7 +26,7 @@ DURABLE_BINDING_RUNTIME_FILES = (
 
 
 class DurableApprovalBindingAdversarialTests(unittest.TestCase):
-    def test_controlled_artifact_integration_runs_with_explicit_durable_audit_directory(self) -> None:
+    def test_durable_audit_alone_does_not_authorize_controlled_artifact_write(self) -> None:
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
             result = integration.run_dry_run_agent_and_write_artifact_with_durable_audit(
                 self.make_request(),
@@ -37,10 +37,12 @@ class DurableApprovalBindingAdversarialTests(unittest.TestCase):
 
             self.assertTrue(durable_result.durable_audit_write_completed)
             self.assertEqual(len(durable_writes), len(events))
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
+            self.assertFalse(artifact_result.write_completed)
+            self.assertFalse(any(Path(workspace).iterdir()))
             self.assertTrue((Path(audit_dir) / "events.jsonl").is_file())
 
-    def test_durable_audit_log_is_written_before_artifact_file_appears(self) -> None:
+    def test_durable_audit_log_exists_before_unauthorized_artifact_is_blocked(self) -> None:
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
             output_path = Path(workspace) / "ordered.md"
             audit_log_path = Path(audit_dir) / "events.jsonl"
@@ -60,8 +62,10 @@ class DurableApprovalBindingAdversarialTests(unittest.TestCase):
                     relative_output_path="ordered.md",
                 )
 
-            self.assertTrue(result[0].write_completed)
-            self.assertTrue(output_path.is_file())
+            artifact_result = result[-2]
+            self.assertFalse(result[0].write_completed)
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
+            self.assertFalse(output_path.exists())
 
     def test_durable_audit_append_failure_blocks_artifact_write(self) -> None:
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
@@ -167,7 +171,7 @@ class DurableApprovalBindingAdversarialTests(unittest.TestCase):
                     self.assertFalse(artifact_result.write_attempted)
                     self.assertFalse(any(Path(workspace).iterdir()))
 
-    def test_existing_m9_non_durable_path_remains_explicitly_unchanged(self) -> None:
+    def test_existing_m9_non_durable_path_fails_closed_without_canonical_gate(self) -> None:
         with TemporaryDirectory() as workspace:
             result = integration.run_dry_run_agent_and_write_artifact(
                 self.make_request(),
@@ -176,10 +180,11 @@ class DurableApprovalBindingAdversarialTests(unittest.TestCase):
             )
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
-            self.assertTrue((Path(workspace) / "non-durable.md").is_file())
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
+            self.assertFalse(artifact_result.write_completed)
+            self.assertFalse((Path(workspace) / "non-durable.md").exists())
 
-    def test_existing_m10_controlled_demo_still_passes(self) -> None:
+    def test_existing_m10_demo_fails_closed_without_canonical_gate(self) -> None:
         with TemporaryDirectory() as workspace:
             result = run_controlled_agent_demo(
                 "Create a controlled local summary artifact.",
@@ -188,8 +193,9 @@ class DurableApprovalBindingAdversarialTests(unittest.TestCase):
             )
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
-            self.assertTrue(Path(artifact_result.resolved_output_path).is_file())
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
+            self.assertFalse(artifact_result.write_completed)
+            self.assertFalse(any(Path(workspace).iterdir()))
 
     def test_no_forbidden_capabilities_are_introduced(self) -> None:
         forbidden_modules = {

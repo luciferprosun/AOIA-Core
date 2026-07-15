@@ -308,7 +308,8 @@ class FullChainFailClosed1ATests(unittest.TestCase):
     def test_direct_sandbox_bypass_remains_blocked_unless_existing_lower_contract_is_complete(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
             switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
-            valid_request = self.sandbox_request()
+            valid_gate = self.gate()
+            valid_request = self.sandbox_request(gate_result=valid_gate)
             forged_cases = {
                 "missing_human_approval": replace(valid_request, human_approved=False),
                 "missing_write_contract": replace(valid_request, artifact_write_allowed=False),
@@ -332,6 +333,7 @@ class FullChainFailClosed1ATests(unittest.TestCase):
             valid_result = write_sandbox_artifact(
                 valid_request,
                 workspace,
+                approval_evidence=valid_gate,
                 write_kill_switch_path=str(switch_path),
                 write_kill_switch_directory=switch_dir,
             )
@@ -505,8 +507,8 @@ class FullChainFailClosed1ATests(unittest.TestCase):
         gate["gate_result"] = nested
         return gate
 
-    def sandbox_request(self):
-        nested_gate = self.gate().gate_result
+    def sandbox_request(self, *, gate_result=None):
+        nested_gate = (gate_result or self.gate()).gate_result
         assert nested_gate is not None
         return create_sandbox_artifact_request(
             run_id="full-chain-run",

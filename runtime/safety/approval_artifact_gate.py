@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import weakref
 from dataclasses import dataclass
 from typing import Any
 
@@ -34,7 +35,38 @@ class PreArtifactApprovalGateResult:
         }
 
 
+_ISSUED_PRE_ARTIFACT_GATE_RESULTS: dict[
+    int,
+    tuple[
+        weakref.ReferenceType[PreArtifactApprovalGateResult],
+        tuple[Any, ...],
+    ],
+] = {}
+
+
 def evaluate_pre_artifact_approval_gate(
+    *,
+    approval_decision: ApprovalDecision,
+    approval_audit_handoff_result: ApprovalDecisionAuditHandoffResult,
+) -> PreArtifactApprovalGateResult:
+    result = _evaluate_pre_artifact_approval_gate(
+        approval_decision=approval_decision,
+        approval_audit_handoff_result=approval_audit_handoff_result,
+    )
+    return _record_canonical_pre_artifact_gate_issuance(result)
+
+
+def is_canonically_issued_pre_artifact_gate_result(value: Any) -> bool:
+    if type(value) is not PreArtifactApprovalGateResult:
+        return False
+    issuance = _ISSUED_PRE_ARTIFACT_GATE_RESULTS.get(id(value))
+    if issuance is None:
+        return False
+    reference, fingerprint = issuance
+    return reference() is value and fingerprint == _pre_artifact_gate_fingerprint(value)
+
+
+def _evaluate_pre_artifact_approval_gate(
     *,
     approval_decision: ApprovalDecision,
     approval_audit_handoff_result: ApprovalDecisionAuditHandoffResult,
@@ -75,6 +107,36 @@ def evaluate_pre_artifact_approval_gate(
         audit_event_id=handoff.audit_event_id,
         audit_event_hash=handoff.audit_event_hash,
         reason="approval decision durable audit handoff accepted",
+    )
+
+
+def _record_canonical_pre_artifact_gate_issuance(
+    result: PreArtifactApprovalGateResult,
+) -> PreArtifactApprovalGateResult:
+    identity = id(result)
+
+    def discard(reference: weakref.ReferenceType[PreArtifactApprovalGateResult]) -> None:
+        issuance = _ISSUED_PRE_ARTIFACT_GATE_RESULTS.get(identity)
+        if issuance is not None and issuance[0] is reference:
+            _ISSUED_PRE_ARTIFACT_GATE_RESULTS.pop(identity, None)
+
+    _ISSUED_PRE_ARTIFACT_GATE_RESULTS[identity] = (
+        weakref.ref(result, discard),
+        _pre_artifact_gate_fingerprint(result),
+    )
+    return result
+
+
+def _pre_artifact_gate_fingerprint(
+    result: PreArtifactApprovalGateResult,
+) -> tuple[Any, ...]:
+    return (
+        result.allowed,
+        result.approval_decision_id,
+        result.approval_decision_type,
+        result.audit_event_id,
+        result.audit_event_hash,
+        result.reason,
     )
 
 

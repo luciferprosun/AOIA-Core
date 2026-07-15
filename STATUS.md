@@ -1,49 +1,32 @@
 # AOIA-Core Status
 
-## Implemented
+## Current
 
-- Local-first command inspection and audit artifacts.
-- Bash safety parser and corpus work for pre-execution inspection.
-- Inert schemas used to describe structure and review targets.
-- Dry-run approval concepts and related tests.
-- Reviewer evidence documentation for external review.
-- No autonomous shell execution in the current reviewer claim.
+AOIA-Core is a development prototype with a local-first, human-controlled
+authority model. Provider Runtime, Selector and Critic; Artifact Preview;
+ActionProposal; controlled write and human-gate bindings; Durable Audit Ledger;
+Knowledge Foundation; Linux, Bash, Python and UNIX Hats; retrieval; routing;
+offline review; adversarial validation; and deterministic evidence are present.
 
-## Partial / Transitional
+The baseline entering Cleanup 1E was 3,255 passed, 4 skipped, 0 failures, and
+0 errors. The current UNIX freeze is `aoia-unix-unit-1a-r1`.
 
-- Legacy tools remain visible in the repository.
-- Dev-tools are present for development support, not as the main reviewer claim.
-- Provider switcher exists as repository tooling, not as current reviewer scope.
-- Lab clone utility exists as developer support, not as current reviewer scope.
-- Older executor and shell tooling may still be visible in the tree but are not part of the current reviewer claim.
+## Packaging and commands
 
-## Planned / Out of Scope Now
+`pyproject.toml` defines both the `runtime.*` package and the retained top-level
+compatibility imports. After the documented editable installation, no
+`PYTHONPATH=runtime:.` workaround is required for the stable developer flow.
+The canonical commands are maintained and tested in `README.md`.
 
-- Real shell execution.
-- Autonomous command execution.
-- Provider orchestration.
-- Cloudflare or live deployment.
-- Browser automation.
-- Gmail or other email sending.
-- Android flashing workflows.
-- GUI production application delivery.
+## Authority status
 
-## Reviewer Notes
+AOIA-Core is not an autonomous executor. Provider and critic output, previews,
+proposals, knowledge, Hat descriptors, routes, retrieval results, audit records,
+manifests, and freezes are metadata only. Only the existing separate canonical
+human barrier may authorize its exact controlled path.
 
-AOIA-Core should be reviewed as a safety, audit, and pre-execution inspection layer. It should not be reviewed as an autonomous agent or as a production shell executor.
+## Next controlled step
 
-## CI / Import Layout Note
-
-The current test suite imports several modules as top-level names from inside
-`runtime/` (`main`, `tools`, `adaptive_routing`, `retrieval`, `orchestrator`).
-
-For this reviewer-packaging phase, CI uses:
-
-`PYTHONPATH=runtime:. python3 -m unittest discover -s tests -p "test*.py" -v`
-
-This matches the empirically validated current validation command:
-470 tests passed, 4 skipped.
-
-This is a temporary compatibility measure, not the final packaging architecture.
-Import-layout normalization / packaging refactor is deferred to a separate
-audited phase before GT-RUNTIME-9.
+The next permitted roadmap step after successful Cleanup 1E is isolated
+clean-clone and full-prototype validation. No commit, push, release ZIP, or
+deployment is authorized by this status document.

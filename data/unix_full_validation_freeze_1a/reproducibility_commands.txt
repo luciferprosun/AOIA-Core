@@ -1,0 +1,4 @@
+CI=1 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=runtime:. python3 -m unittest tests.test_unix_full_validation_and_freeze_1a -v < /dev/null
+CI=1 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=runtime:. python3 -m unittest tests.test_unix_unit_adversarial_suite_1a -v < /dev/null
+CI=1 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=runtime:. python3 -m unittest discover -s tests -p 'test*.py' -q < /dev/null
+PYTHONPYCACHEPREFIX=/tmp/aoia-unix-freeze-pycache python3 -m compileall -q runtime tests

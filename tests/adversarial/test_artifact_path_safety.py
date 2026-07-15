@@ -19,6 +19,7 @@ from runtime.schemas.sandbox_artifact import (
     SandboxArtifactType,
     create_sandbox_artifact_request,
 )
+from tests.canonical_human_gate_support import canonical_gate_and_artifact_request
 
 
 class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
@@ -34,6 +35,14 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
             human_approved=True,
             dry_run_trace_id="trace-path-safety",
             audit_event_id="audit-path-safety",
+        )
+
+    def make_authorized_request(self, relative_output_path: str, content_text: str = "safe artifact\n"):
+        return canonical_gate_and_artifact_request(
+            relative_output_path=relative_output_path,
+            content_text=content_text,
+            run_id="adversarial-path-safety",
+            requested_by="unit-test",
         )
 
     def test_absolute_path_rejected(self) -> None:
@@ -80,7 +89,8 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
             except (OSError, NotImplementedError) as exc:
                 self.skipTest(f"symlink creation not supported here: {exc}")
 
-            result = write_sandbox_artifact(self.make_request("escape.md"), workspace)
+            gate, request = self.make_authorized_request("escape.md")
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse((Path(outside) / "outside.md").exists())
@@ -93,7 +103,8 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
             except (OSError, NotImplementedError) as exc:
                 self.skipTest(f"symlink creation not supported here: {exc}")
 
-            result = write_sandbox_artifact(self.make_request("escape/result.md"), workspace)
+            gate, request = self.make_authorized_request("escape/result.md")
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse((Path(outside) / "result.md").exists())
@@ -125,7 +136,8 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
         for allowed_path in ("report.MD", "summary.Json", "notes.TXT"):
             with self.subTest(allowed_path=allowed_path):
                 with TemporaryDirectory() as workspace:
-                    result = write_sandbox_artifact(self.make_request(allowed_path), workspace)
+                    gate, request = self.make_authorized_request(allowed_path)
+                    result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
                     self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
 
     def test_double_extension_rejects_final_unsafe_suffix(self) -> None:
@@ -135,9 +147,10 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
 
     def test_write_once_overwrite_prevention(self) -> None:
         with TemporaryDirectory() as workspace:
-            request = self.make_request("result.md", "first")
-            first = write_sandbox_artifact(request, workspace)
-            second = write_sandbox_artifact(self.make_request("result.md", "second"), workspace)
+            first_gate, request = self.make_authorized_request("result.md", "first")
+            first = write_sandbox_artifact(request, workspace, approval_evidence=first_gate)
+            second_gate, second_request = self.make_authorized_request("result.md", "second")
+            second = write_sandbox_artifact(second_request, workspace, approval_evidence=second_gate)
 
             self.assertEqual(first.state, SandboxArtifactState.WRITTEN)
             self.assertEqual(second.state, SandboxArtifactState.BLOCKED)
@@ -148,14 +161,16 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             target = Path(workspace) / "oversized.md"
 
-            result = write_sandbox_artifact(self.make_request("oversized.md", oversized_content), workspace)
+            gate, request = self.make_authorized_request("oversized.md", oversized_content)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(target.exists())
 
     def run_blocked(self, relative_output_path: str):
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request(relative_output_path), workspace)
+            gate, request = self.make_authorized_request(relative_output_path)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
             self.assertFalse(result.write_completed)

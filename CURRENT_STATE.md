@@ -1,151 +1,44 @@
 # AOIA-Core Current State
 
-Status: Research prototype / safety-core in progress
+Status: complete development-prototype handoff under controlled repository cleanup
 
-Audience: reviewers, contributors, security reviewers
+Audience: architects, programmers, reviewers, and security reviewers
 
-Last updated: 2026-06-09
+Last updated: 2026-07-14
 
-Branch: dev/gt-runtime-8-bash-safety-planning
+AOIA-Core is a local-first, human-controlled epistemic control system. It is not
+an autonomous agent and no metadata object, route, score, preview, freeze, or
+test result grants execution or write authority.
 
-AOIA-Core is not currently a production autonomous-agent runtime. It is a local-first research prototype for pre-execution inspection, proposal review, and audit-oriented safety controls for AI-assisted workflows.
+## Implemented state
 
-## 1. What AOIA-Core Is
+- Provider Runtime, Selector, and Critic preserve provider output as untrusted.
+- Artifact Preview and ActionProposal remain metadata-only.
+- Controlled write remains bound to the separate canonical human barrier.
+- Durable Audit Ledger and static capability boundaries are test-protected.
+- Knowledge Foundation records carry exact provenance without authority.
+- Linux, Bash, Python, and UNIX Hats are retained and validated.
+- The UNIX flow performs deterministic local ingestion, retrieval, inert routing, and offline static review.
+- The current UNIX freeze is `aoia-unix-unit-1a-r1`.
+- The complete handoff inventory is `data/architect_handoff_manifest_1a.json`.
 
-AOIA-Core is a local-first research prototype and safety-core in progress.
+## Verified baseline
 
-It currently focuses on:
+The baseline entering Cleanup 1E was 3,255 passed, 4 skipped, 0 failures, and
+0 errors. Stable installed entrypoints and the updated suite are validated by
+the Cleanup 1E report; this file intentionally avoids binding to a branch or
+commit so it remains useful after a controlled checkpoint.
 
-- pre-execution inspection
-- proposal review
-- audit-oriented safety controls
-- human approval boundaries
-- provenance and evidence-boundary documentation
-- controlled model selection/proposal work
+## Canonical developer path
 
-The current work is incremental and checkpoint-driven.
+Use `README.md` for installation and the five tested commands. Use
+`START_HERE_ARCHITECT.md` for the short architecture map. `pyproject.toml` is
+the only canonical dependency and console-entrypoint declaration.
 
-## 2. What AOIA-Core Is Not
+## Boundaries and limitations
 
-AOIA-Core is not:
-
-- an autonomous agent runtime
-- helper-bot production
-- browser automation
-- a shell execution product
-- a finished security system
-- a trusted model-output system
-- an automatic source-trust system
-- an automatic canonical knowledge promotion system
-
-Reviewer claims should be read narrowly and checked against the current docs, tests, and blocker register.
-
-## 3. What Is Currently Enforced
-
-Current enforced boundaries include:
-
-- local validation through the repository test suite
-- non-execution claims for the current reviewer-facing safety-core scope
-- model-router proposal and approval separation
-- provider output remaining untrusted in the controlled router path
-- no automatic fallback in the controlled router checkpoint
-- explicit distinction between legacy runtime surfaces and current reviewer claims
-
-These boundaries do not remove all legacy risk surfaces from the repository.
-
-## 4. What Is Test-Enforced
-
-Current tests cover:
-
-- controlled model router boundary checks
-- provider-call gating behavior in the M1 router path
-- OpenRouter Free / generic free route rejection for sensitive, canonical, and secret-adjacent tasks
-- provider output remaining untrusted and non-canonical in tested paths
-- shell safety parser and approval-gate behavior
-- memory-hats and provenance-related invariants in their current scoped tests
-
-The current expected suite count is 618 tests with 4 skipped at this checkpoint.
-
-Recent RED-1 cleanup checkpoint:
-
-- RED-1-C through RED-1-I added diagnostic negative tests and three narrow runtime hardening changes.
-- RED-1-G removed the `KnowledgeRouter` import-time `token_savings_report.json` write from the `runtime.webapp` path.
-- RED-1-H hardened `runtime/main.py` browser approval exposure and removed the legacy "Autonomous local runtime" wording.
-- RED-1-I hardened the model-router approval provenance boundary for untrusted proposal/decision payloads.
-- Current checkpoint: 618 tests OK, 4 skipped; GitHub Actions green; HEAD `0e258c01204644fb7b0401aa25547bcbfec5f888`.
-- This does not close RED-1 globally. Legacy runtime and public entrypoint surfaces remain open for framework cleanup.
-
-## Framework Cleanup Checkpoint
-
-Framework cleanup has started. The docs/audit top-level was reduced to 70 files by moving historical checkpoints, model-review artifacts, and future/planning artifacts into `docs/audit/archive/` subfolders.
-
-No tracked files were deleted. Runtime, tests, and web files were not changed by the cleanup move-sets.
-
-RED-1 remains checkpointed, not fully closed. Next cleanup must be dependency-aware because some `docs/audit` files are referenced by tests or current reviewer docs.
-
-M2-WHITEHAT-A adds a minimal inert Memory Hat control surface for AIOA White Hat. It exposes static read-only metadata for Hats 001-004 and keeps all hats non-executing, human-review-required, and non-authoritative.
-
-This does not add Critic Mode, helper bots, provider calls, browser automation, shell execution, or new knowledge ingestion.
-
-## Post-Cleanup Stability Checkpoint
-
-- AOIA-Core is a solo-developed research prototype being tightened into a reviewer-facing framework.
-- Historical audit, model-review, and future-planning artifacts were moved into `docs/audit/archive/` subfolders without deleting tracked files.
-- The docs/audit top-level currently has 70 files.
-- M2-WHITEHAT-A added an inert Memory Hat Control Surface and `GET /api/memory-hats`.
-- Local validation, app smoke tests, and GitHub Actions are green at this checkpoint.
-- Controlled model/proposal paths remain non-executing; live provider chat is not claimed unless explicitly tested through an approved safe path.
-- This checkpoint is stable, but framework cleanup and RED-1 hardening are not globally complete.
-
-## 5. What Is Documentation-Only Or Future-Planned
-
-The following remain documentation-only or future-planned unless separately implemented, tested, and reviewed:
-
-- helper-bot governance and workflows
-- browser/output quarantine policy
-- expanded negative tests for helper-bot boundaries
-- execution surface mapping
-- complete provider/network gate coverage proof
-- canonical promotion hardening
-- source-provenance checks for future helper-bot workflows
-
-Documentation should not be read as runtime authority.
-
-## 6. RED-1 Known Blockers
-
-RED-1 blockers remain OPEN.
-
-See `docs/audit/RED_1_BLOCKER_REGISTER.md`.
-
-The blocker register records known surfaces that must be mapped and tested before helper-bot production work:
-
-- legacy browser paths
-- legacy executor and shell surfaces
-- browser and web-reader surfaces
-- provider and network call surfaces
-- file-write, delete, Git, and canonical-promotion surfaces
-- missing negative tests for helper-bot proposal boundaries
-
-No blocker is claimed as fixed by this document.
-
-## 7. Reviewer Quick Path
-
-Recommended review order:
-
-1. `README.md`
-2. `CURRENT_STATE.md`
-3. `docs/audit/RED_1_BLOCKER_REGISTER.md`
-4. `docs/REVIEWER_QUICKSTART.md`
-5. `tests/`
-
-Use the tests and blocker register to challenge current claims.
-
-## 8. Safe Next Engineering Steps
-
-Safe next steps:
-
-1. Keep RED-1 blockers visible and OPEN until mapped and tested.
-2. Add diagnostic negative tests for helper-bot proposals.
-3. Map legacy execution, browser, provider, file-write, Git, and canonical-promotion surfaces.
-4. Add explicit guard documentation before any helper-bot workflow prototype.
-5. Treat future helper-bot output as draft, non-canonical, and human-review-required.
+Provider and critic output, knowledge, Hats, routing, retrieval, previews,
+ledger entries, manifests, and freeze evidence are non-authoritative. The UNIX
+corpus is bounded, lexical retrieval is not guaranteed correct, and the offline
+prototype executes nothing. Historical reports remain evidence of prior states
+and must not override current code, tests, or governance.

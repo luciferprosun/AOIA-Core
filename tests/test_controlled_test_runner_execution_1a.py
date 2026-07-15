@@ -16,6 +16,7 @@ from runtime.execution.controlled_test_runner import (
     ControlledTestExecutionRequest,
     ControlledTestExecutionStatus,
     ControlledTestSourceTrust,
+    _build_controlled_child_environment,
     execute_controlled_test_run,
 )
 
@@ -86,11 +87,105 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
         self.assertEqual(sys.executable, args[0])
         self.assertIs(kwargs["shell"], False)
         self.assertEqual(str(REPO_ROOT), kwargs["cwd"])
-        self.assertEqual({"PYTHONPATH": "runtime:.", "PYTHONNOUSERSITE": "1"}, kwargs["env"])
+        self.assertEqual(
+            {"PYTHONPATH", "PYTHONNOUSERSITE", "PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX"},
+            set(kwargs["env"]),
+        )
+        self.assertEqual("runtime:.", kwargs["env"]["PYTHONPATH"])
+        self.assertEqual("1", kwargs["env"]["PYTHONNOUSERSITE"])
+        self.assertEqual("1", kwargs["env"]["PYTHONDONTWRITEBYTECODE"])
+        pycache_root = Path(kwargs["env"]["PYTHONPYCACHEPREFIX"])
+        self.assertTrue(pycache_root.is_absolute())
+        self.assertNotEqual(REPO_ROOT, pycache_root)
+        self.assertNotIn(REPO_ROOT, pycache_root.parents)
+        self.assertFalse(pycache_root.exists())
         self.assertTrue(kwargs["capture_output"])
         self.assertTrue(kwargs["text"])
         self.assertEqual(ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED, result.status)
         self.assert_authority_false(result)
+
+    def test_controlled_pycache_root_is_cleaned_after_success_failure_and_timeout(self):
+        observed_roots = []
+
+        def completed(returncode):
+            def side_effect(*args, **kwargs):
+                cache_root = Path(kwargs["env"]["PYTHONPYCACHEPREFIX"])
+                self.assertTrue(cache_root.is_dir())
+                self.assertFalse(cache_root.is_symlink())
+                (cache_root / "lifecycle-marker").write_text("bounded test marker", encoding="utf-8")
+                observed_roots.append(cache_root)
+                if returncode is None:
+                    raise subprocess.TimeoutExpired(cmd=args[0], timeout=kwargs["timeout"])
+                return subprocess.CompletedProcess(args=args[0], returncode=returncode, stdout="out", stderr="err")
+
+            return side_effect
+
+        expected_statuses = (
+            (0, ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED),
+            (1, ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_FAILED),
+            (None, ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_TIMEOUT),
+        )
+        for returncode, expected_status in expected_statuses:
+            with self.subTest(returncode=returncode), patch(
+                "runtime.execution.controlled_test_runner.subprocess.run",
+                side_effect=completed(returncode),
+            ):
+                result = self.execute()
+                self.assertEqual(expected_status, result.status)
+                self.assertFalse(observed_roots[-1].exists())
+
+    def test_child_environment_is_minimal_and_does_not_inherit_parent_secrets(self):
+        completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
+        with patch.dict("os.environ", {"OPENAI_API_KEY": "synthetic-test-secret", "AOIA_UNRELATED": "not-inherited"}), patch(
+            "runtime.execution.controlled_test_runner.subprocess.run",
+            return_value=completed,
+        ) as run_mock:
+            self.execute()
+
+        child_environment = run_mock.call_args.kwargs["env"]
+        self.assertEqual(
+            {"PYTHONPATH", "PYTHONNOUSERSITE", "PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX"},
+            set(child_environment),
+        )
+        self.assertNotIn("OPENAI_API_KEY", child_environment)
+        self.assertNotIn("AOIA_UNRELATED", child_environment)
+
+    def test_child_environment_rejects_relative_repository_and_symlink_cache_roots(self):
+        with self.assertRaises(ValueError):
+            _build_controlled_child_environment(repo_root=str(REPO_ROOT), pycache_root="relative/cache")
+        with self.assertRaises(ValueError):
+            _build_controlled_child_environment(repo_root=str(REPO_ROOT), pycache_root=str(REPO_ROOT))
+
+        with TemporaryDirectory(prefix="aoia-pycache-symlink-test-", dir="/tmp") as temporary_root:
+            link = Path(temporary_root) / "cache-link"
+            link.symlink_to(REPO_ROOT, target_is_directory=True)
+            with self.assertRaises(ValueError):
+                _build_controlled_child_environment(repo_root=str(REPO_ROOT), pycache_root=str(link))
+
+    def test_repository_local_temporary_parent_fails_closed_before_subprocess(self):
+        with patch("runtime.execution.controlled_test_runner.tempfile.gettempdir", return_value=str(REPO_ROOT)), patch(
+            "runtime.execution.controlled_test_runner.subprocess.run"
+        ) as run_mock:
+            result = self.execute()
+
+        self.assertEqual(ControlledTestExecutionStatus.INTERNAL_EXECUTION_ERROR, result.status)
+        self.assertFalse(run_mock.called)
+
+    def test_actual_child_import_creates_no_bytecode_in_its_repository(self):
+        with TemporaryDirectory(prefix="aoia-controlled-child-workspace-", dir="/tmp") as temporary_root:
+            workspace = Path(temporary_root)
+            tests_directory = workspace / "tests"
+            tests_directory.mkdir()
+            (tests_directory / "test_bytecode_probe.py").write_text(
+                "import unittest\n\nclass Probe(unittest.TestCase):\n    def test_probe(self):\n        self.assertTrue(True)\n",
+                encoding="utf-8",
+            )
+            request = self.request("python -m unittest tests.test_bytecode_probe -v", repo_root=str(workspace))
+            result = execute_controlled_test_run(request)
+
+            self.assertEqual(ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED, result.status)
+            self.assertEqual([], list(workspace.rglob("*.pyc")))
+            self.assertEqual([], [path for path in workspace.rglob("__pycache__") if path.is_dir()])
 
     def test_output_is_bounded_and_truncated(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="x" * 200, stderr="y" * 200)

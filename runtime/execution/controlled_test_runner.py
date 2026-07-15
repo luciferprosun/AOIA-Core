@@ -4,8 +4,10 @@ import hashlib
 import json
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import Any
 
 
@@ -16,6 +18,7 @@ _MINIMAL_ENV = {
     "PYTHONPATH": "runtime:.",
     "PYTHONNOUSERSITE": "1",
 }
+_CONTROLLED_PYCACHE_PREFIX = "aoia-controlled-test-pycache-"
 
 
 class ControlledTestExecutionStatus(str, Enum):
@@ -322,6 +325,36 @@ class ControlledTestExecutionResult:
         }
 
 
+def _validated_external_temp_parent(repo_root: str) -> Path:
+    repository = Path(repo_root).resolve(strict=True)
+    temp_parent = Path(tempfile.gettempdir())
+    if not temp_parent.is_absolute() or temp_parent.is_symlink():
+        raise ValueError("controlled test temporary parent must be an absolute non-symlink path")
+    resolved_parent = temp_parent.resolve(strict=True)
+    if not resolved_parent.is_dir():
+        raise ValueError("controlled test temporary parent must be a directory")
+    if resolved_parent == repository or repository in resolved_parent.parents:
+        raise ValueError("controlled test temporary parent must be outside the repository")
+    return resolved_parent
+
+
+def _build_controlled_child_environment(*, repo_root: str, pycache_root: str) -> dict[str, str]:
+    repository = Path(repo_root).resolve(strict=True)
+    cache_path = Path(pycache_root)
+    if not cache_path.is_absolute() or cache_path.is_symlink():
+        raise ValueError("controlled child pycache root must be an absolute non-symlink path")
+    resolved_cache = cache_path.resolve(strict=True)
+    if not resolved_cache.is_dir():
+        raise ValueError("controlled child pycache root must be a directory")
+    if resolved_cache == repository or repository in resolved_cache.parents:
+        raise ValueError("controlled child pycache root must be outside the repository")
+    return {
+        **_MINIMAL_ENV,
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPYCACHEPREFIX": str(resolved_cache),
+    }
+
+
 def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> ControlledTestExecutionResult:
     if not isinstance(request, ControlledTestExecutionRequest):
         return _blocked_result(
@@ -427,15 +460,20 @@ def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> Cont
     flags.add(ControlledTestExecutionFlag.HUMAN_EXECUTION_BARRIER_HASH_BOUND)
 
     try:
-        completed = subprocess.run(
-            args,
-            cwd=request_data["repo_root"],
-            env=dict(_MINIMAL_ENV),
-            timeout=request_data["timeout_seconds"],
-            capture_output=True,
-            text=True,
-            shell=False,
-        )
+        temp_parent = _validated_external_temp_parent(request_data["repo_root"])
+        with tempfile.TemporaryDirectory(prefix=_CONTROLLED_PYCACHE_PREFIX, dir=temp_parent) as pycache_root:
+            completed = subprocess.run(
+                args,
+                cwd=request_data["repo_root"],
+                env=_build_controlled_child_environment(
+                    repo_root=request_data["repo_root"],
+                    pycache_root=pycache_root,
+                ),
+                timeout=request_data["timeout_seconds"],
+                capture_output=True,
+                text=True,
+                shell=False,
+            )
     except subprocess.TimeoutExpired as exc:
         stdout_preview, stdout_truncated = _bound_output(_timeout_output(exc.stdout), request_data["max_output_bytes"])
         stderr_preview, stderr_truncated = _bound_output(_timeout_output(exc.stderr), request_data["max_output_bytes"])

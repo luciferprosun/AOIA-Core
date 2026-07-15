@@ -1,0 +1,661 @@
+AOIA-Core Visible UNIX Prototype 1A
+AOIA-Core UNIX Knowledge Unit is a local-first, deterministic, human-controlled knowledge and review layer. It can classify UNIX knowledge questions, select an inert UNIX Hat, retrieve locally indexed evidence and explain provenance and scoring. It does not execute commands and does not grant authority.
+
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+
+Stage 1 — Query
+Raw query: How do UNIX file permissions work?
+Normalized query: how do unix file permissions work
+Query hash: 60f68234cf527443994be89d44dd78735f1cb4e4801f79e71625d321ddc10af3
+Request ID: unix-route-60f68234cf527443994be89d
+
+Stage 2 — Route classification
+Route status: ROUTE_TO_UNIX_KNOWLEDGE
+Selected Hat ID: unix-knowledge-hat-1a
+Route rationale: deterministic_unix_knowledge_topic_match
+Route proposal hash: a3c1c11b923bc8742996356c691238e2caf3eb1cfa523684d380591426426704
+Excluded/risk signals: none
+Confidence breakdown:
+  topic_match_score: 3600
+  scope_match_score: 2000
+  execution_risk_score: 0
+  excluded_domain_score: 0
+  ambiguity_score: 0
+  final_confidence: 5600
+
+Stage 3 — UNIX Hat
+Hat ID: unix-knowledge-hat-1a
+Display name: UNIX Knowledge Hat 1A
+Description: Read-only UNIX knowledge classification and retrieval-request metadata.
+Supported scope: ai-safety-boundaries; bsd-macos-posix-differences; containers; control-groups; debugging; filesystem-concepts; init-and-systemd; linux; namespaces; network-boundaries; observability; package-management-concepts; path-safety; permissions-users-groups; pipes-and-text-processing; posix; processes-and-signals; shell-concepts-and-safety; ssh-concepts; unix
+Excluded scope: actual-command-execution; browser-automation; controlled-write; credential-handling; filesystem-mutation; financial-trading; git-operation; human-approval; legal-authority; live-shell-operation; malware-execution; medical-advice; package-installation; patch-application; provider-api-operation; real-system-administration; unrelated-scientific-domains
+Corpus binding: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Index binding: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Capability IDs: none
+Descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.
+
+Stage 4 — Retrieval request
+Normalized query: how do unix file permissions work
+Index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Requested limit: 5
+Provenance policy: exact-corpus-record-and-source-hash-1a
+Retrieval adapter version: unix-runtime-retrieval-1a
+Routing invoked retrieval: no
+Retrieval required a separate explicit caller: yes
+
+Stage 5 — Retrieval results
+Retrieval status: OK
+Result 1
+  Title: 319
+  Excerpt: h push git stash Sources: LINUX COMMAND, linux_engineering_book.md, linux_engineering_book.pdf 1.15.83 git stash # schowaj zmiany 21.1 Git — Zaawansowane git stash # schowaj zmiany Sources: linux_engineering_book.md, linux_engineering_book.pdf 1.15.84 git stash pop Przywraca ze schowka git stash pop Sources: LINUX COMMAND 1.15.85 git stash pop # przywróć 21.1 Git — Zaawansowane git stash pop # przywróć Sources: linux_engineering_book.md, linux_engineering_book.pdf 1
+  Record ID: a95b23888489cea19acfc086084521f4912ae78527420c639e39054a69916e50
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:15123-18140
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 540b5f37b45148dd569e977c5c0c5dcba9a42c1ced91284f096370945162e65b
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 3566
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=1666, term_frequency=900, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=3566
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 2
+  Title: 1.18.2 k9s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 447
+  Excerpt: d_Library.pdf 1.4.70 cp -i src dst Sekcja Komend cp -i src dst Sources: RHCSA_Command_Library.pdf 1.4.71 cp -p Zachowuje atrybuty cp -p file1 file2 Sources: LINUX COMMAND 1.4.72 cp -p src dst Sekcja Komend cp -p src dst Sources: RHCSA_Command_Library.pdf 1.4.73 cp -r Kopiuje katalog rekurencyjnie cp -r /etc /backup Sources: LINUX COMMAND 1.4.74 cp -r src/ dst/ Sekcja Komend cp -r src/ dst/ Sources: RHCSA_Command_Library.pdf
+  Record ID: 01ef819d99f267f4ab10dc895ae3e3d79d0f06da07fd0ee8333e338e7d0691e7
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:3326-6414
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 37e8599d7861362779d0902a0e4f1f6c2436b5cf9c710815faa24809da6b24a1
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 3250
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=1250, term_frequency=1000, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=3250
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 3
+  Title: Sources: RHCSA_Command_Library.pdf
+  Excerpt: rsync --partial Resume partial rsync --partial /src/ /dest/ Sources: LINUX COMMAND 1.7.153 rsync --progress Show progress rsync --progress /src/ /dest/ Sources: LINUX COMMAND 1.7.154 rsync -a /backup/ / restoring without verification. rsync -a /backup/ / Sources: komendy 194 1.7.155 rsync -a /backup/ / restoring without verification.‘ Dangerous Mistakes rsync -a /backup/ /` restoring without verification. Sourc
+  Record ID: 93dd379ced45a438882af5b30a5c935b79a02f23b5c144c47907e988ae9d2769
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:9260-12152
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 12c8c10a0488bba1f03f95f64030ae69a1d0222108c2e2f3a0794b83c31d2f5a
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 3250
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=1250, term_frequency=1000, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=3250
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 4
+  Title: 1.10.103 bzip2
+  Excerpt: 259 1.10.156 echo "vm.swappiness=10" >> /etc/sysctl.conf Kontrola swappiness (0-200, domyślnie 60) echo "vm.swappiness=10" >> /etc/sysctl.conf Sources: linux_engineering_book.md, linux_engineering_book.pdf 1.10.157 echo "większe" 10.2 Struktury Kontrolne echo "większe" Sources: linux_engineering_book.md, linux_engineering_book.pdf 1.10.158 echo $((2**10)) # potęgowanie 10.5 Zaawansowany Bash echo $((2**10)) # potęgowanie Sources: linux
+  Record ID: af6e8de3dc3f5f53abf3be4ea2d1be262f0f559470ca41fc6fcba1fcc09f8ef5
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:12153-15122
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 1b28ea217bf44e7512c5fdfdf87875755f1dc13b6d954e15708eff04ed228a9a
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 3000
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=1250, term_frequency=750, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=3000
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 5
+  Title: 1.16.42 chmod u+x file # dodaj execute dla właściciela . . . . . . . . . . . . . . . . . . . . . . . 381
+  Excerpt: od u=rwx,g=rx,o=r . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 381 1.16.44 chown . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 382 1.16.45 chown -R . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 382 1.16.46 chown -R user:group . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 382 1.1
+  Record ID: b9a5b9714c29a64191f6aa326daca8e2d44b013ae8b18d444ac62f0c9386e718
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:2769-3325
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: caf6df2b6f72cecce6569bd1417dff296a60d248e6db784acda5520476e78e6c
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2882
+  Score breakdown: exact_phrase=0, title=333, heading=166, token_overlap=833, term_frequency=550, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2882
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+
+Sponsor review metadata
+Corpus record count: 13
+Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Retrieval index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+UNIX Hat descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Routing policy version: deterministic-unix-routing-policy-1a
+Test baseline reference: 3146 passed, 4 skipped before this step
+Measured benchmark: index_bytes=1972073, build_ns=4168471762, peak_memory_bytes=21654815, query_p50_ns=169860405, query_p95_ns=270352268, query_max_ns=551398957
+Warnings: NO_COMMAND_OR_ACTION_EXECUTED; ROUTE_METADATA_IS_NOT_AUTHORITY; CALLER_CONTEXT_DID_NOT_GRANT_ROUTE_OR_APPROVAL; RETRIEVAL_RESULT_IS_NON_AUTHORITATIVE; ROUTING_DID_NOT_INVOKE_RETRIEVAL
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.; Offline lexical evidence review only; no correctness guarantee.; The visible result is not permission, approval, or an execution instruction.; No fallback answer is generated for no-route or review-needed requests.
+
+Stage 6 — Safety conclusion
+NO COMMAND OR ACTION WAS EXECUTED
+THIS OUTPUT IS KNOWLEDGE AND REVIEW METADATA ONLY
+Route safety status: ROUTE_TO_UNIX_KNOWLEDGE
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+AOIA-Core Visible UNIX Prototype 1A
+AOIA-Core UNIX Knowledge Unit is a local-first, deterministic, human-controlled knowledge and review layer. It can classify UNIX knowledge questions, select an inert UNIX Hat, retrieve locally indexed evidence and explain provenance and scoring. It does not execute commands and does not grant authority.
+
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+
+Stage 1 — Query
+Raw query: Explain path traversal.
+Normalized query: explain path traversal
+Query hash: 2672948c3d7ae677a7e4ab5d412deb843e6cdf614c7f0247f88c10bf7a2b61cd
+Request ID: unix-route-2672948c3d7ae677a7e4ab5d
+
+Stage 2 — Route classification
+Route status: ROUTE_TO_UNIX_KNOWLEDGE
+Selected Hat ID: unix-knowledge-hat-1a
+Route rationale: deterministic_unix_knowledge_topic_match
+Route proposal hash: 529f9e61af430d9108a894200f2a3519e9bfcad6bea9ac83c179c7fe329775d0
+Excluded/risk signals: none
+Confidence breakdown:
+  topic_match_score: 1200
+  scope_match_score: 2000
+  execution_risk_score: 0
+  excluded_domain_score: 0
+  ambiguity_score: 0
+  final_confidence: 3200
+
+Stage 3 — UNIX Hat
+Hat ID: unix-knowledge-hat-1a
+Display name: UNIX Knowledge Hat 1A
+Description: Read-only UNIX knowledge classification and retrieval-request metadata.
+Supported scope: ai-safety-boundaries; bsd-macos-posix-differences; containers; control-groups; debugging; filesystem-concepts; init-and-systemd; linux; namespaces; network-boundaries; observability; package-management-concepts; path-safety; permissions-users-groups; pipes-and-text-processing; posix; processes-and-signals; shell-concepts-and-safety; ssh-concepts; unix
+Excluded scope: actual-command-execution; browser-automation; controlled-write; credential-handling; filesystem-mutation; financial-trading; git-operation; human-approval; legal-authority; live-shell-operation; malware-execution; medical-advice; package-installation; patch-application; provider-api-operation; real-system-administration; unrelated-scientific-domains
+Corpus binding: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Index binding: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Capability IDs: none
+Descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.
+
+Stage 4 — Retrieval request
+Normalized query: explain path traversal
+Index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Requested limit: 5
+Provenance policy: exact-corpus-record-and-source-hash-1a
+Retrieval adapter version: unix-runtime-retrieval-1a
+Routing invoked retrieval: no
+Retrieval required a separate explicit caller: yes
+
+Stage 5 — Retrieval results
+Retrieval status: OK
+Result 1
+  Title: Sources: RHCSA_Command_Library.pdf
+  Excerpt: 217 1.8.110 systemd-notify Notify systemd z app systemd-notify --ready Sources: LINUX COMMAND 1.8.111 systemd-path Ścieżki specjalne systemd-path systemd-system-unit systemd-path user-binaries Sources: LINUX COMMAND 1.8.112 systemd-run Uruchamia w przejściowej jednostce systemd-run --unit=myservice /bin/sleep 100 systemd-run --on-calendar="daily" /bin/backup.sh Sources: LINUX COMMAND 1.8.113 systemd-run --on-calendar="Mon *-*-1..7 02:00" /bin/backup.sh month
+  Record ID: 93dd379ced45a438882af5b30a5c935b79a02f23b5c144c47907e988ae9d2769
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:9260-12152
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 12c8c10a0488bba1f03f95f64030ae69a1d0222108c2e2f3a0794b83c31d2f5a
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2333
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=833, term_frequency=500, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2333
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 2
+  Title: 319
+  Excerpt: 1.13.89 restorecon -F Force reset context restorecon -F -R /var/www Sources: LINUX COMMAND 1.13.90 restorecon -F /path/ Sekcja Komend restorecon -F /path/ Sources: RHCSA_Command_Library.pdf 1.13.91 restorecon -R Rekurencyjnie restorecon -R /home restorecon -R Sources: LINUX COMMAND, RHCSA_Command_Library.pdf 320 1.13.92 restorecon -Rv Sekcja Komend restorecon -Rv Sources: RHCSA_Command_Library.pdf 1.13.
+  Record ID: a95b23888489cea19acfc086084521f4912ae78527420c639e39054a69916e50
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:15123-18140
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 540b5f37b45148dd569e977c5c0c5dcba9a42c1ced91284f096370945162e65b
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2333
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=833, term_frequency=500, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2333
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 3
+  Title: 12.2 DNF/YUM (RHEL/Fedora)
+  Excerpt: COMMAND 1.16.95 dnf provides Sekcja Komend dnf provides Sources: RHCSA_Command_Library.pdf 1.16.96 dnf provides /path/file owning package. SAFE dnf provides /path/file Sources: komendy 1.16.97 dnf provides /path/to/file # który pakiet zawiera plik 12.2 DNF/YUM (RHEL/Fedora) dnf provides /path/to/file # który pakiet zawiera plik Sources: linux_engineering_book.md, linux_engineering_book.pdf 1.16.98 dnf reinstall Sekcja Komend dnf reinstall Sources: RHCSA_Command_L
+  Record ID: aece08eb503a6a35fb1fa79af59289407a29784f963619010b4681ffcfaf0d90
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:18141-20921
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 0ae3b4a90c28696dd504346e98cfa1b50f79b73cc78aaecc8a3cd8ff3650b534
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2333
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=833, term_frequency=500, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2333
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 4
+  Title: 1.18.2 k9s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 447
+  Excerpt: . Sources: RHCSA_Command_Library.pdf 1.4.53 cd / Sekcja Komend cd / Sources: RHCSA_Command_Library.pdf 1.4.54 cd /path/to/dir Sekcja Komend cd /path/to/dir Sources: RHCSA_Command_Library.pdf 1.4.55 cd /sys/kernel/debug/tracing 15.2 Diagnostyka Jądra cd /sys/kernel/debug/tracing Sources: linux_engineering_book.md, linux_engineering_book.pdf 1.4.56 cd linux-6.8 16.1 Pobieranie i Konfiguracja cd linux-6.8 Sources: linux_engineering_book.md, linux_engineering_book.pdf
+  Record ID: 01ef819d99f267f4ab10dc895ae3e3d79d0f06da07fd0ee8333e338e7d0691e7
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:3326-6414
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 37e8599d7861362779d0902a0e4f1f6c2436b5cf9c710815faa24809da6b24a1
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2233
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=833, term_frequency=400, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2233
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 5
+  Title: 1.10.103 bzip2
+  Excerpt: -x Sekcja Komend declare -x Sources: RHCSA_Command_Library.pdf 1.10.131 echo Require or preview for commands. echo $PATH echo Sources: LINUX COMMAND, komendy 256 1.10.132 echo "$line" 10.2 Struktury Kontrolne echo "$line" Sources: linux_engineering_book.md, linux_engineering_book.pdf 1.10.133 echo "$var" Use instead of for arbitrary data. echo "$var" Sources: komendy 1.10.134 echo "- - -" > /sys/class/scsi_h
+  Record ID: af6e8de3dc3f5f53abf3be4ea2d1be262f0f559470ca41fc6fcba1fcc09f8ef5
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:12153-15122
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 1b28ea217bf44e7512c5fdfdf87875755f1dc13b6d954e15708eff04ed228a9a
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2233
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=833, term_frequency=400, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2233
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+
+Sponsor review metadata
+Corpus record count: 13
+Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Retrieval index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+UNIX Hat descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Routing policy version: deterministic-unix-routing-policy-1a
+Test baseline reference: 3146 passed, 4 skipped before this step
+Measured benchmark: index_bytes=1972073, build_ns=4168471762, peak_memory_bytes=21654815, query_p50_ns=169860405, query_p95_ns=270352268, query_max_ns=551398957
+Warnings: NO_COMMAND_OR_ACTION_EXECUTED; ROUTE_METADATA_IS_NOT_AUTHORITY; CALLER_CONTEXT_DID_NOT_GRANT_ROUTE_OR_APPROVAL; RETRIEVAL_RESULT_IS_NON_AUTHORITATIVE; ROUTING_DID_NOT_INVOKE_RETRIEVAL
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.; Offline lexical evidence review only; no correctness guarantee.; The visible result is not permission, approval, or an execution instruction.; No fallback answer is generated for no-route or review-needed requests.
+
+Stage 6 — Safety conclusion
+NO COMMAND OR ACTION WAS EXECUTED
+THIS OUTPUT IS KNOWLEDGE AND REVIEW METADATA ONLY
+Route safety status: ROUTE_TO_UNIX_KNOWLEDGE
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+AOIA-Core Visible UNIX Prototype 1A
+AOIA-Core UNIX Knowledge Unit is a local-first, deterministic, human-controlled knowledge and review layer. It can classify UNIX knowledge questions, select an inert UNIX Hat, retrieve locally indexed evidence and explain provenance and scoring. It does not execute commands and does not grant authority.
+
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+
+Stage 1 — Query
+Raw query: How do process signals work?
+Normalized query: how do process signals work
+Query hash: 38d2425ada3104779a5a19798a7f320d3c77a1872bbfccd7cce8b5e2e9ec2edb
+Request ID: unix-route-38d2425ada3104779a5a1979
+
+Stage 2 — Route classification
+Route status: ROUTE_TO_UNIX_KNOWLEDGE
+Selected Hat ID: unix-knowledge-hat-1a
+Route rationale: deterministic_unix_knowledge_topic_match
+Route proposal hash: 1629874f5989726ea26c9d5b9992960351ed78793d7ceccba68b31daf1a55d18
+Excluded/risk signals: none
+Confidence breakdown:
+  topic_match_score: 1200
+  scope_match_score: 2000
+  execution_risk_score: 0
+  excluded_domain_score: 0
+  ambiguity_score: 0
+  final_confidence: 3200
+
+Stage 3 — UNIX Hat
+Hat ID: unix-knowledge-hat-1a
+Display name: UNIX Knowledge Hat 1A
+Description: Read-only UNIX knowledge classification and retrieval-request metadata.
+Supported scope: ai-safety-boundaries; bsd-macos-posix-differences; containers; control-groups; debugging; filesystem-concepts; init-and-systemd; linux; namespaces; network-boundaries; observability; package-management-concepts; path-safety; permissions-users-groups; pipes-and-text-processing; posix; processes-and-signals; shell-concepts-and-safety; ssh-concepts; unix
+Excluded scope: actual-command-execution; browser-automation; controlled-write; credential-handling; filesystem-mutation; financial-trading; git-operation; human-approval; legal-authority; live-shell-operation; malware-execution; medical-advice; package-installation; patch-application; provider-api-operation; real-system-administration; unrelated-scientific-domains
+Corpus binding: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Index binding: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Capability IDs: none
+Descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.
+
+Stage 4 — Retrieval request
+Normalized query: how do process signals work
+Index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Requested limit: 5
+Provenance policy: exact-corpus-record-and-source-hash-1a
+Retrieval adapter version: unix-runtime-retrieval-1a
+Routing invoked retrieval: no
+Retrieval required a separate explicit caller: yes
+
+Stage 5 — Retrieval results
+Retrieval status: OK
+Result 1
+  Title: Sources: RHCSA_Command_Library.pdf
+  Excerpt: rsync --partial Resume partial rsync --partial /src/ /dest/ Sources: LINUX COMMAND 1.7.153 rsync --progress Show progress rsync --progress /src/ /dest/ Sources: LINUX COMMAND 1.7.154 rsync -a /backup/ / restoring without verification. rsync -a /backup/ / Sources: komendy 194 1.7.155 rsync -a /backup/ / restoring without verification.‘ Dangerous Mistakes rsync -a /backup/ /` restoring without verification. Sourc
+  Record ID: 93dd379ced45a438882af5b30a5c935b79a02f23b5c144c47907e988ae9d2769
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:9260-12152
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 12c8c10a0488bba1f03f95f64030ae69a1d0222108c2e2f3a0794b83c31d2f5a
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2850
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=1000, term_frequency=850, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2850
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 2
+  Title: 319
+  Excerpt: h push git stash Sources: LINUX COMMAND, linux_engineering_book.md, linux_engineering_book.pdf 1.15.83 git stash # schowaj zmiany 21.1 Git — Zaawansowane git stash # schowaj zmiany Sources: linux_engineering_book.md, linux_engineering_book.pdf 1.15.84 git stash pop Przywraca ze schowka git stash pop Sources: LINUX COMMAND 1.15.85 git stash pop # przywróć 21.1 Git — Zaawansowane git stash pop # przywróć Sources: linux_engineering_book.md, linux_engineering_book.pdf 1
+  Record ID: a95b23888489cea19acfc086084521f4912ae78527420c639e39054a69916e50
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:15123-18140
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 540b5f37b45148dd569e977c5c0c5dcba9a42c1ced91284f096370945162e65b
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2350
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=1000, term_frequency=350, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2350
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 3
+  Title: 1.18.2 k9s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 447
+  Excerpt: d_Library.pdf 1.4.70 cp -i src dst Sekcja Komend cp -i src dst Sources: RHCSA_Command_Library.pdf 1.4.71 cp -p Zachowuje atrybuty cp -p file1 file2 Sources: LINUX COMMAND 1.4.72 cp -p src dst Sekcja Komend cp -p src dst Sources: RHCSA_Command_Library.pdf 1.4.73 cp -r Kopiuje katalog rekurencyjnie cp -r /etc /backup Sources: LINUX COMMAND 1.4.74 cp -r src/ dst/ Sekcja Komend cp -r src/ dst/ Sources: RHCSA_Command_Library.pdf
+  Record ID: 01ef819d99f267f4ab10dc895ae3e3d79d0f06da07fd0ee8333e338e7d0691e7
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:3326-6414
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 37e8599d7861362779d0902a0e4f1f6c2436b5cf9c710815faa24809da6b24a1
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2000
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=500, term_frequency=500, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2000
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 4
+  Title: Sources: LINUX COMMAND
+  Excerpt: X COMMAND 1.6.317 rpcinfo -p server Sekcja Komend rpcinfo -p server Sources: RHCSA_Command_Library.pdf 1.6.318 showmount NFS exports showmount -e server Sources: LINUX COMMAND 1.6.319 showmount -a server Sekcja Komend showmount -a server Sources: RHCSA_Command_Library.pdf 1.6.320 showmount -e server Sekcja Komend showmount -e server Sources: RHCSA_Command_Library.pdf 1.6.321 siege HTTP load tester siege -c 10 -t 1M http://localhost Sources: LINUX COMMAND
+  Record ID: 345eb96669b0db2c5e4ed78d0bcf7ca514fb2e2f231148c25bd82114801d531d
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:6415-9259
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: e3d24b9abf8a35b0bf39106fbde31478cd46f5e4a3257e786befbc9e4702cb71
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2000
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=500, term_frequency=500, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2000
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+Result 5
+  Title: 12.2 DNF/YUM (RHEL/Fedora)
+  Excerpt: rtial /src/ /dest/ Sources: LINUX COMMAND 418 1.16.340 rsync --progress Show progress rsync --progress /src/ /dest/ Sources: LINUX COMMAND 1.16.341 rsync -a /backup/ / restoring without verification. rsync -a /backup/ / Sources: komendy 1.16.342 rsync -a /backup/ / restoring without verification.‘ Dangerous Mistakes rsync -a /backup/ /` restoring without verification. Sources: komendy 1.16.343 rsync -av --dry-run befo
+  Record ID: aece08eb503a6a35fb1fa79af59289407a29784f963619010b4681ffcfaf0d90
+  Source ID: unix-source-20073ff81818837abe1d2d64
+  Source locator: lines:18141-20921
+  Source hash: 4e18a23a0c33340f536b1b34910e950f66070c3bfe4fc73dd9ad71e18b774927
+  Record content hash: 0ae3b4a90c28696dd504346e98cfa1b50f79b73cc78aaecc8a3cd8ff3650b534
+  Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+  Index manifest hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+  Final score: 2000
+  Score breakdown: exact_phrase=0, title=0, heading=0, token_overlap=500, term_frequency=500, source_quality=500, provenance=500, risk_adjustment=0, staleness_adjustment=0, pheromone_adjustment=0, final=2000
+  Staleness: STALENESS_UNKNOWN — canonical records contain no verified publication or review date
+  Warnings: STALENESS_UNKNOWN
+  Authority status: NON_AUTHORITATIVE
+
+Sponsor review metadata
+Corpus record count: 13
+Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Retrieval index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+UNIX Hat descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Routing policy version: deterministic-unix-routing-policy-1a
+Test baseline reference: 3146 passed, 4 skipped before this step
+Measured benchmark: index_bytes=1972073, build_ns=4168471762, peak_memory_bytes=21654815, query_p50_ns=169860405, query_p95_ns=270352268, query_max_ns=551398957
+Warnings: NO_COMMAND_OR_ACTION_EXECUTED; ROUTE_METADATA_IS_NOT_AUTHORITY; CALLER_CONTEXT_DID_NOT_GRANT_ROUTE_OR_APPROVAL; RETRIEVAL_RESULT_IS_NON_AUTHORITATIVE; ROUTING_DID_NOT_INVOKE_RETRIEVAL
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.; Offline lexical evidence review only; no correctness guarantee.; The visible result is not permission, approval, or an execution instruction.; No fallback answer is generated for no-route or review-needed requests.
+
+Stage 6 — Safety conclusion
+NO COMMAND OR ACTION WAS EXECUTED
+THIS OUTPUT IS KNOWLEDGE AND REVIEW METADATA ONLY
+Route safety status: ROUTE_TO_UNIX_KNOWLEDGE
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+AOIA-Core Visible UNIX Prototype 1A
+AOIA-Core UNIX Knowledge Unit is a local-first, deterministic, human-controlled knowledge and review layer. It can classify UNIX knowledge questions, select an inert UNIX Hat, retrieve locally indexed evidence and explain provenance and scoring. It does not execute commands and does not grant authority.
+
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+
+Stage 1 — Query
+Raw query: Run sudo apt install curl.
+Normalized query: run sudo apt install curl
+Query hash: d738018f829591466e14409e3c7b3661a1a247828284ca584bc41f434cfbbbca
+Request ID: unix-route-d738018f829591466e14409e
+
+Stage 2 — Route classification
+Route status: EXECUTION_REQUEST_BLOCKED
+Selected Hat ID: none
+Route rationale: execution_request_blocked_before_inert_knowledge_routing
+Route proposal hash: 3d92a7c22d7c8e334731e1213f88703c9ca41ae06b0f0c45a575ff485b23eea4
+Excluded/risk signals: imperative:run; install curl; run sudo
+Confidence breakdown:
+  topic_match_score: 2400
+  scope_match_score: 2000
+  execution_risk_score: 10000
+  excluded_domain_score: 0
+  ambiguity_score: 0
+  final_confidence: 10000
+
+Stage 3 — UNIX Hat
+Hat ID: unix-knowledge-hat-1a
+Display name: UNIX Knowledge Hat 1A
+Description: Read-only UNIX knowledge classification and retrieval-request metadata.
+Supported scope: ai-safety-boundaries; bsd-macos-posix-differences; containers; control-groups; debugging; filesystem-concepts; init-and-systemd; linux; namespaces; network-boundaries; observability; package-management-concepts; path-safety; permissions-users-groups; pipes-and-text-processing; posix; processes-and-signals; shell-concepts-and-safety; ssh-concepts; unix
+Excluded scope: actual-command-execution; browser-automation; controlled-write; credential-handling; filesystem-mutation; financial-trading; git-operation; human-approval; legal-authority; live-shell-operation; malware-execution; medical-advice; package-installation; patch-application; provider-api-operation; real-system-administration; unrelated-scientific-domains
+Corpus binding: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Index binding: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Capability IDs: none
+Descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.
+
+Stage 4 — Retrieval request
+Retrieval request: none; retrieval was not performed.
+
+Stage 5 — Retrieval results
+Retrieval status: NOT_PERFORMED
+Candidates: none
+
+Sponsor review metadata
+Corpus record count: 13
+Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Retrieval index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+UNIX Hat descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Routing policy version: deterministic-unix-routing-policy-1a
+Test baseline reference: 3146 passed, 4 skipped before this step
+Measured benchmark: index_bytes=1972073, build_ns=4168471762, peak_memory_bytes=21654815, query_p50_ns=169860405, query_p95_ns=270352268, query_max_ns=551398957
+Warnings: NO_COMMAND_OR_ACTION_EXECUTED; ROUTE_METADATA_IS_NOT_AUTHORITY; CALLER_CONTEXT_DID_NOT_GRANT_ROUTE_OR_APPROVAL; RETRIEVAL_WAS_NOT_PERFORMED_FOR_ROUTE_STATUS
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.; Offline lexical evidence review only; no correctness guarantee.; The visible result is not permission, approval, or an execution instruction.; No fallback answer is generated for no-route or review-needed requests.
+
+Stage 6 — Safety conclusion
+NO COMMAND OR ACTION WAS EXECUTED
+THIS OUTPUT IS KNOWLEDGE AND REVIEW METADATA ONLY
+Route safety status: EXECUTION_REQUEST_BLOCKED
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+EXECUTION REQUEST BLOCKED
+AOIA-Core Visible UNIX Prototype 1A
+AOIA-Core UNIX Knowledge Unit is a local-first, deterministic, human-controlled knowledge and review layer. It can classify UNIX knowledge questions, select an inert UNIX Hat, retrieve locally indexed evidence and explain provenance and scoring. It does not execute commands and does not grant authority.
+
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+
+Stage 1 — Query
+Raw query: Explain stellar nucleosynthesis.
+Normalized query: explain stellar nucleosynthesis
+Query hash: 6b470e9c60d1e28f642e50f719d969835655cd64168fbbb29581eee541b01330
+Request ID: unix-route-6b470e9c60d1e28f642e50f7
+
+Stage 2 — Route classification
+Route status: NO_ROUTE
+Selected Hat ID: none
+Route rationale: query_is_outside_the_unix_knowledge_scope
+Route proposal hash: e1fb6795250bfd35211b37cee7d1dba28d552590616ed10da21e8f73f5fe0686
+Excluded/risk signals: stellar nucleosynthesis
+Confidence breakdown:
+  topic_match_score: 0
+  scope_match_score: 0
+  execution_risk_score: 0
+  excluded_domain_score: 5000
+  ambiguity_score: 0
+  final_confidence: 5000
+
+Stage 3 — UNIX Hat
+Hat ID: unix-knowledge-hat-1a
+Display name: UNIX Knowledge Hat 1A
+Description: Read-only UNIX knowledge classification and retrieval-request metadata.
+Supported scope: ai-safety-boundaries; bsd-macos-posix-differences; containers; control-groups; debugging; filesystem-concepts; init-and-systemd; linux; namespaces; network-boundaries; observability; package-management-concepts; path-safety; permissions-users-groups; pipes-and-text-processing; posix; processes-and-signals; shell-concepts-and-safety; ssh-concepts; unix
+Excluded scope: actual-command-execution; browser-automation; controlled-write; credential-handling; filesystem-mutation; financial-trading; git-operation; human-approval; legal-authority; live-shell-operation; malware-execution; medical-advice; package-installation; patch-application; provider-api-operation; real-system-administration; unrelated-scientific-domains
+Corpus binding: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Index binding: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Capability IDs: none
+Descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.
+
+Stage 4 — Retrieval request
+Retrieval request: none; retrieval was not performed.
+
+Stage 5 — Retrieval results
+Retrieval status: NOT_PERFORMED
+Candidates: none
+
+Sponsor review metadata
+Corpus record count: 13
+Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Retrieval index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+UNIX Hat descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Routing policy version: deterministic-unix-routing-policy-1a
+Test baseline reference: 3146 passed, 4 skipped before this step
+Measured benchmark: index_bytes=1972073, build_ns=4168471762, peak_memory_bytes=21654815, query_p50_ns=169860405, query_p95_ns=270352268, query_max_ns=551398957
+Warnings: NO_COMMAND_OR_ACTION_EXECUTED; ROUTE_METADATA_IS_NOT_AUTHORITY; CALLER_CONTEXT_DID_NOT_GRANT_ROUTE_OR_APPROVAL; RETRIEVAL_WAS_NOT_PERFORMED_FOR_ROUTE_STATUS
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.; Offline lexical evidence review only; no correctness guarantee.; The visible result is not permission, approval, or an execution instruction.; No fallback answer is generated for no-route or review-needed requests.
+
+Stage 6 — Safety conclusion
+NO COMMAND OR ACTION WAS EXECUTED
+THIS OUTPUT IS KNOWLEDGE AND REVIEW METADATA ONLY
+Route safety status: NO_ROUTE
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+AOIA-Core Visible UNIX Prototype 1A
+AOIA-Core UNIX Knowledge Unit is a local-first, deterministic, human-controlled knowledge and review layer. It can classify UNIX knowledge questions, select an inert UNIX Hat, retrieve locally indexed evidence and explain provenance and scoring. It does not execute commands and does not grant authority.
+
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none
+
+Stage 1 — Query
+Raw query: Fix my system.
+Normalized query: fix my system
+Query hash: bca1d7d9400a6ccbc53a49848fa94bbe9e849f7aff893d98e34fece61d133f1e
+Request ID: unix-route-bca1d7d9400a6ccbc53a4984
+
+Stage 2 — Route classification
+Route status: REVIEW_NEEDED
+Selected Hat ID: none
+Route rationale: ambiguous_system_request_requires_separate_human_review
+Route proposal hash: 5368e8cf5c72ab7e9eaeea26405c013a3dce4c7eac7333f0eb43b31ae549a42c
+Excluded/risk signals: none
+Confidence breakdown:
+  topic_match_score: 0
+  scope_match_score: 0
+  execution_risk_score: 0
+  excluded_domain_score: 0
+  ambiguity_score: 8000
+  final_confidence: 8000
+
+Stage 3 — UNIX Hat
+Hat ID: unix-knowledge-hat-1a
+Display name: UNIX Knowledge Hat 1A
+Description: Read-only UNIX knowledge classification and retrieval-request metadata.
+Supported scope: ai-safety-boundaries; bsd-macos-posix-differences; containers; control-groups; debugging; filesystem-concepts; init-and-systemd; linux; namespaces; network-boundaries; observability; package-management-concepts; path-safety; permissions-users-groups; pipes-and-text-processing; posix; processes-and-signals; shell-concepts-and-safety; ssh-concepts; unix
+Excluded scope: actual-command-execution; browser-automation; controlled-write; credential-handling; filesystem-mutation; financial-trading; git-operation; human-approval; legal-authority; live-shell-operation; malware-execution; medical-advice; package-installation; patch-application; provider-api-operation; real-system-administration; unrelated-scientific-domains
+Corpus binding: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Index binding: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+Capability IDs: none
+Descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.
+
+Stage 4 — Retrieval request
+Retrieval request: none; retrieval was not performed.
+
+Stage 5 — Retrieval results
+Retrieval status: NOT_PERFORMED
+Candidates: none
+
+Sponsor review metadata
+Corpus record count: 13
+Corpus manifest hash: e7241f0d043d90bf79a3f1a9f2691691a1d87b719d39cc533c9a765d97a61768
+Retrieval index hash: 3703dce3476b9c482515c3454f41a563c19f0f9ad21723fc61945434e79f7745
+UNIX Hat descriptor hash: 24850bfb838488d8b7839a518cd2a8d702b8b266397edbbcb0fc5f7a4ba78a0c
+Routing policy version: deterministic-unix-routing-policy-1a
+Test baseline reference: 3146 passed, 4 skipped before this step
+Measured benchmark: index_bytes=1972073, build_ns=4168471762, peak_memory_bytes=21654815, query_p50_ns=169860405, query_p95_ns=270352268, query_max_ns=551398957
+Warnings: NO_COMMAND_OR_ACTION_EXECUTED; ROUTE_METADATA_IS_NOT_AUTHORITY; CALLER_CONTEXT_DID_NOT_GRANT_ROUTE_OR_APPROVAL; RETRIEVAL_WAS_NOT_PERFORMED_FOR_ROUTE_STATUS
+Limitations: Knowledge metadata only; never execution permission.; Retrieval requires a separate explicit caller action.; No provider, network, shell, Git, browser, writer, patch, or gate capability.; Ambiguous requests require review and execution requests remain blocked.; Offline lexical evidence review only; no correctness guarantee.; The visible result is not permission, approval, or an execution instruction.; No fallback answer is generated for no-route or review-needed requests.
+
+Stage 6 — Safety conclusion
+NO COMMAND OR ACTION WAS EXECUTED
+THIS OUTPUT IS KNOWLEDGE AND REVIEW METADATA ONLY
+Route safety status: REVIEW_NEEDED
+Authority status: NON_AUTHORITATIVE
+Execution status: NO_COMMAND_OR_ACTION_EXECUTED
+UNIX Hat capabilities: none
+Provider calls: none
+Network calls: none
+Filesystem mutations during query: none

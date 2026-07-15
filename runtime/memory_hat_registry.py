@@ -2,6 +2,13 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
+from runtime.memory_hats.unix_hat import (
+    NON_AUTHORITATIVE,
+    UnixHatDescriptor,
+    UnixHatRoutingError,
+    validate_unix_hat_descriptor,
+)
+
 
 @dataclass(frozen=True)
 class MemoryHatRecord:
@@ -118,3 +125,51 @@ def _record_to_dict(record: MemoryHatRecord) -> dict[str, object]:
     payload["candidate_paths"] = list(record.candidate_paths)
     payload["notes"] = list(record.notes)
     return payload
+
+
+@dataclass(frozen=True, slots=True)
+class UnixHatRegistry:
+    """Immutable registry for validated UNIX Hat descriptor metadata."""
+
+    descriptors: tuple[UnixHatDescriptor, ...] = ()
+    authority_status: str = NON_AUTHORITATIVE
+
+    def register(self, descriptor: UnixHatDescriptor) -> "UnixHatRegistry":
+        validate_unix_hat_descriptor(descriptor)
+        if self.authority_status != NON_AUTHORITATIVE:
+            raise UnixHatRoutingError(
+                "STALE_HAT_DESCRIPTOR",
+                "registry authority status is invalid",
+            )
+        if any(item.hat_id == descriptor.hat_id for item in self.descriptors):
+            raise UnixHatRoutingError(
+                "DUPLICATE_HAT_ID",
+                "Hat ID is already registered",
+            )
+        if any(
+            item.descriptor_hash == descriptor.descriptor_hash
+            for item in self.descriptors
+        ):
+            raise UnixHatRoutingError(
+                "DUPLICATE_HAT_HASH",
+                "Hat descriptor hash is already registered",
+            )
+        return UnixHatRegistry(
+            descriptors=tuple(
+                sorted(
+                    (*self.descriptors, descriptor),
+                    key=lambda item: item.hat_id,
+                )
+            )
+        )
+
+    def resolve(self, hat_id: str) -> UnixHatDescriptor | None:
+        if not isinstance(hat_id, str):
+            raise TypeError("hat_id must be a string")
+        return next(
+            (item for item in self.descriptors if item.hat_id == hat_id),
+            None,
+        )
+
+    def list_descriptors(self) -> tuple[UnixHatDescriptor, ...]:
+        return self.descriptors

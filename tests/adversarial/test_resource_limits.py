@@ -12,6 +12,7 @@ from runtime.schemas.sandbox_artifact import (
     SandboxArtifactType,
     create_sandbox_artifact_request,
 )
+from tests.canonical_human_gate_support import canonical_gate_and_artifact_request
 
 
 class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
@@ -29,10 +30,19 @@ class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
             audit_event_id="audit-resource-limits",
         )
 
+    def make_authorized_request(self, relative_output_path: str, content_text: str = "safe artifact\n"):
+        return canonical_gate_and_artifact_request(
+            relative_output_path=relative_output_path,
+            content_text=content_text,
+            run_id="adversarial-resource-limits",
+            requested_by="unit-test",
+        )
+
     def test_max_artifact_size_accepted_at_exact_limit(self) -> None:
         content = "x" * MAX_SANDBOX_ARTIFACT_BYTES
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request("exact-limit.md", content), workspace)
+            gate, request = self.make_authorized_request("exact-limit.md", content)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
             self.assertEqual(result.bytes_written, MAX_SANDBOX_ARTIFACT_BYTES)
@@ -42,7 +52,8 @@ class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             target = Path(workspace) / "over-limit.md"
 
-            result = write_sandbox_artifact(self.make_request("over-limit.md", content), workspace)
+            gate, request = self.make_authorized_request("over-limit.md", content)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
@@ -51,14 +62,16 @@ class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
     def test_max_path_depth_accepted_at_exact_limit(self) -> None:
         relative_path = "/".join(["d"] * (MAX_ARTIFACT_PATH_DEPTH - 1) + ["result.md"])
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request(relative_path), workspace)
+            gate, request = self.make_authorized_request(relative_path)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
 
     def test_path_depth_one_over_limit_rejected(self) -> None:
         relative_path = "/".join(["d"] * MAX_ARTIFACT_PATH_DEPTH + ["result.md"])
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request(relative_path), workspace)
+            gate, request = self.make_authorized_request(relative_path)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertIn("artifact path depth exceeds limit", result.blocked_reason)
@@ -68,7 +81,8 @@ class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
         filename = "a" * (MAX_ARTIFACT_FILENAME_BYTES - len(suffix.encode("utf-8"))) + suffix
         self.assertEqual(len(filename.encode("utf-8")), MAX_ARTIFACT_FILENAME_BYTES)
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request(filename), workspace)
+            gate, request = self.make_authorized_request(filename)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
 
@@ -77,7 +91,8 @@ class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
         filename = "a" * (MAX_ARTIFACT_FILENAME_BYTES - len(suffix.encode("utf-8")) + 1) + suffix
         self.assertEqual(len(filename.encode("utf-8")), MAX_ARTIFACT_FILENAME_BYTES + 1)
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request(filename), workspace)
+            gate, request = self.make_authorized_request(filename)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertIn("artifact filename exceeds byte limit", result.blocked_reason)
@@ -85,7 +100,8 @@ class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
     def test_deeply_nested_path_is_rejected_without_creating_partial_files(self) -> None:
         relative_path = "/".join(["deep"] * 128 + ["result.md"])
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request(relative_path), workspace)
+            gate, request = self.make_authorized_request(relative_path)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(any(Path(workspace).iterdir()))
@@ -93,7 +109,8 @@ class ArtifactResourceLimitsAdversarialTests(unittest.TestCase):
     def test_large_payload_rejection_does_not_create_partial_files(self) -> None:
         content = "x" * (MAX_SANDBOX_ARTIFACT_BYTES * 2)
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(self.make_request("large.md", content), workspace)
+            gate, request = self.make_authorized_request("large.md", content)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(any(Path(workspace).iterdir()))

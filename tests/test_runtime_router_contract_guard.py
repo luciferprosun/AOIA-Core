@@ -4,9 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-import warnings
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import patch
 
 from orchestrator.knowledge_router import KnowledgeRouter
@@ -59,33 +57,30 @@ class RuntimeRouterContractGuardTests(unittest.TestCase):
         self.assertNotIn(LINUX_RETRIEVAL_V1_FLAG, source)
         self.assertNotIn("retrieve_linux_knowledge", source)
 
-    def test_knowledge_router_default_uses_facade(self) -> None:
-        fake_response = SimpleNamespace(
-            confidence="high",
-            confidence_score=100,
-            message="facade answer",
-            query="systemctl status",
-            results=({"file_location": "runtime/knowledge/systemd/example.md"},),
-        )
-
-        with patch("orchestrator.knowledge_router.retrieve_linux_knowledge", return_value=fake_response) as facade:
+    def test_knowledge_router_returns_request_metadata_without_using_facade(self) -> None:
+        with patch("retrieval.facade.retrieve_linux_knowledge") as facade:
             with tempfile.TemporaryDirectory() as tmpdir:
                 router = KnowledgeRouter(Path(tmpdir))
                 decision = router.route("systemctl status")
 
-        facade.assert_called_once()
-        self.assertTrue(decision.should_handle_locally)
-        self.assertEqual(decision.response, "facade answer")
+        facade.assert_not_called()
+        self.assertFalse(decision.should_handle_locally)
+        self.assertEqual(decision.route_status, "ROUTE_PROPOSED")
+        self.assertIsNotNone(decision.retrieval_request)
+        self.assertFalse(decision.retrieval_request.execution_allowed)
 
-    def test_legacy_engine_injection_is_not_silent(self) -> None:
-        fake_engine = SimpleNamespace(retrieve_operational_memory=lambda query: None)
+    def test_legacy_engine_injection_is_inert(self) -> None:
+        def forbidden_retrieval(_query):
+            raise AssertionError("routing must not invoke legacy engine retrieval")
 
-        with warnings.catch_warnings(record=True) as captured:
-            warnings.simplefilter("always")
-            with tempfile.TemporaryDirectory() as tmpdir:
-                KnowledgeRouter(Path(tmpdir), engine=fake_engine)
+        class FakeEngine:
+            retrieve_operational_memory = staticmethod(forbidden_retrieval)
 
-        self.assertTrue(any("deprecated" in str(item.message).lower() for item in captured))
+        with tempfile.TemporaryDirectory() as tmpdir:
+            router = KnowledgeRouter(Path(tmpdir), engine=FakeEngine())
+            decision = router.route("systemctl status")
+
+        self.assertEqual(decision.route_status, "ROUTE_PROPOSED")
 
     def test_refusal_behavior_preserved(self) -> None:
         response = retrieve_linux_knowledge("zzzz-not-a-linux-command-xyz", max_results=3)

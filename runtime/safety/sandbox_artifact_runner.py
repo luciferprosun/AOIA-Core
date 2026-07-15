@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import posix
 from pathlib import Path
+from typing import Any
 
 from runtime.safety.sandbox_workspace import SandboxWorkspaceViolationError
 from runtime.safety.workspace_guard import validate_workspace_target_path
@@ -35,9 +36,19 @@ def write_sandbox_artifact(
     allow_overwrite: bool = False,
     write_kill_switch_path: str | None = None,
     write_kill_switch_directory: str | None = None,
+    *,
+    approval_evidence: Any | None = None,
 ) -> SandboxArtifactResult:
     if not isinstance(request, SandboxArtifactRequest):
         raise TypeError("request must be a SandboxArtifactRequest")
+    contract_violation = _artifact_contract_violation_reason(request)
+    if contract_violation:
+        return create_blocked_sandbox_artifact_result(
+            request,
+            workspace_root=workspace_root,
+            blocked_reason=contract_violation,
+            notes="2A-2 artifact contract guard blocked artifact write",
+        )
     if write_kill_switch_path is not None:
         kill_switch = check_write_kill_switch_file(
             write_kill_switch_path,
@@ -50,21 +61,6 @@ def write_sandbox_artifact(
                 blocked_reason=kill_switch.reason,
                 notes="Step 15 global write kill-switch blocked artifact write",
             )
-    contract_violation = _artifact_contract_violation_reason(request)
-    if contract_violation:
-        return create_blocked_sandbox_artifact_result(
-            request,
-            workspace_root=workspace_root,
-            blocked_reason=contract_violation,
-            notes="2A-2 artifact contract guard blocked artifact write",
-        )
-    if not request.human_approved:
-        return create_blocked_sandbox_artifact_result(
-            request,
-            workspace_root=workspace_root,
-            blocked_reason="sandbox artifact request requires explicit human approval",
-            notes="M8-A artifact write blocked before filesystem access",
-        )
     content_bytes = request.content_text.encode("utf-8")
     if len(content_bytes) > MAX_SANDBOX_ARTIFACT_BYTES:
         return create_blocked_sandbox_artifact_result(
@@ -108,6 +104,15 @@ def write_sandbox_artifact(
             resolved_output_path=resolved_output_path,
             blocked_reason="sandbox artifact output path is a directory",
             notes="M8-A artifact write blocked before opening output path",
+        )
+
+    approval_violation = _approval_evidence_violation_reason(request, approval_evidence)
+    if approval_violation:
+        return create_blocked_sandbox_artifact_result(
+            request,
+            workspace_root=workspace_root,
+            blocked_reason=approval_violation,
+            notes="Step 12C canonical human gate evidence blocked artifact write",
         )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -277,3 +282,20 @@ def _artifact_contract_violation_reason(request: SandboxArtifactRequest) -> str:
     if request.audit_event_id != request.contract_audit_event_id:
         return "artifact audit event must match contract audit event"
     return ""
+
+
+def _approval_evidence_violation_reason(
+    request: SandboxArtifactRequest,
+    approval_evidence: Any,
+) -> str:
+    from runtime.human_decision_gate_integration import (
+        validate_canonical_human_gate_authority,
+    )
+
+    return validate_canonical_human_gate_authority(
+        approval_evidence,
+        expected_artifact_hash=request.content_hash,
+        expected_approval_decision_id=request.approval_decision_id,
+        expected_audit_event_id=request.audit_event_id,
+        expected_contract_audit_event_id=request.contract_audit_event_id,
+    )

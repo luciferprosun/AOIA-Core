@@ -63,7 +63,7 @@ class Macrostep4BLocalRunStatusTests(unittest.TestCase):
             self.assertEqual(Path(status.artifacts_dir), Path(status.run_root) / "artifacts")
             self.assertEqual(Path(status.audit_dir), Path(status.run_root) / "audit")
             self.assertEqual(Path(status.audit_log_path), Path(status.audit_dir) / "events.jsonl")
-            self.assertTrue(status.expected_artifact_exists)
+            self.assertFalse(status.expected_artifact_exists)
 
     def test_missing_run_is_incomplete_without_creation(self) -> None:
         with TemporaryDirectory() as base:
@@ -118,7 +118,7 @@ class Macrostep4BLocalRunStatusTests(unittest.TestCase):
             status = read_local_run_status(base_workspace_root=base, run_id="count_run")
 
         self.assertGreaterEqual(status.event_count, 1)
-        self.assertEqual(status.artifact_count, 1)
+        self.assertEqual(status.artifact_count, 0)
 
     def test_run_status_validates_audit_hash_chain(self) -> None:
         with TemporaryDirectory() as base:

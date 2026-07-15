@@ -6,6 +6,7 @@ from typing import Any, Callable, Mapping
 from runtime.human_decision_gate_integration import (
     GATE_PASSED,
     HumanDecisionPreArtifactGateResult,
+    validate_canonical_human_gate_authority,
 )
 from runtime.safety.approval_artifact_gate import PreArtifactApprovalGateResult
 from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
@@ -128,6 +129,22 @@ def write_artifact_after_human_gate(
                 reason="artifact write requires a completed durable handoff and passed gate",
             )
 
+        authority_violation = validate_canonical_human_gate_authority(
+            gate_result,
+            expected_packet_hash=expected_packet,
+            expected_artifact_hash=artifact_request.content_hash,
+            expected_approval_decision_id=artifact_request.approval_decision_id,
+            expected_audit_event_id=artifact_request.audit_event_id,
+            expected_contract_audit_event_id=artifact_request.contract_audit_event_id,
+        )
+        if authority_violation:
+            return _blocked(
+                status=BLOCKED_INVALID_GATE_RESULT,
+                packet_hash=packet_hash,
+                artifact_hash=artifact_hash,
+                reason=authority_violation,
+            )
+
         nested_gate = _pre_artifact_gate_result(gate.get("gate_result"))
         _validate_gate_evidence(gate, nested_gate)
         _validate_artifact_request(
@@ -148,7 +165,11 @@ def write_artifact_after_human_gate(
                     reason=kill_switch.reason,
                 )
 
-        artifact_result = artifact_writer(artifact_request, workspace_root)
+        artifact_result = artifact_writer(
+            artifact_request,
+            workspace_root,
+            approval_evidence=gate_result,
+        )
         if not isinstance(artifact_result, SandboxArtifactResult):
             raise TypeError("artifact writer must return SandboxArtifactResult")
         if not artifact_result.write_completed:
@@ -206,8 +227,10 @@ def write_artifact_after_human_gate(
 def _gate_mapping(
     gate_result: HumanDecisionPreArtifactGateResult | Mapping[str, Any],
 ) -> dict[str, Any]:
-    if isinstance(gate_result, HumanDecisionPreArtifactGateResult):
-        return gate_result.to_dict()
+    if type(gate_result) is HumanDecisionPreArtifactGateResult:
+        mapped = gate_result.to_dict()
+        mapped["gate_result"] = gate_result.gate_result
+        return mapped
     if isinstance(gate_result, Mapping):
         return dict(gate_result)
     raise TypeError("gate_result must be a HumanDecisionPreArtifactGateResult or mapping")
@@ -228,8 +251,8 @@ def _gate_boundary_flags_are_safe(gate: Mapping[str, Any]) -> bool:
 
 
 def _pre_artifact_gate_result(value: Any) -> PreArtifactApprovalGateResult:
-    if isinstance(value, PreArtifactApprovalGateResult):
-        return PreArtifactApprovalGateResult(**value.to_dict())
+    if type(value) is PreArtifactApprovalGateResult:
+        return value
     if isinstance(value, Mapping):
         return PreArtifactApprovalGateResult(**dict(value))
     raise TypeError("gate result lacks existing pre-artifact gate evidence")

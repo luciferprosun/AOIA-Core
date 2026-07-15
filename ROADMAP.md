@@ -1,19 +1,27 @@
-# AOIA Core Roadmap
+# AOIA-Core Controlled Roadmap
 
-## Current priority
+## Protected completed prototype
 
-- preserve AOIA as a standalone runtime and infrastructure authority root
-- keep deterministic retrieval, provenance control, contradiction handling, and bounded execution intact
+The development handoff currently retains the authority boundary, Provider
+Runtime/Selector/Critic, Artifact Preview, controlled write and human gate,
+ActionProposal, Durable Audit Ledger, Knowledge Foundation, Linux/Bash/Python/
+UNIX Hats, retrieval, routing, offline prototype, tests, and current freeze.
 
-## Next controlled steps
+## Current repository sequence
 
-1. cleanly separate source from generated operational state
-2. reconcile duplicated ADR trees without changing runtime behavior
-3. keep provenance and contradiction registries local and deterministic
-4. review provider/orchestrator drift without turning AOIA into a science or MHLM repository
+1. Cleanup 1E — documentation, packaging, and stable entrypoints.
+2. Cleanup 1F — isolated clean-clone and full-prototype validation.
+3. A separately approved final evidence refresh and controlled Git checkpoint.
+4. A separately approved deterministic repository handoff archive, if required.
+
+Each step must preserve all four Hats and the canonical human authority barrier.
+This roadmap grants no deletion, execution, Git, provider, network, or release
+authority.
 
 ## Non-goals
 
-- importing LSC scientific canon
-- importing MHLM theory as root doctrine
-- adding autonomous or self-modifying behavior
+- autonomous or self-modifying behavior;
+- automatic trust promotion or approval;
+- provider fallback, retry, or streaming;
+- broad legacy removal without dependency proof;
+- public deployment from the cleanup workflow.

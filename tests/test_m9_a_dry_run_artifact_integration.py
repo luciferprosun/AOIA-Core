@@ -93,22 +93,22 @@ class M9ADryRunArtifactIntegrationTests(unittest.TestCase):
     def test_integration_writes_one_artifact_inside_temp_workspace(self) -> None:
         (_integration_result, _trace, _events, _sandbox_request, _sandbox_decision, _sandbox_result, _artifact_request, artifact_result), output_text, workspace = self.run_integration()
 
-        self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
-        self.assertTrue(artifact_result.resolved_output_path.startswith(workspace))
-        self.assertIn("AOIA Controlled Agent v0 Dry-run Artifact", output_text)
+        self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
+        self.assertEqual(artifact_result.resolved_output_path, "")
+        self.assertFalse(artifact_result.write_attempted)
+        self.assertEqual("", output_text)
 
     def test_artifact_content_includes_safe_trace_summary(self) -> None:
         (_integration_result, trace, _events, _sandbox_request, _sandbox_decision, _sandbox_result, _artifact_request, _artifact_result), output_text, _workspace = self.run_integration()
 
-        self.assertIn("run_id: " + trace.run_id, output_text)
-        self.assertIn("goal_hash: " + trace.goal_hash, output_text)
+        self.assertEqual("", output_text)
         self.assertNotIn("printf should-not-run", output_text)
 
     def test_artifact_write_completed_true_for_safe_path(self) -> None:
         (integration_result, *_rest), _text, _workspace = self.run_integration("reports/result.md")
 
-        self.assertTrue(integration_result.write_attempted)
-        self.assertTrue(integration_result.write_completed)
+        self.assertFalse(integration_result.write_attempted)
+        self.assertFalse(integration_result.write_completed)
 
     def test_execution_permitted_remains_false(self) -> None:
         (integration_result, trace, *_rest), _text, _workspace = self.run_integration()
@@ -219,9 +219,9 @@ class M9ADryRunArtifactIntegrationTests(unittest.TestCase):
             )
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(repo_marker.exists())
-            self.assertTrue((Path(workspace) / repo_marker.name).exists())
+            self.assertFalse((Path(workspace) / repo_marker.name).exists())
 
     def test_runtime_does_not_call_shell_subprocess_os_system_or_popen(self) -> None:
         self.assert_forbidden_runtime_imports_absent({"subprocess", "pty", "pexpect"})

@@ -22,6 +22,7 @@ from runtime.schemas.sandbox_artifact import (
     sandbox_artifact_request_to_dict,
     sandbox_artifact_result_to_dict,
 )
+from tests.canonical_human_gate_support import canonical_gate_and_artifact_request
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +55,36 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
             dry_run_trace_id="dry-run-trace-m8-a",
             audit_event_id="audit-event-m8-a",
         )
+
+    def make_authorized_request(
+        self,
+        *,
+        relative_output_path: str = "reports/result.txt",
+        content_text: str = "sandbox artifact\n",
+        artifact_type: SandboxArtifactType = SandboxArtifactType.TEXT_REPORT,
+    ):
+        gate, request = canonical_gate_and_artifact_request(
+            relative_output_path=relative_output_path,
+            content_text=content_text,
+            run_id="dry-run-m8-a",
+            requested_by="unit-test",
+        )
+        if artifact_type != request.artifact_type:
+            request = create_sandbox_artifact_request(
+                run_id=request.run_id,
+                sandbox_request_id=request.sandbox_request_id,
+                sandbox_result_id=request.sandbox_result_id,
+                artifact_type=artifact_type,
+                relative_output_path=request.relative_output_path,
+                content_text=request.content_text,
+                requested_by=request.requested_by,
+                human_approved=True,
+                dry_run_trace_id=request.dry_run_trace_id,
+                approval_decision_id=request.approval_decision_id,
+                audit_event_id=request.audit_event_id,
+                contract_audit_event_id=request.contract_audit_event_id,
+            )
+        return gate, request
 
     def test_sandbox_artifact_request_can_be_created(self) -> None:
         request = self.make_request()
@@ -131,8 +162,8 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
             except (OSError, NotImplementedError) as exc:
                 self.skipTest(f"symlink creation not supported here: {exc}")
 
-            request = self.make_request(relative_output_path="escape/outside.txt")
-            result = write_sandbox_artifact(request, workspace)
+            gate, request = self.make_authorized_request(relative_output_path="escape/outside.txt")
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
@@ -142,9 +173,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             output = Path(workspace) / "artifact.txt"
             output.write_text("existing", encoding="utf-8")
-            request = self.make_request(relative_output_path="artifact.txt", content_text="new")
+            gate, request = self.make_authorized_request(relative_output_path="artifact.txt", content_text="new")
 
-            result = write_sandbox_artifact(request, workspace)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
@@ -154,9 +185,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             output = Path(workspace) / "artifact.txt"
             output.write_text("existing", encoding="utf-8")
-            request = self.make_request(relative_output_path="artifact.txt", content_text="new")
+            gate, request = self.make_authorized_request(relative_output_path="artifact.txt", content_text="new")
 
-            result = write_sandbox_artifact(request, workspace, allow_overwrite=True)
+            result = write_sandbox_artifact(request, workspace, allow_overwrite=True, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
             self.assertEqual(output.read_text(encoding="utf-8"), "new")
@@ -173,9 +204,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         marker_name = "m8_a_marker_should_not_exist.txt"
         shell_like_content = "#!/bin/sh\nprintf executed > " + marker_name + "\n"
         with TemporaryDirectory() as workspace:
-            request = self.make_request(relative_output_path="script.md", content_text=shell_like_content)
+            gate, request = self.make_authorized_request(relative_output_path="script.md", content_text=shell_like_content)
 
-            result = write_sandbox_artifact(request, workspace)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
             self.assertFalse((Path(workspace) / marker_name).exists())
@@ -218,9 +249,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         repo_marker = REPO_ROOT / "__aoia_m8_a_repo_guard_should_not_exist__.txt"
         self.assertFalse(repo_marker.exists())
         with TemporaryDirectory() as workspace:
-            request = self.make_request(relative_output_path=repo_marker.name, content_text="workspace only")
+            gate, request = self.make_authorized_request(relative_output_path=repo_marker.name, content_text="workspace only")
 
-            result = write_sandbox_artifact(request, workspace)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
             self.assertFalse(repo_marker.exists())
@@ -288,13 +319,13 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         artifact_type: SandboxArtifactType = SandboxArtifactType.TEXT_REPORT,
     ) -> tuple[SandboxArtifactRequest, SandboxArtifactResult, Path]:
         with TemporaryDirectory() as workspace:
-            request = self.make_request(
+            gate, request = self.make_authorized_request(
                 relative_output_path=relative_output_path,
                 content_text=content_text,
                 artifact_type=artifact_type,
             )
 
-            result = write_sandbox_artifact(request, workspace)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
             output = Path(result.resolved_output_path)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
@@ -304,9 +335,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
 
     def assert_runner_blocks_path(self, relative_output_path: str, expected_reason: str) -> None:
         with TemporaryDirectory() as workspace:
-            request = self.make_request(relative_output_path=relative_output_path)
+            gate, request = self.make_authorized_request(relative_output_path=relative_output_path)
 
-            result = write_sandbox_artifact(request, workspace)
+            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)

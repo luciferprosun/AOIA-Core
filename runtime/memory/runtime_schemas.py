@@ -408,9 +408,11 @@ def validate_memory_runtime_metadata(
 
 def _validate_tetrad(value: Mapping[str, Any], *, now: int) -> list[str]:
     reason_codes: list[str] = []
-    if set(value.keys()) - _ALLOWED_TETRAD_FIELDS:
+    if set(value.keys()) != _ALLOWED_TETRAD_FIELDS:
         reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_TETRAD)
     if value.get("schema_version") != TETRAD_KNOWLEDGE_OBJECT_SCHEMA_VERSION:
+        reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_TETRAD)
+    if not _valid_identifier(value.get("object_id")) or not _valid_required_text(value.get("summary")):
         reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_TETRAD)
     if value.get("status_label") not in SUPPORTED_TETRAD_STATUS_LABELS:
         reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_TETRAD)
@@ -441,11 +443,13 @@ def _validate_tags(
     tag_ids: set[str] = set()
     tag_hashes: list[str] = []
     for value in values:
-        if set(value.keys()) - _ALLOWED_TAG_FIELDS:
+        if set(value.keys()) != _ALLOWED_TAG_FIELDS:
             reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_TAG)
         tag_id = value.get("tag_id")
         tag_hash = _optional_hash("tag_hash", value.get("tag_hash"))
-        if tag_id in tag_ids:
+        if tag_hash is None:
+            reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_HASH)
+        if isinstance(tag_id, str) and tag_id in tag_ids:
             reason_codes.append(MEMORY_RUNTIME_BLOCKED_DUPLICATE_TAG_ID)
         if tag_hash is not None and tag_hash in tag_hashes:
             reason_codes.append(MEMORY_RUNTIME_BLOCKED_DUPLICATE_TAG_HASH)
@@ -454,6 +458,8 @@ def _validate_tags(
         if tag_hash is not None:
             tag_hashes.append(tag_hash)
         if value.get("schema_version") != PHEROMONE_MEMORY_TAG_SCHEMA_VERSION:
+            reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_TAG)
+        if not _valid_identifier(value.get("tag_id")) or not _valid_required_text(value.get("reason")):
             reason_codes.append(MEMORY_RUNTIME_BLOCKED_INVALID_TAG)
         if value.get("tag_kind") not in SUPPORTED_PHEROMONE_TAG_KINDS:
             reason_codes.append(MEMORY_RUNTIME_BLOCKED_UNKNOWN_TAG_KIND)
@@ -568,12 +574,9 @@ def _required_hash(field_name: str, value: object) -> str:
 
 
 def _optional_hash(field_name: str, value: object) -> str | None:
-    if not isinstance(value, str):
+    if not isinstance(value, str) or not _HASH_RE.fullmatch(value):
         return None
-    text = value.casefold()
-    if not _HASH_RE.match(text):
-        return None
-    return text
+    return value
 
 
 def _hash_tuple(field_name: str, values: object, *, allow_empty: bool) -> tuple[str, ...]:
@@ -585,11 +588,19 @@ def _hash_tuple(field_name: str, values: object, *, allow_empty: bool) -> tuple[
 
 
 def _valid_hash_tuple(values: object, *, allow_empty: bool) -> bool:
-    try:
-        _hash_tuple("hashes", values, allow_empty=allow_empty)
-        return True
-    except (TypeError, ValueError):
+    if isinstance(values, (str, bytes)) or not isinstance(values, tuple):
         return False
+    if not allow_empty and not values:
+        return False
+    return all(isinstance(value, str) and _HASH_RE.fullmatch(value) for value in values)
+
+
+def _valid_identifier(value: object) -> bool:
+    return isinstance(value, str) and bool(_ID_RE.fullmatch(value))
+
+
+def _valid_required_text(value: object) -> bool:
+    return isinstance(value, str) and bool(" ".join(value.split()))
 
 
 def _nonnegative_int(field_name: str, value: object) -> int:
@@ -599,8 +610,4 @@ def _nonnegative_int(field_name: str, value: object) -> int:
 
 
 def _unique(values: list[str]) -> list[str]:
-    result: list[str] = []
-    for value in values:
-        if value not in result:
-            result.append(value)
-    return result
+    return sorted(set(values))

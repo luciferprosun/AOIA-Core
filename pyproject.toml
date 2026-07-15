@@ -1,33 +1,37 @@
 [project]
 name = "aoia-core"
-version = "0.0.0"
-description = "local-first pre-execution inspection and audit framework for AI-assisted commands"
+version = "0.1.0"
+description = "Local-first, human-controlled epistemic control system development prototype"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.scripts]
+aoia-offline-prototype = "runtime.developer_entrypoints:offline_prototype_main"
+aoia-smoke-test = "runtime.developer_entrypoints:smoke_test_main"
+aoia-verify-artifacts = "runtime.developer_entrypoints:verify_artifacts_main"
+
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = []
+build-backend = "aoia_build_backend"
+backend-path = ["build_support"]
 
 [tool.setuptools]
-package-dir = {"" = "runtime"}
+package-dir = {"" = "runtime", runtime = "runtime"}
 py-modules = ["main"]
-
-[tool.setuptools.packages.find]
-where = ["runtime"]
-include = [
-    "adaptive_routing*",
-    "commands*",
-    "knowledge*",
-    "memory*",
-    "memory_hats*",
-    "orchestrator*",
-    "provider_critic*",
-    "providers*",
-    "retrieval*",
-    "router*",
-    "safety*",
-    "schemas*",
-    "tools*",
+packages = [
+    "adaptive_routing", "adaptive_routing.environment", "agent_loops", "audit",
+    "bridges", "browser_ops", "commands", "cpt", "execution", "git_ops",
+    "integration_boundaries", "knowledge", "knowledge.tools", "knowledge.validator",
+    "live_flows", "memory", "memory_hats", "orchestration", "orchestrator",
+    "package_ops", "patches", "provider_critic", "providers", "retrieval",
+    "retrieval.linux", "router", "safety", "schemas", "tools", "runtime",
+    "runtime.adaptive_routing", "runtime.adaptive_routing.environment",
+    "runtime.agent_loops", "runtime.audit", "runtime.bridges", "runtime.browser_ops",
+    "runtime.commands", "runtime.cpt", "runtime.execution", "runtime.git_ops",
+    "runtime.integration_boundaries", "runtime.knowledge", "runtime.knowledge.tools",
+    "runtime.knowledge.validator", "runtime.live_flows", "runtime.memory",
+    "runtime.memory_hats", "runtime.orchestration", "runtime.orchestrator",
+    "runtime.package_ops", "runtime.patches", "runtime.provider_critic",
+    "runtime.providers", "runtime.retrieval", "runtime.retrieval.linux",
+    "runtime.router", "runtime.safety", "runtime.schemas", "runtime.tools",
 ]
-namespaces = true

@@ -1,5 +1,4 @@
-google-genai>=1.0.0
-playwright>=1.59.0
-beautifulsoup4>=4.12.0
-rich>=13.7.0
-textual>=0.86.0
+# Compatibility-only pointer. Canonical dependencies are declared in the root
+# pyproject.toml. The supported default offline development-prototype path uses
+# only the Python standard library and intentionally installs no provider,
+# browser-automation, network-client, or TUI dependency.

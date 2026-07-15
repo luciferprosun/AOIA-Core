@@ -211,15 +211,18 @@ class Red1PublicEntrypointBoundaryNegativeTests(unittest.TestCase):
         self.assertTrue(str(router.report_path).endswith("token_savings_report.json"))
         write_text.assert_not_called()
 
-    def test_explicit_token_savings_report_method_writes_once(self) -> None:
+    def test_explicit_token_savings_report_method_returns_inert_data_without_write(self) -> None:
         KnowledgeRouter = load_knowledge_router_class()
 
         with tempfile.TemporaryDirectory() as tmpdir:
             router = KnowledgeRouter(Path(tmpdir), retriever=lambda query: None)
             with patch.object(Path, "write_text") as write_text:
-                router.write_token_savings_report()
+                report = router.write_token_savings_report()
 
-        write_text.assert_called_once()
+        write_text.assert_not_called()
+        self.assertFalse(report["filesystem_persisted"])
+        self.assertFalse(report["retrieval_executed"])
+        self.assertEqual(report["authority_status"], "NON_AUTHORITATIVE")
 
     def test_runtime_main_is_statically_inspected_not_imported(self) -> None:
         main_loaded_before = "main" in sys.modules

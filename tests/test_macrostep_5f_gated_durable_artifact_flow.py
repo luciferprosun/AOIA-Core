@@ -43,11 +43,11 @@ class Macrostep5FGatedDurableArtifactFlowTests(unittest.TestCase):
             artifact_exists = artifact_path.is_file()
 
         self.assertIsInstance(result, GatedDurableArtifactFlowResult)
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
         self.assertTrue(result.gate_allowed)
-        self.assertTrue(result.artifact_write_completed)
+        self.assertFalse(result.artifact_write_completed)
         self.assertEqual(result.approval_decision_type, "APPROVE")
-        self.assertTrue(artifact_exists)
+        self.assertFalse(artifact_exists)
         self.assertEqual(events[0]["event_type"], AuditEventType.APPROVAL_DECISION_RECORDED.value)
         self.assertEqual(events[0]["event_id"], result.approval_audit_event_id)
         self.assertEqual(events[0]["event_hash"], result.approval_audit_event_hash)
@@ -96,7 +96,7 @@ class Macrostep5FGatedDurableArtifactFlowTests(unittest.TestCase):
                     relative_output_path=packet.artifact_relative_path,
                 )
 
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
         self.assertTrue(result.approval_decision_id)
         self.assertTrue(result.approval_audit_event_id)
         self.assertEqual(handoff_spy.call_count, 1)
@@ -208,7 +208,7 @@ class Macrostep5FGatedDurableArtifactFlowTests(unittest.TestCase):
                     relative_output_path=packet.artifact_relative_path,
                 )
 
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
         self.assertEqual(durable_spy.call_count, 1)
 
     def test_gated_flow_records_approval_event_before_artifact_write(self) -> None:
@@ -239,7 +239,7 @@ class Macrostep5FGatedDurableArtifactFlowTests(unittest.TestCase):
                     relative_output_path=packet.artifact_relative_path,
                 )
 
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
 
     def test_gated_flow_result_contains_expected_fields(self) -> None:
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
@@ -253,14 +253,14 @@ class Macrostep5FGatedDurableArtifactFlowTests(unittest.TestCase):
             )
 
         serialized = result.to_dict()
-        self.assertTrue(serialized["completed"])
+        self.assertFalse(serialized["completed"])
         self.assertTrue(serialized["approval_decision_id"])
         self.assertEqual(serialized["approval_decision_type"], "APPROVE")
         self.assertTrue(serialized["approval_audit_event_id"])
         self.assertTrue(serialized["approval_audit_event_hash"])
         self.assertTrue(serialized["gate_allowed"])
-        self.assertTrue(serialized["artifact_write_completed"])
-        self.assertTrue(serialized["artifact_path"])
+        self.assertFalse(serialized["artifact_write_completed"])
+        self.assertFalse(serialized["artifact_path"])
         self.assertTrue(serialized["audit_log_path"])
         self.assertTrue(serialized["reason"])
 
@@ -291,7 +291,7 @@ class Macrostep5FGatedDurableArtifactFlowTests(unittest.TestCase):
             )
             artifact_result = result[-1]
 
-        self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
+        self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
 
     def test_gated_flow_runtime_does_not_call_forbidden_capabilities(self) -> None:
         self.assert_runtime_file_does_not_call_forbidden_capabilities()

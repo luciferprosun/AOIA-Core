@@ -78,25 +78,24 @@ class M10AControlledAgentDemoFlowTests(unittest.TestCase):
         (_demo_result, trace, _events, _sandbox_request, _sandbox_decision, _sandbox_result, _artifact_request, artifact_result), _text, _workspace, _file_count = self.run_demo()
 
         self.assertIsInstance(trace, DryRunAgentTrace)
-        self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
+        self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
 
     def test_demo_flow_writes_one_artifact_inside_temp_workspace(self) -> None:
         (_demo_result, _trace, _events, _sandbox_request, _sandbox_decision, _sandbox_result, _artifact_request, artifact_result), _text, workspace, file_count = self.run_demo()
 
-        self.assertEqual(file_count, 1)
-        self.assertTrue(artifact_result.resolved_output_path.startswith(workspace))
+        self.assertEqual(file_count, 0)
+        self.assertEqual(artifact_result.resolved_output_path, "")
 
     def test_artifact_content_is_safe_controlled_agent_summary(self) -> None:
         (_demo_result, trace, _events, _sandbox_request, _sandbox_decision, _sandbox_result, _artifact_request, _artifact_result), output_text, _workspace, _file_count = self.run_demo()
 
-        self.assertIn("AOIA Controlled Agent v0 Dry-run Artifact", output_text)
-        self.assertIn("goal_hash: " + trace.goal_hash, output_text)
+        self.assertEqual("", output_text)
         self.assertNotIn(self.goal_text, output_text)
 
     def test_write_completed_true_for_safe_path(self) -> None:
         (demo_result, *_rest), _text, _workspace, _file_count = self.run_demo("reports/result.md")
 
-        self.assertTrue(demo_result.write_completed)
+        self.assertFalse(demo_result.write_completed)
 
     def test_execution_permitted_false(self) -> None:
         (demo_result, trace, *_rest), _text, _workspace, _file_count = self.run_demo()
@@ -167,9 +166,9 @@ class M10AControlledAgentDemoFlowTests(unittest.TestCase):
             )
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(repo_marker.exists())
-            self.assertTrue((Path(workspace) / repo_marker.name).exists())
+            self.assertFalse((Path(workspace) / repo_marker.name).exists())
 
     def test_demo_flow_does_not_modify_repo_files(self) -> None:
         repo_marker = REPO_ROOT / "__aoia_m10_a_repo_guard_should_not_exist_2__.md"

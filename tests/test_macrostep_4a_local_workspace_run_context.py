@@ -86,13 +86,12 @@ class Macrostep4ALocalWorkspaceRunContextTests(unittest.TestCase):
             artifact_path = Path(result.artifact_path or "")
             audit_log_path = Path(result.audit_log_path or "")
 
-            self.assertTrue(result.completed)
+            self.assertFalse(result.completed)
             self.assertTrue(result.durable_audit_completed)
-            self.assertTrue(result.artifact_write_completed)
+            self.assertFalse(result.artifact_write_completed)
             self.assertTrue(audit_log_path.is_file())
             self.assertEqual(audit_log_path, Path(base) / "runs" / "entrypoint_run" / "audit" / "events.jsonl")
-            self.assertTrue(artifact_path.is_file())
-            self.assertTrue(str(artifact_path).startswith(str(Path(base) / "runs" / "entrypoint_run" / "artifacts")))
+            self.assertIsNone(result.artifact_path)
 
     def test_workspace_context_preserves_macrostep_3a_entrypoint_behavior(self) -> None:
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
@@ -102,7 +101,7 @@ class Macrostep4ALocalWorkspaceRunContextTests(unittest.TestCase):
                 audit_dir=audit_dir,
             )
 
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
 
     def test_workspace_context_does_not_call_old_non_durable_path(self) -> None:
         with TemporaryDirectory() as base:
@@ -117,7 +116,7 @@ class Macrostep4ALocalWorkspaceRunContextTests(unittest.TestCase):
                     run_id="durable_only_run",
                 )
 
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
 
     def test_workspace_context_runtime_does_not_call_forbidden_capabilities(self) -> None:
         forbidden_modules = {

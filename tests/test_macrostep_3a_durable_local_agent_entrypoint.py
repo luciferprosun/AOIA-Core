@@ -36,7 +36,7 @@ class Macrostep3ADurableLocalAgentEntrypointTests(unittest.TestCase):
             )
 
         self.assertIsInstance(result, LocalAgentEntrypointResult)
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
 
     def test_entrypoint_requires_explicit_workspace_root(self) -> None:
         with TemporaryDirectory() as audit_dir:
@@ -83,11 +83,10 @@ class Macrostep3ADurableLocalAgentEntrypointTests(unittest.TestCase):
 
             self.assertTrue(result.durable_audit_required)
             self.assertTrue(result.durable_audit_completed)
-            self.assertTrue(result.artifact_write_completed)
+            self.assertFalse(result.artifact_write_completed)
             self.assertTrue(audit_log_path.is_file())
             self.assertEqual(audit_log_path.name, "events.jsonl")
-            self.assertTrue(artifact_path.is_file())
-            self.assertTrue(str(artifact_path).startswith(workspace))
+            self.assertIsNone(result.artifact_path)
 
     def test_entrypoint_result_serializes_to_dict(self) -> None:
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
@@ -99,7 +98,7 @@ class Macrostep3ADurableLocalAgentEntrypointTests(unittest.TestCase):
 
         serialized = local_agent_entrypoint_result_to_dict(result)
         self.assertIsInstance(serialized, dict)
-        self.assertTrue(serialized["completed"])
+        self.assertFalse(serialized["completed"])
         self.assertTrue(serialized["durable_audit_required"])
 
     def test_entrypoint_preserves_existing_m9_behavior(self) -> None:
@@ -108,7 +107,7 @@ class Macrostep3ADurableLocalAgentEntrypointTests(unittest.TestCase):
             result = run_dry_run_agent_and_write_artifact(request, workspace)
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
 
     def test_entrypoint_preserves_existing_m10_behavior(self) -> None:
         with TemporaryDirectory() as workspace:
@@ -119,7 +118,7 @@ class Macrostep3ADurableLocalAgentEntrypointTests(unittest.TestCase):
             )
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
 
     def test_entrypoint_runtime_does_not_call_forbidden_capabilities(self) -> None:
         forbidden_modules = {
