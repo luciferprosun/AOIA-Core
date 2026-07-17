@@ -20,6 +20,7 @@ from runtime.human_decision_end_to_end_demo import (
 from runtime.human_decision_gate_integration import (
     HumanDecisionPreArtifactGateResult,
 )
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -33,7 +34,7 @@ ARTIFACT_HASH = hashlib.sha256(CONTENT.encode("utf-8")).hexdigest()
 class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
     def test_end_to_end_approve_writes_artifact(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(workspace, audit_dir, decision="APPROVE")
+            result = self.run_demo_with_enabled_switch(workspace, audit_dir, decision="APPROVE")
             output = Path(result.artifact_path or "")
             written_content = output.read_text(encoding="utf-8")
             artifact_files = [path for path in Path(workspace).rglob("*") if path.is_file()]
@@ -46,7 +47,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
     def test_end_to_end_reject_does_not_write(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(workspace, audit_dir, decision="REJECT")
+            result = self.run_demo_with_enabled_switch(workspace, audit_dir, decision="REJECT")
             artifact_files = [path for path in Path(workspace).rglob("*") if path.is_file()]
 
         self.assertFalse(result.demo_completed)
@@ -61,7 +62,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
     def test_missing_packet_hash_fails_closed(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -73,7 +74,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
     def test_stale_packet_hash_fails_closed(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -85,7 +86,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
     def test_stale_artifact_hash_fails_closed(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -109,7 +110,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
         writer = Mock(side_effect=AssertionError("writer must not run"))
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -134,7 +135,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
         gate = Mock(side_effect=AssertionError("gate must not run"))
         writer = Mock(side_effect=AssertionError("writer must not run"))
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -169,10 +170,10 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
         def write(**kwargs):
             calls.append("write")
-            return self.real_write(**kwargs)
+            return self.write_with_enabled_switch(**kwargs)
 
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -188,7 +189,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
     def test_output_accurately_reports_every_stage(self):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(workspace, audit_dir, decision="APPROVE")
+            result = self.run_demo_with_enabled_switch(workspace, audit_dir, decision="APPROVE")
 
         self.assertIsInstance(result, LocalApprovalArtifactDemoResult)
         payload = result.to_dict()
@@ -219,9 +220,9 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
     def test_equivalent_local_inputs_produce_deterministic_stage_results(self):
         with TemporaryDirectory() as workspace_a, TemporaryDirectory() as audit_a:
-            first = self.run_demo(workspace_a, audit_a, decision="APPROVE")
+            first = self.run_demo_with_enabled_switch(workspace_a, audit_a, decision="APPROVE")
         with TemporaryDirectory() as workspace_b, TemporaryDirectory() as audit_b:
-            second = self.run_demo(workspace_b, audit_b, decision="APPROVE")
+            second = self.run_demo_with_enabled_switch(workspace_b, audit_b, decision="APPROVE")
 
         first_payload = first.to_dict()
         second_payload = second.to_dict()
@@ -248,7 +249,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
                 link.symlink_to(Path(outside), target_is_directory=True)
             except (OSError, NotImplementedError) as exc:
                 self.skipTest(f"symlink creation not supported here: {exc}")
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -272,9 +273,9 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
         }
         before = deepcopy(metadata)
         with TemporaryDirectory() as workspace_a, TemporaryDirectory() as audit_a:
-            baseline = self.run_demo(workspace_a, audit_a, decision="REJECT")
+            baseline = self.run_demo_with_enabled_switch(workspace_a, audit_a, decision="REJECT")
         with TemporaryDirectory() as workspace_b, TemporaryDirectory() as audit_b:
-            with_metadata = self.run_demo(
+            with_metadata = self.run_demo_with_enabled_switch(
                 workspace_b,
                 audit_b,
                 decision="REJECT",
@@ -331,7 +332,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
 
     def run_path_blocked(self, path: str):
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            result = self.run_demo(
+            result = self.run_demo_with_enabled_switch(
                 workspace,
                 audit_dir,
                 decision="APPROVE",
@@ -340,7 +341,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
             self.assertFalse(any(item.is_file() for item in Path(workspace).rglob("*")))
         return result
 
-    def run_demo(
+    def run_demo_with_enabled_switch(
         self,
         workspace: str,
         audit_dir: str,
@@ -350,6 +351,7 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
         artifact_relative_path: str = "reports/m6-g2-demo.md",
         **overrides,
     ):
+        overrides.setdefault("write_function", self.write_with_enabled_switch)
         return run_local_approval_to_artifact_demo(
             workspace_root=workspace,
             audit_dir=audit_dir,
@@ -363,6 +365,19 @@ class M6G2EndToEndLocalApprovalArtifactDemoTests(unittest.TestCase):
             reason="reviewed deterministic local demo",
             **overrides,
         )
+
+    @staticmethod
+    def write_with_enabled_switch(**kwargs):
+        from runtime.human_decision_gated_artifact_write import write_artifact_after_human_gate
+
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_artifact_after_human_gate(
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
 
     @property
     def real_capture(self):

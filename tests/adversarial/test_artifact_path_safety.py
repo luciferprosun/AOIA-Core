@@ -7,6 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 from runtime.safety.sandbox_workspace import (
     SandboxPathTraversalBlockedError,
     assert_path_inside_workspace,
@@ -90,7 +91,9 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
                 self.skipTest(f"symlink creation not supported here: {exc}")
 
             gate, request = self.make_authorized_request("escape.md")
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse((Path(outside) / "outside.md").exists())
@@ -104,7 +107,9 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
                 self.skipTest(f"symlink creation not supported here: {exc}")
 
             gate, request = self.make_authorized_request("escape/result.md")
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse((Path(outside) / "result.md").exists())
@@ -137,7 +142,9 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
             with self.subTest(allowed_path=allowed_path):
                 with TemporaryDirectory() as workspace:
                     gate, request = self.make_authorized_request(allowed_path)
-                    result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+                    result = self.write_with_enabled_switch(
+                        request, workspace, approval_evidence=gate
+                    )
                     self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
 
     def test_double_extension_rejects_final_unsafe_suffix(self) -> None:
@@ -148,9 +155,13 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
     def test_write_once_overwrite_prevention(self) -> None:
         with TemporaryDirectory() as workspace:
             first_gate, request = self.make_authorized_request("result.md", "first")
-            first = write_sandbox_artifact(request, workspace, approval_evidence=first_gate)
+            first = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=first_gate
+            )
             second_gate, second_request = self.make_authorized_request("result.md", "second")
-            second = write_sandbox_artifact(second_request, workspace, approval_evidence=second_gate)
+            second = self.write_with_enabled_switch(
+                second_request, workspace, approval_evidence=second_gate
+            )
 
             self.assertEqual(first.state, SandboxArtifactState.WRITTEN)
             self.assertEqual(second.state, SandboxArtifactState.BLOCKED)
@@ -162,7 +173,9 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
             target = Path(workspace) / "oversized.md"
 
             gate, request = self.make_authorized_request("oversized.md", oversized_content)
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(target.exists())
@@ -170,11 +183,27 @@ class ArtifactPathSafetyAdversarialTests(unittest.TestCase):
     def run_blocked(self, relative_output_path: str):
         with TemporaryDirectory() as workspace:
             gate, request = self.make_authorized_request(relative_output_path)
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
             self.assertFalse(result.write_completed)
             return result
+
+    @staticmethod
+    def write_with_enabled_switch(request, workspace, *args, **kwargs):
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_sandbox_artifact(
+                request,
+                workspace,
+                *args,
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
 
 
 if __name__ == "__main__":

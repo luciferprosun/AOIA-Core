@@ -24,6 +24,7 @@ from runtime.human_decision_gated_artifact_write import (
     write_artifact_after_human_gate,
 )
 from runtime.safety import sandbox_artifact_runner
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 from runtime.schemas.sandbox_artifact import (
     SandboxArtifactType,
     create_sandbox_artifact_request,
@@ -47,7 +48,7 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
                 "write_sandbox_artifact",
                 wraps=sandbox_artifact_runner.write_sandbox_artifact,
             ) as writer_spy:
-                result = write_artifact_after_human_gate(
+                result = self.write_with_enabled_switch(
                     gate_result=gate,
                     artifact_request=request,
                     workspace_root=workspace,
@@ -69,7 +70,7 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
     def test_reject_does_not_write(self):
         gate, request = self.gate_and_request("REJECT")
         with TemporaryDirectory() as workspace:
-            result = write_artifact_after_human_gate(
+            result = self.write_with_enabled_switch(
                 gate_result=gate,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -113,7 +114,7 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
     def test_stale_packet_hash_blocks(self):
         gate, request = self.gate_and_request("APPROVE")
         with TemporaryDirectory() as workspace:
-            result = write_artifact_after_human_gate(
+            result = self.write_with_enabled_switch(
                 gate_result=gate,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -126,7 +127,7 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
     def test_stale_artifact_hash_blocks(self):
         gate, request = self.gate_and_request("APPROVE")
         with TemporaryDirectory() as workspace:
-            result = write_artifact_after_human_gate(
+            result = self.write_with_enabled_switch(
                 gate_result=gate,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -176,7 +177,7 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
             except (OSError, NotImplementedError) as exc:
                 self.skipTest(f"symlink creation not supported here: {exc}")
 
-            result = write_artifact_after_human_gate(
+            result = self.write_with_enabled_switch(
                 gate_result=gate,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -200,7 +201,7 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
         blocked_request = replace(request, relative_output_path="../blocked.md")
         blocked = self.run_blocked(gate, blocked_request)
         with TemporaryDirectory() as workspace:
-            written = write_artifact_after_human_gate(
+            written = self.write_with_enabled_switch(
                 gate_result=gate,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -225,12 +226,12 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
         denied = replace(gate, pre_artifact_gate_passed=False, blocking=True)
 
         with TemporaryDirectory() as baseline_dir, TemporaryDirectory() as metadata_dir:
-            baseline = write_artifact_after_human_gate(
+            baseline = self.write_with_enabled_switch(
                 gate_result=denied,
                 artifact_request=request,
                 workspace_root=baseline_dir,
             )
-            with_metadata = write_artifact_after_human_gate(
+            with_metadata = self.write_with_enabled_switch(
                 gate_result=denied,
                 artifact_request=request,
                 workspace_root=metadata_dir,
@@ -359,7 +360,7 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
         request,
     ):
         with TemporaryDirectory() as workspace:
-            result = write_artifact_after_human_gate(
+            result = self.write_with_enabled_switch(
                 gate_result=gate,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -369,6 +370,17 @@ class M6G1GatedArtifactWriteIntegrationTests(unittest.TestCase):
             )
         self.assertFalse(result.artifact_write_occurred)
         return result
+
+    @staticmethod
+    def write_with_enabled_switch(**kwargs):
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_artifact_after_human_gate(
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
 
 
 if __name__ == "__main__":

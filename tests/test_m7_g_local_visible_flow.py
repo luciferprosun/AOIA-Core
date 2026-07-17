@@ -20,6 +20,7 @@ from runtime.local_visible_flow import (
     run_local_visible_flow,
 )
 from runtime.proposal_intake import UNTRUSTED
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -30,10 +31,14 @@ ARTIFACT_HASH = hashlib.sha256(CONTENT.encode("utf-8")).hexdigest()
 
 class M7GLocalVisibleFlowTests(unittest.TestCase):
     def test_approve_produces_visible_flow_and_uses_existing_safe_path(self):
+        def approval_flow_with_enabled_switch(**kwargs):
+            kwargs["write_function"] = self.write_with_enabled_switch
+            return run_local_approval_to_artifact_demo(**kwargs)
+
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
             with patch(
                 "runtime.local_visible_flow.run_local_approval_to_artifact_demo",
-                wraps=run_local_approval_to_artifact_demo,
+                side_effect=approval_flow_with_enabled_switch,
             ) as approval_flow:
                 result = self.run_flow(
                     workspace,
@@ -267,6 +272,19 @@ class M7GLocalVisibleFlowTests(unittest.TestCase):
         }
         values.update(overrides)
         return run_local_visible_flow(**values)
+
+    @staticmethod
+    def write_with_enabled_switch(**kwargs):
+        from runtime.human_decision_gated_artifact_write import write_artifact_after_human_gate
+
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_artifact_after_human_gate(
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
 
 
 if __name__ == "__main__":

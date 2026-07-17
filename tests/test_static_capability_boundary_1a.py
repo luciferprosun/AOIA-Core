@@ -1168,7 +1168,18 @@ class StaticCapabilityImportGraphStep14Tests(unittest.TestCase):
                 "runtime/artifact_preview.py",
                 "runtime/schemas/action_proposal.py",
                 "runtime/audit/durable_audit_ledger.py",
+                "runtime/safety/write_kill_switch.py",
             }.issubset(paths)
+        )
+        kill_switch_record = next(
+            record
+            for record in records
+            if record.path == step14.WRITE_KILL_SWITCH_PROTECTED_PATH
+        )
+        self.assertEqual("other_inert", kill_switch_record.zone)
+        self.assertEqual(
+            "fail-closed application-write blocker; non-authoritative and read-only",
+            step14.WRITE_KILL_SWITCH_SECURITY_ROLE,
         )
 
         reports = step14.scan_step14_import_graph(REPO_ROOT, records)

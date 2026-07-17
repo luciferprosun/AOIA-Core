@@ -10,7 +10,7 @@ from runtime.human_decision_gate_integration import (
 )
 from runtime.safety.approval_artifact_gate import PreArtifactApprovalGateResult
 from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
-from runtime.safety.write_kill_switch import check_write_kill_switch_file
+from runtime.safety.write_kill_switch import resolve_required_write_kill_switch
 from runtime.schemas.sandbox_artifact import (
     SandboxArtifactRequest,
     SandboxArtifactResult,
@@ -85,6 +85,15 @@ def write_artifact_after_human_gate(
 ) -> HumanDecisionGatedArtifactWriteResult:
     del metadata
     try:
+        kill_switch = resolve_required_write_kill_switch(
+            write_kill_switch_path,
+            switch_directory=write_kill_switch_directory,
+        )
+        if not kill_switch.writes_allowed:
+            return _blocked(
+                status=BLOCKED_WRITE_KILL_SWITCH,
+                reason=kill_switch.reason,
+            )
         gate = _gate_mapping(gate_result)
         packet_hash = _full_hash(gate.get("packet_hash"))
         artifact_hash = _full_hash(gate.get("artifact_hash"))
@@ -152,23 +161,12 @@ def write_artifact_after_human_gate(
             nested_gate=nested_gate,
             artifact_hash=artifact_hash,
         )
-        if write_kill_switch_path is not None:
-            kill_switch = check_write_kill_switch_file(
-                write_kill_switch_path,
-                allowed_switch_directory=write_kill_switch_directory,
-            )
-            if not kill_switch.writes_allowed:
-                return _blocked(
-                    status=BLOCKED_WRITE_KILL_SWITCH,
-                    packet_hash=packet_hash,
-                    artifact_hash=artifact_hash,
-                    reason=kill_switch.reason,
-                )
-
         artifact_result = artifact_writer(
             artifact_request,
             workspace_root,
             approval_evidence=gate_result,
+            write_kill_switch_path=write_kill_switch_path,
+            write_kill_switch_directory=write_kill_switch_directory,
         )
         if not isinstance(artifact_result, SandboxArtifactResult):
             raise TypeError("artifact writer must return SandboxArtifactResult")

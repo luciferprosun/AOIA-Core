@@ -66,6 +66,7 @@ from runtime.git_ops.git_write_preview import (
     create_git_write_preview,
 )
 from runtime.human_decision_gated_artifact_write import write_artifact_after_human_gate
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -272,7 +273,9 @@ class GitCommitPreview1ATests(unittest.TestCase):
     def test_commit_preview_cannot_satisfy_control_write_gate_or_future_authority(self):
         preview_result = self.commit_preview()
         writer = Mock(wraps=write_artifact_after_human_gate)
-        with TemporaryDirectory() as workspace:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
             result = write_preview_artifact_after_human_gate(
                 preview=self.artifact_preview(),
                 proposed_content_text=CONTENT,
@@ -281,6 +284,8 @@ class GitCommitPreview1ATests(unittest.TestCase):
                 context=self.context(),
                 expected_packet_hash=PACKET_HASH,
                 gated_writer=writer,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
             )
 
         self.assertEqual(CONTROL_WRITE_BLOCKED_MISSING_HUMAN_GATE, result.status)

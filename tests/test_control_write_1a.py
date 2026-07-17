@@ -29,6 +29,7 @@ from runtime.human_decision_gated_artifact_write import (
     BLOCKED_STALE_OR_MISMATCHED_STATE,
     write_artifact_after_human_gate,
 )
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -44,7 +45,8 @@ class ControlWrite1ATests(unittest.TestCase):
         gate = self.gate()
         writer = Mock(wraps=write_artifact_after_human_gate)
 
-        with TemporaryDirectory() as workspace:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
             result = write_preview_artifact_after_human_gate(
                 preview=preview,
                 proposed_content_text=CONTENT,
@@ -53,6 +55,8 @@ class ControlWrite1ATests(unittest.TestCase):
                 context=self.context(),
                 expected_packet_hash=PACKET_HASH,
                 gated_writer=writer,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
             )
             files = [path for path in Path(workspace).rglob("*") if path.is_file()]
             written_content = files[0].read_text(encoding="utf-8")
@@ -75,7 +79,10 @@ class ControlWrite1ATests(unittest.TestCase):
 
         for preview in (invalid, blocked):
             with self.subTest(status=preview.status):
-                result = self.run_bridge(preview=preview, writer=writer)
+                result = self.run_bridge_with_enabled_switch(
+                    preview=preview,
+                    writer=writer,
+                )
                 self.assertEqual(CONTROL_WRITE_BLOCKED_INVALID_PREVIEW, result.status)
                 self.assertFalse(result.artifact_write_occurred)
 
@@ -84,7 +91,10 @@ class ControlWrite1ATests(unittest.TestCase):
     def test_hash_mismatch_fails_before_writer(self):
         writer = Mock(wraps=write_artifact_after_human_gate)
 
-        result = self.run_bridge(proposed_content_text="changed\n", writer=writer)
+        result = self.run_bridge_with_enabled_switch(
+            proposed_content_text="changed\n",
+            writer=writer,
+        )
 
         self.assertEqual(CONTROL_WRITE_BLOCKED_HASH_MISMATCH, result.status)
         self.assertEqual(0, writer.call_count)
@@ -92,7 +102,7 @@ class ControlWrite1ATests(unittest.TestCase):
     def test_missing_human_gate_evidence_fails_closed(self):
         writer = Mock(wraps=write_artifact_after_human_gate)
 
-        result = self.run_bridge(gate_result={}, writer=writer)
+        result = self.run_bridge_with_enabled_switch(gate_result={}, writer=writer)
 
         self.assertEqual(CONTROL_WRITE_BLOCKED_MISSING_HUMAN_GATE, result.status)
         self.assertFalse(result.artifact_write_occurred)
@@ -100,10 +110,16 @@ class ControlWrite1ATests(unittest.TestCase):
 
     def test_stale_or_mismatched_packet_or_artifact_hash_fails_closed(self):
         writer = Mock(wraps=write_artifact_after_human_gate)
-        stale_packet = self.run_bridge(expected_packet_hash="b" * 64, writer=writer)
+        stale_packet = self.run_bridge_with_enabled_switch(
+            expected_packet_hash="b" * 64,
+            writer=writer,
+        )
         gate = self.gate().to_dict()
         gate["artifact_hash"] = "c" * 64
-        stale_artifact = self.run_bridge(gate_result=gate, writer=writer)
+        stale_artifact = self.run_bridge_with_enabled_switch(
+            gate_result=gate,
+            writer=writer,
+        )
 
         self.assertEqual(BLOCKED_STALE_OR_MISMATCHED_STATE, stale_packet.status)
         self.assertEqual(BLOCKED_STALE_OR_MISMATCHED_STATE, stale_artifact.status)
@@ -123,7 +139,7 @@ class ControlWrite1ATests(unittest.TestCase):
             "hats": ["HAT_APPROVED"],
         }
 
-        result = self.run_bridge(
+        result = self.run_bridge_with_enabled_switch(
             preview=preview,
             gate_result={"decision": "APPROVE"},
             metadata=metadata,
@@ -141,7 +157,7 @@ class ControlWrite1ATests(unittest.TestCase):
         preview = self.preview()
         object.__setattr__(preview, "can_write", True)
 
-        result = self.run_bridge(preview=preview, writer=writer)
+        result = self.run_bridge_with_enabled_switch(preview=preview, writer=writer)
 
         self.assertEqual(CONTROL_WRITE_BLOCKED_INVALID_PREVIEW, result.status)
         self.assertFalse(result.artifact_write_occurred)
@@ -193,7 +209,7 @@ class ControlWrite1ATests(unittest.TestCase):
                     )
                 )
 
-    def run_bridge(
+    def run_bridge_with_enabled_switch(
         self,
         *,
         preview=None,
@@ -203,7 +219,8 @@ class ControlWrite1ATests(unittest.TestCase):
         metadata=None,
         writer=None,
     ):
-        with TemporaryDirectory() as workspace:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
             result = write_preview_artifact_after_human_gate(
                 preview=preview or self.preview(),
                 proposed_content_text=proposed_content_text,
@@ -213,9 +230,17 @@ class ControlWrite1ATests(unittest.TestCase):
                 expected_packet_hash=expected_packet_hash,
                 metadata=metadata,
                 gated_writer=writer or write_artifact_after_human_gate,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
             )
             self.assertFalse(any(path.is_file() for path in Path(workspace).rglob("*")))
             return result
+
+    @staticmethod
+    def write_enabled_switch(switch_dir: str) -> Path:
+        switch_path = Path(switch_dir) / "write_kill_switch.state"
+        switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+        return switch_path
 
     def preview(self, **changes):
         values = {

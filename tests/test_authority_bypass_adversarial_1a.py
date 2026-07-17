@@ -35,6 +35,7 @@ from runtime.safety.sandbox_artifact_runner import (
     MAX_SANDBOX_ARTIFACT_BYTES,
     write_sandbox_artifact,
 )
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 from runtime.schemas.action_proposal import (
     ActionProposalKind,
     ActionProposalRequest,
@@ -81,7 +82,10 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
                 object.__setattr__(preview, field_name, True)
                 writer = Mock(wraps=write_artifact_after_human_gate)
 
-                result = self.run_control_write(preview=preview, writer=writer)
+                result = self.run_control_write_with_enabled_switch(
+                    preview=preview,
+                    writer=writer,
+                )
 
                 self.assertEqual(CONTROL_WRITE_BLOCKED_INVALID_PREVIEW, result.status)
                 self.assertFalse(result.artifact_write_occurred)
@@ -112,7 +116,7 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
         object.__setattr__(forced, "can_change_gate", True)
         object.__setattr__(forced, "output_trust", "TRUSTED")
 
-        result = self.run_control_write(gate_result=forced)
+        result = self.run_control_write_with_enabled_switch(gate_result=forced)
 
         self.assertEqual(CONTROL_WRITE_BLOCKED_MISSING_HUMAN_GATE, result.status)
         self.assertFalse(result.artifact_write_occurred)
@@ -141,7 +145,9 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
         self.assertFalse(forced.execution_implemented)
         self.assertTrue(forced.human_approved)
 
-        result = self.run_control_write(gate_result=forced.to_dict())
+        result = self.run_control_write_with_enabled_switch(
+            gate_result=forced.to_dict()
+        )
 
         self.assertEqual(CONTROL_WRITE_BLOCKED_MISSING_HUMAN_GATE, result.status)
         self.assertFalse(result.artifact_write_occurred)
@@ -189,7 +195,10 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
             with self.subTest(name=name):
                 writer = Mock(wraps=write_artifact_after_human_gate)
 
-                result = self.run_control_write(gate_result=gate_result, writer=writer)
+                result = self.run_control_write_with_enabled_switch(
+                    gate_result=gate_result,
+                    writer=writer,
+                )
 
                 self.assertTrue(result.blocking)
                 self.assertFalse(result.artifact_write_occurred)
@@ -247,7 +256,7 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
 
         for name, kwargs, expected_status in cases:
             with self.subTest(name=name):
-                result = self.run_control_write(**kwargs)
+                result = self.run_control_write_with_enabled_switch(**kwargs)
 
                 self.assertEqual(expected_status, result.status)
                 self.assertFalse(result.artifact_write_occurred)
@@ -282,26 +291,44 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
             ),
         }
 
-        for name, request in invalid_requests.items():
-            with self.subTest(name=name):
-                with TemporaryDirectory() as workspace:
-                    result = write_sandbox_artifact(request, workspace)
+        with TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
+            for name, request in invalid_requests.items():
+                with self.subTest(name=name), TemporaryDirectory() as workspace:
+                    result = write_sandbox_artifact(
+                        request,
+                        workspace,
+                        write_kill_switch_path=str(switch_path),
+                        write_kill_switch_directory=switch_dir,
+                    )
 
                     self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
                     self.assertFalse(result.write_completed)
                     self.assertFalse(any(path.is_file() for path in Path(workspace).rglob("*")))
 
-        with TemporaryDirectory() as workspace:
-            with self.assertRaises(TypeError):
-                write_sandbox_artifact({"human_approved": True}, workspace)  # type: ignore[arg-type]
-            self.assertFalse(any(Path(workspace).rglob("*")))
+            with TemporaryDirectory() as workspace:
+                with self.assertRaises(TypeError):
+                    write_sandbox_artifact(
+                        {"human_approved": True},  # type: ignore[arg-type]
+                        workspace,
+                        write_kill_switch_path=str(switch_path),
+                        write_kill_switch_directory=switch_dir,
+                    )
+                self.assertFalse(any(Path(workspace).rglob("*")))
 
     def test_direct_sandbox_writer_accepts_only_existing_valid_contract_with_all_safety_fields(self):
         gate = self.gate()
         request = self.sandbox_request(gate_result=gate)
 
-        with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
+            result = write_sandbox_artifact(
+                request,
+                workspace,
+                approval_evidence=gate,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
             output = Path(result.resolved_output_path)
 
             self.assertEqual(SandboxArtifactState.WRITTEN, result.state)
@@ -326,106 +353,128 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
             "bad\x00path.txt",
         )
 
-        for unsafe_path in unsafe_paths:
-            with self.subTest(unsafe_path=repr(unsafe_path)):
-                proposal = build_action_proposal(
-                    ActionProposalRequest(
-                        action_kind=ActionProposalKind.FILE_WRITE,
-                        target_refs=(unsafe_path,),
-                        arguments={"content": CONTENT},
+        with TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
+            for unsafe_path in unsafe_paths:
+                with self.subTest(unsafe_path=repr(unsafe_path)):
+                    proposal = build_action_proposal(
+                        ActionProposalRequest(
+                            action_kind=ActionProposalKind.FILE_WRITE,
+                            target_refs=(unsafe_path,),
+                            arguments={"content": CONTENT},
+                        )
                     )
-                )
-                preview = self.preview(target_path=unsafe_path)
-                control_result = self.run_control_write(preview=preview)
-
-                with TemporaryDirectory() as workspace:
-                    sandbox_result = write_sandbox_artifact(
-                        self.sandbox_request(relative_output_path=unsafe_path),
-                        workspace,
+                    preview = self.preview(target_path=unsafe_path)
+                    control_result = self.run_control_write_with_enabled_switch(
+                        preview=preview
                     )
 
-                    self.assertFalse(any(path.is_file() for path in Path(workspace).rglob("*")))
+                    with TemporaryDirectory() as workspace:
+                        sandbox_result = write_sandbox_artifact(
+                            self.sandbox_request(relative_output_path=unsafe_path),
+                            workspace,
+                            write_kill_switch_path=str(switch_path),
+                            write_kill_switch_directory=switch_dir,
+                        )
 
-                self.assertEqual(ActionProposalStatus.INVALID_TARGET, proposal.status)
-                self.assertEqual(ArtifactPreviewStatus.INVALID_TARGET, preview.status)
-                self.assertEqual(CONTROL_WRITE_BLOCKED_INVALID_PREVIEW, control_result.status)
-                self.assertEqual(SandboxArtifactState.BLOCKED, sandbox_result.state)
+                        self.assertFalse(any(path.is_file() for path in Path(workspace).rglob("*")))
+
+                    self.assertEqual(ActionProposalStatus.INVALID_TARGET, proposal.status)
+                    self.assertEqual(ArtifactPreviewStatus.INVALID_TARGET, preview.status)
+                    self.assertEqual(CONTROL_WRITE_BLOCKED_INVALID_PREVIEW, control_result.status)
+                    self.assertEqual(SandboxArtifactState.BLOCKED, sandbox_result.state)
 
     def test_symlink_and_directory_targets_block_before_or_during_sandbox_write(self):
-        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
-            link = Path(workspace) / "linked.md"
-            try:
-                link.symlink_to(Path(outside) / "escape.md")
-            except (OSError, NotImplementedError) as exc:
-                self.skipTest(f"symlink creation not supported here: {exc}")
+        with TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
+            with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
+                link = Path(workspace) / "linked.md"
+                try:
+                    link.symlink_to(Path(outside) / "escape.md")
+                except (OSError, NotImplementedError) as exc:
+                    self.skipTest(f"symlink creation not supported here: {exc}")
 
-            result = write_sandbox_artifact(
-                self.sandbox_request(relative_output_path="linked.md"),
-                workspace,
-            )
+                result = write_sandbox_artifact(
+                    self.sandbox_request(relative_output_path="linked.md"),
+                    workspace,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
 
-            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
-            self.assertFalse((Path(outside) / "escape.md").exists())
+                self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+                self.assertFalse((Path(outside) / "escape.md").exists())
 
-        with TemporaryDirectory() as workspace:
-            directory_target = Path(workspace) / "directory.md"
-            directory_target.mkdir()
+            with TemporaryDirectory() as workspace:
+                directory_target = Path(workspace) / "directory.md"
+                directory_target.mkdir()
 
-            result = write_sandbox_artifact(
-                self.sandbox_request(relative_output_path="directory.md"),
-                workspace,
-            )
+                result = write_sandbox_artifact(
+                    self.sandbox_request(relative_output_path="directory.md"),
+                    workspace,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
 
-            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
-            self.assertFalse(result.write_completed)
+                self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+                self.assertFalse(result.write_completed)
 
     def test_sandbox_hard_limits_block_fail_closed(self):
-        over_limit = "x" * (MAX_SANDBOX_ARTIFACT_BYTES + 1)
-        with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(
-                self.sandbox_request(
-                    relative_output_path="over-limit.md",
-                    content_text=over_limit,
-                ),
-                workspace,
-            )
-            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
-            self.assertFalse(result.write_attempted)
+        with TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
+            over_limit = "x" * (MAX_SANDBOX_ARTIFACT_BYTES + 1)
+            with TemporaryDirectory() as workspace:
+                result = write_sandbox_artifact(
+                    self.sandbox_request(
+                        relative_output_path="over-limit.md",
+                        content_text=over_limit,
+                    ),
+                    workspace,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+                self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+                self.assertFalse(result.write_attempted)
 
-        with TemporaryDirectory() as workspace:
-            output = Path(workspace) / "existing.md"
-            output.write_text("original", encoding="utf-8")
+            with TemporaryDirectory() as workspace:
+                output = Path(workspace) / "existing.md"
+                output.write_text("original", encoding="utf-8")
 
-            result = write_sandbox_artifact(
-                self.sandbox_request(relative_output_path="existing.md"),
-                workspace,
-            )
+                result = write_sandbox_artifact(
+                    self.sandbox_request(relative_output_path="existing.md"),
+                    workspace,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
 
-            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
-            self.assertEqual("original", output.read_text(encoding="utf-8"))
+                self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+                self.assertEqual("original", output.read_text(encoding="utf-8"))
 
-        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
-            parent_link = Path(workspace) / "escape"
-            try:
-                parent_link.symlink_to(Path(outside), target_is_directory=True)
-            except (OSError, NotImplementedError) as exc:
-                self.skipTest(f"symlink creation not supported here: {exc}")
+            with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
+                parent_link = Path(workspace) / "escape"
+                try:
+                    parent_link.symlink_to(Path(outside), target_is_directory=True)
+                except (OSError, NotImplementedError) as exc:
+                    self.skipTest(f"symlink creation not supported here: {exc}")
 
-            result = write_sandbox_artifact(
-                self.sandbox_request(relative_output_path="escape/result.md"),
-                workspace,
-            )
+                result = write_sandbox_artifact(
+                    self.sandbox_request(relative_output_path="escape/result.md"),
+                    workspace,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
 
-            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
-            self.assertFalse((Path(outside) / "result.md").exists())
+                self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+                self.assertFalse((Path(outside) / "result.md").exists())
 
-        with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(
-                self.sandbox_request(relative_output_path="../escape.md"),
-                workspace,
-            )
+            with TemporaryDirectory() as workspace:
+                result = write_sandbox_artifact(
+                    self.sandbox_request(relative_output_path="../escape.md"),
+                    workspace,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
 
-            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+                self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
 
     def test_metadata_as_authority_attempts_do_not_satisfy_gate_or_write_authority(self):
         provider_result = self.provider_result()
@@ -459,7 +508,9 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
 
         for attempt in attempts:
             with self.subTest(attempt_type=type(attempt).__name__):
-                result = self.run_control_write(gate_result=attempt)
+                result = self.run_control_write_with_enabled_switch(
+                    gate_result=attempt
+                )
 
                 self.assertTrue(result.blocking)
                 self.assertFalse(result.artifact_write_occurred)
@@ -534,7 +585,7 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
                 self.assertTrue(forbidden_calls.isdisjoint(called_attrs))
                 self.assertTrue(forbidden_names.isdisjoint(called_names))
 
-    def run_control_write(
+    def run_control_write_with_enabled_switch(
         self,
         *,
         preview=None,
@@ -545,7 +596,8 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
         metadata=None,
         writer=None,
     ):
-        with TemporaryDirectory() as workspace:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            switch_path = self.write_enabled_switch(switch_dir)
             result = write_preview_artifact_after_human_gate(
                 preview=preview or self.preview(),
                 proposed_content_text=proposed_content_text,
@@ -556,9 +608,17 @@ class AuthorityBypassAdversarial1ATests(unittest.TestCase):
                 expected_artifact_hash=expected_artifact_hash,
                 metadata=metadata,
                 gated_writer=writer or write_artifact_after_human_gate,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
             )
             self.assertFalse(any(path.is_file() for path in Path(workspace).rglob("*")))
             return result
+
+    @staticmethod
+    def write_enabled_switch(switch_dir: str) -> Path:
+        switch_path = Path(switch_dir) / "write_kill_switch.state"
+        switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+        return switch_path
 
     def preview(self, **changes):
         values = {

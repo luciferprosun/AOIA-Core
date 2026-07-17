@@ -41,7 +41,7 @@ from runtime.safety.workspace_guard import (
     validate_workspace_root,
     validate_workspace_target_path,
 )
-from runtime.safety.write_kill_switch import WRITES_DISABLED
+from runtime.safety.write_kill_switch import WRITES_DISABLED, WRITES_ENABLED
 from runtime.schemas.sandbox_artifact import (
     SandboxArtifactState,
     SandboxArtifactType,
@@ -152,8 +152,9 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
 
     def test_allowed_workspace_guard_result_does_not_bypass_missing_gate_evidence(self):
         writer = Mock(wraps=write_artifact_after_human_gate)
-        with TemporaryDirectory() as workspace:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
             guard = validate_workspace_target_path(workspace, "reports/step16.txt")
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
             result = write_preview_artifact_after_human_gate(
                 preview=self.preview(),
                 proposed_content_text=CONTENT,
@@ -162,6 +163,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
                 context=self.context(),
                 expected_packet_hash=PACKET_HASH,
                 gated_writer=writer,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
             )
 
         self.assertTrue(guard.allowed)
@@ -170,8 +173,9 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
 
     def test_allowed_workspace_guard_result_does_not_bypass_hash_mismatch(self):
         writer = Mock(wraps=write_artifact_after_human_gate)
-        with TemporaryDirectory() as workspace:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
             guard = validate_workspace_target_path(workspace, "reports/step16.txt")
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
             result = write_preview_artifact_after_human_gate(
                 preview=self.preview(),
                 proposed_content_text="changed after preview\n",
@@ -180,6 +184,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
                 context=self.context(),
                 expected_packet_hash=PACKET_HASH,
                 gated_writer=writer,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
             )
 
         self.assertTrue(guard.allowed)
@@ -210,8 +216,9 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
         self.assertEqual(0, writer.call_count)
 
     def test_target_symlink_swap_before_write_blocks(self):
-        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside, TemporaryDirectory() as switch_dir:
             gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
             request = self.request(relative_output_path="reports/swap-target.txt", gate_result=gate)
             original_guard = sandbox_artifact_runner.validate_workspace_target_path
             calls = {"count": 0}
@@ -233,6 +240,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
                     request,
                     workspace,
                     approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
                 )
 
             self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
@@ -241,8 +250,9 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
             self.assertIn("symlink", result.blocked_reason)
 
     def test_parent_symlink_swap_before_write_blocks(self):
-        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside:
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside, TemporaryDirectory() as switch_dir:
             gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
             request = self.request(relative_output_path="reports/swap-parent.txt", gate_result=gate)
             original_guard = sandbox_artifact_runner.validate_workspace_target_path
             calls = {"count": 0}
@@ -265,6 +275,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
                     request,
                     workspace,
                     approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
                 )
 
             self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
@@ -414,6 +426,12 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
             sandbox_policy_decision_id="step-16-sandbox-policy-decision",
             contract_audit_event_id=nested_gate.audit_event_id or "audit-event-step-16",
         )
+
+    @staticmethod
+    def write_switch(switch_dir: str, value: str) -> Path:
+        switch_path = Path(switch_dir) / "write_kill_switch.state"
+        switch_path.write_text(value, encoding="utf-8")
+        return switch_path
 
 
 def scan_module(path: Path) -> dict[str, tuple[str, ...]]:

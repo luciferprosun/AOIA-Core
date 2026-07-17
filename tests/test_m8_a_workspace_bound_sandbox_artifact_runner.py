@@ -6,6 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 from runtime.safety.sandbox_workspace import (
     SandboxPathTraversalBlockedError,
     SandboxWorkspaceViolationError,
@@ -163,7 +164,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
                 self.skipTest(f"symlink creation not supported here: {exc}")
 
             gate, request = self.make_authorized_request(relative_output_path="escape/outside.txt")
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
@@ -175,7 +178,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
             output.write_text("existing", encoding="utf-8")
             gate, request = self.make_authorized_request(relative_output_path="artifact.txt", content_text="new")
 
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
@@ -187,7 +192,12 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
             output.write_text("existing", encoding="utf-8")
             gate, request = self.make_authorized_request(relative_output_path="artifact.txt", content_text="new")
 
-            result = write_sandbox_artifact(request, workspace, allow_overwrite=True, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request,
+                workspace,
+                allow_overwrite=True,
+                approval_evidence=gate,
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
             self.assertEqual(output.read_text(encoding="utf-8"), "new")
@@ -206,7 +216,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             gate, request = self.make_authorized_request(relative_output_path="script.md", content_text=shell_like_content)
 
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
             self.assertFalse((Path(workspace) / marker_name).exists())
@@ -216,7 +228,7 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             request = self.make_request(human_approved=False)
 
-            result = write_sandbox_artifact(request, workspace)
+            result = self.write_with_enabled_switch(request, workspace)
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
@@ -251,7 +263,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             gate, request = self.make_authorized_request(relative_output_path=repo_marker.name, content_text="workspace only")
 
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
             self.assertFalse(repo_marker.exists())
@@ -325,7 +339,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
                 artifact_type=artifact_type,
             )
 
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
             output = Path(result.resolved_output_path)
 
             self.assertEqual(result.state, SandboxArtifactState.WRITTEN)
@@ -337,7 +353,9 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
         with TemporaryDirectory() as workspace:
             gate, request = self.make_authorized_request(relative_output_path=relative_output_path)
 
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request, workspace, approval_evidence=gate
+            )
 
             self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
             self.assertFalse(result.write_attempted)
@@ -363,6 +381,20 @@ class M8AWorkspaceBoundSandboxArtifactRunnerTests(unittest.TestCase):
             for module_name in imports:
                 self.assertNotIn(module_name, forbidden_modules)
                 self.assertFalse(any(module_name == item or module_name.startswith(item + ".") for item in forbidden_modules))
+
+    @staticmethod
+    def write_with_enabled_switch(request, workspace, *args, **kwargs):
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_sandbox_artifact(
+                request,
+                workspace,
+                *args,
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
 
 
 if __name__ == "__main__":

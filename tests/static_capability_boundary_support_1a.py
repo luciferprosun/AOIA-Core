@@ -166,9 +166,15 @@ STEP14_CORE_PROTECTED_PATHS = (
     "runtime/providers/critic_taxonomy.py",
     "runtime/safety/action_proposal_policy.py",
     "runtime/safety/provider_critic_policy.py",
+    "runtime/safety/write_kill_switch.py",
     "runtime/schemas/action_proposal.py",
     "runtime/schemas/action_proposal_projection.py",
     "runtime/schemas/provider_critic.py",
+)
+
+WRITE_KILL_SWITCH_PROTECTED_PATH = "runtime/safety/write_kill_switch.py"
+WRITE_KILL_SWITCH_SECURITY_ROLE = (
+    "fail-closed application-write blocker; non-authoritative and read-only"
 )
 
 LEDGER_FILESYSTEM_EXCEPTION_PATH = "runtime/audit/durable_audit_ledger.py"
@@ -204,6 +210,7 @@ _STEP14_CORE_ZONE_BY_PATH = {
     "runtime/providers/critic_taxonomy.py": "provider_critic",
     "runtime/safety/action_proposal_policy.py": "action_proposal",
     "runtime/safety/provider_critic_policy.py": "provider_critic",
+    "runtime/safety/write_kill_switch.py": "other_inert",
     "runtime/schemas/action_proposal.py": "action_proposal",
     "runtime/schemas/action_proposal_projection.py": "action_proposal",
     "runtime/schemas/provider_critic.py": "provider_critic",
@@ -331,6 +338,7 @@ _EXPLICIT_ZONE_PATHS = {
         "runtime/review_session_bundle.py",
         "runtime/review_session_snapshot.py",
         "runtime/secret_boundary_review.py",
+        "runtime/safety/write_kill_switch.py",
     ),
 }
 
@@ -445,6 +453,7 @@ def resolve_step14_core_protected_files(
             "artifact_preview",
             "action_proposal",
             "audit",
+            "other_inert",
         }:
             raise StaticCapabilityPolicyError(
                 f"invalid Step 14 core zone: {record.zone!r}"

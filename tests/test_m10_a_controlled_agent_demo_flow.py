@@ -4,6 +4,7 @@ import ast
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from runtime.safety.audit_event_policy import assert_append_only_chain
 from runtime.safety.controlled_agent_demo import (
@@ -15,6 +16,8 @@ from runtime.safety.controlled_agent_demo import (
 )
 from runtime.schemas.dry_run_agent import DryRunAgentRequest, DryRunAgentTrace, DryRunPlanStep
 from runtime.schemas.sandbox_artifact import SandboxArtifactState
+from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -251,13 +254,29 @@ class M10AControlledAgentDemoFlowTests(unittest.TestCase):
                 self.assertFalse(any(module_name == item or module_name.startswith(item + ".") for item in forbidden_modules))
 
     def assert_demo_blocks_path(self, relative_output_path: str, expected_reason: str) -> None:
-        with TemporaryDirectory() as workspace:
-            result = run_controlled_agent_demo(
-                self.goal_text,
-                workspace,
-                relative_output_path=relative_output_path,
-                requested_by="unit-test",
+        def write_with_enabled_switch(request, workspace_root, *args, **kwargs):
+            return write_sandbox_artifact(
+                request,
+                workspace_root,
+                *args,
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
             )
+
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            with patch(
+                "runtime.safety.dry_run_artifact_integration.write_sandbox_artifact",
+                side_effect=write_with_enabled_switch,
+            ):
+                result = run_controlled_agent_demo(
+                    self.goal_text,
+                    workspace,
+                    relative_output_path=relative_output_path,
+                    requested_by="unit-test",
+                )
             demo_result = result[0]
             artifact_result = result[-1]
 

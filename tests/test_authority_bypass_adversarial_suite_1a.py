@@ -6,6 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from runtime.safety import write_sandbox_artifact
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 from runtime.schemas import SandboxArtifactType, create_sandbox_artifact_request
 from tests.canonical_human_gate_support import canonical_gate_and_artifact_request
 
@@ -28,7 +29,7 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             )
             target = Path(workspace) / "forged.txt"
 
-            result = write_sandbox_artifact(request, workspace)
+            result = self.write_with_enabled_switch(request, workspace)
             observed = {
                 "write_attempted": result.write_attempted,
                 "write_completed": result.write_completed,
@@ -54,7 +55,7 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             content_text="a boolean is not a human gate\n",
         )
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace)
+            result = self.write_with_enabled_switch(request, workspace)
             self._assert_blocked_without_mutation(result, workspace, "boolean-forged.md")
 
     def test_b02_self_generated_ids_and_contract_metadata_are_not_authority(self) -> None:
@@ -63,7 +64,7 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             content_text="self-generated ids are not approval\n",
         )
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace)
+            result = self.write_with_enabled_switch(request, workspace)
             self._assert_blocked_without_mutation(result, workspace, "ids-forged.md")
 
     def test_b03_mapping_shaped_gate_evidence_cannot_authorize_write(self) -> None:
@@ -72,7 +73,11 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             content_text="mapping-shaped evidence must not write\n",
         )
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate.to_dict())
+            result = self.write_with_enabled_switch(
+                request,
+                workspace,
+                approval_evidence=gate.to_dict(),
+            )
             self._assert_blocked_without_mutation(result, workspace, "mapping-forged.md")
 
     def test_b04_fake_gate_object_cannot_authorize_write(self) -> None:
@@ -81,7 +86,11 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             content_text="fake object must not write\n",
         )
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace, approval_evidence=object())
+            result = self.write_with_enabled_switch(
+                request,
+                workspace,
+                approval_evidence=object(),
+            )
             self._assert_blocked_without_mutation(result, workspace, "fake-object.md")
 
     def test_b05_gate_artifact_hash_mismatch_blocks_before_mutation(self) -> None:
@@ -92,7 +101,11 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
         replayed_request = replace(request, content_text="different content was not reviewed\n")
         replayed_request = replace(replayed_request, contract_payload_hash=replayed_request.content_hash)
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(replayed_request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                replayed_request,
+                workspace,
+                approval_evidence=gate,
+            )
             self._assert_blocked_without_mutation(result, workspace, "mismatched-content.md")
             self.assertIn("artifact hash", result.blocked_reason)
 
@@ -102,7 +115,11 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             content_text="path safety remains independent of approval\n",
         )
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request,
+                workspace,
+                approval_evidence=gate,
+            )
             self._assert_blocked_without_mutation(result, workspace, "path-binding-escape.md")
             self.assertIn("path traversal", result.blocked_reason)
 
@@ -113,7 +130,11 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
         )
         stale_request = replace(request, content_text="stale replay content\n")
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(stale_request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                stale_request,
+                workspace,
+                approval_evidence=gate,
+            )
             self._assert_blocked_without_mutation(result, workspace, "stale-content.md")
 
     def test_b08_exact_canonical_gate_evidence_allows_bound_write(self) -> None:
@@ -122,7 +143,11 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             content_text="canonical human gate approved content\n",
         )
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            result = self.write_with_enabled_switch(
+                request,
+                workspace,
+                approval_evidence=gate,
+            )
             target = Path(workspace) / "canonical-positive.md"
 
             self.assertEqual("WRITTEN", result.state.value)
@@ -136,7 +161,7 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             content_text="must not be partially written\n",
         )
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace)
+            result = self.write_with_enabled_switch(request, workspace)
             self._assert_blocked_without_mutation(result, workspace, "no-partial-mutation.md")
             self.assertFalse(any(Path(workspace).rglob("*.tmp")))
 
@@ -148,7 +173,7 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
         observations = []
         for _ in range(2):
             with TemporaryDirectory() as workspace:
-                result = write_sandbox_artifact(request, workspace)
+                result = self.write_with_enabled_switch(request, workspace)
                 observations.append(
                     (
                         result.state.value,
@@ -170,6 +195,20 @@ class AuthorityBypassAdversarialSuite1ATests(unittest.TestCase):
             raise AssertionError("blocked write left an artifact")
         if any(path.is_file() for path in Path(workspace).rglob("*")):
             raise AssertionError("blocked write left a file in workspace")
+
+    @staticmethod
+    def write_with_enabled_switch(request, workspace, *args, **kwargs):
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_sandbox_artifact(
+                request,
+                workspace,
+                *args,
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
 
 
 if __name__ == "__main__":

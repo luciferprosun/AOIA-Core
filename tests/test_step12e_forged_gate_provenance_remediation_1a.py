@@ -21,6 +21,7 @@ from runtime.human_decision_gated_artifact_write import (
 )
 from runtime.safety.approval_artifact_gate import PreArtifactApprovalGateResult
 from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
+from runtime.safety.write_kill_switch import WRITES_ENABLED
 from runtime.schemas.sandbox_artifact import SandboxArtifactState
 from tests.canonical_human_gate_support import canonical_gate_and_artifact_request
 
@@ -82,7 +83,7 @@ class Step12EForgedGateProvenanceRemediation1ATests(unittest.TestCase):
     def test_case_f_valid_canonical_path_preserves_exact_controlled_write(self) -> None:
         canonical, request = self.canonical_pair("case-f.md", "case F canonical controlled write\n")
         with TemporaryDirectory() as workspace:
-            result = write_artifact_after_human_gate(
+            result = self.write_gated_with_enabled_switch(
                 gate_result=canonical,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -107,7 +108,7 @@ class Step12EForgedGateProvenanceRemediation1ATests(unittest.TestCase):
         _canonical, request = self.canonical_pair("case-h.md", "case H legacy boolean\n")
         self.assertTrue(request.human_approved)
         with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace)
+            result = self.write_sandbox_with_enabled_switch(request, workspace)
             target = Path(workspace) / request.relative_output_path
 
             self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
@@ -116,7 +117,7 @@ class Step12EForgedGateProvenanceRemediation1ATests(unittest.TestCase):
 
     def assert_rejected_by_wrapper_and_direct_writer(self, gate, request) -> None:
         with TemporaryDirectory() as workspace:
-            wrapped = write_artifact_after_human_gate(
+            wrapped = self.write_gated_with_enabled_switch(
                 gate_result=gate,
                 artifact_request=request,
                 workspace_root=workspace,
@@ -130,12 +131,41 @@ class Step12EForgedGateProvenanceRemediation1ATests(unittest.TestCase):
             self.assertFalse(target.exists())
 
         with TemporaryDirectory() as workspace:
-            direct = write_sandbox_artifact(request, workspace, approval_evidence=gate)
+            direct = self.write_sandbox_with_enabled_switch(
+                request,
+                workspace,
+                approval_evidence=gate,
+            )
             target = Path(workspace) / request.relative_output_path
 
             self.assertEqual(SandboxArtifactState.BLOCKED, direct.state)
             self.assertFalse(direct.write_completed)
             self.assertFalse(target.exists())
+
+    @staticmethod
+    def write_gated_with_enabled_switch(**kwargs):
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_artifact_after_human_gate(
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
+
+    @staticmethod
+    def write_sandbox_with_enabled_switch(request, workspace, *args, **kwargs):
+        with TemporaryDirectory() as switch_dir:
+            switch_path = Path(switch_dir) / "write_kill_switch.state"
+            switch_path.write_text(WRITES_ENABLED, encoding="utf-8")
+            return write_sandbox_artifact(
+                request,
+                workspace,
+                *args,
+                **kwargs,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
 
     @staticmethod
     def forged_gate(request) -> HumanDecisionPreArtifactGateResult:

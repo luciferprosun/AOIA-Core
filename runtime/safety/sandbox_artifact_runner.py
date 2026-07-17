@@ -6,7 +6,7 @@ from typing import Any
 
 from runtime.safety.sandbox_workspace import SandboxWorkspaceViolationError
 from runtime.safety.workspace_guard import validate_workspace_target_path
-from runtime.safety.write_kill_switch import check_write_kill_switch_file
+from runtime.safety.write_kill_switch import resolve_required_write_kill_switch
 from runtime.schemas.sandbox_artifact import (
     SANDBOX_ARTIFACT_CONTRACT_VERSION,
     SandboxArtifactRequest,
@@ -41,6 +41,17 @@ def write_sandbox_artifact(
 ) -> SandboxArtifactResult:
     if not isinstance(request, SandboxArtifactRequest):
         raise TypeError("request must be a SandboxArtifactRequest")
+    kill_switch = resolve_required_write_kill_switch(
+        write_kill_switch_path,
+        switch_directory=write_kill_switch_directory,
+    )
+    if not kill_switch.writes_allowed:
+        return create_blocked_sandbox_artifact_result(
+            request,
+            workspace_root=workspace_root,
+            blocked_reason=kill_switch.reason,
+            notes="Step 15 global write kill-switch blocked artifact write",
+        )
     contract_violation = _artifact_contract_violation_reason(request)
     if contract_violation:
         return create_blocked_sandbox_artifact_result(
@@ -49,18 +60,6 @@ def write_sandbox_artifact(
             blocked_reason=contract_violation,
             notes="2A-2 artifact contract guard blocked artifact write",
         )
-    if write_kill_switch_path is not None:
-        kill_switch = check_write_kill_switch_file(
-            write_kill_switch_path,
-            allowed_switch_directory=write_kill_switch_directory,
-        )
-        if not kill_switch.writes_allowed:
-            return create_blocked_sandbox_artifact_result(
-                request,
-                workspace_root=workspace_root,
-                blocked_reason=kill_switch.reason,
-                notes="Step 15 global write kill-switch blocked artifact write",
-            )
     content_bytes = request.content_text.encode("utf-8")
     if len(content_bytes) > MAX_SANDBOX_ARTIFACT_BYTES:
         return create_blocked_sandbox_artifact_result(

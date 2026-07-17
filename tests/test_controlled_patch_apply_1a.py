@@ -6,7 +6,7 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from runtime.control_write import ControlWriteContext
 from runtime.human_decision_approval_bridge import build_approval_decision_from_capture
@@ -40,7 +40,7 @@ from runtime.patches.controlled_patch_apply import (
     PATCH_APPLY_BLOCKED_WORKSPACE_GUARD,
     ControlledPatchApplyRequest,
     ControlledPatchApplyResult,
-    apply_controlled_patch,
+    apply_controlled_patch as apply_controlled_patch_runtime,
     canonical_controlled_patch_apply_json,
     compute_controlled_patch_apply_hash,
 )
@@ -57,6 +57,7 @@ from runtime.patches.patch_policy import (
 )
 from runtime.patches.patch_preview import PatchFileEdit, build_patch_preview, compute_patch_preview_hash
 from runtime.safety.write_kill_switch import WRITES_DISABLED, WRITES_ENABLED
+from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -65,6 +66,24 @@ CONTENT = "# Controlled patch apply fixture\n"
 UPDATED_CONTENT = "# Controlled patch apply fixture\n\nUpdated.\n"
 TARGET_PATH = "docs/controlled-patch-apply.md"
 PACKET_HASH = "d" * 64
+
+
+def apply_controlled_patch(request):
+    def gated_writer_for_file(current_request, _file_preview):
+        def gated_writer(**kwargs):
+            writer = (
+                current_request.gated_writer
+                or ControlledPatchApply1ATests.gated_writer_with_enabled_switch
+            )
+            return writer(**kwargs)
+
+        return gated_writer
+
+    with patch(
+        "runtime.patches.controlled_patch_apply._gated_writer_for_file",
+        side_effect=gated_writer_for_file,
+    ):
+        return apply_controlled_patch_runtime(request)
 
 
 class ControlledPatchApply1ATests(unittest.TestCase):
@@ -138,7 +157,7 @@ class ControlledPatchApply1ATests(unittest.TestCase):
             self.assertEqual("Z = 2\n", (Path(workspace) / "docs/z-apply-fixture.txt").read_text(encoding="utf-8"))
 
     def test_controlled_patch_apply_uses_existing_controlled_sandbox_write_path(self):
-        writer = Mock(wraps=write_artifact_after_human_gate)
+        writer = Mock(wraps=self.gated_writer_with_enabled_switch)
         with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
             self.write_file(workspace, TARGET_PATH, CONTENT)
             switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
@@ -725,7 +744,34 @@ class ControlledPatchApply1ATests(unittest.TestCase):
             expected_packet_hash=PACKET_HASH,
             write_kill_switch_path=str(switch_path),
             write_kill_switch_directory=switch_dir,
-            gated_writer=gated_writer,
+            gated_writer=gated_writer or self.gated_writer_with_enabled_switch,
+        )
+
+    @staticmethod
+    def gated_writer_with_enabled_switch(**kwargs):
+        kwargs.pop("artifact_writer", None)
+
+        def sandbox_writer(
+            request,
+            workspace_root,
+            *,
+            approval_evidence=None,
+            write_kill_switch_path=None,
+            write_kill_switch_directory=None,
+        ):
+            output_path = Path(workspace_root) / request.relative_output_path
+            return write_sandbox_artifact(
+                request,
+                workspace_root,
+                allow_overwrite=output_path.exists(),
+                approval_evidence=approval_evidence,
+                write_kill_switch_path=write_kill_switch_path,
+                write_kill_switch_directory=write_kill_switch_directory,
+            )
+
+        return write_artifact_after_human_gate(
+            **kwargs,
+            artifact_writer=sandbox_writer,
         )
 
     def context(self):

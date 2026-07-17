@@ -84,10 +84,31 @@ class WriteKillSwitchCheckResult:
         }
 
 
-def check_write_kill_switch_file(
-    switch_file_path: str | Path,
+def resolve_required_write_kill_switch(
+    switch_file_path: object | None = None,
     *,
-    allowed_switch_directory: str | Path | None = None,
+    switch_directory: object | None = None,
+) -> WriteKillSwitchCheckResult:
+    if switch_file_path is None:
+        if switch_directory is None:
+            return _blocked(
+                WriteKillSwitchStatus.BLOCKED_MISSING,
+                "write kill-switch configuration is missing",
+                None,
+            )
+        return check_write_kill_switch_in_directory(
+            switch_directory=switch_directory,
+        )
+    return check_write_kill_switch_file(
+        switch_file_path,
+        allowed_switch_directory=switch_directory,
+    )
+
+
+def check_write_kill_switch_file(
+    switch_file_path: object,
+    *,
+    allowed_switch_directory: object | None = None,
 ) -> WriteKillSwitchCheckResult:
     path_error = _switch_file_path_error(
         switch_file_path,
@@ -134,9 +155,12 @@ def check_write_kill_switch_file(
 
 def check_write_kill_switch_in_directory(
     *,
-    switch_directory: str | Path,
-    switch_filename: str = DEFAULT_WRITE_KILL_SWITCH_FILENAME,
+    switch_directory: object,
+    switch_filename: object = DEFAULT_WRITE_KILL_SWITCH_FILENAME,
 ) -> WriteKillSwitchCheckResult:
+    directory_error = _switch_directory_error(switch_directory)
+    if directory_error is not None:
+        return directory_error
     directory = Path(switch_directory)
     filename_error = _switch_filename_error(switch_filename)
     if filename_error is not None:
@@ -148,7 +172,7 @@ def check_write_kill_switch_in_directory(
 
 
 def evaluate_write_kill_switch_value(
-    raw_value: str,
+    raw_value: object,
     *,
     source_path: str | None = None,
 ) -> WriteKillSwitchCheckResult:
@@ -192,10 +216,16 @@ def evaluate_write_kill_switch_value(
 
 
 def _switch_file_path_error(
-    switch_file_path: str | Path,
+    switch_file_path: object,
     *,
-    allowed_switch_directory: str | Path | None,
+    allowed_switch_directory: object | None,
 ) -> WriteKillSwitchCheckResult | None:
+    if not isinstance(switch_file_path, (str, Path)):
+        return _blocked(
+            WriteKillSwitchStatus.BLOCKED_MALFORMED,
+            "write kill-switch path must be text or a Path",
+            None,
+        )
     text = str(switch_file_path)
     if not text.strip():
         return _blocked(
@@ -213,13 +243,10 @@ def _switch_file_path_error(
     if allowed_switch_directory is None:
         return None
 
+    directory_error = _switch_directory_error(allowed_switch_directory)
+    if directory_error is not None:
+        return directory_error
     allowed_directory = Path(allowed_switch_directory)
-    if not str(allowed_directory).strip() or "\x00" in str(allowed_directory):
-        return _blocked(
-            WriteKillSwitchStatus.BLOCKED_UNSAFE_PATH,
-            "write kill-switch directory is unsafe",
-            None,
-        )
 
     candidate = path if path.is_absolute() else allowed_directory / path
     try:
@@ -240,7 +267,46 @@ def _switch_file_path_error(
     return None
 
 
-def _switch_filename_error(switch_filename: str) -> WriteKillSwitchCheckResult | None:
+def _switch_directory_error(
+    switch_directory: object,
+) -> WriteKillSwitchCheckResult | None:
+    if not isinstance(switch_directory, (str, Path)):
+        return _blocked(
+            WriteKillSwitchStatus.BLOCKED_MALFORMED,
+            "write kill-switch directory must be text or a Path",
+            None,
+        )
+    text = str(switch_directory)
+    if not text.strip() or "\x00" in text:
+        return _blocked(
+            WriteKillSwitchStatus.BLOCKED_UNSAFE_PATH,
+            "write kill-switch directory is unsafe",
+            None,
+        )
+    directory = Path(switch_directory)
+    try:
+        if not directory.exists():
+            return _blocked(
+                WriteKillSwitchStatus.BLOCKED_MISSING,
+                "write kill-switch directory is missing",
+                str(directory),
+            )
+        if directory.is_symlink() or not directory.is_dir():
+            return _blocked(
+                WriteKillSwitchStatus.BLOCKED_UNSAFE_PATH,
+                "write kill-switch directory must be a non-symlink directory",
+                str(directory),
+            )
+    except OSError:
+        return _blocked(
+            WriteKillSwitchStatus.BLOCKED_UNREADABLE,
+            "write kill-switch directory cannot be inspected safely",
+            str(directory),
+        )
+    return None
+
+
+def _switch_filename_error(switch_filename: object) -> WriteKillSwitchCheckResult | None:
     if not isinstance(switch_filename, str) or not switch_filename.strip():
         return _blocked(
             WriteKillSwitchStatus.BLOCKED_UNSAFE_PATH,
