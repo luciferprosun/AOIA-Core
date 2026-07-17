@@ -607,14 +607,47 @@ examples = (
         self.assertEqual((), self.scan(source, zone="knowledge_routing"))
 
     def test_step14_detects_direct_authority_boundary_import(self):
-        findings = self.scan(
-            "from runtime.human_decision_gated_artifact_write "
-            "import write_artifact_after_human_gate"
-        )
-        self.assertIn(
-            "authority-boundary-import",
-            {finding.category for finding in findings},
-        )
+        fixtures = {
+            "human-writer": (
+                "from runtime.human_decision_gated_artifact_write "
+                "import write_artifact_after_human_gate"
+            ),
+            "control-write": "from runtime.control_write import write_preview_artifact_after_human_gate",
+            "sandbox-writer": "from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact",
+            "provider-gateway": "from runtime.providers.gateway import ProviderGateway",
+            "patch-apply": "from runtime.patches.controlled_patch_apply import apply_patch",
+            "git-write": "from runtime.git_ops.controlled_git_commit import controlled_git_commit",
+            "package-install": "from runtime.package_ops.controlled_package_install import install_package",
+            "browser": "from runtime.browser_ops.controlled_browser_automation import run_browser_automation",
+            "executor": "from runtime.tools.executor import execute_tool",
+        }
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                findings = self.scan(source)
+                self.assertIn(
+                    "authority-boundary-import",
+                    {finding.category for finding in findings},
+                )
+
+    def test_step14_strict_policy_blocks_workspace_gate_and_agent_helpers(self):
+        fixtures = {
+            "workspace": "from runtime.safety.workspace_guard import WorkspaceGuard",
+            "approval": "from runtime.human_approval_gate import evaluate_human_approval_gate",
+            "agent": "from runtime.agent_loops.local_agent_loop import run_local_agent_loop",
+            "orchestration": "from runtime.orchestration.async_io_orchestration import orchestrate",
+        }
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                findings = step14.scan_source_for_capabilities(
+                    source,
+                    path=f"runtime/{name}.py",
+                    zone_name="action_proposal",
+                    enforce_inert_side_effects=True,
+                )
+                self.assertIn(
+                    "authority-boundary-import",
+                    {finding.category for finding in findings},
+                )
 
     def test_step14_ignores_comments_and_inert_strings(self):
         source = """
@@ -718,6 +751,508 @@ gate_data = {"approved": True, "entry_hash": "metadata-only"}
                         zone="other_inert",
                     ),
                 )
+
+
+class StaticCapabilityImportGraphStep14Tests(unittest.TestCase):
+    @staticmethod
+    def write_fixture(root: Path, relative: str, source: str) -> Path:
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(source, encoding="utf-8")
+        return path
+
+    @staticmethod
+    def graph_findings(reports):
+        return tuple(
+            finding
+            for report in reports
+            for finding in report.violations
+        )
+
+    def test_step14_strict_scan_blocks_write_and_environment_capabilities(self):
+        fixtures = {
+            "open-write": "open('artifact.txt', 'w')",
+            "builtins-open-alias": (
+                "from builtins import open as mutate\n"
+                "mutate('artifact.txt', mode='a')"
+            ),
+            "path-write": (
+                "from pathlib import Path as P\n"
+                "P('artifact.txt').write_text('data')"
+            ),
+            "assigned-path-write": (
+                "from pathlib import Path\n"
+                "path = Path('artifact.txt')\n"
+                "path.write_bytes(b'data')"
+            ),
+            "path-replace": (
+                "from pathlib import Path\n"
+                "Path('source').replace(Path('target'))"
+            ),
+            "os-open": (
+                "import os as operating_system\n"
+                "operating_system.open('artifact.txt', operating_system.O_CREAT)"
+            ),
+            "os-remove": "from os import remove as erase\nerase('artifact.txt')",
+            "shutil-copy": "import shutil as files\nfiles.copy('a', 'b')",
+            "tempfile": "import tempfile\ntempfile.NamedTemporaryFile()",
+            "getenv": "from os import getenv as secret\nsecret('OPENAI_API_KEY')",
+            "environ": "import os\nvalue = os.environ['OPENAI_API_KEY']",
+            "dotenv": "import dotenv",
+            "keyring": "import keyring",
+        }
+
+        for name, source in fixtures.items():
+            with self.subTest(name=name):
+                findings = step14.scan_source_for_capabilities(
+                    source,
+                    path=f"runtime/{name}.py",
+                    zone_name="provider_critic",
+                    enforce_inert_side_effects=True,
+                )
+                self.assertTrue(findings)
+                self.assertTrue(
+                    {finding.category for finding in findings}.intersection(
+                        {
+                            "environment-access",
+                            "filesystem-mutation",
+                            "secret-import",
+                        }
+                    )
+                )
+
+    def test_step14_audit_filesystem_exception_is_exact_and_operation_specific(self):
+        destructive_sources = {
+            "os-unlink": "import os\nos.unlink('evidence.jsonl')\n",
+            "shutil-rmtree": "import shutil\nshutil.rmtree('records')\n",
+            "path-write-text": (
+                "from pathlib import Path\n"
+                "Path('record.jsonl').write_text('forged')\n"
+            ),
+            "os-open-truncate": (
+                "import os\n"
+                "os.open('record.jsonl', os.O_WRONLY | os.O_TRUNC)\n"
+            ),
+        }
+        non_ledger_paths = (
+            "runtime/audit/other.py",
+            "runtime/audit/durable_audit_ledger_extra.py",
+            "runtime/audit/durable_log.py",
+            "runtime/audit_ledger.py",
+            "nested/runtime/audit/durable_audit_ledger.py",
+            "../runtime/audit/durable_audit_ledger.py",
+            "/outside/runtime/audit/durable_audit_ledger.py",
+        )
+
+        for path in non_ledger_paths:
+            for name, source in destructive_sources.items():
+                with self.subTest(path=path, operation=name):
+                    findings = step14.scan_source_for_capabilities(
+                        source,
+                        path=path,
+                        zone_name="audit",
+                        enforce_inert_side_effects=True,
+                    )
+                    self.assertIn(
+                        "filesystem-mutation",
+                        {finding.category for finding in findings},
+                    )
+
+        ledger_path = "runtime/audit/durable_audit_ledger.py"
+        for name, source in destructive_sources.items():
+            with self.subTest(path=ledger_path, operation=name):
+                findings = step14.scan_source_for_capabilities(
+                    source,
+                    path=ledger_path,
+                    zone_name="audit",
+                    enforce_inert_side_effects=True,
+                )
+                self.assertIn(
+                    "filesystem-mutation",
+                    {finding.category for finding in findings},
+                )
+
+        policy_shaped_sources = {
+            "environment": (
+                "import os\n"
+                "configured = os.environ.get('AOIA_LEDGER_EXCEPTION')\n"
+                "os.unlink('evidence.jsonl')\n"
+            ),
+            "metadata": (
+                "import os\n"
+                "provider_metadata = {'allow_filesystem': True, "
+                "'path': 'runtime/audit/durable_audit_ledger.py'}\n"
+                "os.unlink('evidence.jsonl')\n"
+            ),
+        }
+        for name, source in policy_shaped_sources.items():
+            with self.subTest(policy_input=name):
+                findings = step14.scan_source_for_capabilities(
+                    source,
+                    path=ledger_path,
+                    zone_name="audit",
+                    enforce_inert_side_effects=True,
+                )
+                self.assertIn(
+                    "filesystem-mutation",
+                    {finding.category for finding in findings},
+                )
+
+        gateway_findings = step14.scan_source_for_capabilities(
+            "import os\nos.unlink('ledger.jsonl')\n",
+            path="runtime/providers/gateway.py",
+            zone_name="provider_critic",
+            enforce_inert_side_effects=True,
+        )
+        self.assertIn(
+            "filesystem-mutation",
+            {finding.category for finding in gateway_findings},
+        )
+
+        safe_read = step14.scan_source_for_capabilities(
+            "from pathlib import Path\nPath('record.jsonl').read_bytes()\n",
+            path="runtime/audit/other.py",
+            zone_name="audit",
+            enforce_inert_side_effects=True,
+        )
+        self.assertEqual((), safe_read)
+
+        allowed_append = step14.scan_source_for_capabilities(
+            (
+                "import os\n"
+                "os.open('record.jsonl', "
+                "os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o600)\n"
+            ),
+            path=ledger_path,
+            zone_name="audit",
+            enforce_inert_side_effects=True,
+        )
+        self.assertEqual((), allowed_append)
+
+    def test_step14_ledger_exception_does_not_propagate_to_helpers(self):
+        import_forms = {
+            "relative": "from .helper import value\n",
+            "absolute": "from runtime.audit.helper import value\n",
+            "package-reexport": "from runtime.audit import value\n",
+        }
+        for name, ledger_import in import_forms.items():
+            with self.subTest(import_form=name):
+                with tempfile.TemporaryDirectory() as root_name:
+                    root = Path(root_name)
+                    self.write_fixture(root, "runtime/__init__.py", "")
+                    self.write_fixture(
+                        root,
+                        "runtime/audit/__init__.py",
+                        (
+                            "from .helper import value\n"
+                            if name == "package-reexport"
+                            else ""
+                        ),
+                    )
+                    self.write_fixture(
+                        root,
+                        "runtime/audit/durable_audit_ledger.py",
+                        ledger_import,
+                    )
+                    self.write_fixture(
+                        root,
+                        "runtime/audit/helper.py",
+                        (
+                            "from pathlib import Path\n"
+                            "Path('forged.jsonl').write_text('forged')\n"
+                            "value = None\n"
+                        ),
+                    )
+                    reports = step14.scan_step14_import_graph(
+                        root,
+                        (
+                            step14.ProtectedRuntimeFile(
+                                path="runtime/audit/durable_audit_ledger.py",
+                                zone="audit",
+                            ),
+                        ),
+                    )
+
+                findings = self.graph_findings(reports)
+                self.assertIn(
+                    "filesystem-mutation",
+                    {finding.category for finding in findings},
+                )
+                formatted = step14.format_violations(findings)
+                self.assertIn("runtime/audit/durable_audit_ledger.py ->", formatted)
+                self.assertIn("runtime/audit/helper.py", formatted)
+
+    def test_step14_real_ledger_uses_only_exact_allowed_filesystem_operations(self):
+        ledger_path = "runtime/audit/durable_audit_ledger.py"
+        source = (REPO_ROOT / ledger_path).read_text(encoding="utf-8")
+        findings = step14.scan_source_for_capabilities(
+            source,
+            path=ledger_path,
+            zone_name="audit",
+            enforce_inert_side_effects=True,
+        )
+        self.assertEqual((), findings)
+        self.assertEqual(
+            (
+                "fcntl.flock",
+                "os.close",
+                "os.fdopen",
+                "os.fsync",
+                "os.open",
+            ),
+            step14.LEDGER_ALLOWED_FILESYSTEM_CALLS,
+        )
+
+        malicious_source = source + "\nimport os\nos.unlink('forged.jsonl')\n"
+        malicious_findings = step14.scan_source_for_capabilities(
+            malicious_source,
+            path=ledger_path,
+            zone_name="audit",
+            enforce_inert_side_effects=True,
+        )
+        self.assertIn(
+            "filesystem-mutation",
+            {finding.category for finding in malicious_findings},
+        )
+
+    def test_step14_transitive_relative_reexport_and_gateway_bypasses_fail_closed(self):
+        with tempfile.TemporaryDirectory() as root_name:
+            root = Path(root_name)
+            self.write_fixture(root, "runtime/__init__.py", "")
+            self.write_fixture(
+                root,
+                "runtime/protected.py",
+                (
+                    "from .reexport import launch\n"
+                    "from . import relative_writer\n"
+                    "from importlib import import_module as load\n"
+                    "dynamic_helper = load('runtime.dynamic_helper')\n"
+                    "import runtime.reexport_package\n"
+                ),
+            )
+            self.write_fixture(
+                root,
+                "runtime/reexport.py",
+                "from runtime.helper import launch\n",
+            )
+            self.write_fixture(
+                root,
+                "runtime/helper.py",
+                "import subprocess as process\nlaunch = process.run\n",
+            )
+            self.write_fixture(root, "runtime/dynamic_helper.py", "import socket\n")
+            self.write_fixture(root, "runtime/reexport_package/__init__.py", "from runtime.helper import launch\n")
+            self.write_fixture(
+                root,
+                "runtime/relative_writer.py",
+                "from .control_write import write_preview_artifact_after_human_gate\n",
+            )
+            self.write_fixture(root, "runtime/control_write.py", "")
+
+            reports = step14.scan_step14_import_graph(
+                root,
+                (
+                    step14.ProtectedRuntimeFile(
+                        path="runtime/protected.py",
+                        zone="provider_critic",
+                    ),
+                ),
+            )
+
+        findings = self.graph_findings(reports)
+        categories = {finding.category for finding in findings}
+        self.assertIn("process-import", categories)
+        self.assertIn("network-import", categories)
+        self.assertIn("authority-boundary-import", categories)
+        formatted = step14.format_violations(findings)
+        self.assertIn(
+            "runtime/protected.py -> runtime/reexport.py -> runtime/helper.py",
+            formatted,
+        )
+        self.assertIn(
+            "runtime/protected.py -> runtime/relative_writer.py -> runtime/control_write.py",
+            formatted,
+        )
+
+    def test_step14_gateway_exception_is_non_transitive(self):
+        with tempfile.TemporaryDirectory() as root_name:
+            root = Path(root_name)
+            self.write_fixture(root, "runtime/__init__.py", "")
+            self.write_fixture(
+                root,
+                "runtime/protected.py",
+                "from runtime.shared_helper import value\n",
+            )
+            self.write_fixture(root, "runtime/shared_helper.py", "import requests\nvalue = None\n")
+            self.write_fixture(root, "runtime/providers/__init__.py", "")
+            self.write_fixture(
+                root,
+                "runtime/providers/gateway.py",
+                "from runtime.shared_helper import value\n",
+            )
+
+            reports = step14.scan_step14_import_graph(
+                root,
+                (
+                    step14.ProtectedRuntimeFile(
+                        path="runtime/protected.py",
+                        zone="provider_critic",
+                    ),
+                ),
+                gateway_exceptions=("runtime/providers/gateway.py",),
+            )
+
+        findings = self.graph_findings(reports)
+        self.assertIn("network-import", {finding.category for finding in findings})
+        self.assertTrue(all(not report.exemptions_applied for report in reports))
+
+    def test_step14_missing_local_modules_fail_closed_and_cycles_terminate(self):
+        with tempfile.TemporaryDirectory() as root_name:
+            root = Path(root_name)
+            self.write_fixture(root, "runtime/__init__.py", "")
+            self.write_fixture(root, "runtime/protected.py", "from .cycle_a import value\n")
+            self.write_fixture(root, "runtime/cycle_a.py", "from .cycle_b import value\n")
+            self.write_fixture(root, "runtime/cycle_b.py", "from .cycle_a import value\nvalue = 1\n")
+
+            clean_reports = step14.scan_step14_import_graph(
+                root,
+                (
+                    step14.ProtectedRuntimeFile(
+                        path="runtime/protected.py",
+                        zone="provider_critic",
+                    ),
+                ),
+            )
+            self.assertEqual((), self.graph_findings(clean_reports))
+            self.assertEqual(
+                (
+                    "runtime/cycle_a.py",
+                    "runtime/cycle_b.py",
+                    "runtime/protected.py",
+                ),
+                clean_reports[0].scanned_paths,
+            )
+
+            self.write_fixture(root, "runtime/cycle_b.py", "from .missing import value\n")
+            missing_reports = step14.scan_step14_import_graph(
+                root,
+                (
+                    step14.ProtectedRuntimeFile(
+                        path="runtime/protected.py",
+                        zone="provider_critic",
+                    ),
+                ),
+            )
+
+            with self.assertRaises(step14.StaticCapabilityPolicyError):
+                step14.scan_step14_import_graph(
+                    root,
+                    (
+                        step14.ProtectedRuntimeFile(
+                            path="runtime/not_present.py",
+                            zone="provider_critic",
+                        ),
+                    ),
+                )
+
+        findings = self.graph_findings(missing_reports)
+        self.assertIn("unresolved-local-import", {item.category for item in findings})
+
+    def test_step14_accepted_core_policy_is_explicit_complete_and_clean(self):
+        records = step14.resolve_step14_core_protected_files(REPO_ROOT)
+        paths = {record.path for record in records}
+        self.assertEqual(set(step14.STEP14_CORE_PROTECTED_PATHS), paths)
+        self.assertTrue(
+            {
+                "runtime/providers/critic.py",
+                "runtime/artifact_preview.py",
+                "runtime/schemas/action_proposal.py",
+                "runtime/audit/durable_audit_ledger.py",
+            }.issubset(paths)
+        )
+
+        reports = step14.scan_step14_import_graph(REPO_ROOT, records)
+        self.assertEqual(paths, {report.root_path for report in reports})
+        self.assertEqual((), self.graph_findings(reports))
+        self.assertTrue(all(not report.unresolved_imports for report in reports))
+
+    def test_step14_policy_result_is_non_authoritative_and_scanner_never_executes_sources(self):
+        from runtime.human_decision_gate_integration import (
+            validate_canonical_human_gate_authority,
+        )
+
+        with tempfile.TemporaryDirectory() as root_name:
+            root = Path(root_name)
+            self.write_fixture(root, "runtime/__init__.py", "")
+            self.write_fixture(
+                root,
+                "runtime/protected.py",
+                "from .inert_helper import value\n",
+            )
+            self.write_fixture(
+                root,
+                "runtime/inert_helper.py",
+                "raise RuntimeError('scanner executed source')\nvalue = 1\n",
+            )
+            before = {
+                path.relative_to(root).as_posix(): path.read_bytes()
+                for path in root.rglob("*.py")
+            }
+            reports = step14.scan_step14_import_graph(
+                root,
+                (
+                    step14.ProtectedRuntimeFile(
+                        path="runtime/protected.py",
+                        zone="provider_critic",
+                    ),
+                ),
+            )
+            after = {
+                path.relative_to(root).as_posix(): path.read_bytes()
+                for path in root.rglob("*.py")
+            }
+
+        self.assertEqual(before, after)
+        self.assertEqual((), self.graph_findings(reports))
+        scanner_scan = scan_module(
+            REPO_ROOT / "tests/static_capability_boundary_support_1a.py"
+        )
+        self.assertTrue(
+            set(scanner_scan.imports).issubset(
+                {
+                    "__future__",
+                    "__future__.annotations",
+                    "ast",
+                    "dataclasses",
+                    "dataclasses.dataclass",
+                    "pathlib",
+                    "pathlib.Path",
+                    "typing",
+                    "typing.Iterable",
+                    "typing.Sequence",
+                }
+            )
+        )
+        self.assertEqual(
+            [],
+            [
+                name
+                for name in scanner_scan.calls
+                if name in FORBIDDEN_CALLS
+                or matches_any_prefix(name, FORBIDDEN_IMPORT_PREFIXES)
+            ],
+        )
+        report = reports[0]
+        self.assertFalse(hasattr(report, "approved"))
+        self.assertFalse(hasattr(report, "allowed"))
+        rejection = validate_canonical_human_gate_authority(
+            report,
+            expected_artifact_hash="a" * 64,
+            expected_approval_decision_id="approval-step14",
+            expected_audit_event_id="audit-step14",
+            expected_contract_audit_event_id="audit-step14",
+        )
+        self.assertTrue(rejection)
 
 
 class StaticCapabilityRepositoryStep14Tests(unittest.TestCase):
