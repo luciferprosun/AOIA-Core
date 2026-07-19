@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
+aoia-knowledge-query = "runtime.developer_entrypoints:knowledge_query_main"
 aoia-offline-prototype = "runtime.developer_entrypoints:offline_prototype_main"
 aoia-smoke-test = "runtime.developer_entrypoints:smoke_test_main"
 aoia-verify-artifacts = "runtime.developer_entrypoints:verify_artifacts_main"
@@ -22,6 +23,7 @@ packages = [
     "adaptive_routing", "adaptive_routing.environment", "agent_loops", "audit",
     "bridges", "browser_ops", "commands", "cpt", "execution", "git_ops",
     "integration_boundaries", "knowledge", "knowledge.tools", "knowledge.validator",
+    "knowledge_modules",
     "live_flows", "memory", "memory_hats", "orchestration", "orchestrator",
     "package_ops", "patches", "provider_critic", "providers", "retrieval",
     "retrieval.linux", "router", "safety", "schemas", "tools", "runtime",
@@ -30,6 +32,7 @@ packages = [
     "runtime.commands", "runtime.cpt", "runtime.execution", "runtime.git_ops",
     "runtime.integration_boundaries", "runtime.knowledge", "runtime.knowledge.tools",
     "runtime.knowledge.validator", "runtime.live_flows", "runtime.memory",
+    "runtime.knowledge_modules",
     "runtime.memory_hats", "runtime.orchestration", "runtime.orchestrator",
     "runtime.package_ops", "runtime.patches", "runtime.provider_critic",
     "runtime.providers", "runtime.retrieval", "runtime.retrieval.linux",

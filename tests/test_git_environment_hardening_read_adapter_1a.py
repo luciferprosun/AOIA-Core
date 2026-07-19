@@ -37,6 +37,7 @@ GIT_ENV_MODULE = REPO_ROOT / "runtime" / "git_ops" / "git_env.py"
 GIT_SANITIZE_MODULE = REPO_ROOT / "runtime" / "git_ops" / "git_sanitize.py"
 STEP26_MODULE = REPO_ROOT / "runtime" / "patches" / "post_patch_controlled_test_integration.py"
 CONTROLLED_PACKAGE_INSTALL_MODULE = REPO_ROOT / "runtime" / "package_ops" / "controlled_package_install.py"
+KNOWLEDGE_MODULE_GATEWAY = REPO_ROOT / "runtime" / "knowledge_modules" / "external_gateway.py"
 AUTHORITY_FIELDS = (
     "can_approve",
     "can_write",
@@ -351,7 +352,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
         self.assertFalse(result.can_push)
         self.assertFalse(result.git_write_authority_granted)
 
-    def test_static_boundary_allows_subprocess_only_in_step26_and_step27a_modules(self):
+    def test_static_boundary_allows_subprocess_only_in_exact_reviewed_gateway_modules(self):
         allowed = {
             STEP26_MODULE,
             GIT_READ_MODULE,
@@ -361,6 +362,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
             REPO_ROOT / "runtime" / "commands" / "local_commands.py",
             REPO_ROOT / "runtime" / "tools" / "build_rhcsa_library.py",
             CONTROLLED_PACKAGE_INSTALL_MODULE,
+            KNOWLEDGE_MODULE_GATEWAY,
         }
         findings = []
         for path in runtime_files():

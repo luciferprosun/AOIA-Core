@@ -22,6 +22,7 @@ PROTECTED_ZONE_NAMES = (
 )
 
 GATEWAY_EXCEPTION_PATHS = (
+    "runtime/knowledge_modules/external_gateway.py",
     "runtime/providers/gateway.py",
 )
 
@@ -329,6 +330,10 @@ _EXPLICIT_ZONE_PATHS = {
         "runtime/human_review_decision.py",
         "runtime/human_review_decision_projection.py",
         "runtime/human_review_decision_validator.py",
+        "runtime/knowledge_modules/contracts.py",
+        "runtime/knowledge_modules/evidence.py",
+        "runtime/knowledge_modules/registry.py",
+        "runtime/knowledge_modules/selection.py",
         "runtime/patches/patch_policy.py",
         "runtime/prompt_packet_review.py",
         "runtime/provider_config_review.py",

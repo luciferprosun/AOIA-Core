@@ -46,6 +46,7 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         self.assertEqual(
             project["scripts"],
             {
+                "aoia-knowledge-query": "runtime.developer_entrypoints:knowledge_query_main",
                 "aoia-offline-prototype": "runtime.developer_entrypoints:offline_prototype_main",
                 "aoia-smoke-test": "runtime.developer_entrypoints:smoke_test_main",
                 "aoia-verify-artifacts": "runtime.developer_entrypoints:verify_artifacts_main",
@@ -57,9 +58,11 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
             "runtime.retrieval.linux",
             "runtime.memory_hats",
             "runtime.knowledge",
+            "runtime.knowledge_modules",
             "retrieval.linux",
             "memory_hats",
             "knowledge",
+            "knowledge_modules",
         ):
             self.assertIn(package, packages)
 
@@ -83,6 +86,13 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
                     names = set(archive.namelist())
                     self.assertIn("aoia_core_editable.pth", names)
                     self.assertIn("aoia_core-0.1.0.dist-info/entry_points.txt", names)
+                    entry_points = archive.read(
+                        "aoia_core-0.1.0.dist-info/entry_points.txt"
+                    ).decode("utf-8")
+                    self.assertIn(
+                        "aoia-knowledge-query = runtime.developer_entrypoints:knowledge_query_main",
+                        entry_points,
+                    )
                     editable_paths = archive.read("aoia_core_editable.pth").decode("utf-8").splitlines()
                     self.assertEqual(editable_paths, [str(ROOT), str(ROOT / "runtime")])
 
@@ -90,7 +100,7 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         lines = (ROOT / "runtime/requirements.txt").read_text(encoding="utf-8").splitlines()
         self.assertFalse([line for line in lines if line.strip() and not line.lstrip().startswith("#")])
 
-    def test_smoke_imports_all_four_hat_surfaces_and_is_inert(self) -> None:
+    def test_smoke_imports_all_hat_surfaces_and_is_inert(self) -> None:
         result = run_developer_smoke_test(ROOT)
         self.assertEqual(result["status"], "PASS")
         self.assertEqual(result["authority_status"], "NON_AUTHORITATIVE")
@@ -100,7 +110,12 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         self.assertFalse(result["can_write"])
         self.assertEqual(
             result["entrypoints"],
-            ["aoia-offline-prototype", "aoia-smoke-test", "aoia-verify-artifacts"],
+            [
+                "aoia-knowledge-query",
+                "aoia-offline-prototype",
+                "aoia-smoke-test",
+                "aoia-verify-artifacts",
+            ],
         )
         self.assertIn("runtime.retrieval.linux", result["imported_modules"])
         self.assertIn("runtime.safety.bash_parser", result["imported_modules"])

@@ -157,6 +157,7 @@ def run_developer_smoke_test(repository_root: str | Path) -> dict[str, Any]:
         "authority_status": NON_AUTHORITATIVE,
         **_AUTHORITY_FLAGS,
         "entrypoints": [
+            "aoia-knowledge-query",
             "aoia-offline-prototype",
             "aoia-smoke-test",
             "aoia-verify-artifacts",
@@ -236,8 +237,17 @@ def smoke_test_main(argv: Sequence[str] | None = None) -> int:
         return 2
 
 
+def knowledge_query_main(argv: Sequence[str] | None = None) -> int:
+    """Enter the explicit Knowledge Hub without importing it for other CLIs."""
+
+    from runtime.knowledge_modules.cli import main
+
+    return main(argv)
+
+
 __all__ = (
     "DeveloperEntrypointError",
+    "knowledge_query_main",
     "offline_prototype_main",
     "run_developer_smoke_test",
     "smoke_test_main",

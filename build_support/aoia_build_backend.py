@@ -44,6 +44,7 @@ def _metadata_files() -> dict[str, bytes]:
     ).encode("utf-8")
     entry_points = (
         "[console_scripts]\n"
+        "aoia-knowledge-query = runtime.developer_entrypoints:knowledge_query_main\n"
         "aoia-offline-prototype = runtime.developer_entrypoints:offline_prototype_main\n"
         "aoia-smoke-test = runtime.developer_entrypoints:smoke_test_main\n"
         "aoia-verify-artifacts = runtime.developer_entrypoints:verify_artifacts_main\n"

@@ -64,6 +64,10 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/review_session_bundle.py",
     "runtime/review_packet_projection.py",
     "runtime/proposal_review_packet.py",
+    "runtime/knowledge_modules/contracts.py",
+    "runtime/knowledge_modules/evidence.py",
+    "runtime/knowledge_modules/registry.py",
+    "runtime/knowledge_modules/selection.py",
 )
 
 NO_AUTHORITY_MODULES = tuple(
@@ -72,6 +76,7 @@ NO_AUTHORITY_MODULES = tuple(
 )
 
 PROVIDER_GATEWAY = REPO_ROOT / "runtime/providers/gateway.py"
+KNOWLEDGE_MODULE_GATEWAY = REPO_ROOT / "runtime/knowledge_modules/external_gateway.py"
 POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime/patches/post_patch_controlled_test_integration.py"
 GIT_READ_ADAPTER = REPO_ROOT / "runtime/git_ops/git_read.py"
 GIT_READ_GOVERNANCE = REPO_ROOT / "runtime/git_ops/git_governance.py"
@@ -255,7 +260,7 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
                 )
 
     def test_gateway_exception_does_not_allow_provider_sdk_imports_in_no_authority_modules(self):
-        for path in (*NO_AUTHORITY_MODULES, PROVIDER_GATEWAY):
+        for path in (*NO_AUTHORITY_MODULES, PROVIDER_GATEWAY, KNOWLEDGE_MODULE_GATEWAY):
             with self.subTest(path=self.relative(path)):
                 imports = scan_module(path).imports
                 self.assertEqual(
@@ -266,6 +271,40 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
                         if matches_any_prefix(module_name, PROVIDER_SDK_IMPORT_PREFIXES)
                     ],
                 )
+
+    def test_knowledge_module_gateway_subprocess_exception_is_exact_and_narrow(self):
+        self.assertTrue(KNOWLEDGE_MODULE_GATEWAY.exists())
+        scan = scan_module(KNOWLEDGE_MODULE_GATEWAY)
+        self.assertIn("subprocess", scan.imports)
+        self.assertIn("subprocess.run", scan.calls)
+        self.assertNotIn("subprocess.Popen", scan.calls)
+        self.assertEqual(
+            [],
+            [
+                module_name
+                for module_name in scan.imports
+                if matches_any_prefix(
+                    module_name,
+                    (
+                        "socket",
+                        "ssl",
+                        "http.client",
+                        "urllib",
+                        "requests",
+                        "httpx",
+                        "aiohttp",
+                        "webbrowser",
+                        "openai",
+                        "anthropic",
+                        "git",
+                    ),
+                )
+            ],
+        )
+        source = KNOWLEDGE_MODULE_GATEWAY.read_text(encoding="utf-8").casefold()
+        self.assertNotIn("shell=true", source)
+        self.assertNotIn("os.environ", source)
+        self.assertNotIn("getenv", source)
 
     def test_dynamic_import_is_blocked_in_metadata_review_modules(self):
         dynamic_import_calls = {"__import__", "importlib.import_module", "import_module"}
@@ -1350,7 +1389,13 @@ class StaticCapabilityRepositoryStep14Tests(unittest.TestCase):
             REPO_ROOT,
             self.protected_files,
         )
-        self.assertEqual(("runtime/providers/gateway.py",), exceptions)
+        self.assertEqual(
+            (
+                "runtime/knowledge_modules/external_gateway.py",
+                "runtime/providers/gateway.py",
+            ),
+            exceptions,
+        )
         protected_paths = {record.path for record in self.protected_files}
         self.assertTrue(all("*" not in path for path in exceptions))
         self.assertTrue(all((REPO_ROOT / path).is_file() for path in exceptions))
