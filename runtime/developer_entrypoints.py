@@ -143,6 +143,7 @@ def run_developer_smoke_test(repository_root: str | Path) -> dict[str, Any]:
         "runtime.retrieval.linux",
         "runtime.safety.bash_parser",
         "runtime.knowledge",
+        "runtime.knowledge_modules",
         "runtime.memory_hats.unix_hat",
         "runtime.developer_entrypoints",
     )
@@ -157,6 +158,7 @@ def run_developer_smoke_test(repository_root: str | Path) -> dict[str, Any]:
         "authority_status": NON_AUTHORITATIVE,
         **_AUTHORITY_FLAGS,
         "entrypoints": [
+            "aoia-knowledge-hub",
             "aoia-knowledge-query",
             "aoia-offline-prototype",
             "aoia-smoke-test",
@@ -245,8 +247,17 @@ def knowledge_query_main(argv: Sequence[str] | None = None) -> int:
     return main(argv)
 
 
+def knowledge_hub_main(argv: Sequence[str] | None = None) -> int:
+    """Enter the generic request-only Knowledge Module control plane."""
+
+    from runtime.knowledge_modules.cli import hub_main
+
+    return hub_main(argv)
+
+
 __all__ = (
     "DeveloperEntrypointError",
+    "knowledge_hub_main",
     "knowledge_query_main",
     "offline_prototype_main",
     "run_developer_smoke_test",

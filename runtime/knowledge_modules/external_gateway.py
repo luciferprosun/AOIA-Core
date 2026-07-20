@@ -159,8 +159,12 @@ class GermanLawExternalGateway:
                 command.append(f"--document-type={document_type}")
             for source_class in query.source_classes:
                 command.append(f"--source-class={source_class}")
+            for publisher in getattr(query, "publishers", ()):
+                command.append(f"--publisher={publisher}")
             for language in query.languages:
                 command.append(f"--language={language}")
+            if not getattr(query, "official_only", True):
+                command.append("--no-official-only")
             if query.include_administrative_rules:
                 command.append("--include-administrative-rules")
             command.extend(

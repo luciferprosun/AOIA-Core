@@ -46,6 +46,7 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         self.assertEqual(
             project["scripts"],
             {
+                "aoia-knowledge-hub": "runtime.developer_entrypoints:knowledge_hub_main",
                 "aoia-knowledge-query": "runtime.developer_entrypoints:knowledge_query_main",
                 "aoia-offline-prototype": "runtime.developer_entrypoints:offline_prototype_main",
                 "aoia-smoke-test": "runtime.developer_entrypoints:smoke_test_main",
@@ -90,6 +91,10 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
                         "aoia_core-0.1.0.dist-info/entry_points.txt"
                     ).decode("utf-8")
                     self.assertIn(
+                        "aoia-knowledge-hub = runtime.developer_entrypoints:knowledge_hub_main",
+                        entry_points,
+                    )
+                    self.assertIn(
                         "aoia-knowledge-query = runtime.developer_entrypoints:knowledge_query_main",
                         entry_points,
                     )
@@ -111,6 +116,7 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         self.assertEqual(
             result["entrypoints"],
             [
+                "aoia-knowledge-hub",
                 "aoia-knowledge-query",
                 "aoia-offline-prototype",
                 "aoia-smoke-test",
@@ -120,6 +126,7 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         self.assertIn("runtime.retrieval.linux", result["imported_modules"])
         self.assertIn("runtime.safety.bash_parser", result["imported_modules"])
         self.assertIn("runtime.knowledge", result["imported_modules"])
+        self.assertIn("runtime.knowledge_modules", result["imported_modules"])
         self.assertIn("runtime.memory_hats.unix_hat", result["imported_modules"])
 
     def test_artifact_verifier_is_read_only_and_complete(self) -> None:

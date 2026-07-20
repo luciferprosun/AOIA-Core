@@ -78,9 +78,16 @@ class KnowledgeModuleReadonly1ATests(unittest.TestCase):
     def test_contract_registry_selection_and_evidence_have_no_capability_imports_or_writes(self):
         files = (
             "runtime/knowledge_modules/contracts.py",
+            "runtime/knowledge_modules/composite.py",
             "runtime/knowledge_modules/evidence.py",
+            "runtime/knowledge_modules/instances.py",
+            "runtime/knowledge_modules/planning.py",
+            "runtime/knowledge_modules/policy.py",
+            "runtime/knowledge_modules/profiles.py",
             "runtime/knowledge_modules/registry.py",
             "runtime/knowledge_modules/selection.py",
+            "runtime/knowledge_modules/transports.py",
+            "runtime/schemas/knowledge_module.py",
         )
         forbidden_imports = {
             "subprocess",

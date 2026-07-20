@@ -65,9 +65,16 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/review_packet_projection.py",
     "runtime/proposal_review_packet.py",
     "runtime/knowledge_modules/contracts.py",
+    "runtime/knowledge_modules/composite.py",
     "runtime/knowledge_modules/evidence.py",
+    "runtime/knowledge_modules/instances.py",
+    "runtime/knowledge_modules/planning.py",
+    "runtime/knowledge_modules/policy.py",
+    "runtime/knowledge_modules/profiles.py",
     "runtime/knowledge_modules/registry.py",
     "runtime/knowledge_modules/selection.py",
+    "runtime/knowledge_modules/transports.py",
+    "runtime/schemas/knowledge_module.py",
 )
 
 NO_AUTHORITY_MODULES = tuple(

@@ -109,6 +109,20 @@ aoia-smoke-test --repository-root .
 This imports the core and all four Hats, confirms the stable entrypoints, and
 verifies the current architect-handoff manifest without executing actions.
 
+## Knowledge Module control plane
+
+The provider-independent control plane lists logical modules and concrete
+read-only instances without activating either:
+
+```bash
+aoia-knowledge-hub list-modules --repository-root . --format json
+aoia-knowledge-hub list-instances --repository-root . --module de-law-federal-1a --format json
+aoia-knowledge-hub query --repository-root . --question "Explain evidence and authority." --format json
+```
+
+The zero-module query is valid and returns `NO_KNOWLEDGE_MODULE_SELECTED`.
+Selections are explicit and request-only; provider selection remains separate.
+
 ## Full test suite
 
 ```bash

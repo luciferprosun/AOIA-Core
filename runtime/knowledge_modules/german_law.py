@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -17,6 +18,7 @@ from runtime.knowledge_modules.contracts import (
     KnowledgeModuleError,
     KnowledgeModuleFailure,
     KnowledgeModuleVerificationResult,
+    canonical_hash,
     canonical_json_bytes,
     exact_fields,
     reject_enabled_authority,
@@ -29,20 +31,30 @@ from runtime.knowledge_modules.evidence import (
     evidence_item_from_fields,
 )
 from runtime.knowledge_modules.external_gateway import GermanLawExternalGateway
+from runtime.knowledge_modules.instances import (
+    AVAILABLE,
+    INSTANCE_SCHEMA_VERSION,
+    KnowledgeModuleInstanceDescriptor,
+    KnowledgeModuleInstanceRegistration,
+)
 from runtime.knowledge_modules.registry import (
     KnowledgeModuleRegistration,
     KnowledgeModuleRegistry,
 )
+from runtime.knowledge_modules.planning import ModuleQueryPlan
 from runtime.knowledge_modules.selection import (
     DOCUMENT_TYPES,
     SOURCE_CLASSES,
     KnowledgeModuleQuery,
 )
+from runtime.knowledge_modules.transports import LOCAL_READ_ONLY_PROCESS
 
 
 GERMAN_LAW_MODULE_ID = "de-law-federal-1a"
 GERMAN_LAW_MODULE_VERSION = "1a"
 GERMAN_LAW_DISPLAY_NAME = "German Federal Law"
+GERMAN_LAW_INSTANCE_ID = "de-law-federal-1a-local"
+GERMAN_LAW_DEPLOYMENT_ID = "de-law-federal-1a-production-local"
 GERMAN_LAW_EXPECTED_HEAD = "73f444cdad78fa5d66f76216c19dc41f4c0e3b03"
 GERMAN_LAW_FACTORY_SNAPSHOT = "federal-factory-1a-9d801825276967f0c960c876feb51297"
 GERMAN_LAW_SOURCE_SNAPSHOTS = (
@@ -227,6 +239,44 @@ _RETRIEVAL_FAILURE_CODES = {
 }
 
 
+@dataclass(frozen=True, slots=True)
+class _GermanLawPlannedQuery:
+    """German-Law-only extension used when instance filters exceed the 1A wrapper."""
+
+    question: str
+    retrieval_mode: str
+    as_of_date: str | None
+    jurisdictions: tuple[str, ...]
+    document_types: tuple[str, ...]
+    source_classes: tuple[str, ...]
+    publishers: tuple[str, ...]
+    languages: tuple[str, ...]
+    official_only: bool
+    include_administrative_rules: bool
+    max_results: int
+    max_excerpt_characters: int
+    max_total_context_characters: int
+    query_hash: str = ""
+
+    def __post_init__(self) -> None:
+        payload = {
+            "as_of_date": self.as_of_date,
+            "document_types": list(self.document_types),
+            "include_administrative_rules": self.include_administrative_rules,
+            "jurisdictions": list(self.jurisdictions),
+            "languages": list(self.languages),
+            "max_excerpt_characters": self.max_excerpt_characters,
+            "max_results": self.max_results,
+            "max_total_context_characters": self.max_total_context_characters,
+            "official_only": self.official_only,
+            "publishers": list(self.publishers),
+            "question": self.question,
+            "retrieval_mode": self.retrieval_mode,
+            "source_classes": list(self.source_classes),
+        }
+        object.__setattr__(self, "query_hash", canonical_hash(payload))
+
+
 EXPECTED_GERMAN_LAW_DESCRIPTOR = KnowledgeModuleDescriptor(
     schema_version=DESCRIPTOR_SCHEMA_VERSION,
     module_id=GERMAN_LAW_MODULE_ID,
@@ -275,6 +325,34 @@ EXPECTED_GERMAN_LAW_DESCRIPTOR = KnowledgeModuleDescriptor(
     enabled_by_default=False,
     authority_status="NON_AUTHORITATIVE",
     capability_ids=(),
+)
+
+GERMAN_LAW_INSTANCE_CONFIGURATION_HASH = canonical_hash(
+    {
+        "expected_repository_head": GERMAN_LAW_EXPECTED_HEAD,
+        "expected_factory_snapshot": GERMAN_LAW_FACTORY_SNAPSHOT,
+        "expected_source_snapshots": GERMAN_LAW_SOURCE_SNAPSHOTS,
+        "expected_temporal_snapshot": GERMAN_LAW_TEMPORAL_SNAPSHOT,
+        "expected_eu_snapshot": EU_PILOT_SNAPSHOT,
+        "module_id": GERMAN_LAW_MODULE_ID,
+        "module_version": GERMAN_LAW_MODULE_VERSION,
+        "transport_kind": LOCAL_READ_ONLY_PROCESS,
+    }
+)
+
+GERMAN_LAW_LOCAL_INSTANCE = KnowledgeModuleInstanceDescriptor(
+    schema_version=INSTANCE_SCHEMA_VERSION,
+    instance_id=GERMAN_LAW_INSTANCE_ID,
+    module_id=GERMAN_LAW_MODULE_ID,
+    module_version=GERMAN_LAW_MODULE_VERSION,
+    deployment_id=GERMAN_LAW_DEPLOYMENT_ID,
+    transport_kind=LOCAL_READ_ONLY_PROCESS,
+    availability_status=AVAILABLE,
+    corpus_snapshot_ids=GERMAN_LAW_SOURCE_SNAPSHOTS,
+    temporal_snapshot_id=GERMAN_LAW_TEMPORAL_SNAPSHOT,
+    instance_configuration_hash=GERMAN_LAW_INSTANCE_CONFIGURATION_HASH,
+    expected_module_descriptor_hash=EXPECTED_GERMAN_LAW_DESCRIPTOR.descriptor_hash,
+    priority=100,
 )
 
 
@@ -437,6 +515,65 @@ class GermanLawModuleAdapter:
             raise KnowledgeModuleError(
                 "MODULE_OUTPUT_MALFORMED", "German Law query failed closed"
             ) from exc
+
+    def query_plan(
+        self,
+        configuration: KnowledgeModuleConfiguration,
+        plan: ModuleQueryPlan,
+        expected_descriptor: KnowledgeModuleDescriptor,
+    ) -> KnowledgeEvidenceBundle:
+        """Map the generic instance plan only at this German-Law boundary."""
+        if plan.module_id != GERMAN_LAW_MODULE_ID:
+            raise KnowledgeModuleError("MODULE_DESCRIPTOR_MISMATCH", "German Law plan ID differs")
+        filters = dict(plan.module_specific_filters)
+        supported = {
+            "as_of_date",
+            "document_types",
+            "include_administrative_rules",
+            "jurisdictions",
+            "languages",
+            "official_only",
+            "publishers",
+            "source_classes",
+        }
+        unknown = set(filters) - supported
+        if unknown:
+            raise KnowledgeModuleError("PROFILE_INVALID", f"German Law filters are unsupported: {sorted(unknown)}")
+
+        def strings(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
+            value = filters.get(name, default)
+            if isinstance(value, str):
+                value = (value,)
+            if not isinstance(value, tuple) or any(not isinstance(item, str) for item in value):
+                raise KnowledgeModuleError("PROFILE_INVALID", f"German Law {name} filter is invalid")
+            return tuple(value)
+
+        common = {
+            "question": plan.question,
+            "retrieval_mode": plan.retrieval_mode,
+            "as_of_date": filters.get("as_of_date"),
+            "jurisdictions": strings("jurisdictions", expected_descriptor.jurisdictions),
+            "document_types": strings("document_types", ()),
+            "source_classes": strings("source_classes", ()),
+            "languages": strings("languages", expected_descriptor.languages),
+            "include_administrative_rules": filters.get("include_administrative_rules", False),
+            "max_results": plan.max_results,
+            "max_excerpt_characters": plan.max_excerpt_characters,
+            "max_total_context_characters": plan.max_total_context_characters,
+        }
+        publishers = strings("publishers", ())
+        official_only = filters.get("official_only", True)
+        if type(official_only) is not bool:
+            raise KnowledgeModuleError("PROFILE_INVALID", "German Law official_only filter is invalid")
+        if not publishers and official_only:
+            planned_query = KnowledgeModuleQuery(**common)
+        else:
+            planned_query = _GermanLawPlannedQuery(
+                **common,
+                publishers=publishers,
+                official_only=official_only,
+            )
+        return self.query(configuration, planned_query, expected_descriptor)
 
     @staticmethod
     def _validate_configuration(
@@ -807,8 +944,8 @@ class GermanLawModuleAdapter:
             "max_excerpt_characters": query.max_excerpt_characters,
             "max_results": query.max_results,
             "max_total_context_characters": query.max_total_context_characters,
-            "official_only": True,
-            "publishers": [],
+            "official_only": getattr(query, "official_only", True),
+            "publishers": list(getattr(query, "publishers", ())),
             "query_text": query.question,
             "retrieval_mode": query.retrieval_mode,
             "source_classes": list(query.source_classes),
@@ -914,9 +1051,15 @@ class GermanLawModuleAdapter:
 
 
 def production_knowledge_module_registry() -> KnowledgeModuleRegistry:
-    return KnowledgeModuleRegistry().register(
+    registry = KnowledgeModuleRegistry().register_static_module(
         KnowledgeModuleRegistration(
             descriptor=EXPECTED_GERMAN_LAW_DESCRIPTOR,
+            adapter_factory=GermanLawModuleAdapter,
+        )
+    )
+    return registry.register_instance(
+        KnowledgeModuleInstanceRegistration(
+            descriptor=GERMAN_LAW_LOCAL_INSTANCE,
             adapter_factory=GermanLawModuleAdapter,
         )
     )
@@ -930,6 +1073,9 @@ __all__ = (
     "EXPECTED_MANIFEST_HASHES",
     "GERMAN_LAW_EXPECTED_HEAD",
     "GERMAN_LAW_FACTORY_SNAPSHOT",
+    "GERMAN_LAW_INSTANCE_CONFIGURATION_HASH",
+    "GERMAN_LAW_INSTANCE_ID",
+    "GERMAN_LAW_LOCAL_INSTANCE",
     "GERMAN_LAW_MODULE_ID",
     "GERMAN_LAW_MODULE_VERSION",
     "GERMAN_LAW_SOURCE_SNAPSHOTS",
