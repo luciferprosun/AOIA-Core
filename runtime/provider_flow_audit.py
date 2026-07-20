@@ -78,6 +78,24 @@ _SECRET_ASSIGNMENT = re.compile(
 )
 _TOKEN_CANDIDATE = re.compile(r"(?<![A-Za-z0-9_-])[A-Za-z0-9_+/=-]{40,}(?![A-Za-z0-9_-])")
 _HEX_HASH = re.compile(r"^[0-9a-f]{64}$")
+_IDENTITY_COMPONENT_SEPARATOR = re.compile(r"[-_]")
+_READABLE_IDENTITY_WORD = re.compile(
+    r"(?:[a-z]{1,24}|[A-Z]{1,12}|[A-Z][a-z]{1,23})"
+)
+_READABLE_IDENTITY_COMPONENT = re.compile(
+    r"(?:"
+    r"[a-z]{1,24}"
+    r"|[A-Z]{1,12}"
+    r"|[A-Z][a-z]{1,23}"
+    r"|[A-Za-z][0-9]{1,4}"
+    r"|[0-9]{1,6}[A-Za-z]?"
+    r"|[a-z]{2,20}[0-9]{1,4}"
+    r"|[A-Z][a-z]{1,19}[0-9]{1,4}"
+    r"|[A-Z]{2,12}[0-9]{1,4}"
+    r"|[0-9a-fA-F]{7,32}"
+    r")"
+)
+_READABLE_BRANCH_PREFIX = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 
 
 class ProviderFlowAuditError(ValueError):
@@ -990,6 +1008,8 @@ def _redact_high_entropy_candidate(match: re.Match[str]) -> str:
     value = match.group(0)
     if re.fullmatch(r"[0-9a-fA-F]+", value):
         return value
+    if _is_human_readable_identity_candidate(value):
+        return value
     classes = sum(
         bool(pattern.search(value))
         for pattern in (
@@ -999,9 +1019,56 @@ def _redact_high_entropy_candidate(match: re.Match[str]) -> str:
             re.compile(r"[_+/=-]"),
         )
     )
-    if classes < 4 or _shannon_entropy(value) < 4.0:
+    if classes < 3 or _shannon_entropy(value) < 4.0:
         return value
     return "[REDACTED]"
+
+
+def _is_human_readable_identity_candidate(value: str) -> bool:
+    """Recognize structured identity text without consulting machine state."""
+    if not value or "+" in value or "=" in value:
+        return False
+    if "/" not in value:
+        return _is_readable_identity_segment(value, allow_simple=False)
+
+    absolute = value.startswith("/")
+    trimmed = value[1:] if absolute else value
+    if trimmed.endswith("/"):
+        trimmed = trimmed[:-1]
+    segments = tuple(trimmed.split("/"))
+    if not segments or any(not segment for segment in segments):
+        return False
+    if absolute:
+        if len(segments) < 2:
+            return False
+    elif len(segments) < 2 or not _READABLE_BRANCH_PREFIX.fullmatch(segments[0]):
+        return False
+    return all(
+        _is_readable_identity_segment(segment, allow_simple=True)
+        for segment in segments
+    )
+
+
+def _is_readable_identity_segment(value: str, *, allow_simple: bool) -> bool:
+    if re.fullmatch(r"[0-9a-fA-F]{40,}", value):
+        return True
+    components = tuple(_IDENTITY_COMPONENT_SEPARATOR.split(value))
+    if not components or any(not component for component in components):
+        return False
+    if any(
+        not _READABLE_IDENTITY_COMPONENT.fullmatch(component)
+        for component in components
+    ):
+        return False
+    if len(components) == 1:
+        return allow_simple
+    if not allow_simple and len(components) < 3:
+        return False
+    readable_words = sum(
+        bool(_READABLE_IDENTITY_WORD.fullmatch(component))
+        for component in components
+    )
+    return readable_words >= 2
 
 
 def _shannon_entropy(value: str) -> float:
