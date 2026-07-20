@@ -26,6 +26,10 @@ CORE_NO_AUTHORITY_MODULES = (
 )
 
 ADDITIONAL_METADATA_REVIEW_MODULES = (
+    "runtime/epistemic_orchestra/__init__.py",
+    "runtime/epistemic_orchestra/canonical.py",
+    "runtime/epistemic_orchestra/contracts.py",
+    "runtime/epistemic_orchestra/cpt_stage.py",
     "runtime/schemas/tool_call_preview.py",
     "runtime/schemas/tool_registry.py",
     "runtime/schemas/intent_router.py",
@@ -84,6 +88,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/schemas/knowledge_context.py",
     "runtime/schemas/knowledge_module.py",
     "runtime/schemas/knowledge_provider_result.py",
+    "runtime/schemas/epistemic_orchestra.py",
     "runtime/schemas/structured_knowledge_answer.py",
 )
 
