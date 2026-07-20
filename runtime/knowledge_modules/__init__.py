@@ -19,6 +19,18 @@ from runtime.knowledge_modules.composite import (
     KnowledgeHubExecutionResult,
     ModuleInstanceEvidenceBundle,
 )
+from runtime.knowledge_modules.context import (
+    KnowledgeContextEvidenceReference,
+    KnowledgeContextFailure,
+    KnowledgeContextModuleSection,
+    KnowledgeContextPackage,
+    build_knowledge_context_package,
+)
+from runtime.knowledge_modules.context_policy import (
+    KnowledgeContextLimits,
+    KnowledgeResponsePolicy,
+)
+from runtime.knowledge_modules.context_serializer import serialize_knowledge_context
 from runtime.knowledge_modules.hub import KnowledgeHub1A, KnowledgeHub1B
 from runtime.knowledge_modules.instances import (
     KnowledgeModuleControlRecord,
@@ -35,6 +47,11 @@ from runtime.knowledge_modules.profiles import (
     KnowledgeProfile,
     KnowledgeProfileModuleSelection,
 )
+from runtime.knowledge_modules.provider_result import (
+    KnowledgeProviderRequest,
+    KnowledgeProviderResult,
+)
+from runtime.knowledge_modules.provider_target import ProviderTarget
 from runtime.knowledge_modules.registry import (
     KnowledgeModuleRegistration,
     KnowledgeModuleRegistry,
@@ -44,12 +61,28 @@ from runtime.knowledge_modules.selection import (
     KnowledgeModuleSelection,
 )
 from runtime.knowledge_modules.transports import KnowledgeModuleTransportDescriptor
+from runtime.knowledge_modules.structured_answer import (
+    StructuredKnowledgeAnswer,
+    StructuredKnowledgeAnswer1A,
+    StructuredKnowledgeClaim,
+    parse_structured_knowledge_answer,
+)
+from runtime.knowledge_modules.citation_validation import (
+    KnowledgeCitationValidationResult,
+    validate_knowledge_citations,
+)
 
 
 __all__ = (
     "KnowledgeCoverageWarning",
     "CompositeKnowledgeEvidenceBundle",
     "CompositeKnowledgeQueryPlan",
+    "KnowledgeCitationValidationResult",
+    "KnowledgeContextEvidenceReference",
+    "KnowledgeContextFailure",
+    "KnowledgeContextLimits",
+    "KnowledgeContextModuleSection",
+    "KnowledgeContextPackage",
     "KnowledgeEvidenceBundle",
     "KnowledgeEvidenceInstanceProvenance",
     "KnowledgeEvidenceItem",
@@ -60,7 +93,10 @@ __all__ = (
     "KnowledgeHubPolicy",
     "KnowledgeProfile",
     "KnowledgeProfileModuleSelection",
+    "KnowledgeProviderRequest",
+    "KnowledgeProviderResult",
     "KnowledgeQuery",
+    "KnowledgeResponsePolicy",
     "KnowledgeModuleConfiguration",
     "KnowledgeModuleControlRecord",
     "KnowledgeModuleDescriptor",
@@ -76,4 +112,12 @@ __all__ = (
     "KnowledgeModuleTransportDescriptor",
     "ModuleInstanceEvidenceBundle",
     "ModuleQueryPlan",
+    "ProviderTarget",
+    "StructuredKnowledgeAnswer",
+    "StructuredKnowledgeAnswer1A",
+    "StructuredKnowledgeClaim",
+    "build_knowledge_context_package",
+    "parse_structured_knowledge_answer",
+    "serialize_knowledge_context",
+    "validate_knowledge_citations",
 )

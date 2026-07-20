@@ -21,15 +21,22 @@ from tests.knowledge_control_plane_test_support_1b import (
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERIC = (
+    "citation_validation.py",
     "contracts.py",
+    "context.py",
+    "context_policy.py",
+    "context_serializer.py",
     "evidence.py",
     "instances.py",
     "profiles.py",
+    "provider_result.py",
+    "provider_target.py",
     "planning.py",
     "composite.py",
     "policy.py",
     "registry.py",
     "selection.py",
+    "structured_answer.py",
     "transports.py",
     "hub.py",
 )

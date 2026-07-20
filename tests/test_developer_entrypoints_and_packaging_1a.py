@@ -46,6 +46,7 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         self.assertEqual(
             project["scripts"],
             {
+                "aoia-knowledge-chat": "runtime.developer_entrypoints:knowledge_chat_main",
                 "aoia-knowledge-hub": "runtime.developer_entrypoints:knowledge_hub_main",
                 "aoia-knowledge-query": "runtime.developer_entrypoints:knowledge_query_main",
                 "aoia-offline-prototype": "runtime.developer_entrypoints:offline_prototype_main",
@@ -91,6 +92,10 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
                         "aoia_core-0.1.0.dist-info/entry_points.txt"
                     ).decode("utf-8")
                     self.assertIn(
+                        "aoia-knowledge-chat = runtime.developer_entrypoints:knowledge_chat_main",
+                        entry_points,
+                    )
+                    self.assertIn(
                         "aoia-knowledge-hub = runtime.developer_entrypoints:knowledge_hub_main",
                         entry_points,
                     )
@@ -116,6 +121,7 @@ class DeveloperEntrypointsAndPackagingTests(unittest.TestCase):
         self.assertEqual(
             result["entrypoints"],
             [
+                "aoia-knowledge-chat",
                 "aoia-knowledge-hub",
                 "aoia-knowledge-query",
                 "aoia-offline-prototype",

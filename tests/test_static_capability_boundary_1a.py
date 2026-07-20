@@ -65,16 +65,26 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/review_packet_projection.py",
     "runtime/proposal_review_packet.py",
     "runtime/knowledge_modules/contracts.py",
+    "runtime/knowledge_modules/citation_validation.py",
     "runtime/knowledge_modules/composite.py",
+    "runtime/knowledge_modules/context.py",
+    "runtime/knowledge_modules/context_policy.py",
+    "runtime/knowledge_modules/context_serializer.py",
     "runtime/knowledge_modules/evidence.py",
     "runtime/knowledge_modules/instances.py",
     "runtime/knowledge_modules/planning.py",
     "runtime/knowledge_modules/policy.py",
     "runtime/knowledge_modules/profiles.py",
+    "runtime/knowledge_modules/provider_result.py",
+    "runtime/knowledge_modules/provider_target.py",
     "runtime/knowledge_modules/registry.py",
     "runtime/knowledge_modules/selection.py",
+    "runtime/knowledge_modules/structured_answer.py",
     "runtime/knowledge_modules/transports.py",
+    "runtime/schemas/knowledge_context.py",
     "runtime/schemas/knowledge_module.py",
+    "runtime/schemas/knowledge_provider_result.py",
+    "runtime/schemas/structured_knowledge_answer.py",
 )
 
 NO_AUTHORITY_MODULES = tuple(
@@ -84,6 +94,7 @@ NO_AUTHORITY_MODULES = tuple(
 
 PROVIDER_GATEWAY = REPO_ROOT / "runtime/providers/gateway.py"
 KNOWLEDGE_MODULE_GATEWAY = REPO_ROOT / "runtime/knowledge_modules/external_gateway.py"
+KNOWLEDGE_PROVIDER_BRIDGE = REPO_ROOT / "runtime/knowledge_modules/provider_bridge.py"
 POST_PATCH_CONTROLLED_TEST_INTEGRATION = REPO_ROOT / "runtime/patches/post_patch_controlled_test_integration.py"
 GIT_READ_ADAPTER = REPO_ROOT / "runtime/git_ops/git_read.py"
 GIT_READ_GOVERNANCE = REPO_ROOT / "runtime/git_ops/git_governance.py"
@@ -312,6 +323,51 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertNotIn("shell=true", source)
         self.assertNotIn("os.environ", source)
         self.assertNotIn("getenv", source)
+
+    def test_knowledge_provider_bridge_uses_only_the_canonical_provider_boundary(self):
+        self.assertTrue(KNOWLEDGE_PROVIDER_BRIDGE.exists())
+        scan = scan_module(KNOWLEDGE_PROVIDER_BRIDGE)
+        provider_imports = tuple(sorted({
+            ".".join(name.split(".")[:3])
+            for name in scan.imports
+            if name.startswith("runtime.providers")
+        }))
+        self.assertEqual(
+            (
+                "runtime.providers.contracts",
+                "runtime.providers.gateway",
+                "runtime.providers.payloads",
+                "runtime.providers.registry",
+            ),
+            provider_imports,
+        )
+        self.assertEqual(
+            [],
+            [
+                name
+                for name in scan.imports
+                if matches_any_prefix(
+                    name,
+                    (
+                        "os",
+                        "pathlib",
+                        "socket",
+                        "ssl",
+                        "subprocess",
+                        "urllib",
+                        "requests",
+                        "httpx",
+                        "aiohttp",
+                        "openai",
+                        "anthropic",
+                        "git",
+                    ),
+                )
+            ],
+        )
+        source = KNOWLEDGE_PROVIDER_BRIDGE.read_text(encoding="utf-8")
+        for forbidden in ("retry", "fallback", "streaming", "tool_call", "OPENROUTER_API_KEY"):
+            self.assertNotIn(forbidden, source)
 
     def test_dynamic_import_is_blocked_in_metadata_review_modules(self):
         dynamic_import_calls = {"__import__", "importlib.import_module", "import_module"}

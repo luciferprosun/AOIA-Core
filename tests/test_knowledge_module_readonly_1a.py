@@ -29,11 +29,11 @@ def selected_hashes():
 
 
 class KnowledgeModuleReadonly1ATests(unittest.TestCase):
-    def test_only_external_gateway_imports_process_and_no_module_imports_provider_or_network(self):
+    def test_inert_modules_exclude_the_two_explicit_gateways_and_import_no_provider_or_network(self):
         files = tuple(
             path
             for path in (ROOT / "runtime/knowledge_modules").glob("*.py")
-            if path.name != "external_gateway.py"
+            if path.name not in {"external_gateway.py", "provider_bridge.py"}
         )
         forbidden = {
             "subprocess",
@@ -78,16 +78,26 @@ class KnowledgeModuleReadonly1ATests(unittest.TestCase):
     def test_contract_registry_selection_and_evidence_have_no_capability_imports_or_writes(self):
         files = (
             "runtime/knowledge_modules/contracts.py",
+            "runtime/knowledge_modules/citation_validation.py",
             "runtime/knowledge_modules/composite.py",
+            "runtime/knowledge_modules/context.py",
+            "runtime/knowledge_modules/context_policy.py",
+            "runtime/knowledge_modules/context_serializer.py",
             "runtime/knowledge_modules/evidence.py",
             "runtime/knowledge_modules/instances.py",
             "runtime/knowledge_modules/planning.py",
             "runtime/knowledge_modules/policy.py",
             "runtime/knowledge_modules/profiles.py",
+            "runtime/knowledge_modules/provider_result.py",
+            "runtime/knowledge_modules/provider_target.py",
             "runtime/knowledge_modules/registry.py",
             "runtime/knowledge_modules/selection.py",
+            "runtime/knowledge_modules/structured_answer.py",
             "runtime/knowledge_modules/transports.py",
+            "runtime/schemas/knowledge_context.py",
             "runtime/schemas/knowledge_module.py",
+            "runtime/schemas/knowledge_provider_result.py",
+            "runtime/schemas/structured_knowledge_answer.py",
         )
         forbidden_imports = {
             "subprocess",

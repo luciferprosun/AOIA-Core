@@ -123,6 +123,18 @@ aoia-knowledge-hub query --repository-root . --question "Explain evidence and au
 The zero-module query is valid and returns `NO_KNOWLEDGE_MODULE_SELECTED`.
 Selections are explicit and request-only; provider selection remains separate.
 
+The provider-independent context bridge can bind the same deterministic context
+package to an explicitly selected provider target. Dry-run is the default and
+does not perform a live provider call:
+
+```bash
+aoia-knowledge-chat --repository-root . --provider openrouter_chat --model explicit-model-id --question "Explain the purpose of the Nachweisgesetz." --dry-run --format json
+```
+
+Module selection remains a separate set of explicit `--enable-module`,
+`--instance`, and module-specific retrieval options. Evidence is serialized as
+untrusted data and cannot grant approval, write, execution, Git, or gate authority.
+
 ## Full test suite
 
 ```bash

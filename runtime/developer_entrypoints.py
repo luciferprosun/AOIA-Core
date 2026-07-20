@@ -158,6 +158,7 @@ def run_developer_smoke_test(repository_root: str | Path) -> dict[str, Any]:
         "authority_status": NON_AUTHORITATIVE,
         **_AUTHORITY_FLAGS,
         "entrypoints": [
+            "aoia-knowledge-chat",
             "aoia-knowledge-hub",
             "aoia-knowledge-query",
             "aoia-offline-prototype",
@@ -255,8 +256,17 @@ def knowledge_hub_main(argv: Sequence[str] | None = None) -> int:
     return hub_main(argv)
 
 
+def knowledge_chat_main(argv: Sequence[str] | None = None) -> int:
+    """Enter the explicit provider/knowledge bridge without loading it elsewhere."""
+
+    from runtime.knowledge_modules.chat_cli import main
+
+    return main(argv)
+
+
 __all__ = (
     "DeveloperEntrypointError",
+    "knowledge_chat_main",
     "knowledge_hub_main",
     "knowledge_query_main",
     "offline_prototype_main",

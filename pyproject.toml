@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
+aoia-knowledge-chat = "runtime.developer_entrypoints:knowledge_chat_main"
 aoia-knowledge-hub = "runtime.developer_entrypoints:knowledge_hub_main"
 aoia-knowledge-query = "runtime.developer_entrypoints:knowledge_query_main"
 aoia-offline-prototype = "runtime.developer_entrypoints:offline_prototype_main"
