@@ -96,6 +96,7 @@ SENSITIVE_ORCHESTRA_GET_PATHS = frozenset(
     }
 )
 ORCHESTRA_SESSION_API_ROOT = "/api/orchestra/sessions"
+ORCHESTRA_HUMAN_REVIEW_SUFFIX = "/human-review"
 _ORCHESTRA_SESSION_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")
 
 
@@ -114,6 +115,21 @@ def _session_id_from_api_path(path: str) -> str | None:
         return None
     prefix = f"{ORCHESTRA_SESSION_API_ROOT}/"
     candidate = path[len(prefix) :] if path.startswith(prefix) else ""
+    if (
+        not candidate
+        or "/" in candidate
+        or "%" in candidate
+        or not _ORCHESTRA_SESSION_ID.fullmatch(candidate)
+    ):
+        raise ValueError("session identifier is malformed")
+    return candidate
+
+
+def _human_review_session_id_from_api_path(path: str) -> str | None:
+    prefix = f"{ORCHESTRA_SESSION_API_ROOT}/"
+    if not path.startswith(prefix) or not path.endswith(ORCHESTRA_HUMAN_REVIEW_SUFFIX):
+        return None
+    candidate = path[len(prefix) : -len(ORCHESTRA_HUMAN_REVIEW_SUFFIX)]
     if (
         not candidate
         or "/" in candidate
@@ -534,6 +550,37 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
 
 
 def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
+    try:
+        human_review_session_id = _human_review_session_id_from_api_path(path)
+    except ValueError:
+        return HTTPStatus.BAD_REQUEST, {
+            "ok": False,
+            "error": "session identifier is malformed",
+        }
+    if human_review_session_id is not None:
+        try:
+            from runtime.epistemic_orchestra.session_view import (
+                OrchestraSessionNotFoundError,
+            )
+        except ModuleNotFoundError:  # pragma: no cover - script launch path
+            from epistemic_orchestra.session_view import OrchestraSessionNotFoundError
+        try:
+            return (
+                HTTPStatus.OK,
+                get_orchestra_service().get_orchestra_human_review_workspace(
+                    human_review_session_id
+                ),
+            )
+        except OrchestraSessionNotFoundError:
+            return HTTPStatus.NOT_FOUND, {
+                "ok": False,
+                "error": "Orchestra session was not found",
+            }
+        except (TypeError, ValueError, RuntimeError):
+            return HTTPStatus.CONFLICT, {
+                "ok": False,
+                "error": "Orchestra human review evidence is unavailable",
+            }
     try:
         session_id = _session_id_from_api_path(path)
     except ValueError:

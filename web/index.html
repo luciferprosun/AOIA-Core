@@ -532,6 +532,54 @@
             <p id="orchestra-session-human-warning" class="blocked-note">
               HUMAN REVIEW REQUIRED — NO RESULT SHOWN HERE GRANTS APPROVAL, WRITE OR EXECUTION AUTHORITY
             </p>
+            <div class="button-row">
+              <button id="open-orchestra-human-review" class="button button-disabled" type="button" disabled>
+                Open human comparison workspace
+              </button>
+            </div>
+          </article>
+
+          <article id="orchestra-human-review-workspace" class="status-card commit-card">
+            <div class="view-head">
+              <div>
+                <p class="eyebrow">Ephemeral, read-only comparison</p>
+                <h4>Orchestra human review workspace</h4>
+              </div>
+              <span id="orchestra-human-review-status" class="badge badge-blocked">Load a session view first</span>
+            </div>
+            <p id="orchestra-human-comparison-warning" class="blocked-note">
+              HUMAN COMPARISON WORKSPACE — REVIEW ONLY. NO RESPONSE, CONSENSUS, CRITIC RESULT OR UI ACTION GRANTS APPROVAL, WRITE OR EXECUTION AUTHORITY.
+            </p>
+
+            <h5>Review Session Header</h5>
+            <pre id="orchestra-human-review-summary" class="code-panel" aria-live="polite"></pre>
+
+            <h5>Agreement Overview</h5>
+            <p class="helper-text">DESCRIPTIVE AGREEMENT ONLY — NOT AN APPROVAL OR CORRECTNESS DETERMINATION</p>
+            <pre id="orchestra-human-review-agreement" class="code-panel"></pre>
+
+            <h5>Response Candidate Cards</h5>
+            <div id="orchestra-human-review-candidates"></div>
+
+            <h5>Side-by-Side Comparison</h5>
+            <div class="form-grid">
+              <label class="label" for="orchestra-compare-candidate-a">Candidate A</label>
+              <select id="orchestra-compare-candidate-a" class="select"></select>
+              <label class="label" for="orchestra-compare-candidate-b">Candidate B</label>
+              <select id="orchestra-compare-candidate-b" class="select"></select>
+            </div>
+            <label class="label" for="orchestra-compare-normalized-text">
+              <input id="orchestra-compare-normalized-text" type="checkbox" />
+              Show normalized text in the local comparison
+            </label>
+            <div id="orchestra-human-review-pair-text" class="commit-table-wrap"></div>
+            <pre id="orchestra-human-review-comparison" class="code-panel"></pre>
+
+            <h5>CRITIC RESULT — NON-AUTHORITATIVE METADATA</h5>
+            <div id="orchestra-human-review-critic-results"></div>
+
+            <h5>AUDIT RESULT — EVIDENCE ONLY</h5>
+            <pre id="orchestra-human-review-audit-result" class="code-panel"></pre>
           </article>
         </section>
       </main>

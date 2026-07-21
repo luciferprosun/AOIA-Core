@@ -16,6 +16,10 @@ from typing import Callable, Mapping, Sequence
 
 from runtime.epistemic_orchestra.canonical import EpistemicContractError
 from runtime.epistemic_orchestra.contracts import EpistemicRunContract
+from runtime.epistemic_orchestra.human_review_workspace import (
+    OrchestraHumanReviewWorkspaceError,
+    build_orchestra_human_review_workspace,
+)
 from runtime.epistemic_orchestra.live_run_preview import (
     OrchestraLiveRunPreview,
     build_live_run_confirmation_material,
@@ -42,6 +46,7 @@ from runtime.epistemic_orchestra.session_view import (
     OrchestraProviderTypeSnapshot,
     OrchestraSessionNotFoundError,
     OrchestraSessionSnapshot,
+    OrchestraSessionView,
     OrchestraSessionViewError,
     build_orchestra_session_view,
     validate_orchestra_session_id,
@@ -707,6 +712,32 @@ class OrchestraLiveWebService:
     def get_orchestra_session_view(self, session_id: object) -> dict[str, object]:
         """Return one inert view without consuming, refreshing, or mutating state."""
 
+        view = self._build_orchestra_session_view_for_read(session_id)
+        payload = view.to_dict()
+        self._assert_payload_excludes_credentials(payload)
+        return payload
+
+    def get_orchestra_human_review_workspace(
+        self,
+        session_id: object,
+    ) -> dict[str, object]:
+        """Return a comparison projection without live or mutable capabilities."""
+
+        view = self._build_orchestra_session_view_for_read(session_id)
+        try:
+            payload = build_orchestra_human_review_workspace(view).to_dict()
+        except OrchestraHumanReviewWorkspaceError as error:
+            raise OrchestraLiveWebError(str(error)) from None
+        # The workspace is derived only from the already-sanitized view.  Do
+        # not reload credential files merely to inspect this read response.
+        return payload
+
+    def _build_orchestra_session_view_for_read(
+        self,
+        session_id: object,
+    ) -> OrchestraSessionView:
+        """Build the sole sanitized source accepted by read-only projections."""
+
         try:
             normalized = validate_orchestra_session_id(session_id)
         except OrchestraSessionViewError as error:
@@ -730,11 +761,9 @@ class OrchestraLiveWebService:
                 confirmation_hash=None,
             )
         try:
-            payload = build_orchestra_session_view(snapshot).to_dict()
+            return build_orchestra_session_view(snapshot)
         except OrchestraSessionViewError as error:
             raise OrchestraLiveWebError(str(error)) from None
-        self._assert_payload_excludes_credentials(payload)
-        return payload
 
     def _build_role_selection(
         self,

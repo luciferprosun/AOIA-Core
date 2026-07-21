@@ -9,6 +9,7 @@ const state = {
   orchestraPreview: null,
   orchestraPreviewHash: "",
   orchestraSessionView: null,
+  orchestraHumanReviewWorkspace: null,
   selectedProvider: "",
   selectedModel: "",
   selectedMode: "PUBLIC_DEV",
@@ -141,6 +142,18 @@ const elements = {
   orchestraSessionProviderResults: document.querySelector("#orchestra-session-provider-results"),
   orchestraSessionCriticResults: document.querySelector("#orchestra-session-critic-results"),
   orchestraSessionAuditResult: document.querySelector("#orchestra-session-audit-result"),
+  openOrchestraHumanReview: document.querySelector("#open-orchestra-human-review"),
+  orchestraHumanReviewStatus: document.querySelector("#orchestra-human-review-status"),
+  orchestraHumanReviewSummary: document.querySelector("#orchestra-human-review-summary"),
+  orchestraHumanReviewAgreement: document.querySelector("#orchestra-human-review-agreement"),
+  orchestraHumanReviewCandidates: document.querySelector("#orchestra-human-review-candidates"),
+  orchestraCompareCandidateA: document.querySelector("#orchestra-compare-candidate-a"),
+  orchestraCompareCandidateB: document.querySelector("#orchestra-compare-candidate-b"),
+  orchestraCompareNormalizedText: document.querySelector("#orchestra-compare-normalized-text"),
+  orchestraHumanReviewPairText: document.querySelector("#orchestra-human-review-pair-text"),
+  orchestraHumanReviewComparison: document.querySelector("#orchestra-human-review-comparison"),
+  orchestraHumanReviewCriticResults: document.querySelector("#orchestra-human-review-critic-results"),
+  orchestraHumanReviewAuditResult: document.querySelector("#orchestra-human-review-audit-result"),
 };
 
 async function jsonFetch(url, options = {}) {
@@ -874,8 +887,27 @@ function appendReadOnlyResult(container, heading, payload) {
   container.appendChild(article);
 }
 
+function clearOrchestraHumanReviewWorkspace() {
+  state.orchestraHumanReviewWorkspace = null;
+  elements.orchestraHumanReviewSummary.textContent = "No human review workspace loaded.";
+  elements.orchestraHumanReviewAgreement.textContent = "No descriptive agreement metadata loaded.";
+  elements.orchestraHumanReviewCandidates.replaceChildren();
+  elements.orchestraCompareCandidateA.replaceChildren();
+  elements.orchestraCompareCandidateB.replaceChildren();
+  elements.orchestraCompareNormalizedText.checked = false;
+  elements.orchestraHumanReviewPairText.replaceChildren();
+  elements.orchestraHumanReviewComparison.textContent = "Select two available candidates.";
+  elements.orchestraHumanReviewCriticResults.replaceChildren();
+  elements.orchestraHumanReviewAuditResult.textContent = "No audit evidence loaded.";
+}
+
 function clearOrchestraSessionView() {
   state.orchestraSessionView = null;
+  clearOrchestraHumanReviewWorkspace();
+  elements.openOrchestraHumanReview.disabled = true;
+  elements.openOrchestraHumanReview.className = "button button-disabled";
+  elements.orchestraHumanReviewStatus.textContent = "Load a session view first";
+  elements.orchestraHumanReviewStatus.className = "badge badge-blocked";
   elements.orchestraSessionSummary.textContent = "No session view loaded.";
   elements.orchestraSessionRoleTableBody.replaceChildren();
   elements.orchestraSessionProviderResults.replaceChildren();
@@ -885,6 +917,8 @@ function clearOrchestraSessionView() {
 
 function renderOrchestraSessionView(payload) {
   state.orchestraSessionView = payload;
+  elements.openOrchestraHumanReview.disabled = false;
+  elements.openOrchestraHumanReview.className = "button button-subtle";
   const summary = {
     schema_version: payload.schema_version,
     session_id: payload.session_id,
@@ -955,6 +989,143 @@ function renderOrchestraSessionView(payload) {
   renderSafeJson(elements.orchestraSessionAuditResult, payload.audit_result || {});
 }
 
+function appendCandidateOption(select, candidate) {
+  const option = document.createElement("option");
+  option.value = candidate.candidate_id;
+  option.textContent = `${candidate.ordering_index}: ${candidate.role_display_name} — ${candidate.presentation_status}`;
+  select.appendChild(option);
+}
+
+function appendComparisonTextCandidate(container, label, candidate, normalized) {
+  const article = document.createElement("article");
+  article.className = "status-card";
+  const heading = document.createElement("h6");
+  heading.textContent = `${label}: ${candidate.role_display_name}`;
+  const response = document.createElement("pre");
+  response.className = "code-panel";
+  const text = normalized ? candidate.normalized_response_text : candidate.response_text;
+  response.textContent = text ?? `[${candidate.presentation_status} — response unavailable]`;
+  article.append(heading, response);
+  container.appendChild(article);
+}
+
+function renderSelectedOrchestraComparison() {
+  const workspace = state.orchestraHumanReviewWorkspace;
+  elements.orchestraHumanReviewPairText.replaceChildren();
+  if (!workspace) {
+    elements.orchestraHumanReviewComparison.textContent = "No comparison workspace loaded.";
+    return;
+  }
+  const candidateAId = elements.orchestraCompareCandidateA.value;
+  const candidateBId = elements.orchestraCompareCandidateB.value;
+  const candidateA = (workspace.candidates || []).find((item) => item.candidate_id === candidateAId);
+  const candidateB = (workspace.candidates || []).find((item) => item.candidate_id === candidateBId);
+  if (!candidateA || !candidateB || candidateAId === candidateBId) {
+    elements.orchestraHumanReviewComparison.textContent = "Select two distinct candidates.";
+    return;
+  }
+  const comparison = (workspace.pair_comparisons || []).find(
+    (item) => item.candidate_a_id === candidateAId && item.candidate_b_id === candidateBId,
+  );
+  if (!comparison) {
+    elements.orchestraHumanReviewComparison.textContent = "Comparison unavailable — fail closed.";
+    return;
+  }
+  const normalized = elements.orchestraCompareNormalizedText.checked;
+  appendComparisonTextCandidate(elements.orchestraHumanReviewPairText, "Candidate A", candidateA, normalized);
+  appendComparisonTextCandidate(elements.orchestraHumanReviewPairText, "Candidate B", candidateB, normalized);
+  renderSafeJson(elements.orchestraHumanReviewComparison, comparison);
+}
+
+function renderOrchestraHumanReviewWorkspace(payload) {
+  state.orchestraHumanReviewWorkspace = payload;
+  const summary = {
+    schema_version: payload.schema_version,
+    session_id: payload.session_id,
+    session_state: payload.session_state,
+    session_digest: payload.session_digest,
+    comparison_snapshot_digest: payload.comparison_snapshot_digest,
+    created_at_epoch: payload.created_at_epoch,
+    configured_role_count: payload.configured_role_count,
+    completed_response_count: payload.completed_response_count,
+    failed_response_count: payload.failed_response_count,
+    incomplete_response_count: payload.incomplete_response_count,
+    withheld_response_count: payload.withheld_response_count,
+    valid_evidence_candidate_count: payload.valid_evidence_candidate_count,
+    invalid_evidence_candidate_count: payload.invalid_evidence_candidate_count,
+    redacted_candidate_count: payload.redacted_candidate_count,
+    truncated_candidate_count: payload.truncated_candidate_count,
+    evidence_status_summary: payload.evidence_status_summary,
+    authority_status: payload.authority_status,
+    human_review_required: payload.human_review_required,
+  };
+  renderSafeJson(elements.orchestraHumanReviewSummary, summary);
+  renderSafeJson(elements.orchestraHumanReviewAgreement, payload.agreement_overview || {});
+
+  elements.orchestraHumanReviewCandidates.replaceChildren();
+  elements.orchestraCompareCandidateA.replaceChildren();
+  elements.orchestraCompareCandidateB.replaceChildren();
+  for (const candidate of payload.candidates || []) {
+    appendReadOnlyResult(
+      elements.orchestraHumanReviewCandidates,
+      `${candidate.role_display_name || "Role"} — UNTRUSTED, NON-AUTHORITATIVE`,
+      candidate,
+    );
+    appendCandidateOption(elements.orchestraCompareCandidateA, candidate);
+    appendCandidateOption(elements.orchestraCompareCandidateB, candidate);
+  }
+  if ((payload.candidates || []).length > 1) {
+    elements.orchestraCompareCandidateA.selectedIndex = 0;
+    elements.orchestraCompareCandidateB.selectedIndex = 1;
+  }
+
+  elements.orchestraHumanReviewCriticResults.replaceChildren();
+  for (const critic of payload.critic_results || []) {
+    appendReadOnlyResult(
+      elements.orchestraHumanReviewCriticResults,
+      `CRITIC RESULT — NON-AUTHORITATIVE METADATA — ${critic.critic_identifier || "unavailable"}`,
+      critic,
+    );
+  }
+  renderSafeJson(elements.orchestraHumanReviewAuditResult, payload.audit_result || {});
+  renderSelectedOrchestraComparison();
+}
+
+async function loadOrchestraHumanReviewWorkspace() {
+  clearOrchestraHumanReviewWorkspace();
+  const sessionId = elements.orchestraSessionId.value.trim();
+  if (!state.orchestraSessionView || state.orchestraSessionView.session_id !== sessionId) {
+    elements.orchestraHumanReviewStatus.textContent = "Load the matching sanitized session view first";
+    elements.orchestraHumanReviewStatus.className = "badge badge-blocked";
+    return;
+  }
+  elements.openOrchestraHumanReview.disabled = true;
+  try {
+    const payload = await jsonFetch(`/api/orchestra/sessions/${sessionId}/human-review`);
+    if (
+      !state.orchestraSessionView ||
+      state.orchestraSessionView.session_id !== sessionId ||
+      elements.orchestraSessionId.value.trim() !== sessionId ||
+      payload.session_id !== sessionId
+    ) {
+      throw new Error("Workspace session identity differs from the loaded session view.");
+    }
+    renderOrchestraHumanReviewWorkspace(payload);
+    elements.orchestraHumanReviewStatus.textContent = "Review-only comparison loaded";
+    elements.orchestraHumanReviewStatus.className = "badge";
+  } catch (error) {
+    elements.orchestraHumanReviewStatus.textContent = `Workspace unavailable: ${String(error)}`;
+    elements.orchestraHumanReviewStatus.className = "badge badge-blocked";
+  } finally {
+    const matchingSessionView =
+      state.orchestraSessionView?.session_id === elements.orchestraSessionId.value.trim();
+    elements.openOrchestraHumanReview.disabled = !matchingSessionView;
+    elements.openOrchestraHumanReview.className = matchingSessionView
+      ? "button button-subtle"
+      : "button button-disabled";
+  }
+}
+
 async function loadOrchestraSessionView() {
   clearOrchestraSessionView();
   const sessionId = elements.orchestraSessionId.value.trim();
@@ -966,6 +1137,9 @@ async function loadOrchestraSessionView() {
   elements.loadOrchestraSession.disabled = true;
   try {
     const payload = await jsonFetch(`/api/orchestra/sessions/${sessionId}`);
+    if (elements.orchestraSessionId.value.trim() !== sessionId) {
+      throw new Error("Session ID changed while the read-only view was loading.");
+    }
     renderOrchestraSessionView(payload);
     elements.orchestraSessionViewStatus.textContent = `${payload.session_state || "UNKNOWN"} — read only`;
     elements.orchestraSessionViewStatus.className = "badge";
@@ -1299,6 +1473,10 @@ elements.orchestraPrompt.addEventListener("input", () => {
 });
 elements.runOrchestra.addEventListener("click", runOrchestra);
 elements.loadOrchestraSession.addEventListener("click", loadOrchestraSessionView);
+elements.openOrchestraHumanReview.addEventListener("click", loadOrchestraHumanReviewWorkspace);
+elements.orchestraCompareCandidateA.addEventListener("change", renderSelectedOrchestraComparison);
+elements.orchestraCompareCandidateB.addEventListener("change", renderSelectedOrchestraComparison);
+elements.orchestraCompareNormalizedText.addEventListener("change", renderSelectedOrchestraComparison);
 elements.orchestraSessionId.addEventListener("input", () => {
   const displayedSessionId = state.orchestraSessionView?.session_id;
   if (displayedSessionId && elements.orchestraSessionId.value.trim() !== displayedSessionId) {
