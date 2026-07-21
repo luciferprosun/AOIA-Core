@@ -44,8 +44,8 @@ class CptUiPreviewTests(unittest.TestCase):
         send_body = self._function_body("sendPrompt")
 
         self.assertIn('"/api/cpt/transform"', transform_body)
-        self.assertIn('"/api/chat"', send_body)
-        self.assertIn('elements.composer.addEventListener("submit"', self.app_source)
+        self.assertIn('"/api/operator/chat"', send_body)
+        self.assertIn('elements.chatForm.addEventListener("submit"', self.app_source)
 
     def test_ui_does_not_call_provider_model_endpoint_from_cpt_transform_function(self) -> None:
         function_body = self._function_body("transformComposerPrompt")
@@ -69,14 +69,7 @@ class CptUiPreviewTests(unittest.TestCase):
         combined = "\n".join((self.index_source, self.app_source, self.styles_source))
         urls = set(re.findall(r"https?://[^\"'\s)]+", combined))
 
-        self.assertEqual(
-            {
-                "https://fonts.googleapis.com",
-                "https://fonts.gstatic.com",
-                "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
-            },
-            urls,
-        )
+        self.assertEqual(set(), urls)
         self.assertNotIn("cdn.", combined.lower())
         self.assertNotIn("unpkg.com", combined.lower())
         self.assertNotIn("jsdelivr", combined.lower())

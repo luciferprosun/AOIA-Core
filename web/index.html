@@ -1,322 +1,315 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AOIA Operator Console</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/styles.css?v=operator-console-1a" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>AOIA Operator Console — Critical Prompt Loop</title>
+    <link rel="stylesheet" href="/styles.css?v=single-window-operator-console-1a" />
   </head>
   <body>
-    <div class="operator-shell">
-      <aside class="operator-sidebar" aria-label="Operator navigation">
-        <div class="brand-block">
-          <span class="brand-mark">AOIA</span>
-          <div>
-            <p class="eyebrow">Controlled Agent MVP</p>
-            <h1>Operator Console</h1>
-          </div>
+    <div class="app-shell" id="app-shell">
+      <header class="topbar">
+        <div class="brand" aria-label="AOIA Core operator workspace">
+          <span class="brand-symbol" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path d="M16 3.5 27 9.8v12.4L16 28.5 5 22.2V9.8L16 3.5Z" stroke="currentColor" stroke-width="1.4" opacity=".7" />
+              <path d="m10.4 20.8 5.6-11 5.6 11M12.9 16.1h6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <span class="brand-name">AOIA Core <span>Whitehat</span></span>
+            <span class="brand-subtitle">Epistemic Control Console</span>
+          </span>
         </div>
-        <nav class="section-nav">
-          <button class="nav-item active" type="button" data-target="chat">Chat</button>
-          <button class="nav-item" type="button" data-target="dashboard">Dashboard</button>
-          <button class="nav-item" type="button" data-target="router">Router</button>
-          <button class="nav-item" type="button" data-target="evidence">Evidence</button>
-          <button class="nav-item" type="button" data-target="boundaries">Boundaries</button>
-          <button class="nav-item" type="button" data-target="agent-loop">Agent Loop</button>
-          <button class="nav-item" type="button" data-target="audit">Audit</button>
-          <button class="nav-item" type="button" data-target="settings">Settings</button>
-        </nav>
-        <div class="sidebar-status">
-          <span id="connection-status" class="status-dot status-warn">loading</span>
-          <span id="safety-mode">Preview-only</span>
+
+        <div class="workspace-route" aria-label="Current workspace">
+          <span>Workspace</span>
+          <span aria-hidden="true">/</span>
+          <strong>Critical Prompt Loop</strong>
         </div>
-      </aside>
 
-      <main class="operator-main">
-        <header class="operator-topbar">
-          <div>
-            <p class="eyebrow">Local operator console</p>
-            <h2>Human-controlled chat and safe previews</h2>
+        <div class="top-actions">
+          <div class="status-cluster" id="connection-status" title="Local AOIA status">
+            <span class="pulse-dot status-warn" id="connection-dot" aria-hidden="true"></span>
+            <span>Local core</span>
+            <strong id="local-core-state">checking</strong>
           </div>
-          <div class="topbar-actions">
-            <span class="status-pill">Bot <strong id="top-bot">Default</strong></span>
-            <span class="status-pill">Mode <strong id="top-mode">Chat / public dev</strong></span>
-            <span class="status-pill">Model <strong id="top-model">loading</strong></span>
-            <span class="status-pill">Status <strong id="run-status">Idle</strong></span>
-            <button id="refresh-all" class="button button-primary" type="button">Refresh</button>
-          </div>
-        </header>
+          <button class="route-button" id="primary-route-button" type="button" aria-label="Configure primary provider and model">
+            <span class="provider-icon" id="primary-provider-icon" aria-hidden="true">AI</span>
+            <span class="route-button-copy"><small>Primary route</small><strong id="primary-route-readout">loading</strong></span>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+          </button>
+          <button class="icon-button" id="audit-button" type="button" title="Open audit and evidence" aria-label="Open audit and evidence">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5h16M6.5 16V9.5M12 16V4.5M17.5 16v-4" /></svg>
+          </button>
+          <button class="icon-button" id="settings-button" type="button" title="Open settings" aria-label="Open settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.55v.09h-3v-.09a1.7 1.7 0 0 0-1.03-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.55-1.03H5.3v-3h.15A1.7 1.7 0 0 0 7 9.94a1.7 1.7 0 0 0-.34-1.88L6.6 8l2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.7 4.7v-.09h3v.09a1.7 1.7 0 0 0 1.03 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06L19.8 8l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1.03h.15v3h-.15A1.7 1.7 0 0 0 19.4 15Z" /></svg>
+          </button>
+        </div>
+      </header>
 
-        <section id="chat" class="view active-view">
-          <div class="chat-shell">
-            <div class="chat-main">
-              <div class="view-head">
-                <div>
-                  <p class="eyebrow">Chat</p>
-                  <h3>AOIA operator conversation</h3>
+      <section class="observer-zone" aria-labelledby="critical-loop-title">
+        <div class="observer-heading">
+          <div class="observer-title">
+            <p class="kicker" id="critical-loop-title">Critical Prompt Loop</p>
+            <span class="loop-line" aria-hidden="true"></span>
+          </div>
+          <p class="loop-state"><strong id="observer-count">3/3 enabled</strong><span>one conversation · observer metadata only</span></p>
+        </div>
+
+        <div class="observer-rail" id="observer-rail" aria-label="Critical Prompt Loop observers">
+          <button class="observer-card" type="button" data-observer-index="0" data-tone="logic" aria-label="Open Logic and Claims observer report">
+            <span class="observer-card-head">
+              <span class="observer-identity"><span class="observer-number">01</span><strong data-observer-role>Logic &amp; Claims</strong></span>
+              <span class="observer-status" data-observer-status>idle</span>
+            </span>
+            <span class="observer-summary" data-observer-summary>Waiting for the same primary conversation. No critic runtime call has been made.</span>
+            <span class="observer-card-foot"><span data-observer-model>unconfigured</span><span class="authority-badge">NO AUTHORITY</span></span>
+          </button>
+
+          <button class="observer-card" type="button" data-observer-index="1" data-tone="safety" aria-label="Open Safety and Authority observer report">
+            <span class="observer-card-head">
+              <span class="observer-identity"><span class="observer-number">02</span><strong data-observer-role>Safety &amp; Authority</strong></span>
+              <span class="observer-status" data-observer-status>idle</span>
+            </span>
+            <span class="observer-summary" data-observer-summary>Tracks visible safety boundaries as read-only metadata, never as approval.</span>
+            <span class="observer-card-foot"><span data-observer-model>unconfigured</span><span class="authority-badge">NO AUTHORITY</span></span>
+          </button>
+
+          <button class="observer-card" type="button" data-observer-index="2" data-tone="evidence" aria-label="Open Evidence and Consistency observer report">
+            <span class="observer-card-head">
+              <span class="observer-identity"><span class="observer-number">03</span><strong data-observer-role>Evidence &amp; Consistency</strong></span>
+              <span class="observer-status" data-observer-status>idle</span>
+            </span>
+            <span class="observer-summary" data-observer-summary>Surfaces existing evidence state without authorizing any action.</span>
+            <span class="observer-card-foot"><span data-observer-model>unconfigured</span><span class="authority-badge">NO AUTHORITY</span></span>
+          </button>
+        </div>
+      </section>
+
+      <main class="workspace">
+        <section class="chat-panel" id="chat" aria-label="Single AOIA operator conversation">
+          <header class="chat-toolbar">
+            <div class="conversation-title">
+              <h1>One conversation</h1>
+              <span class="untrusted-tag">PROVIDER OUTPUT · UNTRUSTED</span>
+            </div>
+            <div class="chat-route-readout">
+              <span class="provider-icon" id="chat-provider-icon" aria-hidden="true">AI</span>
+              <span><small>Manual route</small><strong id="chat-route-readout">loading</strong></span>
+            </div>
+          </header>
+
+          <div class="chat-history" id="chat-history" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Conversation history">
+            <div class="system-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3 4.5 6v5.2c0 4.6 3.2 8.8 7.5 9.8 4.3-1 7.5-5.2 7.5-9.8V6L12 3Z" /><path d="M9.2 12.1 11 14l3.9-4.1" /></svg>
+              <span>AOIA keeps one chronological conversation. The three Critical Prompt Loop slots observe this same thread, but their cards and reports are metadata only and cannot approve, write, execute, dispatch, or switch providers.</span>
+            </div>
+            <article class="message-row system">
+              <span class="message-avatar" aria-hidden="true">AO</span>
+              <div class="message-content">
+                <div class="message-meta"><strong>AOIA</strong><span>local controller</span><span>ready</span></div>
+                <div class="message-bubble">Single-window cockpit ready. Send performs one explicit controlled provider request when the selected route is available. Preview only metadata and human review remain separate from authority.</div>
+                <div class="message-evidence"><span>mode: human-controlled</span><span>fallback: disabled</span><span>authority: human only</span></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="composer-wrap">
+            <form class="composer" id="chat-form">
+              <div class="composer-main">
+                <button class="tool-button" id="critic-transform" type="button" title="Critic Transform — transform the draft locally with Critical Prompt Transform">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.5 4.3L18 9l-4.5 1.7L12 15l-1.5-4.3L6 9l4.5-1.7L12 3Z" /><path d="m18.5 14 .9 2.6L22 17.5l-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6Z" /></svg>
+                  <span>CPT</span>
+                </button>
+                <label class="visually-hidden" for="chat-input">Message</label>
+                <textarea id="chat-input" rows="1" maxlength="12000" placeholder="Write a message… Enter sends, Shift+Enter adds a line."></textarea>
+                <button class="send-button" id="send-chat" type="submit" aria-label="Send message manually">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14-7-4.5 14-3-5.5L5 12Z" /><path d="m11.5 13.5 7.5-8.5" /></svg>
+                </button>
+              </div>
+              <div class="composer-footer">
+                <div class="composer-status">
+                  <span id="chat-state">Preview only</span>
+                  <span id="chat-disabled-reason">Checking controlled chat availability.</span>
                 </div>
-                <span id="chat-state" class="badge badge-blocked">Preview only</span>
+                <div class="composer-safety"><span>UNTRUSTED</span><span>MANUAL SEND</span><span>NO AUTO-FALLBACK</span></div>
+                <p id="cpt-status" aria-live="polite">CPT improves critical framing, not truth. Human review required. Manual send required.</p>
               </div>
-              <div id="chat-history" class="chat-history" aria-live="polite">
-                <article class="message message-system">
-                  <p class="message-role">System</p>
-                  <p>
-                    This console is ready for local operator chat. If the Kimi key is configured, Send performs one
-                    controlled non-streaming provider call and keeps the response untrusted.
-                  </p>
-                </article>
-              </div>
-              <form id="chat-form" class="chat-composer">
-                <textarea
-                  id="chat-input"
-                  rows="4"
-                  placeholder="Type a message for AOIA. Send performs one controlled Kimi call when configured."
-                ></textarea>
-                <div class="chat-actions">
-                  <button id="send-chat" class="button button-primary" type="submit">Send</button>
-                  <button id="new-chat" class="button button-subtle" type="button">New chat</button>
-                  <button id="stop-chat" class="button button-disabled" type="button" disabled>Stop</button>
-                </div>
-              </form>
-            </div>
-            <aside class="chat-side status-card">
-              <h4>Current route</h4>
-              <dl class="fact-list">
-                <div><dt>Provider</dt><dd id="chat-provider">-</dd></div>
-                <div><dt>Model</dt><dd id="chat-model">-</dd></div>
-                <div><dt>Mode</dt><dd id="chat-mode">-</dd></div>
-                <div><dt>Callable</dt><dd id="chat-callable">No</dd></div>
-                <div><dt>Reason</dt><dd id="chat-disabled-reason">Kimi key status is being checked.</dd></div>
-              </dl>
-              <p class="blocked-note">Provider output remains untrusted and cannot execute anything.</p>
-              <button class="button button-disabled full-width" type="button" disabled>No execution available</button>
-            </aside>
-          </div>
-        </section>
-
-        <section id="dashboard" class="view">
-          <div class="view-head">
-            <div>
-              <p class="eyebrow">Dashboard</p>
-              <h3>System status</h3>
-            </div>
-            <span id="dashboard-state" class="badge">loading</span>
-          </div>
-          <div class="card-grid">
-            <article class="status-card">
-              <h4>Git state</h4>
-              <dl class="fact-list">
-                <div><dt>Branch</dt><dd id="git-branch">-</dd></div>
-                <div><dt>HEAD</dt><dd id="git-head">-</dd></div>
-                <div><dt>Worktree</dt><dd id="git-clean">-</dd></div>
-                <div><dt>Reason</dt><dd id="git-reasons">-</dd></div>
-              </dl>
-            </article>
-            <article class="status-card">
-              <h4>Prototype block</h4>
-              <dl class="fact-list">
-                <div><dt>Roadmap</dt><dd id="roadmap-block">Steps 42-54 complete</dd></div>
-                <div><dt>Freeze</dt><dd id="freeze-status">checking</dd></div>
-                <div><dt>Safety mode</dt><dd id="operator-safety-mode">preview-only</dd></div>
-                <div><dt>Dispatcher</dt><dd>No dispatcher connected</dd></div>
-              </dl>
-            </article>
-            <article class="status-card warning-card">
-              <h4>AOIA invariants</h4>
-              <ul class="invariant-list">
-                <li>Provider output is never authority.</li>
-                <li>Metadata and UI state are not authority.</li>
-                <li>Preview is not permission.</li>
-                <li>Human approval must be hash-bound.</li>
-              </ul>
-            </article>
-          </div>
-        </section>
-
-        <section id="router" class="view">
-          <div class="view-head">
-            <div>
-              <p class="eyebrow">Model Router</p>
-              <h3>Preview selected route</h3>
-            </div>
-            <span id="router-state" class="badge badge-blocked">Preview only</span>
-          </div>
-          <div class="router-layout">
-            <form id="composer" class="status-card router-card">
-              <label class="label" for="router-provider-select">Provider</label>
-              <select id="router-provider-select" class="select"></select>
-
-              <label class="label" for="router-model-select">Model</label>
-              <select id="router-model-select" class="select"></select>
-
-              <label class="label" for="router-task-mode">Mode</label>
-              <select id="router-task-mode" class="select">
-                <option value="PUBLIC_DEV">Chat / public dev</option>
-                <option value="SENSITIVE">Safe Review</option>
-                <option value="CANONICAL">Audit / canonical</option>
-                <option value="SECRET_ADJACENT">Secret-adjacent</option>
-              </select>
-
-              <label class="label" for="prompt-input">Prompt preview</label>
-              <textarea id="prompt-input" rows="5" placeholder="Write a prompt for preview. No provider request is sent."></textarea>
-
-              <div class="button-row">
-                <button id="router-preview" type="button" class="button button-primary">Preview route</button>
-                <button id="critic-transform" type="button" class="button button-subtle">Critic Transform</button>
-              </div>
-              <p class="helper-text">CPT improves critical framing, not truth. Human review required. Manual send required.</p>
-              <p class="helper-text">
-                Model catalog and router preview: no provider calls. Human approval required before any future provider call.
-                Use Chat Send for one controlled manual call.
-              </p>
-              <p id="cpt-status" class="helper-text" aria-live="polite"></p>
             </form>
-
-            <article class="status-card">
-              <h4>Route status</h4>
-              <dl class="fact-list">
-                <div><dt>Provider configured</dt><dd id="provider-configured">-</dd></div>
-                <div><dt>Connection callable</dt><dd id="connection-callable">No</dd></div>
-                <div><dt>Human barrier</dt><dd id="human-barrier">Not connected</dd></div>
-                <div><dt>Disabled reason</dt><dd id="disabled-reason">Preview only - no controlled execution path connected.</dd></div>
-                <div><dt>Safe next step</dt><dd id="safe-next-step">Review inert preview evidence only.</dd></div>
-              </dl>
-              <button id="provider-call-button" class="button button-disabled full-width" type="button" disabled>
-                Provider call disabled
-              </button>
-              <p class="blocked-note">Router preview never sends provider requests. Chat Send is the controlled manual call path.</p>
-            </article>
-          </div>
-          <pre id="router-proposal-result" class="code-panel" aria-live="polite"></pre>
-        </section>
-
-        <section id="evidence" class="view">
-          <div class="view-head">
-            <div>
-              <p class="eyebrow">Evidence</p>
-              <h3>Hash inspector</h3>
-            </div>
-            <span id="evidence-state" class="badge">missing</span>
-          </div>
-          <div class="card-grid compact-grid">
-            <article class="status-card"><h4>Request hash</h4><p id="request-hash" class="hash-value">missing</p></article>
-            <article class="status-card"><h4>Preview hash</h4><p id="preview-hash" class="hash-value">missing</p></article>
-            <article class="status-card"><h4>Governance hash</h4><p id="governance-hash" class="hash-value">missing</p></article>
-            <article class="status-card"><h4>Barrier hash</h4><p id="barrier-hash" class="hash-value">missing</p></article>
-            <article class="status-card"><h4>Result hash</h4><p id="result-hash" class="hash-value">missing</p></article>
-            <article class="status-card"><h4>Reason codes</h4><p id="evidence-reasons">-</p></article>
-          </div>
-        </section>
-
-        <section id="boundaries" class="view">
-          <div class="view-head">
-            <div>
-              <p class="eyebrow">Boundaries</p>
-              <h3>Runtime boundary map</h3>
-            </div>
-            <span id="boundary-count" class="badge">loading</span>
-          </div>
-          <div id="boundary-list" class="boundary-grid" aria-live="polite"></div>
-        </section>
-
-        <section id="agent-loop" class="view">
-          <div class="view-head">
-            <div>
-              <p class="eyebrow">Agent Loop</p>
-              <h3>Local/provider loop preview</h3>
-            </div>
-            <span class="badge badge-blocked">Metadata only</span>
-          </div>
-          <div class="card-grid">
-            <article class="status-card">
-              <h4>Local loop</h4>
-              <dl class="fact-list">
-                <div><dt>Objective</dt><dd id="local-objective">-</dd></div>
-                <div><dt>Selected candidate</dt><dd id="local-selected">None</dd></div>
-                <div><dt>Risk tier</dt><dd id="local-risk">-</dd></div>
-                <div><dt>Reason codes</dt><dd id="local-reasons">-</dd></div>
-              </dl>
-            </article>
-            <article class="status-card">
-              <h4>Provider loop</h4>
-              <dl class="fact-list">
-                <div><dt>Objective</dt><dd id="provider-objective">-</dd></div>
-                <div><dt>Selected candidate</dt><dd id="provider-selected">None</dd></div>
-                <div><dt>Risk tier</dt><dd id="provider-risk">-</dd></div>
-                <div><dt>Reason codes</dt><dd id="provider-reasons">-</dd></div>
-              </dl>
-            </article>
-          </div>
-        </section>
-
-        <section id="audit" class="view">
-          <div class="view-head">
-            <div>
-              <p class="eyebrow">Audit</p>
-              <h3>Local read-only audit view</h3>
-            </div>
-            <span id="commit-count" class="badge">loading</span>
-          </div>
-          <div class="card-grid">
-            <article class="status-card">
-              <h4>Audit messages</h4>
-              <ul id="audit-messages" class="audit-list"></ul>
-            </article>
-            <article class="status-card commit-card">
-              <h4>Commit history</h4>
-              <p id="commit-status" class="helper-text">Reading local commit history.</p>
-              <div class="commit-table-wrap">
-                <table class="commit-table">
-                  <thead>
-                    <tr>
-                      <th>Commit</th>
-                      <th>Date</th>
-                      <th>Author</th>
-                      <th>Subject</th>
-                    </tr>
-                  </thead>
-                  <tbody id="commit-table-body">
-                    <tr><td colspan="4">Loading commits.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section id="settings" class="view">
-          <div class="view-head">
-            <div>
-              <p class="eyebrow">Settings</p>
-              <h3>Operator settings</h3>
-            </div>
-            <span class="badge">No secrets shown</span>
-          </div>
-          <div class="card-grid">
-            <article class="status-card">
-              <h4>API key status</h4>
-              <p id="provider-config-status">checking</p>
-              <p class="helper-text">Only configured/not configured status is displayed. Key values are never shown.</p>
-            </article>
-            <article class="status-card">
-              <h4>Current selection</h4>
-              <dl class="fact-list">
-                <div><dt>Provider</dt><dd id="selected-provider">-</dd></div>
-                <div><dt>Model</dt><dd id="selected-model">-</dd></div>
-                <div><dt>Mode</dt><dd id="selected-mode">-</dd></div>
-              </dl>
-            </article>
           </div>
         </section>
       </main>
     </div>
 
-    <script src="/app.js?v=operator-console-1a" type="module"></script>
+    <dialog class="drawer-dialog" id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description">
+      <div class="drawer-shell">
+        <header class="drawer-head">
+          <div class="drawer-head-copy">
+            <h2 id="settings-title" tabindex="-1">AOIA configuration</h2>
+            <p id="settings-description">Providers, primary model, Critical Prompt Loop and session safety</p>
+          </div>
+          <button class="icon-button" type="button" data-close-dialog="settings-dialog" aria-label="Close settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </header>
+
+        <div class="drawer-tabs" role="tablist" aria-label="Settings sections">
+          <button class="tab-button" id="tab-connections" type="button" role="tab" aria-controls="panel-connections" aria-selected="true" tabindex="0" data-tab="connections">Connections / Add API</button>
+          <button class="tab-button" id="tab-primary" type="button" role="tab" aria-controls="panel-primary" aria-selected="false" tabindex="-1" data-tab="primary">Primary Model</button>
+          <button class="tab-button" id="tab-loop" type="button" role="tab" aria-controls="panel-loop" aria-selected="false" tabindex="-1" data-tab="loop">Critical Prompt Loop</button>
+          <button class="tab-button" id="tab-safety" type="button" role="tab" aria-controls="panel-safety" aria-selected="false" tabindex="-1" data-tab="safety">Safety / Session</button>
+        </div>
+
+        <div class="drawer-body">
+          <section class="tab-panel" id="panel-connections" role="tabpanel" aria-labelledby="tab-connections">
+            <p class="section-intro">Connections shown here come from the existing read-only router status. Provider detection is a local heuristic suggestion, never authority or proof.</p>
+            <div class="secure-banner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
+              <span><strong>Inert local demo:</strong> this UI has no secure secret backend. It never stores or sends the key and cannot truly verify a provider. The raw field is cleared immediately after submit or cancel.</span>
+            </div>
+            <div class="connection-list" id="connection-list" aria-live="polite"></div>
+            <button class="full-button" id="show-api-form" type="button"><span aria-hidden="true">＋</span> Add API</button>
+
+            <form class="api-form" id="api-form" autocomplete="off">
+              <div class="field">
+                <label for="api-key">API key</label>
+                <input class="text-input" id="api-key" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Paste key — field is cleared after this flow" />
+                <p class="field-help">A prefix may suggest candidates, but a raw key alone cannot reliably identify a provider.</p>
+              </div>
+              <div class="field">
+                <label for="base-url">Base URL <span>(optional compatible/custom provider)</span></label>
+                <input class="text-input" id="base-url" type="url" inputmode="url" autocomplete="off" placeholder="provider.example/v1" />
+              </div>
+              <div class="detection-box" aria-live="polite">
+                <div><strong id="detected-provider">Waiting for local candidate input</strong><span id="detection-note">No network request is performed.</span></div>
+                <span class="confidence" id="detection-confidence">—</span>
+              </div>
+              <div class="field">
+                <label for="provider-confirm">Explicitly confirm provider</label>
+                <select class="select-input" id="provider-confirm" required>
+                  <option value="">Choose provider explicitly</option>
+                  <option value="OpenAI">OpenAI</option>
+                  <option value="Anthropic">Anthropic</option>
+                  <option value="Google AI">Google AI</option>
+                  <option value="Mistral">Mistral</option>
+                  <option value="xAI">xAI</option>
+                  <option value="OpenRouter">OpenRouter</option>
+                  <option value="Custom / OpenAI-compatible">Custom / OpenAI-compatible</option>
+                </select>
+              </div>
+              <div class="flow-status" id="api-flow-status" role="status">Unavailable for real verification: no secure secret backend endpoint exists.</div>
+              <div class="form-actions">
+                <button class="secondary-button" id="cancel-api" type="button">Cancel</button>
+                <button class="primary-button" type="submit">Verify and add</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="tab-panel" id="panel-primary" role="tabpanel" aria-labelledby="tab-primary" hidden>
+            <p class="section-intro">The primary route is selected explicitly. No failure can trigger a retry, fallback, model switch or provider switch.</p>
+            <div class="route-card">
+              <div class="field">
+                <label for="router-provider-select">Provider</label>
+                <select class="select-input" id="router-provider-select"></select>
+              </div>
+              <div class="field">
+                <label for="router-model-select">Model</label>
+                <select class="select-input" id="router-model-select"></select>
+              </div>
+              <div class="field">
+                <label for="router-task-mode">Session mode</label>
+                <select class="select-input" id="router-task-mode">
+                  <option value="PUBLIC_DEV">Chat / public dev</option>
+                  <option value="SENSITIVE">Safe Review</option>
+                  <option value="CANONICAL">Audit / canonical</option>
+                  <option value="SECRET_ADJACENT">Secret-adjacent</option>
+                </select>
+              </div>
+              <div class="route-map" aria-label="Primary model flow"><span>Your prompt</span><span aria-hidden="true">→</span><span>one explicit route</span></div>
+              <p class="route-status" id="primary-route-status">Loading route status.</p>
+              <button class="secondary-button" id="preview-route" type="button">Preview selected route</button>
+              <pre class="route-preview" id="router-proposal-result">No route preview requested.</pre>
+            </div>
+          </section>
+
+          <section class="tab-panel" id="panel-loop" role="tabpanel" aria-labelledby="tab-loop" hidden>
+            <p class="section-intro">Exactly three independent slots observe the same conversation. Configuration updates only current in-memory display metadata; it never dispatches a critic or grants authority.</p>
+            <div class="slot-list" id="slot-list">
+              <article class="slot-card" data-slot-index="0">
+                <div class="slot-card-head"><div><strong>Observer 01</strong><span>Logic &amp; Claims</span></div><button class="toggle" type="button" aria-pressed="true" aria-label="Enable or disable observer 1"></button></div>
+                <div class="slot-controls">
+                  <div class="field"><label for="observer-provider-1">Provider</label><select class="select-input slot-provider" id="observer-provider-1"></select></div>
+                  <div class="field"><label for="observer-model-1">Model</label><select class="select-input slot-model" id="observer-model-1"></select></div>
+                  <div class="field role-field"><label for="observer-role-1">Audit role</label><select class="select-input slot-role" id="observer-role-1"><option>Logic &amp; Claims</option><option>Safety &amp; Authority</option><option>Evidence &amp; Consistency</option><option>Counterarguments</option><option>Cost &amp; Efficiency</option></select></div>
+                </div>
+              </article>
+              <article class="slot-card" data-slot-index="1">
+                <div class="slot-card-head"><div><strong>Observer 02</strong><span>Safety &amp; Authority</span></div><button class="toggle" type="button" aria-pressed="true" aria-label="Enable or disable observer 2"></button></div>
+                <div class="slot-controls">
+                  <div class="field"><label for="observer-provider-2">Provider</label><select class="select-input slot-provider" id="observer-provider-2"></select></div>
+                  <div class="field"><label for="observer-model-2">Model</label><select class="select-input slot-model" id="observer-model-2"></select></div>
+                  <div class="field role-field"><label for="observer-role-2">Audit role</label><select class="select-input slot-role" id="observer-role-2"><option>Safety &amp; Authority</option><option>Logic &amp; Claims</option><option>Evidence &amp; Consistency</option><option>Counterarguments</option><option>Cost &amp; Efficiency</option></select></div>
+                </div>
+              </article>
+              <article class="slot-card" data-slot-index="2">
+                <div class="slot-card-head"><div><strong>Observer 03</strong><span>Evidence &amp; Consistency</span></div><button class="toggle" type="button" aria-pressed="true" aria-label="Enable or disable observer 3"></button></div>
+                <div class="slot-controls">
+                  <div class="field"><label for="observer-provider-3">Provider</label><select class="select-input slot-provider" id="observer-provider-3"></select></div>
+                  <div class="field"><label for="observer-model-3">Model</label><select class="select-input slot-model" id="observer-model-3"></select></div>
+                  <div class="field role-field"><label for="observer-role-3">Audit role</label><select class="select-input slot-role" id="observer-role-3"><option>Evidence &amp; Consistency</option><option>Logic &amp; Claims</option><option>Safety &amp; Authority</option><option>Counterarguments</option><option>Cost &amp; Efficiency</option></select></div>
+                </div>
+              </article>
+            </div>
+            <button class="full-button" id="apply-loop" type="button">Apply loop display configuration</button>
+          </section>
+
+          <section class="tab-panel" id="panel-safety" role="tabpanel" aria-labelledby="tab-safety" hidden>
+            <p class="section-intro">These are visible safety facts, not controls that can authorize an action.</p>
+            <div class="safety-list">
+              <article class="safety-card"><div><h3>Provider output</h3><span class="authority-badge">UNTRUSTED</span></div><p>Provider output remains untrusted and never grants write, execution, Git, browser or package authority.</p></article>
+              <article class="safety-card"><div><h3>Critical Prompt Loop</h3><span class="authority-badge">METADATA</span></div><p>Observer configuration and reports cannot vote themselves into approval.</p></article>
+              <article class="safety-card"><div><h3>Routing</h3><span class="authority-badge">MANUAL</span></div><p>Preview only — no provider calls originate from catalog or preview. Human approval required before any future provider call. No automatic fallback, retry, streaming or provider/model switching is connected.</p></article>
+              <article class="safety-card"><div><h3>Human barrier</h3><span class="authority-badge">SEPARATE</span></div><p>Human approval remains explicit and hash-bound where the existing controlled path requires it.</p></article>
+            </div>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="drawer-dialog" id="audit-dialog" aria-labelledby="audit-title" aria-describedby="audit-description">
+      <div class="drawer-shell drawer-shell-simple">
+        <header class="drawer-head">
+          <div class="drawer-head-copy"><h2 id="audit-title" tabindex="-1">Audit &amp; evidence</h2><p id="audit-description">Read-only endpoint evidence · non-authoritative</p></div>
+          <button class="icon-button" type="button" data-close-dialog="audit-dialog" aria-label="Close audit and evidence"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+        </header>
+        <div class="drawer-body">
+          <div class="audit-grid">
+            <article class="audit-card"><h3>Evidence binding</h3><dl class="audit-facts"><div><dt>Request</dt><dd id="request-hash">missing</dd></div><div><dt>Preview</dt><dd id="preview-hash">missing</dd></div><div><dt>Governance</dt><dd id="governance-hash">missing</dd></div><div><dt>Barrier</dt><dd id="barrier-hash">missing</dd></div><div><dt>Result</dt><dd id="result-hash">missing</dd></div><div><dt>Reason codes</dt><dd id="evidence-reasons">-</dd></div></dl></article>
+            <article class="audit-card"><h3>Local audit messages</h3><ul class="audit-list" id="audit-messages"><li>Loading read-only audit status.</li></ul></article>
+            <article class="audit-card"><h3>Runtime boundaries</h3><p class="section-intro" id="boundary-count">Loading boundaries.</p><div class="boundary-list" id="boundary-list"></div></article>
+            <article class="audit-card commit-card"><h3>Read-only commit history</h3><p class="section-intro" id="commit-status">Loading local commit history.</p><div class="commit-table-wrap"><table class="commit-table"><thead><tr><th>Commit</th><th>Date</th><th>Author</th><th>Subject</th></tr></thead><tbody id="commit-table-body"><tr><td colspan="4">Loading commits.</td></tr></tbody></table></div></article>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="drawer-dialog" id="observer-dialog" aria-labelledby="observer-detail-title" aria-describedby="observer-detail-subtitle">
+      <div class="drawer-shell drawer-shell-simple">
+        <header class="drawer-head">
+          <div class="drawer-head-copy"><h2 id="observer-detail-title" tabindex="-1">Observer report</h2><p id="observer-detail-subtitle">Read-only metadata · no authority</p></div>
+          <button class="icon-button" type="button" data-close-dialog="observer-dialog" aria-label="Close observer report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+        </header>
+        <div class="drawer-body">
+          <div class="observer-detail-head"><span class="observer-number" id="observer-detail-number">01</span><div><h3 id="observer-detail-role">Logic &amp; Claims</h3><p id="observer-detail-model">unconfigured</p></div></div>
+          <div class="warning-banner"><strong>NO AUTHORITY</strong><span>This observer slot has no approval, write, execution, dispatch or provider-routing authority.</span></div>
+          <div class="finding-list" id="observer-finding-list"></div>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+    <script src="/app.js?v=single-window-operator-console-1a" type="module"></script>
   </body>
 </html>

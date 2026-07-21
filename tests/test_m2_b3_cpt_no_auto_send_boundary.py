@@ -148,7 +148,7 @@ class M2B3CPTNoAutoSendBoundaryTests(unittest.TestCase):
     def test_web_ui_critic_transform_does_not_auto_send(self) -> None:
         app_source = WEB_APP_PATH.read_text(encoding="utf-8")
         start = app_source.index("async function transformComposerPrompt")
-        end = app_source.index("elements.composer.addEventListener", start)
+        end = app_source.index("elements.chatForm.addEventListener", start)
         transform_body = app_source[start:end]
 
         self.assertNotIn("sendPrompt(", transform_body)
