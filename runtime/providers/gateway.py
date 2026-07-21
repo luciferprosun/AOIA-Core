@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
@@ -22,12 +23,134 @@ from runtime.providers.payloads import (
 )
 from runtime.providers.redaction import redact_provider_text
 from runtime.providers.runtime_policy import ProviderRuntimePolicy
+from runtime.providers.openai_compatible import OpenAICompatibleProvider
+from runtime.epistemic_orchestra.contracts import NON_AUTHORITATIVE
 
 
 _OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 _KIMI_ENDPOINT = "https://api.moonshot.ai/v1/chat/completions"
 _GEMINI_ENDPOINT_PREFIX = "https://generativelanguage.googleapis.com/v1beta/models/"
 _DEFAULT_KIMI_KEY_FILE_PARTS = ("Desktop", "API TOKENy", "kimi kodex")
+
+
+@dataclass(frozen=True, slots=True)
+class ExactProviderGatewayResult:
+    """One exact remote response, still untrusted and non-authoritative."""
+
+    connection_id: str
+    model_profile_id: str
+    remote_model_id: str
+    response_text: str
+    finish_reason: str | None
+    trust_status: str = "UNTRUSTED"
+    authority_status: str = NON_AUTHORITATIVE
+    authoritative: bool = False
+    can_approve: bool = False
+    can_write: bool = False
+    can_execute: bool = False
+    can_satisfy_gate: bool = False
+
+    def __post_init__(self) -> None:
+        if self.trust_status != "UNTRUSTED" or self.authority_status != NON_AUTHORITATIVE:
+            raise ValueError("exact provider gateway result trust boundary differs")
+        for name in (
+            "authoritative",
+            "can_approve",
+            "can_write",
+            "can_execute",
+            "can_satisfy_gate",
+        ):
+            if type(getattr(self, name)) is not bool or getattr(self, name):
+                raise ValueError("exact provider gateway result contains an authority claim")
+
+
+def run_exact_provider_request_once(
+    *,
+    purpose: str,
+    connection_id: str,
+    connection_revision_hash: str,
+    model_profile_id: str,
+    model_revision_hash: str,
+    api_style: str,
+    native_adapter_id: str | None,
+    base_url: str,
+    credential_reference: str,
+    remote_model_id: str,
+    api_key: str,
+    prompt: str,
+    max_tokens: int,
+    timeout_seconds: int,
+    transport_authorization: object,
+) -> ExactProviderGatewayResult:
+    """Perform the one call authorized by exact Orchestra stage evidence.
+
+    Authorization is consumed before the environment flag or transport is
+    examined.  This function has no fallback, retry, model substitution, or
+    provider-selection behavior.
+    """
+
+    try:
+        from runtime.providers.exact_invocation import consume_gateway_transport_authorization
+    except ModuleNotFoundError:  # pragma: no cover - script launch path
+        from providers.exact_invocation import consume_gateway_transport_authorization
+
+    transport_receipt = consume_gateway_transport_authorization(
+        transport_authorization,
+        purpose=purpose,
+        connection_id=connection_id,
+        connection_revision_hash=connection_revision_hash,
+        model_profile_id=model_profile_id,
+        model_revision_hash=model_revision_hash,
+        remote_model_id=remote_model_id,
+        api_style=api_style,
+        base_url=base_url,
+        native_adapter_id=native_adapter_id,
+        credential_reference=credential_reference,
+        prompt=prompt,
+        max_tokens=max_tokens,
+        timeout_seconds=timeout_seconds,
+    )
+    if os.environ.get("AOIA_PROVIDER_CALLS_ENABLED") != "1":
+        raise RuntimeError(
+            "provider calls remain frozen; AOIA_PROVIDER_CALLS_ENABLED=1 is also required"
+        )
+    if not isinstance(api_key, str) or not api_key:
+        raise RuntimeError("configured provider credential is unavailable")
+
+    if api_style == "openai_compatible":
+        provider = OpenAICompatibleProvider(
+            provider=connection_id,
+            api_key=api_key,
+            model=remote_model_id,
+            base_url=base_url,
+        )
+        exact = provider.generate_exact_once(
+            prompt,
+            purpose=purpose,
+            connection_id=connection_id,
+            connection_revision_hash=connection_revision_hash,
+            model_profile_id=model_profile_id,
+            model_revision_hash=model_revision_hash,
+            api_style=api_style,
+            base_url=base_url,
+            native_adapter_id=native_adapter_id,
+            credential_reference=credential_reference,
+            max_tokens=max_tokens,
+            timeout_seconds=timeout_seconds,
+            transport_receipt=transport_receipt,
+        )
+        response_text = exact.response_text
+        finish_reason = exact.finish_reason
+    else:
+        raise ValueError("connection API style has no approved exact-call adapter")
+
+    return ExactProviderGatewayResult(
+        connection_id=connection_id,
+        model_profile_id=model_profile_id,
+        remote_model_id=remote_model_id,
+        response_text=redact_provider_text(response_text, known_secrets=(api_key,)),
+        finish_reason=finish_reason,
+    )
 
 
 def run_provider_request(

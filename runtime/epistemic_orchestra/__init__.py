@@ -43,6 +43,30 @@ from runtime.epistemic_orchestra.cpt_stage import (
     hash_critic_transformation_record,
     validate_revision_compilation,
 )
+from runtime.epistemic_orchestra.live_run_preview import (
+    OrchestraLiveRunPreview,
+    PlannedLiveStage,
+    build_live_run_confirmation_material,
+    build_live_run_preview,
+    validate_live_run_preview,
+)
+from runtime.epistemic_orchestra.live_session import (
+    LiveOrchestraSessionResult,
+    LiveProviderStageResult,
+    LiveSessionError,
+    LiveSessionUseRegistry,
+    LiveStageInvocationBinding,
+    ManualLiveSessionConfirmation,
+    run_live_orchestra_session,
+)
+from runtime.epistemic_orchestra.role_binding import (
+    ModelRoleAssignment,
+    OrchestraOperatorRole,
+    OrchestraRoleSelection,
+    build_model_role_assignment,
+    build_orchestra_role_selection,
+    validate_role_selection_against_current_profiles,
+)
 
 
 __all__ = [
@@ -60,6 +84,17 @@ __all__ = [
     "EpistemicRunContract",
     "EpistemicStageContract",
     "OrchestrationMode",
+    "OrchestraLiveRunPreview",
+    "OrchestraOperatorRole",
+    "OrchestraRoleSelection",
+    "ModelRoleAssignment",
+    "PlannedLiveStage",
+    "LiveOrchestraSessionResult",
+    "LiveProviderStageResult",
+    "LiveSessionError",
+    "LiveSessionUseRegistry",
+    "LiveStageInvocationBinding",
+    "ManualLiveSessionConfirmation",
     "RevisionCompilation",
     "RevisionDisposition",
     "StageRole",
@@ -68,6 +103,10 @@ __all__ = [
     "build_critic_stage_payload",
     "build_epistemic_run_contract",
     "build_epistemic_stage_contract",
+    "build_live_run_confirmation_material",
+    "build_live_run_preview",
+    "build_model_role_assignment",
+    "build_orchestra_role_selection",
     "build_truncation_evidence",
     "canonical_json_bytes",
     "canonical_sha256",
@@ -83,4 +122,7 @@ __all__ = [
     "validate_stage_parent_binding",
     "validate_stage_replay_state",
     "verify_epistemic_stage_chain",
+    "run_live_orchestra_session",
+    "validate_live_run_preview",
+    "validate_role_selection_against_current_profiles",
 ]

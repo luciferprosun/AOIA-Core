@@ -20,6 +20,8 @@ _SENSITIVE_FIELD_PARTS = (
 _SECRET_PATTERNS = (
     re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{8,}"),
     re.compile(r"\bsk-[A-Za-z0-9_-]{8,}"),
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{12,}"),
+    re.compile(r"\bgithub_pat_[A-Za-z0-9_]{12,}"),
     re.compile(r"\bAIza[A-Za-z0-9_-]{20,}"),
     re.compile(
         r"(?i)\b(?:authorization|api[_ -]?key|token|secret)\s*[:=]\s*[^\s,;]+"
@@ -29,11 +31,19 @@ _SECRET_PATTERNS = (
 
 def redact_provider_text(text: object, *, known_secrets: Sequence[str] = ()) -> str:
     value = str(text)
+    replacement = REDACTED
+    for candidate in (REDACTED, "[MASKED]", ""):
+        if not any(
+            isinstance(secret, str) and secret and secret in candidate
+            for secret in known_secrets
+        ):
+            replacement = candidate
+            break
     for secret in known_secrets:
         if isinstance(secret, str) and secret:
-            value = value.replace(secret, REDACTED)
+            value = value.replace(secret, replacement)
     for pattern in _SECRET_PATTERNS:
-        value = pattern.sub(REDACTED, value)
+        value = pattern.sub(replacement, value)
     return value
 
 

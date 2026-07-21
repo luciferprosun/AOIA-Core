@@ -294,7 +294,7 @@
           <div class="view-head">
             <div>
               <p class="eyebrow">Settings</p>
-              <h3>Operator settings</h3>
+              <h3>Provider connections and Orchestra roles</h3>
             </div>
             <span class="badge">No secrets shown</span>
           </div>
@@ -312,7 +312,167 @@
                 <div><dt>Mode</dt><dd id="selected-mode">-</dd></div>
               </dl>
             </article>
+            <article class="status-card warning-card">
+              <h4>Authority boundary</h4>
+              <p class="helper-text">
+                Saved connections and model roles are operator configuration only. A plan preview is not permission.
+                Provider, critic, auditor, and synthesis output remains untrusted and non-authoritative.
+              </p>
+            </article>
           </div>
+
+          <div class="card-grid">
+            <form id="provider-connection-form" class="status-card">
+              <h4>Add connection</h4>
+              <label class="label" for="provider-connection-id">Connection ID</label>
+              <input id="provider-connection-id" class="select" name="connection_id" required autocomplete="off" />
+
+              <label class="label" for="provider-connection-name">Connection name</label>
+              <input id="provider-connection-name" class="select" name="display_name" required autocomplete="off" />
+
+              <label class="label" for="provider-api-style">API style</label>
+              <select id="provider-api-style" class="select" name="api_style" required>
+                <option value="openai_compatible">OpenAI compatible</option>
+              </select>
+
+              <label class="label" for="provider-base-url">Base URL</label>
+              <input
+                id="provider-base-url"
+                class="select"
+                name="base_url"
+                type="url"
+                placeholder="OpenAI-compatible endpoint URL"
+                autocomplete="url"
+              />
+
+              <label class="label" for="provider-api-key">API key</label>
+              <input
+                id="provider-api-key"
+                class="select"
+                name="api_key"
+                type="password"
+                required
+                autocomplete="new-password"
+              />
+              <p class="helper-text">
+                The key is sent only to the local configuration endpoint, stored outside the repository, and cleared
+                from this form after saving. It is never added to the model table.
+              </p>
+              <button id="save-provider-connection" class="button button-primary" type="submit">Save connection</button>
+              <p id="provider-connection-form-status" class="helper-text" aria-live="polite"></p>
+            </form>
+
+            <form id="model-profile-form" class="status-card">
+              <h4>Add model</h4>
+              <label class="label" for="model-profile-id">Model profile ID</label>
+              <input id="model-profile-id" class="select" name="model_profile_id" required autocomplete="off" />
+
+              <label class="label" for="model-profile-connection">Connection</label>
+              <select id="model-profile-connection" class="select" name="connection_id" required></select>
+
+              <label class="label" for="model-profile-name">Model display name</label>
+              <input id="model-profile-name" class="select" name="display_name" required autocomplete="off" />
+
+              <label class="label" for="model-remote-id">Remote model ID</label>
+              <input id="model-remote-id" class="select" name="remote_model_id" required autocomplete="off" />
+
+              <label class="label" for="model-allowed-roles">Allowed roles</label>
+              <select id="model-allowed-roles" class="select" name="allowed_roles" multiple size="4" required>
+                <option value="MAIN">MAIN</option>
+                <option value="CRITIC">CRITIC</option>
+                <option value="AUDITOR">AUDITOR</option>
+                <option value="SYNTHESIZER">SYNTHESIZER</option>
+              </select>
+              <p class="helper-text">Select one or more roles. Role assignment for a run remains a separate human action.</p>
+              <button id="save-model-profile" class="button button-primary" type="submit">Save model</button>
+              <p id="model-profile-form-status" class="helper-text" aria-live="polite"></p>
+            </form>
+
+            <article class="status-card">
+              <h4>Optional legacy presets</h4>
+              <p class="helper-text">
+                These examples are not saved user models and are never authoritative for the Orchestra selection table.
+              </p>
+              <ul id="orchestra-preset-examples" class="audit-list"></ul>
+            </article>
+          </div>
+
+          <article class="status-card commit-card">
+            <div class="view-head">
+              <div>
+                <p class="eyebrow">User model profiles</p>
+                <h4>Orchestra model-selection table</h4>
+              </div>
+              <div class="topbar-actions">
+                <span id="orchestra-selection-count" class="badge">0 selected</span>
+                <button id="refresh-orchestra-models" class="button button-subtle" type="button">Reload saved models</button>
+              </div>
+            </div>
+            <div class="commit-table-wrap">
+              <table id="orchestra-model-table" class="commit-table">
+                <thead>
+                  <tr>
+                    <th>Selected</th>
+                    <th>Model display name</th>
+                    <th>Connection name</th>
+                    <th>Remote model ID</th>
+                    <th>Connection status</th>
+                    <th>Model status</th>
+                    <th>Assigned role</th>
+                    <th>Last connection test</th>
+                  </tr>
+                </thead>
+                <tbody id="orchestra-model-table-body">
+                  <tr><td colspan="8">No saved model profiles loaded.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="helper-text">
+              Select two to five enabled models. Assign exactly one MAIN and at least one CRITIC or AUDITOR.
+              Roles are never changed automatically.
+            </p>
+          </article>
+
+          <article class="status-card commit-card">
+            <div class="view-head">
+              <div>
+                <p class="eyebrow">Single bounded session</p>
+                <h4>Controlled live Orchestra demonstration</h4>
+              </div>
+              <span id="orchestra-live-status" class="badge badge-blocked">Preview required</span>
+            </div>
+
+            <label class="label" for="orchestra-prompt">Human prompt</label>
+            <textarea id="orchestra-prompt" rows="5" placeholder="Enter the exact prompt for this bounded session."></textarea>
+
+            <div class="button-row">
+              <button id="preview-orchestra-plan" class="button button-primary" type="button">Generate plan preview</button>
+            </div>
+
+            <p class="label">Generated preview hash</p>
+            <p id="orchestra-preview-hash" class="hash-value">missing</p>
+
+            <label class="label" for="orchestra-confirmation-hash">Exact hash-bound confirmation</label>
+            <input
+              id="orchestra-confirmation-hash"
+              class="select"
+              autocomplete="off"
+              placeholder="Paste the exact preview hash"
+            />
+            <label class="label" for="orchestra-confirm-preview">
+              <input id="orchestra-confirm-preview" type="checkbox" />
+              I reviewed this exact plan preview and request one bounded Orchestra session.
+            </label>
+
+            <div class="button-row">
+              <button id="run-orchestra" class="button button-disabled" type="button" disabled>Run Orchestra</button>
+            </div>
+            <p class="blocked-note">
+              Preview alone cannot authorize a call. The exact preview hash, explicit confirmation, and Run Orchestra
+              action are all required. No fallback or automatic retry is permitted.
+            </p>
+            <pre id="orchestra-live-result" class="code-panel" aria-live="polite"></pre>
+          </article>
         </section>
       </main>
     </div>

@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import hashlib
+import ipaddress
 import sys
 import traceback
 from http import HTTPStatus
@@ -72,6 +73,27 @@ class WebRuntimeService:
 
 SERVICE: WebRuntimeService | None = None
 SERVICE_INIT_LOCK = Lock()
+ORCHESTRA_SERVICE = None
+ORCHESTRA_SERVICE_INIT_LOCK = Lock()
+MAXIMUM_JSON_BODY_BYTES = 256 * 1024
+SENSITIVE_ORCHESTRA_API_PATHS = frozenset(
+    {
+        "/api/provider-connections",
+        "/api/provider-connections/disable",
+        "/api/provider-connections/test",
+        "/api/model-profiles",
+        "/api/model-profiles/disable",
+        "/api/orchestra/preview",
+        "/api/orchestra/run",
+    }
+)
+SENSITIVE_ORCHESTRA_GET_PATHS = frozenset(
+    {
+        "/api/provider-connections",
+        "/api/model-profiles",
+        "/api/orchestra/models",
+    }
+)
 
 
 def get_service() -> WebRuntimeService:
@@ -81,6 +103,27 @@ def get_service() -> WebRuntimeService:
             if SERVICE is None:
                 SERVICE = WebRuntimeService()
     return SERVICE
+
+
+def get_orchestra_service():
+    """Lazily construct the local user-provider/Orchestra service.
+
+    Importing ``runtime.webapp`` remains inert: no state directory, credential,
+    provider adapter, or network gateway is touched until an operator calls one
+    of the new configuration or Orchestra endpoints.
+    """
+
+    global ORCHESTRA_SERVICE
+    if ORCHESTRA_SERVICE is None:
+        with ORCHESTRA_SERVICE_INIT_LOCK:
+            if ORCHESTRA_SERVICE is None:
+                project_parent = str(PROJECT_DIR.parent)
+                if project_parent not in sys.path:
+                    sys.path.insert(0, project_parent)
+                from runtime.providers.orchestra_live_service import OrchestraLiveWebService
+
+                ORCHESTRA_SERVICE = OrchestraLiveWebService(PROJECT_DIR.parent)
+    return ORCHESTRA_SERVICE
 
 
 def build_cpt_transform_payload(prompt: str, mode: str = CPT_BALANCED_MODE) -> dict:
@@ -463,6 +506,12 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
 
 
 def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
+    if path == "/api/provider-connections":
+        return HTTPStatus.OK, get_orchestra_service().list_connections()
+    if path == "/api/model-profiles":
+        return HTTPStatus.OK, get_orchestra_service().list_model_profiles()
+    if path == "/api/orchestra/models":
+        return HTTPStatus.OK, get_orchestra_service().list_orchestra_models()
     if path == "/api/status":
         return HTTPStatus.OK, get_service().status_payload()
     if path == "/api/models":
@@ -497,6 +546,33 @@ def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
 
 
 def route_post_payload(path: str, payload: dict[str, object]) -> tuple[HTTPStatus, dict[str, object]]:
+    if path in SENSITIVE_ORCHESTRA_API_PATHS:
+        try:
+            service = get_orchestra_service()
+            if path == "/api/provider-connections":
+                return HTTPStatus.CREATED, service.create_connection(payload)
+            if path == "/api/provider-connections/disable":
+                return HTTPStatus.OK, service.disable_connection(payload)
+            if path == "/api/provider-connections/test":
+                return HTTPStatus.OK, service.test_connection(payload)
+            if path == "/api/model-profiles":
+                return HTTPStatus.CREATED, service.create_model_profile(payload)
+            if path == "/api/model-profiles/disable":
+                return HTTPStatus.OK, service.disable_model_profile(payload)
+            if path == "/api/orchestra/preview":
+                return HTTPStatus.OK, service.create_preview(payload)
+            if path == "/api/orchestra/run":
+                return HTTPStatus.OK, service.run_preview(payload)
+        except (TypeError, ValueError, RuntimeError) as error:
+            try:
+                from runtime.providers.redaction import redact_provider_text
+            except ModuleNotFoundError:  # pragma: no cover - script launch path
+                from providers.redaction import redact_provider_text
+
+            return HTTPStatus.BAD_REQUEST, {
+                "ok": False,
+                "error": redact_provider_text(error)[:500],
+            }
     if path == "/api/operator/chat":
         try:
             response = build_operator_chat_payload(payload)
@@ -528,6 +604,12 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
+        if parsed.path in SENSITIVE_ORCHESTRA_GET_PATHS and not self._local_request_allowed():
+            self._write_json(
+                HTTPStatus.FORBIDDEN,
+                {"ok": False, "error": "Loopback-local request required"},
+            )
+            return
         if parsed.path == "/api/memory-hats":
             self._write_json(HTTPStatus.OK, get_memory_hat_payload())
             return
@@ -542,6 +624,21 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
+        sensitive_request = parsed.path in SENSITIVE_ORCHESTRA_API_PATHS
+        if sensitive_request:
+            if not self._local_request_allowed() or not self._same_origin_request_allowed():
+                self._write_json(
+                    HTTPStatus.FORBIDDEN,
+                    {"ok": False, "error": "Same-origin local request required"},
+                )
+                return
+            content_type = self.headers.get("Content-Type", "")
+            if content_type.split(";", 1)[0].strip().casefold() != "application/json":
+                self._write_json(
+                    HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                    {"ok": False, "error": "Content-Type must be application/json"},
+                )
+                return
         payload = self._read_json_body()
         if payload is None:
             return
@@ -553,6 +650,11 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 return
 
             if parsed.path == "/api/operator/chat":
+                status, response = route_post_payload(parsed.path, payload)
+                self._write_json(status, response)
+                return
+
+            if sensitive_request:
                 status, response = route_post_payload(parsed.path, payload)
                 self._write_json(status, response)
                 return
@@ -621,6 +723,12 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
             self._write_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
         except Exception as error:  # pragma: no cover - local debugging path
+            if sensitive_request:
+                self._write_json(
+                    HTTPStatus.INTERNAL_SERVER_ERROR,
+                    {"ok": False, "error": "Sensitive request failed safely"},
+                )
+                return
             self._write_json(
                 HTTPStatus.INTERNAL_SERVER_ERROR,
                 {
@@ -634,18 +742,99 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         return
 
     def _read_json_body(self) -> dict | None:
-        length = int(self.headers.get("Content-Length", "0") or 0)
+        try:
+            length = int(self.headers.get("Content-Length", "0") or 0)
+        except (TypeError, ValueError):
+            self._write_json(
+                HTTPStatus.BAD_REQUEST,
+                {"ok": False, "error": "Invalid Content-Length"},
+            )
+            return None
+        if length < 0 or length > MAXIMUM_JSON_BODY_BYTES:
+            self._write_json(
+                HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                {"ok": False, "error": "JSON request body is too large"},
+            )
+            return None
         raw_body = self.rfile.read(length) if length else b"{}"
         try:
-            return json.loads(raw_body.decode("utf-8"))
-        except json.JSONDecodeError:
+            payload = json.loads(raw_body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
             self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "Invalid JSON body"})
             return None
+        if not isinstance(payload, dict):
+            self._write_json(
+                HTTPStatus.BAD_REQUEST,
+                {"ok": False, "error": "JSON request body must be an object"},
+            )
+            return None
+        return payload
+
+    def _same_origin_request_allowed(self) -> bool:
+        fetch_site = self.headers.get("Sec-Fetch-Site", "")
+        if fetch_site and fetch_site.casefold() != "same-origin":
+            return False
+        origin = self.headers.get("Origin", "")
+        if not origin:
+            return True
+        host = self.headers.get("Host", "")
+        parsed_origin = urlparse(origin)
+        return (
+            parsed_origin.scheme in {"http", "https"}
+            and bool(host)
+            and parsed_origin.netloc.casefold() == host.casefold()
+            and self._loopback_host_allowed(host)
+            and not parsed_origin.username
+            and not parsed_origin.password
+        )
+
+    def _local_request_allowed(self) -> bool:
+        try:
+            client_host = self.client_address[0]
+        except (AttributeError, IndexError, TypeError):
+            return False
+        try:
+            if not ipaddress.ip_address(client_host).is_loopback:
+                return False
+        except ValueError:
+            return False
+        return self._loopback_host_allowed(self.headers.get("Host", ""))
+
+    @staticmethod
+    def _loopback_host_allowed(host_header: str) -> bool:
+        if not isinstance(host_header, str) or not host_header.strip():
+            return False
+        value = host_header.strip()
+        if value.startswith("["):
+            closing = value.find("]")
+            if closing < 0:
+                return False
+            hostname = value[1:closing]
+            suffix = value[closing + 1 :]
+            if suffix and (not suffix.startswith(":") or not suffix[1:].isdigit()):
+                return False
+        else:
+            if value.count(":") > 1:
+                return False
+            hostname, separator, port = value.rpartition(":")
+            if not separator:
+                hostname = value
+            elif not hostname or not port.isdigit():
+                return False
+        normalized = hostname.rstrip(".").casefold()
+        if normalized == "localhost":
+            return True
+        try:
+            return ipaddress.ip_address(normalized).is_loopback
+        except ValueError:
+            return False
 
     def _write_json(self, status: HTTPStatus, payload: dict) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
