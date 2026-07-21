@@ -8,7 +8,7 @@ back a reconstructed preview, role selection, run contract, or credential.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import RLock
@@ -34,6 +34,18 @@ from runtime.epistemic_orchestra.role_binding import (
     build_orchestra_role_selection,
     validate_role_selection_against_current_profiles,
 )
+from runtime.epistemic_orchestra.session_view import (
+    FAILED_STAGE_EVIDENCE_SCHEMA_VERSION,
+    PROVIDER_TYPE_SNAPSHOT_SCHEMA_VERSION,
+    SESSION_SNAPSHOT_SCHEMA_VERSION,
+    OrchestraFailedStageEvidence,
+    OrchestraProviderTypeSnapshot,
+    OrchestraSessionNotFoundError,
+    OrchestraSessionSnapshot,
+    OrchestraSessionViewError,
+    build_orchestra_session_view,
+    validate_orchestra_session_id,
+)
 from runtime.providers.exact_invocation import ExactInvocationError, ExactProviderInvoker
 from runtime.providers.model_profiles import ModelProfile, ModelProfileError
 from runtime.providers.user_connections import (
@@ -47,6 +59,7 @@ DEFAULT_PREVIEW_LIFETIME_SECONDS = 300
 DEFAULT_LIVE_TIMEOUT_SECONDS = 15
 DEFAULT_LIVE_MAXIMUM_OUTPUT_TOKENS = 256
 MAXIMUM_ISSUED_PREVIEWS = 32
+MAXIMUM_RETAINED_SESSION_VIEWS = 64
 ROLE_ORDER = {
     OrchestraOperatorRole.MAIN.value: 0,
     OrchestraOperatorRole.CRITIC.value: 1,
@@ -120,6 +133,7 @@ class OrchestraLiveWebService:
         self._lock = RLock()
         self._run_counter = 0
         self._issued_previews: dict[str, _IssuedPreview] = {}
+        self._session_snapshots: dict[str, OrchestraSessionSnapshot] = {}
         self._last_connection_tests: dict[str, dict[str, object]] = {}
 
     def list_connections(self) -> dict[str, object]:
@@ -194,6 +208,10 @@ class OrchestraLiveWebService:
                 connection = self.store.disable_connection(payload["connection_id"])
             except UserProviderStoreError as error:
                 raise OrchestraLiveWebError(str(error)) from None
+            self._invalidate_unconsumed_session_snapshots(
+                current_epoch=self._now(),
+                reason_code="CONNECTION_CONFIGURATION_DISABLED",
+            )
             self._issued_previews.clear()
             response = {"ok": True, "connection": self._connection_payload(connection)}
             self._assert_payload_excludes_credentials(response)
@@ -267,6 +285,10 @@ class OrchestraLiveWebService:
                 profile = self.store.disable_model_profile(payload["model_profile_id"])
             except UserProviderStoreError as error:
                 raise OrchestraLiveWebError(str(error)) from None
+            self._invalidate_unconsumed_session_snapshots(
+                current_epoch=self._now(),
+                reason_code="MODEL_CONFIGURATION_DISABLED",
+            )
             self._issued_previews.clear()
             response = {
                 "ok": True,
@@ -422,6 +444,37 @@ class OrchestraLiveWebService:
                 "human_action_required": True,
             }
             self._assert_payload_excludes_credentials(response)
+            connections = {
+                item.connection_id: item for item in self.store.list_connections()
+            }
+            provider_types = tuple(
+                OrchestraProviderTypeSnapshot(
+                    schema_version=PROVIDER_TYPE_SNAPSHOT_SCHEMA_VERSION,
+                    connection_id=connection_id,
+                    provider_type=connections[connection_id].api_style,
+                )
+                for connection_id in dict.fromkeys(
+                    assignment.connection_id for assignment in role_selection.assignments
+                )
+            )
+            self._retain_session_snapshot(
+                OrchestraSessionSnapshot(
+                    schema_version=SESSION_SNAPSHOT_SCHEMA_VERSION,
+                    session_id=run.run_id,
+                    session_state="NOT_EXECUTED",
+                    created_at_epoch=now,
+                    updated_at_epoch=now,
+                    run=run,
+                    preview=preview,
+                    role_selection=role_selection,
+                    provider_types=provider_types,
+                    plan_available=True,
+                    plan_consumed=False,
+                    exact_human_confirmation_recorded=False,
+                    confirmation_hash=None,
+                ),
+                current_epoch=now,
+            )
             self._issued_previews[preview.preview_hash] = _IssuedPreview(
                 source_prompt=source_prompt,
                 role_selection=role_selection,
@@ -457,11 +510,30 @@ class OrchestraLiveWebService:
                 raise OrchestraLiveWebError("live run preview is missing, foreign, or consumed")
             if now > issued.preview.expires_at_epoch:
                 self._issued_previews.pop(hashes[0], None)
+                self._replace_session_snapshot(
+                    issued.run.run_id,
+                    session_state="EXPIRED",
+                    updated_at_epoch=issued.preview.expires_at_epoch,
+                    plan_available=False,
+                    plan_consumed=False,
+                    exact_human_confirmation_recorded=False,
+                    confirmation_hash=None,
+                )
                 raise OrchestraLiveWebError("live run preview has expired")
             # Consume server-held state atomically before revalidation, confirmation,
             # or any live call.  A stale or otherwise rejected Run action must never
             # leave the old preview available for a later replay.
             self._issued_previews.pop(hashes[0], None)
+            self._replace_session_snapshot(
+                issued.run.run_id,
+                session_state="FAILED",
+                updated_at_epoch=now,
+                plan_available=False,
+                plan_consumed=True,
+                exact_human_confirmation_recorded=False,
+                confirmation_hash=None,
+                session_error_code="RUN_ACTION_REJECTED",
+            )
             if len(set(hashes)) != 1:
                 raise OrchestraLiveWebError(
                     "all three confirmation hashes must match exactly"
@@ -492,6 +564,16 @@ class OrchestraLiveWebService:
                 )
             except LiveSessionError as error:
                 raise OrchestraLiveWebError(str(error)) from None
+            self._replace_session_snapshot(
+                issued.run.run_id,
+                session_state="RUNNING",
+                updated_at_epoch=now,
+                plan_available=False,
+                plan_consumed=True,
+                exact_human_confirmation_recorded=True,
+                confirmation_hash=confirmation.confirmation_hash,
+                session_error_code=None,
+            )
         try:
             result = run_live_orchestra_session(
                 run=issued.run,
@@ -504,6 +586,49 @@ class OrchestraLiveWebService:
                 exact_invoker=self.exact_invoker.invoke_exact,
             )
         except LiveStageExecutionError as error:
+            completed_results = tuple(error.completed_stage_results)
+            completed_stages = tuple(error.completed_stage_chain)
+            redaction_warning = False
+            try:
+                self._assert_payload_excludes_credentials(
+                    {
+                        "completed_stage_results": [
+                            item.to_dict() for item in completed_results
+                        ],
+                        "completed_stage_chain": [
+                            item.to_dict() for item in completed_stages
+                        ],
+                    }
+                )
+            except OrchestraLiveWebError:
+                completed_results = ()
+                completed_stages = ()
+                redaction_warning = True
+            failed_evidence = OrchestraFailedStageEvidence(
+                schema_version=FAILED_STAGE_EVIDENCE_SCHEMA_VERSION,
+                reason_code="ORCHESTRA_EXACT_STAGE_FAILED",
+                stage_id=error.stage_id,
+                call_index=error.call_index,
+                operator_role=error.operator_role,
+                connection_id=error.connection_id,
+                model_profile_id=error.model_profile_id,
+            )
+            completed_at = self._now()
+            with self._lock:
+                self._replace_session_snapshot(
+                    issued.run.run_id,
+                    session_state=("PARTIAL" if completed_results else "FAILED"),
+                    updated_at_epoch=completed_at,
+                    completed_stage_results=completed_results,
+                    completed_stage_chain=completed_stages,
+                    failed_stage=failed_evidence,
+                    session_error_code=(
+                        "SESSION_OUTPUT_WITHHELD_BY_CREDENTIAL_BOUNDARY"
+                        if redaction_warning
+                        else None
+                    ),
+                    redaction_warning=redaction_warning,
+                )
             response = {
                 "ok": False,
                 "failed_stage": error.to_dict(),
@@ -518,7 +643,53 @@ class OrchestraLiveWebService:
             self._assert_payload_excludes_credentials(response)
             return response
         except (EpistemicContractError, ExactInvocationError, UserProviderStoreError) as error:
+            self.session_registry.retire_confirmation(confirmation)
+            with self._lock:
+                self._replace_session_snapshot(
+                    issued.run.run_id,
+                    session_state="FAILED",
+                    updated_at_epoch=self._now(),
+                    completed_stage_results=(),
+                    completed_stage_chain=(),
+                    session_result=None,
+                    failed_stage=None,
+                    session_error_code="SESSION_EXECUTION_VALIDATION_FAILED",
+                )
             raise OrchestraLiveWebError(str(error)) from None
+        try:
+            self._assert_payload_excludes_credentials(
+                {
+                    "stage_results": [item.to_dict() for item in result.stage_results],
+                    "stage_chain": [item.to_dict() for item in result.stage_chain],
+                    "session_result": result.to_dict(),
+                }
+            )
+        except OrchestraLiveWebError:
+            with self._lock:
+                self._replace_session_snapshot(
+                    issued.run.run_id,
+                    session_state="FAILED",
+                    updated_at_epoch=self._now(),
+                    completed_stage_results=(),
+                    completed_stage_chain=(),
+                    session_result=None,
+                    failed_stage=None,
+                    session_error_code="SESSION_OUTPUT_WITHHELD_BY_CREDENTIAL_BOUNDARY",
+                    redaction_warning=True,
+                )
+            raise
+        with self._lock:
+            self._replace_session_snapshot(
+                issued.run.run_id,
+                session_state="COMPLETED",
+                updated_at_epoch=self._now(),
+                completed_stage_results=tuple(result.stage_results),
+                completed_stage_chain=tuple(result.stage_chain),
+                session_result=result,
+                failed_stage=None,
+                session_error_code=None,
+                redaction_warning=False,
+            )
         response = {
             "ok": True,
             "session": result.to_dict(),
@@ -532,6 +703,38 @@ class OrchestraLiveWebService:
         }
         self._assert_payload_excludes_credentials(response)
         return response
+
+    def get_orchestra_session_view(self, session_id: object) -> dict[str, object]:
+        """Return one inert view without consuming, refreshing, or mutating state."""
+
+        try:
+            normalized = validate_orchestra_session_id(session_id)
+        except OrchestraSessionViewError as error:
+            raise OrchestraLiveWebError(str(error)) from None
+        with self._lock:
+            snapshot = self._session_snapshots.get(normalized)
+        if snapshot is None:
+            raise OrchestraSessionNotFoundError("Orchestra session was not found")
+        current_epoch = self._now()
+        if (
+            snapshot.session_state == "NOT_EXECUTED"
+            and current_epoch > snapshot.preview.expires_at_epoch
+        ):
+            snapshot = replace(
+                snapshot,
+                session_state="EXPIRED",
+                updated_at_epoch=snapshot.preview.expires_at_epoch,
+                plan_available=False,
+                plan_consumed=False,
+                exact_human_confirmation_recorded=False,
+                confirmation_hash=None,
+            )
+        try:
+            payload = build_orchestra_session_view(snapshot).to_dict()
+        except OrchestraSessionViewError as error:
+            raise OrchestraLiveWebError(str(error)) from None
+        self._assert_payload_excludes_credentials(payload)
+        return payload
 
     def _build_role_selection(
         self,
@@ -650,6 +853,63 @@ class OrchestraLiveWebService:
         except UserProviderStoreError as error:
             raise OrchestraLiveWebError(str(error)) from None
 
+    def _retain_session_snapshot(
+        self,
+        snapshot: OrchestraSessionSnapshot,
+        *,
+        current_epoch: int,
+    ) -> None:
+        if snapshot.session_id not in self._session_snapshots and (
+            len(self._session_snapshots) >= MAXIMUM_RETAINED_SESSION_VIEWS
+        ):
+            terminal = tuple(
+                item
+                for item in self._session_snapshots.values()
+                if item.session_state not in {"NOT_EXECUTED", "RUNNING"}
+                or current_epoch > item.preview.expires_at_epoch
+            )
+            if not terminal:
+                raise OrchestraLiveWebError("too many active Orchestra session views")
+            victim = min(
+                terminal,
+                key=lambda item: (
+                    item.updated_at_epoch,
+                    item.created_at_epoch,
+                    item.session_id,
+                ),
+            )
+            self._session_snapshots.pop(victim.session_id, None)
+        self._session_snapshots[snapshot.session_id] = snapshot
+
+    def _replace_session_snapshot(
+        self,
+        session_id: str,
+        **changes: object,
+    ) -> None:
+        snapshot = self._session_snapshots.get(session_id)
+        if snapshot is None:
+            raise OrchestraLiveWebError("Orchestra session snapshot is missing")
+        self._session_snapshots[session_id] = replace(snapshot, **changes)
+
+    def _invalidate_unconsumed_session_snapshots(
+        self,
+        *,
+        current_epoch: int,
+        reason_code: str,
+    ) -> None:
+        for session_id, snapshot in tuple(self._session_snapshots.items()):
+            if snapshot.plan_available and not snapshot.plan_consumed:
+                self._session_snapshots[session_id] = replace(
+                    snapshot,
+                    session_state="INVALIDATED",
+                    updated_at_epoch=current_epoch,
+                    plan_available=False,
+                    plan_consumed=False,
+                    exact_human_confirmation_recorded=False,
+                    confirmation_hash=None,
+                    session_error_code=reason_code,
+                )
+
     def _purge_expired_previews(self, current_epoch: int) -> None:
         expired = [
             preview_hash
@@ -657,7 +917,17 @@ class OrchestraLiveWebService:
             if current_epoch > issued.preview.expires_at_epoch
         ]
         for preview_hash in expired:
-            self._issued_previews.pop(preview_hash, None)
+            issued = self._issued_previews.pop(preview_hash, None)
+            if issued is not None:
+                self._replace_session_snapshot(
+                    issued.run.run_id,
+                    session_state="EXPIRED",
+                    updated_at_epoch=issued.preview.expires_at_epoch,
+                    plan_available=False,
+                    plan_consumed=False,
+                    exact_human_confirmation_recorded=False,
+                    confirmation_hash=None,
+                )
 
     def _now(self) -> int:
         value = self._clock()
@@ -683,6 +953,7 @@ __all__ = [
     "DEFAULT_LIVE_MAXIMUM_OUTPUT_TOKENS",
     "DEFAULT_LIVE_TIMEOUT_SECONDS",
     "DEFAULT_PREVIEW_LIFETIME_SECONDS",
+    "MAXIMUM_RETAINED_SESSION_VIEWS",
     "OrchestraLiveWebError",
     "OrchestraLiveWebService",
     "ROLE_ORDER",

@@ -33,6 +33,7 @@ ADDITIONAL_METADATA_REVIEW_MODULES = (
     "runtime/epistemic_orchestra/role_binding.py",
     "runtime/epistemic_orchestra/live_run_preview.py",
     "runtime/epistemic_orchestra/live_session.py",
+    "runtime/epistemic_orchestra/session_view.py",
     "runtime/schemas/tool_call_preview.py",
     "runtime/schemas/tool_registry.py",
     "runtime/schemas/intent_router.py",

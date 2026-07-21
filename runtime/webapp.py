@@ -5,6 +5,7 @@ import json
 import os
 import hashlib
 import ipaddress
+import re
 import sys
 import traceback
 from http import HTTPStatus
@@ -94,6 +95,33 @@ SENSITIVE_ORCHESTRA_GET_PATHS = frozenset(
         "/api/orchestra/models",
     }
 )
+ORCHESTRA_SESSION_API_ROOT = "/api/orchestra/sessions"
+_ORCHESTRA_SESSION_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")
+
+
+def _is_sensitive_orchestra_get_path(path: str) -> bool:
+    return path in SENSITIVE_ORCHESTRA_GET_PATHS or (
+        path == ORCHESTRA_SESSION_API_ROOT
+        or path.startswith(f"{ORCHESTRA_SESSION_API_ROOT}/")
+    )
+
+
+def _session_id_from_api_path(path: str) -> str | None:
+    if not (
+        path == ORCHESTRA_SESSION_API_ROOT
+        or path.startswith(f"{ORCHESTRA_SESSION_API_ROOT}/")
+    ):
+        return None
+    prefix = f"{ORCHESTRA_SESSION_API_ROOT}/"
+    candidate = path[len(prefix) :] if path.startswith(prefix) else ""
+    if (
+        not candidate
+        or "/" in candidate
+        or "%" in candidate
+        or not _ORCHESTRA_SESSION_ID.fullmatch(candidate)
+    ):
+        raise ValueError("session identifier is malformed")
+    return candidate
 
 
 def get_service() -> WebRuntimeService:
@@ -506,6 +534,34 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
 
 
 def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
+    try:
+        session_id = _session_id_from_api_path(path)
+    except ValueError:
+        return HTTPStatus.BAD_REQUEST, {
+            "ok": False,
+            "error": "session identifier is malformed",
+        }
+    if session_id is not None:
+        try:
+            from runtime.epistemic_orchestra.session_view import (
+                OrchestraSessionNotFoundError,
+            )
+        except ModuleNotFoundError:  # pragma: no cover - script launch path
+            from epistemic_orchestra.session_view import OrchestraSessionNotFoundError
+        try:
+            return HTTPStatus.OK, get_orchestra_service().get_orchestra_session_view(
+                session_id
+            )
+        except OrchestraSessionNotFoundError:
+            return HTTPStatus.NOT_FOUND, {
+                "ok": False,
+                "error": "Orchestra session was not found",
+            }
+        except (TypeError, ValueError, RuntimeError):
+            return HTTPStatus.CONFLICT, {
+                "ok": False,
+                "error": "Orchestra session evidence is unavailable",
+            }
     if path == "/api/provider-connections":
         return HTTPStatus.OK, get_orchestra_service().list_connections()
     if path == "/api/model-profiles":
@@ -604,7 +660,7 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path in SENSITIVE_ORCHESTRA_GET_PATHS and not self._local_request_allowed():
+        if _is_sensitive_orchestra_get_path(parsed.path) and not self._local_request_allowed():
             self._write_json(
                 HTTPStatus.FORBIDDEN,
                 {"ok": False, "error": "Loopback-local request required"},

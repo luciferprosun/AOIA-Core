@@ -67,6 +67,15 @@ from runtime.epistemic_orchestra.role_binding import (
     build_orchestra_role_selection,
     validate_role_selection_against_current_profiles,
 )
+from runtime.epistemic_orchestra.session_view import (
+    OrchestraAuditResultView,
+    OrchestraCriticResultView,
+    OrchestraRoleResultView,
+    OrchestraSessionSnapshot,
+    OrchestraSessionView,
+    build_orchestra_session_view,
+    serialize_orchestra_session_view,
+)
 
 
 __all__ = [
@@ -87,6 +96,11 @@ __all__ = [
     "OrchestraLiveRunPreview",
     "OrchestraOperatorRole",
     "OrchestraRoleSelection",
+    "OrchestraAuditResultView",
+    "OrchestraCriticResultView",
+    "OrchestraRoleResultView",
+    "OrchestraSessionSnapshot",
+    "OrchestraSessionView",
     "ModelRoleAssignment",
     "PlannedLiveStage",
     "LiveOrchestraSessionResult",
@@ -107,6 +121,7 @@ __all__ = [
     "build_live_run_preview",
     "build_model_role_assignment",
     "build_orchestra_role_selection",
+    "build_orchestra_session_view",
     "build_truncation_evidence",
     "canonical_json_bytes",
     "canonical_sha256",
@@ -123,6 +138,7 @@ __all__ = [
     "validate_stage_replay_state",
     "verify_epistemic_stage_chain",
     "run_live_orchestra_session",
+    "serialize_orchestra_session_view",
     "validate_live_run_preview",
     "validate_role_selection_against_current_profiles",
 ]

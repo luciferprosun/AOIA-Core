@@ -473,6 +473,66 @@
             </p>
             <pre id="orchestra-live-result" class="code-panel" aria-live="polite"></pre>
           </article>
+
+          <article id="orchestra-session-view" class="status-card commit-card">
+            <div class="view-head">
+              <div>
+                <p class="eyebrow">Read-only retained evidence</p>
+                <h4>Orchestra session view</h4>
+              </div>
+              <span id="orchestra-session-view-status" class="badge badge-blocked">Session ID required</span>
+            </div>
+            <label class="label" for="orchestra-session-id">Session ID</label>
+            <div class="button-row">
+              <input
+                id="orchestra-session-id"
+                class="select"
+                autocomplete="off"
+                placeholder="orchestra-web-..."
+              />
+              <button id="load-orchestra-session" class="button button-subtle" type="button">Load read-only view</button>
+            </div>
+            <p class="helper-text">
+              Loading this view cannot create a session, replay a consumed plan, refresh confirmation evidence, or call a provider.
+            </p>
+
+            <h5>Session Summary</h5>
+            <pre id="orchestra-session-summary" class="code-panel" aria-live="polite"></pre>
+
+            <h5>Role and Provider Bindings</h5>
+            <div class="commit-table-wrap">
+              <table class="commit-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Role</th>
+                    <th>Connection</th>
+                    <th>Provider type</th>
+                    <th>Model</th>
+                    <th>Profile</th>
+                    <th>Invocation</th>
+                    <th>Response</th>
+                  </tr>
+                </thead>
+                <tbody id="orchestra-session-role-table-body">
+                  <tr><td colspan="8">No session loaded.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h5>Provider Results</h5>
+            <div id="orchestra-session-provider-results"></div>
+
+            <h5>CRITIC RESULT — NON-AUTHORITATIVE METADATA</h5>
+            <div id="orchestra-session-critic-results"></div>
+
+            <h5>AUDIT RESULT — EVIDENCE ONLY</h5>
+            <pre id="orchestra-session-audit-result" class="code-panel"></pre>
+
+            <p id="orchestra-session-human-warning" class="blocked-note">
+              HUMAN REVIEW REQUIRED — NO RESULT SHOWN HERE GRANTS APPROVAL, WRITE OR EXECUTION AUTHORITY
+            </p>
+          </article>
         </section>
       </main>
     </div>

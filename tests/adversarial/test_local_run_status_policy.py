@@ -10,6 +10,7 @@ from unittest.mock import patch
 from runtime.safety import audit_event_logger, sandbox_artifact_runner
 from runtime.safety.local_run_status import MAX_LOCAL_RUN_STATUS_AUDIT_LOG_BYTES, read_local_run_status
 from runtime.safety.local_workspace_run_context import run_durable_local_agent_in_workspace
+from tests.write_kill_switch_test_support_1a import patch_dry_run_writer_with_test_kill_switch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -126,11 +127,12 @@ class LocalRunStatusPolicyTests(unittest.TestCase):
 
     def test_write_functions_are_not_called_by_status_reader(self) -> None:
         with TemporaryDirectory() as base:
-            run_durable_local_agent_in_workspace(
-                goal="Create a status reader artifact.",
-                base_workspace_root=base,
-                run_id="no_write_calls_run",
-            )
+            with patch_dry_run_writer_with_test_kill_switch():
+                run_result = run_durable_local_agent_in_workspace(
+                    goal="Create a status reader artifact.",
+                    base_workspace_root=base,
+                    run_id="no_write_calls_run",
+                )
             with patch.object(
                 audit_event_logger,
                 "append_audit_event_jsonl",
@@ -142,8 +144,10 @@ class LocalRunStatusPolicyTests(unittest.TestCase):
             ):
                 status = read_local_run_status(base_workspace_root=base, run_id="no_write_calls_run")
 
+        self.assertFalse(run_result.completed)
+        self.assertIn("canonical human gate evidence", run_result.reason)
         self.assertTrue(status.read_successful)
-        self.assertTrue(status.run_complete)
+        self.assertFalse(status.run_complete)
 
     def test_hash_chain_missing_event_hash_is_invalid(self) -> None:
         with TemporaryDirectory() as base:

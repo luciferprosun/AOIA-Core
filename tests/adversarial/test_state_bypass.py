@@ -12,10 +12,13 @@ from runtime.safety.dry_run_artifact_integration import (
     create_artifact_request_from_dry_run,
     run_dry_run_agent_and_write_artifact,
 )
-from runtime.safety.sandbox_artifact_runner import write_sandbox_artifact
 from runtime.schemas.action_proposal import ActionProposalType
 from runtime.schemas.dry_run_agent import create_dry_run_agent_request, create_dry_run_plan_step
 from runtime.schemas.sandbox_artifact import SandboxArtifactRequest, SandboxArtifactState
+from tests.write_kill_switch_test_support_1a import (
+    enabled_test_write_kill_switch,
+    patch_dry_run_writer_with_test_kill_switch,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -83,16 +86,18 @@ class ArtifactStateBypassAdversarialTests(unittest.TestCase):
         self.assertEqual(result.state, SandboxArtifactState.BLOCKED)
         self.assertIn("artifact contract requires dry-run identifiers", result.blocked_reason)
 
-    def test_existing_m9_dry_run_artifact_integration_still_succeeds(self) -> None:
-        with TemporaryDirectory() as workspace:
+    def test_existing_m9_dry_run_artifact_integration_stops_at_canonical_gate(self) -> None:
+        with TemporaryDirectory() as workspace, patch_dry_run_writer_with_test_kill_switch():
             result = run_dry_run_agent_and_write_artifact(self.make_dry_run_request(), workspace)
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
-            self.assertTrue(Path(artifact_result.resolved_output_path).is_file())
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
+            self.assertIn("canonical human gate evidence", artifact_result.blocked_reason)
+            self.assertFalse(artifact_result.write_completed)
+            self.assertFalse(any(Path(workspace).iterdir()))
 
-    def test_existing_m10_controlled_agent_demo_still_succeeds(self) -> None:
-        with TemporaryDirectory() as workspace:
+    def test_existing_m10_controlled_agent_demo_stops_at_canonical_gate(self) -> None:
+        with TemporaryDirectory() as workspace, patch_dry_run_writer_with_test_kill_switch():
             result = run_controlled_agent_demo(
                 "Create a controlled local summary artifact.",
                 workspace,
@@ -100,8 +105,10 @@ class ArtifactStateBypassAdversarialTests(unittest.TestCase):
             )
             artifact_result = result[-1]
 
-            self.assertEqual(artifact_result.state, SandboxArtifactState.WRITTEN)
-            self.assertTrue(Path(artifact_result.resolved_output_path).is_file())
+            self.assertEqual(artifact_result.state, SandboxArtifactState.BLOCKED)
+            self.assertIn("canonical human gate evidence", artifact_result.blocked_reason)
+            self.assertFalse(artifact_result.write_completed)
+            self.assertFalse(any(Path(workspace).iterdir()))
 
     def test_runtime_does_not_add_forbidden_capabilities(self) -> None:
         forbidden_modules = {
@@ -179,8 +186,8 @@ class ArtifactStateBypassAdversarialTests(unittest.TestCase):
         )
 
     def run_direct(self, request: SandboxArtifactRequest):
-        with TemporaryDirectory() as workspace:
-            result = write_sandbox_artifact(request, workspace)
+        with TemporaryDirectory() as workspace, enabled_test_write_kill_switch() as switch:
+            result = switch.write_sandbox_artifact(request, workspace)
             self.assertFalse(result.write_attempted)
             self.assertFalse(result.write_completed)
             self.assertFalse(any(Path(workspace).iterdir()))

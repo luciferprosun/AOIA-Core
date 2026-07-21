@@ -18,6 +18,12 @@ requires = []
 build-backend = "aoia_build_backend"
 backend-path = ["build_support"]
 
+[tool.pytest.ini_options]
+# Preserve forensic source exports as evidence without collecting their archived test copies.
+addopts = [
+    "--ignore=archive/forensic_exports/reports_forensic_export/source_export/tests",
+]
+
 [tool.setuptools]
 package-dir = {"" = "runtime", runtime = "runtime"}
 py-modules = ["main"]

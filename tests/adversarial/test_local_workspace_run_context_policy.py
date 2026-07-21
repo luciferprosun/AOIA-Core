@@ -10,6 +10,7 @@ from runtime.safety.local_workspace_run_context import (
     prepare_local_workspace_run_context,
     run_durable_local_agent_in_workspace,
 )
+from tests.write_kill_switch_test_support_1a import patch_dry_run_writer_with_test_kill_switch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -103,15 +104,19 @@ class LocalWorkspaceRunContextPolicyTests(unittest.TestCase):
                     default_relative_output_path="../escape.md",
                 )
 
-            result = run_durable_local_agent_in_workspace(
-                goal="Create a contained artifact.",
-                base_workspace_root=base,
-                run_id="contained_artifact_run",
-            )
+            with patch_dry_run_writer_with_test_kill_switch():
+                result = run_durable_local_agent_in_workspace(
+                    goal="Create a contained artifact.",
+                    base_workspace_root=base,
+                    run_id="contained_artifact_run",
+                )
 
-            artifact_path = Path(result.artifact_path or "").resolve()
             expected_root = (Path(base) / "runs" / "contained_artifact_run" / "artifacts").resolve()
-            self.assertTrue(str(artifact_path).startswith(str(expected_root)))
+            self.assertEqual(expected_root, Path(result.workspace_root).resolve())
+            self.assertIsNone(result.artifact_path)
+            self.assertFalse(result.completed)
+            self.assertIn("canonical human gate evidence", result.reason)
+            self.assertFalse(any(expected_root.iterdir()))
 
     def test_duplicate_run_id_is_rejected_by_default(self) -> None:
         with TemporaryDirectory() as base:

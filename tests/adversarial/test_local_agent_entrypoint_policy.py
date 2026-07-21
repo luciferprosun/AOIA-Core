@@ -9,6 +9,7 @@ from unittest.mock import patch
 from runtime.safety import dry_run_artifact_integration
 from runtime.safety import local_agent_entrypoint
 from runtime.safety.audit_event_logger import AuditLogWriteBlockedError
+from tests.write_kill_switch_test_support_1a import patch_dry_run_writer_with_test_kill_switch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -51,14 +52,18 @@ class LocalAgentEntrypointPolicyTests(unittest.TestCase):
                     audit_dir=audit_dir,
                 )
 
-            result = local_agent_entrypoint.run_durable_local_agent_entrypoint(
-                goal="create\tartifact\nsummary",
-                workspace_root=workspace,
-                audit_dir=audit_dir,
-                relative_output_path="allowed-control.md",
-            )
+            with patch_dry_run_writer_with_test_kill_switch():
+                result = local_agent_entrypoint.run_durable_local_agent_entrypoint(
+                    goal="create\tartifact\nsummary",
+                    workspace_root=workspace,
+                    audit_dir=audit_dir,
+                    relative_output_path="allowed-control.md",
+                )
 
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
+        self.assertTrue(result.durable_audit_completed)
+        self.assertFalse(result.artifact_write_completed)
+        self.assertIn("canonical human gate evidence", result.reason)
 
     def test_relative_workspace_path_is_rejected(self) -> None:
         with TemporaryDirectory() as audit_dir:
@@ -99,7 +104,7 @@ class LocalAgentEntrypointPolicyTests(unittest.TestCase):
 
     def test_entrypoint_does_not_call_old_non_durable_function(self) -> None:
         with TemporaryDirectory() as workspace, TemporaryDirectory() as audit_dir:
-            with patch.object(
+            with patch_dry_run_writer_with_test_kill_switch(), patch.object(
                 dry_run_artifact_integration,
                 "run_dry_run_agent_and_write_artifact",
                 side_effect=AssertionError("old non-durable path must not be called"),
@@ -110,7 +115,10 @@ class LocalAgentEntrypointPolicyTests(unittest.TestCase):
                     audit_dir=audit_dir,
                 )
 
-        self.assertTrue(result.completed)
+        self.assertFalse(result.completed)
+        self.assertTrue(result.durable_audit_completed)
+        self.assertFalse(result.artifact_write_completed)
+        self.assertIn("canonical human gate evidence", result.reason)
 
     def test_old_non_durable_function_still_exists_but_is_not_imported_by_entrypoint(self) -> None:
         self.assertTrue(hasattr(dry_run_artifact_integration, "run_dry_run_agent_and_write_artifact"))

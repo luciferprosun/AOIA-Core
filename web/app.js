@@ -8,6 +8,7 @@ const state = {
   orchestraModels: [],
   orchestraPreview: null,
   orchestraPreviewHash: "",
+  orchestraSessionView: null,
   selectedProvider: "",
   selectedModel: "",
   selectedMode: "PUBLIC_DEV",
@@ -33,7 +34,7 @@ const MODE_LABELS = {
 };
 
 const ORCHESTRA_ROLES = ["MAIN", "CRITIC", "AUDITOR", "SYNTHESIZER"];
-const SENSITIVE_UI_FIELD_PARTS = ["api_key", "apikey", "authorization", "bearer", "password", "secret"];
+const SENSITIVE_UI_FIELD_PARTS = ["api_key", "apikey", "authorization", "bearer", "credential", "password", "secret"];
 
 const elements = {
   navItems: document.querySelectorAll(".nav-item"),
@@ -132,6 +133,14 @@ const elements = {
   runOrchestra: document.querySelector("#run-orchestra"),
   orchestraLiveStatus: document.querySelector("#orchestra-live-status"),
   orchestraLiveResult: document.querySelector("#orchestra-live-result"),
+  orchestraSessionId: document.querySelector("#orchestra-session-id"),
+  loadOrchestraSession: document.querySelector("#load-orchestra-session"),
+  orchestraSessionViewStatus: document.querySelector("#orchestra-session-view-status"),
+  orchestraSessionSummary: document.querySelector("#orchestra-session-summary"),
+  orchestraSessionRoleTableBody: document.querySelector("#orchestra-session-role-table-body"),
+  orchestraSessionProviderResults: document.querySelector("#orchestra-session-provider-results"),
+  orchestraSessionCriticResults: document.querySelector("#orchestra-session-critic-results"),
+  orchestraSessionAuditResult: document.querySelector("#orchestra-session-audit-result"),
 };
 
 async function jsonFetch(url, options = {}) {
@@ -838,6 +847,8 @@ async function previewOrchestraPlan() {
     }
     state.orchestraPreview = preview;
     state.orchestraPreviewHash = previewHash;
+    clearOrchestraSessionView();
+    elements.orchestraSessionId.value = String(preview.orchestra_run_id || "");
     elements.orchestraPreviewHash.textContent = previewHash;
     elements.orchestraConfirmationHash.value = "";
     elements.orchestraConfirmPreview.checked = false;
@@ -848,6 +859,121 @@ async function previewOrchestraPlan() {
     renderSafeJson(elements.orchestraLiveResult, payload);
   } catch (error) {
     invalidateOrchestraPreview(`Preview blocked: ${String(error)}`);
+  }
+}
+
+function appendReadOnlyResult(container, heading, payload) {
+  const article = document.createElement("article");
+  article.className = "status-card";
+  const title = document.createElement("h6");
+  title.textContent = heading;
+  const content = document.createElement("pre");
+  content.className = "code-panel";
+  renderSafeJson(content, payload);
+  article.append(title, content);
+  container.appendChild(article);
+}
+
+function clearOrchestraSessionView() {
+  state.orchestraSessionView = null;
+  elements.orchestraSessionSummary.textContent = "No session view loaded.";
+  elements.orchestraSessionRoleTableBody.replaceChildren();
+  elements.orchestraSessionProviderResults.replaceChildren();
+  elements.orchestraSessionCriticResults.replaceChildren();
+  elements.orchestraSessionAuditResult.textContent = "No audit evidence loaded.";
+}
+
+function renderOrchestraSessionView(payload) {
+  state.orchestraSessionView = payload;
+  const summary = {
+    schema_version: payload.schema_version,
+    session_id: payload.session_id,
+    session_state: payload.session_state,
+    created_at_epoch: payload.created_at_epoch,
+    updated_at_epoch: payload.updated_at_epoch,
+    session_digest: payload.session_digest,
+    run_hash: payload.run_hash,
+    live_run_plan_digest: payload.live_run_plan_digest,
+    role_selection_digest: payload.role_selection_digest,
+    source_prompt_digest: payload.source_prompt_digest,
+    plan_expiration_epoch: payload.plan_expiration_epoch,
+    plan_available: payload.plan_available,
+    plan_consumed: payload.plan_consumed,
+    plan_reusable: payload.plan_reusable,
+    exact_human_confirmation_recorded: payload.exact_human_confirmation_recorded,
+    confirmation_digest: payload.confirmation_digest,
+    confirmation_is_evidence_only: payload.confirmation_is_evidence_only,
+    selected_role_count: payload.selected_role_count,
+    completed_role_count: payload.completed_role_count,
+    failed_or_incomplete_role_count: payload.failed_or_incomplete_role_count,
+    evidence_status: payload.evidence_status,
+    evidence_references: payload.evidence_references,
+    safety_warnings: payload.safety_warnings,
+    authority_status: payload.authority_status,
+    human_review_required: payload.human_review_required,
+  };
+  renderSafeJson(elements.orchestraSessionSummary, summary);
+
+  elements.orchestraSessionRoleTableBody.replaceChildren();
+  for (const role of payload.role_results || []) {
+    const row = document.createElement("tr");
+    const values = [
+      role.ordering_index,
+      role.operator_role,
+      role.connection_id,
+      role.provider_type,
+      role.selected_model,
+      role.model_profile_id,
+      role.invocation_status,
+      role.response_status,
+    ];
+    for (const value of values) {
+      const cell = document.createElement("td");
+      cell.textContent = String(value ?? "-");
+      row.appendChild(cell);
+    }
+    elements.orchestraSessionRoleTableBody.appendChild(row);
+  }
+
+  elements.orchestraSessionProviderResults.replaceChildren();
+  for (const role of payload.role_results || []) {
+    appendReadOnlyResult(
+      elements.orchestraSessionProviderResults,
+      `${role.operator_role || "ROLE"} — UNTRUSTED PROVIDER RESULT`,
+      role,
+    );
+  }
+
+  elements.orchestraSessionCriticResults.replaceChildren();
+  for (const critic of payload.critic_results || []) {
+    appendReadOnlyResult(
+      elements.orchestraSessionCriticResults,
+      `CRITIC RESULT — NON-AUTHORITATIVE METADATA — ${critic.critic_identifier || "unavailable"}`,
+      critic,
+    );
+  }
+  renderSafeJson(elements.orchestraSessionAuditResult, payload.audit_result || {});
+}
+
+async function loadOrchestraSessionView() {
+  clearOrchestraSessionView();
+  const sessionId = elements.orchestraSessionId.value.trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(sessionId)) {
+    elements.orchestraSessionViewStatus.textContent = "Malformed session ID";
+    elements.orchestraSessionViewStatus.className = "badge badge-blocked";
+    return;
+  }
+  elements.loadOrchestraSession.disabled = true;
+  try {
+    const payload = await jsonFetch(`/api/orchestra/sessions/${sessionId}`);
+    renderOrchestraSessionView(payload);
+    elements.orchestraSessionViewStatus.textContent = `${payload.session_state || "UNKNOWN"} — read only`;
+    elements.orchestraSessionViewStatus.className = "badge";
+  } catch (error) {
+    elements.orchestraSessionViewStatus.textContent = `View unavailable: ${String(error)}`;
+    elements.orchestraSessionViewStatus.className = "badge badge-blocked";
+  } finally {
+    elements.loadOrchestraSession.disabled = false;
   }
 }
 
@@ -862,6 +988,10 @@ async function runOrchestra() {
     return;
   }
 
+  clearOrchestraSessionView();
+  elements.orchestraSessionViewStatus.textContent =
+    "Session lifecycle changed; load the read-only view after the run.";
+  elements.orchestraSessionViewStatus.className = "badge";
   elements.runOrchestra.disabled = true;
   elements.orchestraLiveStatus.textContent = "Running one bounded Orchestra session";
   elements.orchestraLiveStatus.className = "badge";
@@ -1168,6 +1298,15 @@ elements.orchestraPrompt.addEventListener("input", () => {
   }
 });
 elements.runOrchestra.addEventListener("click", runOrchestra);
+elements.loadOrchestraSession.addEventListener("click", loadOrchestraSessionView);
+elements.orchestraSessionId.addEventListener("input", () => {
+  const displayedSessionId = state.orchestraSessionView?.session_id;
+  if (displayedSessionId && elements.orchestraSessionId.value.trim() !== displayedSessionId) {
+    clearOrchestraSessionView();
+    elements.orchestraSessionViewStatus.textContent = "Session ID changed; load the read-only view.";
+    elements.orchestraSessionViewStatus.className = "badge";
+  }
+});
 
 renderPresetExamples();
 

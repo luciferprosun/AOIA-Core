@@ -68,12 +68,20 @@ class LiveSessionError(EpistemicContractError):
 class LiveStageExecutionError(LiveSessionError):
     """Secret-free identity of one consumed exact stage that failed closed."""
 
-    def __init__(self, *, plan: PlannedLiveStage) -> None:
+    def __init__(
+        self,
+        *,
+        plan: PlannedLiveStage,
+        completed_stage_results: Sequence[object] = (),
+        completed_stage_chain: Sequence[object] = (),
+    ) -> None:
         self.stage_id = plan.stage_id
         self.call_index = plan.call_index
         self.operator_role = plan.operator_role
         self.connection_id = plan.connection_id
         self.model_profile_id = plan.model_profile_id
+        self.completed_stage_results = tuple(completed_stage_results)
+        self.completed_stage_chain = tuple(completed_stage_chain)
         super().__init__(
             "live Orchestra stage failed safely "
             f"(stage_id={self.stage_id}, call_index={self.call_index}, "
@@ -549,6 +557,7 @@ class LiveProviderStageResult(JsonContract):
     response_text: str
     response_hash: str
     critic_payload: CriticStagePayload | None
+    latency_ms: int | None = None
     trust_status: str = UNTRUSTED
     authority_status: str = NON_AUTHORITATIVE
     authoritative: bool = False
@@ -571,6 +580,12 @@ class LiveProviderStageResult(JsonContract):
             raise LiveSessionError("provider response exceeds the bounded live-session size")
         if self.response_hash != exact_text_sha256(self.response_text):
             raise LiveSessionError("provider response hash differs")
+        if self.latency_ms is not None and (
+            isinstance(self.latency_ms, bool)
+            or not isinstance(self.latency_ms, int)
+            or self.latency_ms < 0
+        ):
+            raise LiveSessionError("provider response latency is malformed")
         if self.trust_status != UNTRUSTED:
             raise LiveSessionError("provider response must remain UNTRUSTED")
         if self.authority_status != NON_AUTHORITATIVE:
@@ -735,12 +750,20 @@ def _invoke_one(
                 differs = actual != expected
             if differs:
                 raise LiveSessionError(f"exact provider result {name} differs")
+        latency_ms = getattr(response, "latency_ms", None)
+        if latency_ms is not None and (
+            isinstance(latency_ms, bool)
+            or not isinstance(latency_ms, int)
+            or latency_ms < 0
+        ):
+            raise LiveSessionError("exact provider result latency_ms differs")
         return LiveProviderStageResult(
             operator_role=binding.operator_role,
             binding=binding,
             response_text=response_text,
             response_hash=exact_text_sha256(response_text),
             critic_payload=None,
+            latency_ms=latency_ms,
         )
     except LiveStageExecutionError:
         raise
@@ -1008,15 +1031,22 @@ def run_live_orchestra_session(
             parent_response_hash=parent_response_hash,
             provider_prompt=provider_prompt,
         )
-        result = _invoke_one(
-            exact_invoker=exact_invoker,
-            registry=registry,
-            confirmation=confirmation,
-            binding=binding,
-            stage=stage,
-            plan=plan,
-            provider_prompt=provider_prompt,
-        )
+        try:
+            result = _invoke_one(
+                exact_invoker=exact_invoker,
+                registry=registry,
+                confirmation=confirmation,
+                binding=binding,
+                stage=stage,
+                plan=plan,
+                provider_prompt=provider_prompt,
+            )
+        except LiveStageExecutionError as error:
+            raise LiveStageExecutionError(
+                plan=plan,
+                completed_stage_results=results,
+                completed_stage_chain=stages,
+            ) from error
         payload = _review_payload(stage, result.response_text)
         result = LiveProviderStageResult(
             operator_role=result.operator_role,
@@ -1024,6 +1054,7 @@ def run_live_orchestra_session(
             response_text=result.response_text,
             response_hash=result.response_hash,
             critic_payload=payload,
+            latency_ms=result.latency_ms,
         )
         stages.append(stage)
         results.append(result)
@@ -1064,15 +1095,22 @@ def run_live_orchestra_session(
             ),
             provider_prompt=provider_prompt,
         )
-        synthesis_result = _invoke_one(
-            exact_invoker=exact_invoker,
-            registry=registry,
-            confirmation=confirmation,
-            binding=binding,
-            stage=final_stage,
-            plan=plan,
-            provider_prompt=provider_prompt,
-        )
+        try:
+            synthesis_result = _invoke_one(
+                exact_invoker=exact_invoker,
+                registry=registry,
+                confirmation=confirmation,
+                binding=binding,
+                stage=final_stage,
+                plan=plan,
+                provider_prompt=provider_prompt,
+            )
+        except LiveStageExecutionError as error:
+            raise LiveStageExecutionError(
+                plan=plan,
+                completed_stage_results=results,
+                completed_stage_chain=stages[:-1],
+            ) from error
         results.append(synthesis_result)
         final_draft = synthesis_result.response_text
     else:
