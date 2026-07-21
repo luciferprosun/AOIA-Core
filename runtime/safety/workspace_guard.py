@@ -76,6 +76,12 @@ class WorkspaceGuardResult:
     write_authority_granted: bool = False
     execution_authority_granted: bool = False
     provider_authority_granted: bool = False
+    workspace_device: int | None = None
+    workspace_inode: int | None = None
+    parent_identities: tuple[tuple[str, int, int], ...] = ()
+    target_device: int | None = None
+    target_inode: int | None = None
+    target_mode: int | None = None
 
     def __post_init__(self) -> None:
         status = WorkspaceGuardStatus(self.status)
@@ -155,10 +161,11 @@ def validate_workspace_root(workspace_root: str | Path | None) -> WorkspaceGuard
             None,
         )
     try:
-        if path.is_symlink():
+        symlink_component = _first_symlink_component(path)
+        if symlink_component is not None:
             return _blocked(
                 WorkspaceGuardStatus.BLOCKED_WORKSPACE_ROOT_SYMLINK,
-                "workspace_root must not be a symlink",
+                "workspace_root and its path components must not be symlinks",
                 str(path),
                 None,
                 None,
@@ -180,6 +187,7 @@ def validate_workspace_root(workspace_root: str | Path | None) -> WorkspaceGuard
                 None,
             )
         resolved = path.resolve(strict=True)
+        root_stat = resolved.stat(follow_symlinks=False)
     except OSError:
         return _blocked(
             WorkspaceGuardStatus.BLOCKED_UNRESOLVED_WORKSPACE_ROOT,
@@ -197,6 +205,8 @@ def validate_workspace_root(workspace_root: str | Path | None) -> WorkspaceGuard
         workspace_root=str(resolved),
         normalized_relative_target_path=None,
         resolved_absolute_target_path=None,
+        workspace_device=root_stat.st_dev,
+        workspace_inode=root_stat.st_ino,
     )
 
 
@@ -271,7 +281,7 @@ def validate_workspace_target_path(
 
     root = Path(root_result.workspace_root or "")
     candidate = root / normalized
-    parent_check = _existing_parent_symlink_check(root, normalized)
+    parent_check, parent_identities = _existing_parent_symlink_check(root, normalized)
     if parent_check is not None:
         return parent_check
     if candidate.is_symlink():
@@ -301,6 +311,19 @@ def validate_workspace_target_path(
             str(resolved_target),
         )
 
+    try:
+        target_stat = candidate.stat(follow_symlinks=False)
+    except FileNotFoundError:
+        target_stat = None
+    except OSError:
+        return _target_blocked(
+            WorkspaceGuardStatus.BLOCKED_TARGET_POLICY,
+            "artifact output path identity cannot be inspected safely",
+            root_result.workspace_root,
+            normalized,
+            str(resolved_target),
+        )
+
     return WorkspaceGuardResult(
         status=WorkspaceGuardStatus.ALLOWED,
         allowed=True,
@@ -309,6 +332,12 @@ def validate_workspace_target_path(
         workspace_root=root_result.workspace_root,
         normalized_relative_target_path=normalized,
         resolved_absolute_target_path=str(resolved_target),
+        workspace_device=root_result.workspace_device,
+        workspace_inode=root_result.workspace_inode,
+        parent_identities=parent_identities,
+        target_device=target_stat.st_dev if target_stat is not None else None,
+        target_inode=target_stat.st_ino if target_stat is not None else None,
+        target_mode=target_stat.st_mode if target_stat is not None else None,
     )
 
 
@@ -325,26 +354,66 @@ def require_workspace_guard_allowed(
 def _existing_parent_symlink_check(
     workspace_root: Path,
     normalized_target_path: str,
-) -> WorkspaceGuardResult | None:
+) -> tuple[WorkspaceGuardResult | None, tuple[tuple[str, int, int], ...]]:
     current = workspace_root
+    identities: list[tuple[str, int, int]] = []
     for part in normalized_target_path.split("/")[:-1]:
         current = current / part
         if current.is_symlink():
-            return _target_blocked(
-                WorkspaceGuardStatus.BLOCKED_PARENT_SYMLINK,
-                "artifact parent path contains a symlink",
-                str(workspace_root),
-                normalized_target_path,
-                str(current.resolve(strict=False)),
+            return (
+                _target_blocked(
+                    WorkspaceGuardStatus.BLOCKED_PARENT_SYMLINK,
+                    "artifact parent path contains a symlink",
+                    str(workspace_root),
+                    normalized_target_path,
+                    str(current.resolve(strict=False)),
+                ),
+                tuple(identities),
             )
         if current.exists() and not current.is_dir():
-            return _target_blocked(
-                WorkspaceGuardStatus.BLOCKED_TARGET_POLICY,
-                "artifact parent path is not a directory",
-                str(workspace_root),
-                normalized_target_path,
-                str(current),
+            return (
+                _target_blocked(
+                    WorkspaceGuardStatus.BLOCKED_TARGET_POLICY,
+                    "artifact parent path is not a directory",
+                    str(workspace_root),
+                    normalized_target_path,
+                    str(current),
+                ),
+                tuple(identities),
             )
+        if current.exists():
+            try:
+                current_stat = current.stat(follow_symlinks=False)
+            except OSError:
+                return (
+                    _target_blocked(
+                        WorkspaceGuardStatus.BLOCKED_TARGET_POLICY,
+                        "artifact parent path identity cannot be inspected safely",
+                        str(workspace_root),
+                        normalized_target_path,
+                        str(current),
+                    ),
+                    tuple(identities),
+                )
+            identities.append(
+                (
+                    current.relative_to(workspace_root).as_posix(),
+                    current_stat.st_dev,
+                    current_stat.st_ino,
+                )
+            )
+    return None, tuple(identities)
+
+
+def _first_symlink_component(path: Path) -> Path | None:
+    current = Path(path.anchor)
+    for part in path.parts[1:]:
+        current = current / part
+        try:
+            if current.is_symlink():
+                return current
+        except OSError:
+            return current
     return None
 
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import os
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -35,6 +36,7 @@ from runtime.safety.workspace_guard import (
     WORKSPACE_GUARD_BLOCKED_SYMLINK_TARGET,
     WORKSPACE_GUARD_BLOCKED_TARGET_EMPTY,
     WORKSPACE_GUARD_BLOCKED_TARGET_NULL_BYTE,
+    WORKSPACE_GUARD_BLOCKED_TARGET_POLICY,
     WORKSPACE_GUARD_BLOCKED_TARGET_TRAVERSAL,
     WORKSPACE_GUARD_BLOCKED_WORKSPACE_ROOT_SYMLINK,
     WorkspaceGuardResult,
@@ -78,6 +80,25 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
                 self.assertEqual(status, result.status.value)
                 self.assertFalse(result.allowed)
 
+    def test_wrong_type_missing_and_non_directory_workspace_roots_block(self):
+        with TemporaryDirectory() as parent:
+            base = Path(parent)
+            missing = base / "missing"
+            regular_file = base / "not-a-directory"
+            regular_file.write_text("not a workspace", encoding="utf-8")
+            cases = {
+                "boolean": False,
+                "integer": 1,
+                "mapping": {"workspace_safe": True},
+                "missing_path": str(missing),
+                "regular_file": str(regular_file),
+            }
+
+            for name, workspace_root in cases.items():
+                with self.subTest(name=name):
+                    result = validate_workspace_root(workspace_root)  # type: ignore[arg-type]
+                    self.assertFalse(result.allowed)
+
     def test_symlink_workspace_root_blocks(self):
         with TemporaryDirectory() as parent:
             real_root = Path(parent) / "real"
@@ -93,6 +114,23 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
         self.assertEqual(WORKSPACE_GUARD_BLOCKED_WORKSPACE_ROOT_SYMLINK, result.status.value)
         self.assertFalse(result.allowed)
 
+    def test_workspace_root_with_symlink_ancestor_blocks(self):
+        with TemporaryDirectory() as parent, TemporaryDirectory() as outside:
+            real_parent = Path(outside) / "real-parent"
+            real_parent.mkdir()
+            workspace = real_parent / "workspace"
+            workspace.mkdir()
+            linked_parent = Path(parent) / "linked-parent"
+            try:
+                linked_parent.symlink_to(real_parent, target_is_directory=True)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"symlink creation not supported here: {exc}")
+
+            result = validate_workspace_root(str(linked_parent / "workspace"))
+
+        self.assertEqual(WORKSPACE_GUARD_BLOCKED_WORKSPACE_ROOT_SYMLINK, result.status.value)
+        self.assertFalse(result.allowed)
+
     def test_target_path_rejections_are_deterministic(self):
         cases = {
             "empty": ("", WORKSPACE_GUARD_BLOCKED_TARGET_EMPTY),
@@ -104,6 +142,8 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
             "null_byte": ("reports/bad\x00name.txt", WORKSPACE_GUARD_BLOCKED_TARGET_NULL_BYTE),
             "dot_git_config": (".git/config.txt", WORKSPACE_GUARD_BLOCKED_DOT_GIT_TARGET),
             "inside_dot_git": ("reports/.git/config.txt", WORKSPACE_GUARD_BLOCKED_DOT_GIT_TARGET),
+            "dot": (".", WORKSPACE_GUARD_BLOCKED_TARGET_POLICY),
+            "trailing_separator": ("reports/", WORKSPACE_GUARD_BLOCKED_TARGET_POLICY),
         }
 
         with TemporaryDirectory() as workspace:
@@ -226,7 +266,7 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
             def swap_after_second_validation(workspace_root, target_path):
                 result = original_guard(workspace_root, target_path)
                 calls["count"] += 1
-                if calls["count"] == 2 and result.allowed:
+                if calls["count"] == 3 and result.allowed:
                     target = Path(result.resolved_absolute_target_path or "")
                     target.symlink_to(Path(outside) / "escaped.txt")
                 return result
@@ -260,7 +300,7 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
             def swap_parent_after_second_validation(workspace_root, target_path):
                 result = original_guard(workspace_root, target_path)
                 calls["count"] += 1
-                if calls["count"] == 2 and result.allowed:
+                if calls["count"] == 3 and result.allowed:
                     parent = Path(result.resolved_absolute_target_path or "").parent
                     parent.rmdir()
                     parent.symlink_to(Path(outside), target_is_directory=True)
@@ -283,6 +323,326 @@ class WorkspaceGuardToctou1ATests(unittest.TestCase):
             self.assertFalse(result.write_attempted)
             self.assertFalse((Path(outside) / "swap-parent.txt").exists())
             self.assertIn("symlink", result.blocked_reason)
+
+    def test_workspace_root_replacement_after_initial_validation_blocks(self):
+        with TemporaryDirectory() as base, TemporaryDirectory() as switch_dir:
+            base_path = Path(base)
+            workspace = base_path / "workspace"
+            displaced = base_path / "displaced-workspace"
+            workspace.mkdir()
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="reports/root-race.txt", gate_result=gate)
+            original_guard = sandbox_artifact_runner.validate_workspace_target_path
+            calls = {"count": 0}
+
+            def replace_root_before_revalidation(workspace_root, target_path):
+                calls["count"] += 1
+                if calls["count"] == 2:
+                    workspace.rename(displaced)
+                    workspace.mkdir()
+                return original_guard(workspace_root, target_path)
+
+            with patch.object(
+                sandbox_artifact_runner,
+                "validate_workspace_target_path",
+                side_effect=replace_root_before_revalidation,
+            ):
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    str(workspace),
+                    approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertFalse((workspace / "reports" / "root-race.txt").exists())
+            self.assertFalse((displaced / "reports" / "root-race.txt").exists())
+
+    def test_parent_directory_replacement_after_initial_validation_blocks(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside, TemporaryDirectory() as switch_dir:
+            root = Path(workspace)
+            parent = root / "reports"
+            displaced = Path(outside) / "displaced-reports"
+            parent.mkdir()
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="reports/parent-race.txt", gate_result=gate)
+            original_guard = sandbox_artifact_runner.validate_workspace_target_path
+            calls = {"count": 0}
+
+            def replace_parent_before_revalidation(workspace_root, target_path):
+                calls["count"] += 1
+                if calls["count"] == 2:
+                    parent.rename(displaced)
+                    parent.mkdir()
+                return original_guard(workspace_root, target_path)
+
+            with patch.object(
+                sandbox_artifact_runner,
+                "validate_workspace_target_path",
+                side_effect=replace_parent_before_revalidation,
+            ):
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertFalse((parent / "parent-race.txt").exists())
+            self.assertFalse((displaced / "parent-race.txt").exists())
+
+    def test_failed_pre_effect_revalidation_creates_no_parent_directory(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            root = Path(workspace)
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="reports/no-directory.txt", gate_result=gate)
+            original_guard = sandbox_artifact_runner.validate_workspace_target_path
+            calls = {"count": 0}
+
+            def block_second_validation(workspace_root, target_path):
+                calls["count"] += 1
+                if calls["count"] == 2:
+                    return original_guard(None, target_path)
+                return original_guard(workspace_root, target_path)
+
+            with patch.object(
+                sandbox_artifact_runner,
+                "validate_workspace_target_path",
+                side_effect=block_second_validation,
+            ):
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertFalse((root / "reports").exists())
+
+    def test_preexisting_temporary_collision_is_not_deleted(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            root = Path(workspace)
+            parent = root / "reports"
+            parent.mkdir()
+            temporary = parent / ".collision.txt.tmp"
+            temporary.write_text("unrelated sentinel", encoding="utf-8")
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="reports/collision.txt", gate_result=gate)
+
+            result = sandbox_artifact_runner.write_sandbox_artifact(
+                request,
+                workspace,
+                approval_evidence=gate,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertEqual("unrelated sentinel", temporary.read_text(encoding="utf-8"))
+            self.assertFalse((parent / "collision.txt").exists())
+
+    def test_overwrite_target_replacement_before_final_placement_blocks(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            root = Path(workspace)
+            target = root / "replace.txt"
+            displaced = root / "reviewed-target.txt"
+            target.write_text("reviewed target", encoding="utf-8")
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="replace.txt", gate_result=gate)
+            real_fsync = sandbox_artifact_runner.posix.fsync
+            calls = {"count": 0}
+
+            def replace_target_after_temp_write(fd):
+                real_fsync(fd)
+                calls["count"] += 1
+                if calls["count"] == 1:
+                    target.rename(displaced)
+                    target.write_text("foreign target", encoding="utf-8")
+
+            with patch.object(
+                sandbox_artifact_runner.posix,
+                "fsync",
+                side_effect=replace_target_after_temp_write,
+            ):
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    allow_overwrite=True,
+                    approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertEqual("foreign target", target.read_text(encoding="utf-8"))
+            self.assertEqual("reviewed target", displaced.read_text(encoding="utf-8"))
+            self.assertFalse((root / ".replace.txt.tmp").exists())
+
+    def test_target_created_by_another_actor_before_final_placement_is_preserved(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            root = Path(workspace)
+            target = root / "created-race.txt"
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="created-race.txt", gate_result=gate)
+            real_fsync = sandbox_artifact_runner.posix.fsync
+            calls = {"count": 0}
+
+            def create_target_after_temp_write(fd):
+                real_fsync(fd)
+                calls["count"] += 1
+                if calls["count"] == 1:
+                    target.write_text("foreign target", encoding="utf-8")
+
+            with patch.object(
+                sandbox_artifact_runner.posix,
+                "fsync",
+                side_effect=create_target_after_temp_write,
+            ):
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertEqual("foreign target", target.read_text(encoding="utf-8"))
+            self.assertFalse((root / ".created-race.txt.tmp").exists())
+
+    def test_temporary_file_replaced_by_symlink_before_placement_blocks(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as outside, TemporaryDirectory() as switch_dir:
+            root = Path(workspace)
+            parent = root / "reports"
+            parent.mkdir()
+            target = parent / "temp-swap.txt"
+            temporary = parent / ".temp-swap.txt.tmp"
+            outside_file = Path(outside) / "outside.txt"
+            outside_file.write_text("outside sentinel", encoding="utf-8")
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="reports/temp-swap.txt", gate_result=gate)
+            real_fsync = sandbox_artifact_runner.posix.fsync
+            calls = {"count": 0}
+
+            def swap_temp_after_write(fd):
+                real_fsync(fd)
+                calls["count"] += 1
+                if calls["count"] == 1:
+                    temporary.unlink()
+                    temporary.symlink_to(outside_file)
+
+            with patch.object(
+                sandbox_artifact_runner.posix,
+                "fsync",
+                side_effect=swap_temp_after_write,
+            ):
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertFalse(target.exists())
+            self.assertTrue(temporary.is_symlink())
+            self.assertEqual("outside sentinel", outside_file.read_text(encoding="utf-8"))
+
+    def test_partial_write_failure_removes_only_owned_temp_and_created_parent(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            root = Path(workspace)
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="reports/partial.txt", gate_result=gate)
+
+            with patch.object(sandbox_artifact_runner.posix, "write", return_value=0):
+                result = sandbox_artifact_runner.write_sandbox_artifact(
+                    request,
+                    workspace,
+                    approval_evidence=gate,
+                    write_kill_switch_path=str(switch_path),
+                    write_kill_switch_directory=switch_dir,
+                )
+
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertEqual([], list(root.iterdir()))
+
+    def test_workspace_guard_result_cannot_substitute_for_human_gate(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            guard = validate_workspace_target_path(workspace, "reports/inert.txt")
+            gate = self.gate()
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            request = self.request(relative_output_path="reports/inert.txt", gate_result=gate)
+
+            result = sandbox_artifact_runner.write_sandbox_artifact(
+                request,
+                workspace,
+                approval_evidence=guard,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
+
+            self.assertTrue(guard.allowed)
+            self.assertEqual(SandboxArtifactState.BLOCKED, result.state)
+            self.assertEqual([], list(Path(workspace).iterdir()))
+
+    def test_environment_and_metadata_cannot_supply_workspace_boundary(self):
+        authority_looking = {
+            "allowed": True,
+            "trusted": True,
+            "validated": True,
+            "workspace_safe": True,
+            "path_safe": True,
+            "toctou_safe": True,
+            "approved": True,
+            "authority": True,
+            "allow_write": True,
+        }
+        with patch.dict(
+            os.environ,
+            {
+                "AOIA_WORKSPACE_ROOT": "/tmp/authority-looking-workspace",
+                "WORKSPACE_SAFE": "true",
+            },
+        ):
+            missing = validate_workspace_root(None)
+            metadata = validate_workspace_root(authority_looking)  # type: ignore[arg-type]
+
+        self.assertFalse(missing.allowed)
+        self.assertFalse(metadata.allowed)
+
+    def test_valid_full_control_write_chain_writes_only_reviewed_target(self):
+        with TemporaryDirectory() as workspace, TemporaryDirectory() as switch_dir:
+            switch_path = self.write_switch(switch_dir, WRITES_ENABLED)
+            result = write_preview_artifact_after_human_gate(
+                preview=self.preview(),
+                proposed_content_text=CONTENT,
+                workspace_root=workspace,
+                gate_result=self.gate(),
+                context=self.context(),
+                expected_packet_hash=PACKET_HASH,
+                expected_artifact_hash=ARTIFACT_HASH,
+                write_kill_switch_path=str(switch_path),
+                write_kill_switch_directory=switch_dir,
+            )
+            output = Path(workspace) / "reports" / "step16.txt"
+
+            self.assertTrue(result.artifact_write_occurred)
+            self.assertEqual(CONTENT, output.read_text(encoding="utf-8"))
+            self.assertEqual([output], [path for path in Path(workspace).rglob("*") if path.is_file()])
 
     def test_workspace_guard_authority_fields_remain_false(self):
         forced = WorkspaceGuardResult(
