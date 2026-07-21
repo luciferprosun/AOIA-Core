@@ -7,6 +7,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/aoia-core-pycache
     steps:
       - name: Checkout
         uses: actions/checkout@v4
