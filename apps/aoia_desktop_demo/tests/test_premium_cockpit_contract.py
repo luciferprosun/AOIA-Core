@@ -32,7 +32,6 @@ def test_primary_selector_is_readonly_and_has_no_automatic_switch_path() -> None
 def test_three_observer_slots_are_exact_and_manual_only() -> None:
     source = (UI_DIR / "cockpit_state.py").read_text(encoding="utf-8")
     assert "if len(self.observer_slots) != 3" in source
-    assert "CRITIC BACKEND NOT IMPLEMENTED" in source
     assert "send_chat" not in source
     assert "refresh_models" not in source
 
@@ -62,3 +61,4 @@ def test_no_telemetry_integration_or_automatic_observer_request_is_added() -> No
     review_body = source.split("def _run_critical_review", 1)[1].split("# --- chat", 1)[0]
     assert "submit_message" not in review_body
     assert "send_chat" not in review_body
+    assert "submit_critical_review" in review_body

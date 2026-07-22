@@ -1,0 +1,515 @@
+from __future__ import annotations
+
+import ast
+import json
+import threading
+import unittest
+from dataclasses import replace
+from pathlib import Path
+
+from apps.aoia_desktop_demo.app import AppController, CompletedPrimaryTurn
+from apps.aoia_desktop_demo.critical_review import (
+    MAX_OBSERVER_OUTPUT_TOKENS,
+    MAX_RAW_OUTPUT_CHARS,
+    NON_AUTHORITY_MARKER,
+    CriticalReviewRunner,
+    ExecutionStatus,
+    ObserverConfig,
+    ReviewSnapshot,
+    ReviewValidationError,
+    canonical_sha256,
+)
+from apps.aoia_desktop_demo.providers.base import ChatResult
+from apps.aoia_desktop_demo.ui.cockpit_state import CockpitState
+from apps.aoia_desktop_demo.ui.main_window import format_observer_result
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _snapshot(**changes) -> ReviewSnapshot:
+    values = {
+        "session_id": "session-1",
+        "original_prompt": "Explain the bounded result.",
+        "primary_response": "This is the primary response.",
+        "primary_provider_id": "openrouter",
+        "primary_model_id": "openai/gpt-4.1-nano",
+        "knowledge_profile_id": "linux_unix",
+        "evidence_text": "bounded evidence text",
+    }
+    values.update(changes)
+    return ReviewSnapshot.create(**values)
+
+
+def _config(
+    number: int,
+    *,
+    enabled: bool = True,
+    role: str = "Logic & Claims",
+    provider: str = "connection-a",
+    model: str = "vendor/model-a",
+) -> ObserverConfig:
+    return ObserverConfig(
+        slot_id=f"observer-{number}",
+        enabled=enabled,
+        role_id=role,
+        provider_connection_id=provider,
+        model_id=model,
+    )
+
+
+def _structured(summary: str = "Concise review") -> str:
+    return json.dumps(
+        {
+            "summary": summary,
+            "findings": [
+                {
+                    "category": "logic",
+                    "severity": "warning",
+                    "title": "Check claim",
+                    "detail": "The claim needs independent verification.",
+                }
+            ],
+            "uncertainty": ["Source coverage is limited."],
+            "evidence_conflicts": ["No direct conflict found."],
+        }
+    )
+
+
+class _FakeClient:
+    def __init__(self, outcomes: list[str | Exception] | None = None) -> None:
+        self.outcomes = outcomes or [_structured()]
+        self.calls: list[dict[str, object]] = []
+
+    def send_chat(self, model, messages, max_tokens=None):
+        self.calls.append({"model": model, "messages": tuple(messages), "max_tokens": max_tokens})
+        outcome = self.outcomes[min(len(self.calls) - 1, len(self.outcomes) - 1)]
+        if isinstance(outcome, Exception):
+            raise outcome
+        return ChatResult(content=outcome, model=model)
+
+
+class _FakeResolver:
+    def __init__(self, clients: dict[str, _FakeClient] | None = None) -> None:
+        self.clients = clients or {}
+        self.resolved: list[str] = []
+
+    def resolve(self, provider_connection_id: str):
+        self.resolved.append(provider_connection_id)
+        return self.clients.get(provider_connection_id)
+
+
+class SnapshotAndHashingTests(unittest.TestCase):
+    def test_identical_inputs_produce_identical_hashes(self) -> None:
+        first = _snapshot()
+        second = _snapshot()
+        self.assertEqual(first.evidence_digest, second.evidence_digest)
+        self.assertEqual(first.snapshot_hash, second.snapshot_hash)
+
+    def test_prompt_change_changes_snapshot_hash(self) -> None:
+        self.assertNotEqual(_snapshot().snapshot_hash, _snapshot(original_prompt="Different prompt").snapshot_hash)
+
+    def test_response_change_changes_snapshot_hash(self) -> None:
+        self.assertNotEqual(_snapshot().snapshot_hash, _snapshot(primary_response="Different response").snapshot_hash)
+
+    def test_model_change_changes_snapshot_hash(self) -> None:
+        self.assertNotEqual(_snapshot().snapshot_hash, _snapshot(primary_model_id="vendor/other").snapshot_hash)
+
+    def test_evidence_change_changes_digest_and_snapshot_hash(self) -> None:
+        first = _snapshot()
+        second = _snapshot(evidence_text="different bounded evidence")
+        self.assertNotEqual(first.evidence_digest, second.evidence_digest)
+        self.assertNotEqual(first.snapshot_hash, second.snapshot_hash)
+
+    def test_canonical_hash_is_independent_of_dictionary_insertion_order(self) -> None:
+        self.assertEqual(canonical_sha256({"a": 1, "b": 2}), canonical_sha256({"b": 2, "a": 1}))
+
+    def test_api_key_like_material_is_rejected_before_serialization(self) -> None:
+        with self.assertRaises(ReviewValidationError):
+            _snapshot(original_prompt="Use sk-or-test-redacted")
+
+    def test_forged_snapshot_hash_causes_zero_calls(self) -> None:
+        snapshot = replace(_snapshot(), snapshot_hash="0" * 64)
+        client = _FakeClient()
+        resolver = _FakeResolver({"connection-a": client})
+        with self.assertRaises(ReviewValidationError):
+            CriticalReviewRunner().run(snapshot, (_config(1),), resolver)
+        self.assertEqual(client.calls, [])
+        self.assertEqual(resolver.resolved, [])
+
+    def test_empty_prompt_or_response_fails_closed(self) -> None:
+        with self.assertRaises(ReviewValidationError):
+            _snapshot(original_prompt="")
+        with self.assertRaises(ReviewValidationError):
+            _snapshot(primary_response="")
+
+    def test_no_evidence_snapshot_is_deterministic(self) -> None:
+        first = _snapshot(knowledge_profile_id=None, evidence_text="")
+        second = _snapshot(knowledge_profile_id=None, evidence_text="")
+        self.assertEqual(first.evidence_digest, second.evidence_digest)
+        self.assertEqual(first.snapshot_hash, second.snapshot_hash)
+
+
+class ConfigurationValidationTests(unittest.TestCase):
+    def test_more_than_three_configs_fails_before_calls(self) -> None:
+        resolver = _FakeResolver({"connection-a": _FakeClient()})
+        fourth = replace(_config(3), slot_id="observer-3")
+        with self.assertRaises(ReviewValidationError):
+            CriticalReviewRunner().run(_snapshot(), (_config(1), _config(2), _config(3), fourth), resolver)
+        self.assertEqual(resolver.resolved, [])
+
+    def test_duplicate_slots_fail_before_calls(self) -> None:
+        resolver = _FakeResolver({"connection-a": _FakeClient()})
+        with self.assertRaises(ReviewValidationError):
+            CriticalReviewRunner().run(_snapshot(), (_config(1), _config(1)), resolver)
+        self.assertEqual(resolver.resolved, [])
+
+    def test_unsupported_or_out_of_order_slots_fail_before_calls(self) -> None:
+        resolver = _FakeResolver({"connection-a": _FakeClient()})
+        with self.assertRaises(ReviewValidationError):
+            CriticalReviewRunner().run(_snapshot(), (replace(_config(1), slot_id="observer-4"),), resolver)
+        with self.assertRaises(ReviewValidationError):
+            CriticalReviewRunner().run(_snapshot(), (_config(2), _config(1)), resolver)
+        self.assertEqual(resolver.resolved, [])
+
+    def test_disabled_slot_does_not_resolve_or_call(self) -> None:
+        resolver = _FakeResolver({"connection-a": _FakeClient()})
+        result = CriticalReviewRunner().run(_snapshot(), (_config(1, enabled=False),), resolver)[0]
+        self.assertEqual(result.execution_status, ExecutionStatus.DISABLED)
+        self.assertEqual(resolver.resolved, [])
+
+    def test_missing_provider_or_model_is_invalid_without_call(self) -> None:
+        resolver = _FakeResolver({"connection-a": _FakeClient()})
+        results = CriticalReviewRunner().run(
+            _snapshot(),
+            (_config(1, provider=""), _config(2, model="")),
+            resolver,
+        )
+        self.assertEqual([item.execution_status for item in results], [ExecutionStatus.INVALID_CONFIGURATION] * 2)
+        self.assertEqual(resolver.resolved, [])
+
+    def test_malformed_provider_or_model_identifier_is_invalid_without_call(self) -> None:
+        resolver = _FakeResolver({"connection-a": _FakeClient()})
+        results = CriticalReviewRunner().run(
+            _snapshot(),
+            (_config(1, provider="bad connection"), _config(2, model="not-a-model")),
+            resolver,
+        )
+        self.assertEqual([item.execution_status for item in results], [ExecutionStatus.INVALID_CONFIGURATION] * 2)
+        self.assertEqual(resolver.resolved, [])
+
+    def test_configuration_hash_is_deterministic_and_model_bound(self) -> None:
+        first = _config(1)
+        second = _config(1)
+        changed = _config(1, model="vendor/other")
+        self.assertEqual(first.configuration_hash, second.configuration_hash)
+        self.assertNotEqual(first.configuration_hash, changed.configuration_hash)
+
+    def test_configuration_rejects_secret_shaped_material(self) -> None:
+        with self.assertRaises(ReviewValidationError):
+            _config(1, provider="sk-or-test-redacted")
+
+
+class ExactCallBudgetTests(unittest.TestCase):
+    def _run_enabled_count(self, enabled_count: int):
+        client = _FakeClient([_structured("one"), _structured("two"), _structured("three")])
+        resolver = _FakeResolver({"connection-a": client})
+        configs = tuple(_config(index, enabled=index <= enabled_count) for index in range(1, 4))
+        results = CriticalReviewRunner().run(_snapshot(), configs, resolver)
+        return client, resolver, results
+
+    def test_zero_one_two_three_enabled_produce_exact_call_counts(self) -> None:
+        for enabled_count in range(4):
+            with self.subTest(enabled_count=enabled_count):
+                client, _resolver, results = self._run_enabled_count(enabled_count)
+                self.assertEqual(len(client.calls), enabled_count)
+                self.assertEqual(len(results), 3)
+
+    def test_exact_provider_connection_model_and_output_limit_are_unchanged(self) -> None:
+        client = _FakeClient()
+        resolver = _FakeResolver({"operator-connection": client})
+        CriticalReviewRunner().run(
+            _snapshot(),
+            (_config(1, provider="operator-connection", model="vendor/exact-model"),),
+            resolver,
+        )
+        self.assertEqual(resolver.resolved, ["operator-connection"])
+        self.assertEqual(client.calls[0]["model"], "vendor/exact-model")
+        self.assertEqual(client.calls[0]["max_tokens"], MAX_OBSERVER_OUTPUT_TOKENS)
+
+    def test_duplicate_provider_and_model_choices_receive_independent_calls(self) -> None:
+        client = _FakeClient([_structured("one"), _structured("two")])
+        resolver = _FakeResolver({"connection-a": client})
+        CriticalReviewRunner().run(_snapshot(), (_config(1), _config(2)), resolver)
+        self.assertEqual(len(client.calls), 2)
+
+    def test_observer_results_never_enter_later_requests(self) -> None:
+        client = _FakeClient([_structured("UNIQUE-FIRST-OUTPUT"), _structured("second")])
+        resolver = _FakeResolver({"connection-a": client})
+        CriticalReviewRunner().run(_snapshot(), (_config(1), _config(2)), resolver)
+        second_request = "\n".join(message.content for message in client.calls[1]["messages"])
+        self.assertNotIn("UNIQUE-FIRST-OUTPUT", second_request)
+
+    def test_knowledge_and_deterministic_empty_evidence_are_supplied(self) -> None:
+        for snapshot, expected in ((_snapshot(), "bounded evidence text"), (_snapshot(knowledge_profile_id=None, evidence_text=""), "")):
+            client = _FakeClient()
+            CriticalReviewRunner().run(snapshot, (_config(1),), _FakeResolver({"connection-a": client}))
+            payload = json.loads(client.calls[0]["messages"][1].content)
+            self.assertEqual(payload["snapshot"]["evidence_text"], expected)
+            self.assertEqual(payload["snapshot"]["snapshot_hash"], snapshot.snapshot_hash)
+
+    def test_provider_exception_attempts_once_and_continues_other_slots(self) -> None:
+        first = _FakeClient([RuntimeError("provider failed")])
+        second = _FakeClient([_structured("second")])
+        third = _FakeClient([_structured("third")])
+        resolver = _FakeResolver({"one": first, "two": second, "three": third})
+        results = CriticalReviewRunner().run(
+            _snapshot(),
+            (_config(1, provider="one"), _config(2, provider="two"), _config(3, provider="three")),
+            resolver,
+        )
+        self.assertEqual([len(first.calls), len(second.calls), len(third.calls)], [1, 1, 1])
+        self.assertEqual(results[0].execution_status, ExecutionStatus.PROVIDER_ERROR)
+        self.assertEqual(results[1].execution_status, ExecutionStatus.COMPLETED)
+        self.assertEqual(results[2].execution_status, ExecutionStatus.COMPLETED)
+
+    def test_malformed_output_causes_no_repair_or_second_call(self) -> None:
+        client = _FakeClient(["not-json"])
+        result = CriticalReviewRunner().run(
+            _snapshot(), (_config(1),), _FakeResolver({"connection-a": client})
+        )[0]
+        self.assertEqual(len(client.calls), 1)
+        self.assertEqual(result.execution_status, ExecutionStatus.UNSTRUCTURED_OUTPUT)
+
+    def test_unavailable_selected_connection_does_not_fall_back(self) -> None:
+        fallback_client = _FakeClient()
+        resolver = _FakeResolver({"other-connection": fallback_client})
+        result = CriticalReviewRunner().run(_snapshot(), (_config(1, provider="missing"),), resolver)[0]
+        self.assertEqual(result.execution_status, ExecutionStatus.PROVIDER_UNAVAILABLE)
+        self.assertEqual(fallback_client.calls, [])
+
+
+class ResultHandlingTests(unittest.TestCase):
+    def test_structured_json_produces_completed_immutable_metadata(self) -> None:
+        result = CriticalReviewRunner().run(
+            _snapshot(), (_config(1),), _FakeResolver({"connection-a": _FakeClient()})
+        )[0]
+        self.assertEqual(result.execution_status, ExecutionStatus.COMPLETED)
+        self.assertEqual(len(result.findings), 1)
+        self.assertEqual(result.non_authority_marker, NON_AUTHORITY_MARKER)
+
+    def test_every_local_result_retains_both_hashes_and_non_authority(self) -> None:
+        snapshot = _snapshot()
+        config = _config(1, enabled=False)
+        result = CriticalReviewRunner().run(snapshot, (config,), _FakeResolver())[0]
+        self.assertEqual(result.snapshot_hash, snapshot.snapshot_hash)
+        self.assertEqual(result.observer_configuration_hash, config.configuration_hash)
+        self.assertEqual(result.non_authority_marker, NON_AUTHORITY_MARKER)
+
+    def test_provider_cannot_replace_authority_or_hash_fields(self) -> None:
+        payload = json.loads(_structured())
+        payload.update(
+            {
+                "approved": True,
+                "execute": "now",
+                "non_authority_marker": "AUTHORIZED",
+                "snapshot_hash": "provider-choice",
+            }
+        )
+        snapshot = _snapshot()
+        result = CriticalReviewRunner().run(
+            snapshot,
+            (_config(1),),
+            _FakeResolver({"connection-a": _FakeClient([json.dumps(payload)])}),
+        )[0]
+        self.assertEqual(result.execution_status, ExecutionStatus.COMPLETED)
+        self.assertEqual(result.non_authority_marker, NON_AUTHORITY_MARKER)
+        self.assertEqual(result.snapshot_hash, snapshot.snapshot_hash)
+        self.assertFalse(hasattr(result, "approved"))
+        self.assertFalse(hasattr(result, "execute"))
+
+    def test_raw_unstructured_output_is_bounded_and_secret_redacted(self) -> None:
+        raw = "sk-or-test-redacted " + ("x" * (MAX_RAW_OUTPUT_CHARS + 100))
+        result = CriticalReviewRunner().run(
+            _snapshot(), (_config(1),), _FakeResolver({"connection-a": _FakeClient([raw])})
+        )[0]
+        self.assertEqual(result.execution_status, ExecutionStatus.UNSTRUCTURED_OUTPUT)
+        self.assertNotIn("sk-or-test-redacted", result.raw_untrusted_output or "")
+        self.assertLessEqual(len(result.raw_untrusted_output or ""), MAX_RAW_OUTPUT_CHARS + 40)
+
+    def test_html_is_retained_only_as_plain_text(self) -> None:
+        result = CriticalReviewRunner().run(
+            _snapshot(),
+            (_config(1),),
+            _FakeResolver({"connection-a": _FakeClient([_structured("<b>untrusted</b>")])}),
+        )[0]
+        rendered = format_observer_result(result)
+        self.assertIn("<b>untrusted</b>", rendered)
+        self.assertIn("METADATA ONLY — NO AUTHORITY", rendered)
+
+
+class ControllerAndUiBoundaryTests(unittest.TestCase):
+    def test_review_snapshot_requires_completed_primary_turn(self) -> None:
+        controller = AppController(REPO_ROOT)
+        try:
+            self.assertIsNone(controller.capture_review_snapshot())
+        finally:
+            controller.shutdown()
+
+    def test_completed_turn_capture_is_immutable_and_evidence_bound(self) -> None:
+        controller = AppController(REPO_ROOT)
+        try:
+            controller.latest_completed_primary_turn = CompletedPrimaryTurn(
+                session_id="session-1",
+                original_prompt="prompt",
+                primary_response="response",
+                primary_provider_id="openrouter",
+                primary_model_id="vendor/model",
+                knowledge_profile_id="linux_unix",
+                evidence_text="exact bounded evidence",
+            )
+            snapshot = controller.capture_review_snapshot()
+            assert snapshot is not None
+            controller.settings.manual_model_id = "vendor/later-model"
+            controller.settings.knowledge_profile_id = "none"
+            self.assertEqual(snapshot.primary_model_id, "vendor/model")
+            self.assertEqual(snapshot.knowledge_profile_id, "linux_unix")
+            self.assertEqual(snapshot.evidence_text, "exact bounded evidence")
+        finally:
+            controller.shutdown()
+
+    def test_repeated_submit_while_active_does_not_duplicate_calls(self) -> None:
+        started_call = threading.Event()
+        release_call = threading.Event()
+        done = threading.Event()
+
+        class BlockingClient(_FakeClient):
+            def send_chat(self, model, messages, max_tokens=None):
+                self.calls.append({"model": model, "messages": tuple(messages), "max_tokens": max_tokens})
+                started_call.set()
+                release_call.wait(timeout=5)
+                return ChatResult(content=_structured(), model=model)
+
+        client = BlockingClient()
+        resolver = _FakeResolver({"connection-a": client})
+        controller = AppController(REPO_ROOT)
+        try:
+            first = controller.submit_critical_review(
+                _snapshot(),
+                (_config(1),),
+                on_done=lambda _completion: done.set(),
+                on_scheduled_callback=lambda func: func(),
+                provider_resolver=resolver,
+            )
+            self.assertTrue(started_call.wait(timeout=5))
+            second = controller.submit_critical_review(
+                _snapshot(),
+                (_config(1),),
+                on_done=lambda _completion: None,
+                on_scheduled_callback=lambda func: func(),
+                provider_resolver=resolver,
+            )
+            self.assertTrue(first)
+            self.assertFalse(second)
+            release_call.set()
+            self.assertTrue(done.wait(timeout=5))
+            self.assertEqual(len(client.calls), 1)
+        finally:
+            release_call.set()
+            controller.shutdown()
+
+    def test_each_result_updates_only_its_matching_card(self) -> None:
+        state = CockpitState()
+        results = CriticalReviewRunner().run(
+            _snapshot(),
+            (_config(1, enabled=False), _config(2)),
+            _FakeResolver({"connection-a": _FakeClient()}),
+        )
+        state.apply_review_results(results)
+        self.assertEqual(state.observer_slots[0].review_result.execution_status, ExecutionStatus.DISABLED)
+        self.assertEqual(state.observer_slots[1].review_result.execution_status, ExecutionStatus.COMPLETED)
+        self.assertIsNone(state.observer_slots[2].review_result)
+
+    def test_offline_three_observer_smoke_renders_independent_full_results(self) -> None:
+        client = _FakeClient([_structured("slot one"), _structured("slot two"), _structured("slot three")])
+        configs = (
+            _config(1, role="Logic & Claims"),
+            _config(2, role="Safety & Authority"),
+            _config(3, role="Evidence & Consistency"),
+        )
+        results = CriticalReviewRunner().run(
+            _snapshot(), configs, _FakeResolver({"connection-a": client})
+        )
+        state = CockpitState()
+        state.apply_review_results(results)
+        self.assertEqual(len(client.calls), 3)
+        self.assertEqual([slot.result for slot in state.observer_slots], ["slot one", "slot two", "slot three"])
+        dialog_text = format_observer_result(state.observer_slots[1].review_result)
+        self.assertIn("Observer slot: observer-2", dialog_text)
+        self.assertIn("Summary: slot two", dialog_text)
+        self.assertNotIn("Summary: slot one", dialog_text)
+
+    def test_later_selector_changes_do_not_modify_captured_config_or_result_hash(self) -> None:
+        state = CockpitState()
+        slot = state.observer_slots[0]
+        slot.enabled = True
+        slot.provider_id = "connection-a"
+        slot.model_id = "vendor/model-a"
+        captured = _config(1, provider=slot.provider_id, model=slot.model_id)
+        slot.provider_id = "connection-later"
+        slot.model_id = "vendor/later"
+        result = CriticalReviewRunner().run(
+            _snapshot(), (captured,), _FakeResolver({"connection-a": _FakeClient()})
+        )[0]
+        self.assertEqual(result.provider_id, "connection-a")
+        self.assertEqual(result.model_id, "vendor/model-a")
+        self.assertEqual(result.observer_configuration_hash, captured.configuration_hash)
+
+    def test_later_primary_turn_does_not_modify_existing_result_hash(self) -> None:
+        first_snapshot = _snapshot(primary_response="first response")
+        result = CriticalReviewRunner().run(
+            first_snapshot, (_config(1),), _FakeResolver({"connection-a": _FakeClient()})
+        )[0]
+        later_snapshot = _snapshot(primary_response="later response")
+        self.assertNotEqual(first_snapshot.snapshot_hash, later_snapshot.snapshot_hash)
+        self.assertEqual(result.snapshot_hash, first_snapshot.snapshot_hash)
+
+    def test_ui_has_no_automatic_review_trigger(self) -> None:
+        source = (REPO_ROOT / "apps/aoia_desktop_demo/ui/main_window.py").read_text(encoding="utf-8")
+        send_result_body = source.split("def _on_send_result", 1)[1].split("def _on_cancel", 1)[0]
+        self.assertNotIn("_run_critical_review", send_result_body)
+        settings_source = (REPO_ROOT / "apps/aoia_desktop_demo/ui/settings_dialog.py").read_text(encoding="utf-8")
+        self.assertNotIn("submit_critical_review", settings_source)
+
+    def test_review_module_has_no_forbidden_capability_imports(self) -> None:
+        source = (REPO_ROOT / "apps/aoia_desktop_demo/critical_review.py").read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        imported = {
+            alias.name.split(".")[0]
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Import)
+            for alias in node.names
+        }
+        imported.update(
+            node.module.split(".")[0]
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module
+        )
+        for forbidden in (
+            "subprocess",
+            "socket",
+            "requests",
+            "httpx",
+            "aiohttp",
+            "urllib",
+            "webbrowser",
+            "selenium",
+            "playwright",
+        ):
+            self.assertNotIn(forbidden, imported)
+        for forbidden_text in ("os.system(", "os.popen(", "SmartRouter", "/home/l/AOIA_PRODUCTION"):
+            self.assertNotIn(forbidden_text, source)
+
+
+if __name__ == "__main__":
+    unittest.main()

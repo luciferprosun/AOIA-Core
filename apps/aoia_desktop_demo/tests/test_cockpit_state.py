@@ -1,8 +1,4 @@
-from apps.aoia_desktop_demo.ui.cockpit_state import (
-    CRITIC_BACKEND_UNAVAILABLE,
-    CockpitState,
-    configured_model_ids,
-)
+from apps.aoia_desktop_demo.ui.cockpit_state import CockpitState, configured_model_ids
 
 
 def test_catalog_entries_do_not_become_configured_models() -> None:
@@ -33,7 +29,7 @@ def test_observer_models_are_filtered_by_their_selected_provider() -> None:
     assert state.models_for_provider("missing", models) == ()
 
 
-def test_manual_review_fails_closed_when_the_critic_backend_is_unavailable() -> None:
+def test_complete_observer_configuration_is_ready_only_for_manual_review() -> None:
     state = CockpitState()
     slot = state.observer_slots[0]
     slot.enabled = True
@@ -41,4 +37,4 @@ def test_manual_review_fails_closed_when_the_critic_backend_is_unavailable() -> 
     slot.model_id = "openai/gpt-4.1-nano"
     models = {"openrouter": ("openai/gpt-4.1-nano",)}
 
-    assert state.review_status(("openrouter",), models) == CRITIC_BACKEND_UNAVAILABLE
+    assert state.review_status(("openrouter",), models) == "READY FOR MANUAL REVIEW"

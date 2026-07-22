@@ -11,7 +11,16 @@ from __future__ import annotations
 import concurrent.futures
 from dataclasses import dataclass
 from pathlib import Path
+from uuid import uuid4
 
+from .critical_review import (
+    CriticalReviewRunner,
+    ObserverConfig,
+    ObserverReviewResult,
+    ProviderResolver,
+    ReviewSnapshot,
+    ReviewValidationError,
+)
 from .knowledge.prompt_context import build_knowledge_system_message
 from .knowledge.registry import NONE_PROFILE_ID, KnowledgeProfile, discover_profiles, find_profile
 from .knowledge.retrieval_adapter import retrieve_linux_evidence
@@ -35,6 +44,41 @@ class SendResult:
     chat_result: ChatResult | None
     error_message: str | None
     evidence_count: int
+    completed_turn: CompletedPrimaryTurn | None
+
+
+@dataclass(frozen=True, slots=True)
+class CompletedPrimaryTurn:
+    session_id: str
+    original_prompt: str
+    primary_response: str
+    primary_provider_id: str
+    primary_model_id: str
+    knowledge_profile_id: str | None
+    evidence_text: str
+
+
+@dataclass(frozen=True, slots=True)
+class CriticalReviewCompletion:
+    results: tuple[ObserverReviewResult, ...]
+    error_category: str | None = None
+
+
+class _SessionProviderResolver:
+    """Resolve only the controller's existing configured session connection."""
+
+    def __init__(self, controller: AppController) -> None:
+        self._controller = controller
+
+    def resolve(self, provider_connection_id: str):
+        if provider_connection_id not in self._controller.settings.configured_provider_ids():
+            return None
+        if not self._controller.provider_route_is_eligible():
+            return None
+        try:
+            return self._controller._build_client()
+        except ProviderError:
+            return None
 
 
 class AppController:
@@ -43,8 +87,12 @@ class AppController:
         self.settings: DemoSettings = load_settings()
         self.secrets = SessionSecrets()
         self.session = ChatSession()
+        self.session_id = f"desktop-session-{uuid4().hex}"
+        self.latest_completed_primary_turn: CompletedPrimaryTurn | None = None
         self.knowledge_profiles: list[KnowledgeProfile] = discover_profiles(repo_root)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix="aoia-provider")
+        self._critical_review_runner = CriticalReviewRunner()
+        self._critical_review_active = False
 
     # --- settings ------------------------------------------------------
 
@@ -123,14 +171,21 @@ class AppController:
         if self.session.has_active_request:
             return None
 
-        self.session.add_user_message(user_text)
+        # Once a new primary request starts, an older completed turn must not
+        # be reused silently as the current review subject.
+        self.latest_completed_primary_turn = None
+        original_prompt = user_text.strip()
+        self.session.add_user_message(original_prompt)
         model_id = self.effective_model_id()
         profile = self.current_knowledge_profile()
+        provider_id = self.settings.provider
 
         evidence = []
         if profile.id != NONE_PROFILE_ID:
-            evidence = retrieve_linux_evidence(self.repo_root, user_text)
+            evidence = retrieve_linux_evidence(self.repo_root, original_prompt)
         knowledge_message = build_knowledge_system_message(evidence)
+        evidence_text = knowledge_message or ""
+        knowledge_profile_id = profile.id if profile.id != NONE_PROFILE_ID else None
 
         request_id = self.session.begin_request()
 
@@ -143,12 +198,39 @@ class AppController:
                     messages=messages,
                     max_tokens=self.settings.max_response_tokens,
                 )
-                return SendResult(request_id=request_id, chat_result=result, error_message=None, evidence_count=len(evidence))
+                completed_turn = CompletedPrimaryTurn(
+                    session_id=self.session_id,
+                    original_prompt=original_prompt,
+                    primary_response=result.content,
+                    primary_provider_id=provider_id,
+                    primary_model_id=model_id,
+                    knowledge_profile_id=knowledge_profile_id,
+                    evidence_text=evidence_text,
+                )
+                return SendResult(
+                    request_id=request_id,
+                    chat_result=result,
+                    error_message=None,
+                    evidence_count=len(evidence),
+                    completed_turn=completed_turn,
+                )
             except ProviderError as error:
-                return SendResult(request_id=request_id, chat_result=None, error_message=str(error), evidence_count=len(evidence))
+                return SendResult(
+                    request_id=request_id,
+                    chat_result=None,
+                    error_message=str(error),
+                    evidence_count=len(evidence),
+                    completed_turn=None,
+                )
             except Exception as error:  # pragma: no cover - defensive
                 message = redact_exception(error, known_secrets=self._known_secrets())
-                return SendResult(request_id=request_id, chat_result=None, error_message=message, evidence_count=len(evidence))
+                return SendResult(
+                    request_id=request_id,
+                    chat_result=None,
+                    error_message=message,
+                    evidence_count=len(evidence),
+                    completed_turn=None,
+                )
 
         future = self._executor.submit(work)
 
@@ -158,6 +240,67 @@ class AppController:
 
         future.add_done_callback(on_future_done)
         return request_id
+
+    def accept_completed_primary_turn(self, result: SendResult) -> None:
+        """Retain only a successful result already accepted by the UI."""
+        if result.error_message is None and result.chat_result is not None and result.completed_turn is not None:
+            self.latest_completed_primary_turn = result.completed_turn
+
+    def capture_review_snapshot(self) -> ReviewSnapshot | None:
+        turn = self.latest_completed_primary_turn
+        if turn is None:
+            return None
+        return ReviewSnapshot.create(
+            session_id=turn.session_id,
+            original_prompt=turn.original_prompt,
+            primary_response=turn.primary_response,
+            primary_provider_id=turn.primary_provider_id,
+            primary_model_id=turn.primary_model_id,
+            knowledge_profile_id=turn.knowledge_profile_id,
+            evidence_text=turn.evidence_text,
+        )
+
+    @property
+    def critical_review_active(self) -> bool:
+        return self._critical_review_active
+
+    def submit_critical_review(
+        self,
+        snapshot: ReviewSnapshot,
+        observer_configs: tuple[ObserverConfig, ...],
+        on_done,
+        on_scheduled_callback,
+        *,
+        provider_resolver: ProviderResolver | None = None,
+    ) -> bool:
+        """Start one bounded review run using the existing provider worker."""
+        if self._critical_review_active or self.session.has_active_request:
+            return False
+        self._critical_review_active = True
+        resolver = provider_resolver or _SessionProviderResolver(self)
+
+        def work() -> CriticalReviewCompletion:
+            try:
+                results = self._critical_review_runner.run(snapshot, observer_configs, resolver)
+                return CriticalReviewCompletion(results=results)
+            except ReviewValidationError:
+                return CriticalReviewCompletion(results=(), error_category="review_validation_failed")
+            except Exception:  # pragma: no cover - defensive fail-closed boundary
+                return CriticalReviewCompletion(results=(), error_category="review_internal_error")
+
+        future = self._executor.submit(work)
+
+        def on_future_done(finished_future: concurrent.futures.Future) -> None:
+            completion = finished_future.result()
+
+            def finish_on_ui_thread() -> None:
+                self._critical_review_active = False
+                on_done(completion)
+
+            on_scheduled_callback(finish_on_ui_thread)
+
+        future.add_done_callback(on_future_done)
+        return True
 
     def cancel_active_request(self) -> None:
         self.session.cancel_active_request()

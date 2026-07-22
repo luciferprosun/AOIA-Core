@@ -80,14 +80,26 @@ class AppControllerModelOnlyModeTests(unittest.TestCase):
         self.assertEqual(result.evidence_count, 0)
         self.assertIsNone(result.error_message)
         self.assertEqual(result.chat_result.content, "hello")
+        self.assertIsNotNone(result.completed_turn)
+        self.assertEqual(result.completed_turn.original_prompt, "hello there")
+        self.assertEqual(result.completed_turn.evidence_text, "")
+        self.assertIsNone(result.completed_turn.knowledge_profile_id)
 
     @patch("apps.aoia_desktop_demo.app.OpenRouterClient", _FakeOpenRouterClient)
     def test_knowledge_mode_can_attach_evidence(self) -> None:
         self.controller.set_knowledge_profile("linux_unix")
         _FakeOpenRouterClient.next_result = ChatResult(content="answer", model="vendor/test-model")
-        _request_id, result = _run_and_wait(self.controller, "how do I check disk usage")
+        with patch(
+            "apps.aoia_desktop_demo.app.retrieve_linux_evidence", return_value=[object()]
+        ), patch(
+            "apps.aoia_desktop_demo.app.build_knowledge_system_message",
+            return_value="exact bounded primary evidence",
+        ):
+            _request_id, result = _run_and_wait(self.controller, "how do I check disk usage")
         self.assertIsNone(result.error_message)
-        self.assertGreaterEqual(result.evidence_count, 0)  # may legitimately be 0 for a low-confidence query
+        self.assertEqual(result.evidence_count, 1)
+        self.assertEqual(result.completed_turn.evidence_text, "exact bounded primary evidence")
+        self.assertEqual(result.completed_turn.knowledge_profile_id, "linux_unix")
 
     @patch("apps.aoia_desktop_demo.app.OpenRouterClient", _FakeOpenRouterClient)
     def test_exactly_one_provider_call_per_submit_no_hidden_retry(self) -> None:

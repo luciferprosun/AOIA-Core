@@ -10,8 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable
 
+from ..critical_review import ObserverReviewResult
 
-CRITIC_BACKEND_UNAVAILABLE = "UNAVAILABLE — CRITIC BACKEND NOT IMPLEMENTED"
 OBSERVER_ROLES = (
     "Logic & Claims",
     "Safety & Authority",
@@ -27,6 +27,7 @@ class ObserverSlot:
     model_id: str = ""
     state: str = "Not configured"
     result: str = "No review has run. METADATA ONLY — NO AUTHORITY."
+    review_result: ObserverReviewResult | None = None
 
     def is_complete(self, configured_providers: Iterable[str], models: dict[str, tuple[str, ...]]) -> bool:
         return (
@@ -60,7 +61,18 @@ class CockpitState:
         enabled = [slot for slot in self.observer_slots if slot.enabled]
         if not enabled or any(not slot.is_complete(configured_providers, models) for slot in enabled):
             return "OBSERVER CONFIGURATION INCOMPLETE"
-        return CRITIC_BACKEND_UNAVAILABLE
+        return "READY FOR MANUAL REVIEW"
+
+    def apply_review_results(self, results: Iterable[ObserverReviewResult]) -> None:
+        """Apply each immutable result only to its matching fixed card slot."""
+        by_slot = {result.slot_id: result for result in results}
+        for index, slot in enumerate(self.observer_slots, start=1):
+            result = by_slot.get(f"observer-{index}")
+            if result is None:
+                continue
+            slot.review_result = result
+            slot.state = result.execution_status.value
+            slot.result = result.concise_summary
 
 
 def configured_model_ids(

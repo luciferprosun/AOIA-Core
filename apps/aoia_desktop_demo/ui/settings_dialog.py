@@ -155,7 +155,7 @@ class SettingsDialog(tk.Toplevel):
                 variable.trace_add("write", lambda *_args, n=index: self._sync_observer(n))
             variables["provider_combo"] = provider_combo
             variables["model_combo"] = model_combo
-        tk.Label(self.loop_tab, text="Run Critical Review is manual. This demo has no critic backend and never sends observer requests automatically.",
+        tk.Label(self.loop_tab, text="Run Critical Review is manual. Each enabled valid observer receives one bounded independent request; review never starts automatically.",
                  bg=theme.BG, fg=theme.WARN, wraplength=650, justify="left").grid(row=3, column=0, columnspan=3, sticky="w", padx=16, pady=10)
 
     def _build_telemetry_tab(self) -> None:

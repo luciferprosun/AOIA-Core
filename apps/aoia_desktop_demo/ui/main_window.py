@@ -7,7 +7,7 @@ from pathlib import Path
 from tkinter import ttk
 
 from . import theme
-from .cockpit_state import CRITIC_BACKEND_UNAVAILABLE, CockpitState, configured_model_ids
+from .cockpit_state import CockpitState, configured_model_ids
 from .settings_dialog import SettingsDialog
 from ..app import (
     STATUS_ACTIONS_DISABLED,
@@ -17,7 +17,14 @@ from ..app import (
     SOURCES_LABEL,
     SUGGESTION_LABEL,
     AppController,
+    CriticalReviewCompletion,
     SendResult,
+)
+from ..critical_review import (
+    ExecutionStatus,
+    ObserverConfig,
+    ObserverReviewResult,
+    ReviewValidationError,
 )
 from ..knowledge.registry import NONE_PROFILE_ID
 from ..providers.base import ModelInfo, ProviderError
@@ -55,6 +62,79 @@ class AlertWindow(tk.Toplevel):
         self.destroy()
         if self._opener.winfo_exists():
             self._opener.focus_set()
+
+
+class ObserverResultDialog(tk.Toplevel):
+    """Plain-text, per-slot rendering of one immutable observer result."""
+
+    def __init__(self, parent: tk.Widget, result: ObserverReviewResult, opener: tk.Widget) -> None:
+        super().__init__(parent)
+        self._opener = opener
+        self.title(f"Critical Review — {result.slot_id}")
+        self.configure(bg=theme.BG)
+        self.geometry("760x620")
+        self.minsize(620, 480)
+        self.transient(parent)
+        text = tk.Text(
+            self,
+            bg=theme.BG,
+            fg=theme.TEXT,
+            wrap="word",
+            relief="flat",
+            padx=16,
+            pady=14,
+            state="normal",
+        )
+        text.pack(fill="both", expand=True, padx=10, pady=(10, 4))
+        text.insert("1.0", format_observer_result(result))
+        text.configure(state="disabled")
+        close_button = ttk.Button(self, text="Close", command=self._close)
+        close_button.pack(anchor="e", padx=12, pady=(4, 12))
+        self.protocol("WM_DELETE_WINDOW", self._close)
+        self.bind("<Escape>", lambda _event: self._close())
+        close_button.focus_set()
+
+    def _close(self) -> None:
+        self.destroy()
+        if self._opener.winfo_exists():
+            self._opener.focus_set()
+
+
+def format_observer_result(result: ObserverReviewResult) -> str:
+    lines = [
+        f"Observer slot: {result.slot_id}",
+        f"Role: {result.role}",
+        f"Provider: {result.provider_id or '(none)'}",
+        f"Model: {result.model_id or '(none)'}",
+        f"Execution status: {result.execution_status.value}",
+        f"Summary: {result.concise_summary}",
+        "",
+        "Findings:",
+    ]
+    if result.findings:
+        for finding in result.findings:
+            lines.append(f"- [{finding.severity}] {finding.category} — {finding.title}: {finding.detail}")
+    else:
+        lines.append("- None")
+    lines.extend(("", "Uncertainty:"))
+    lines.extend((f"- {item}" for item in result.uncertainty) if result.uncertainty else ("- None",))
+    lines.extend(("", "Evidence conflicts:"))
+    lines.extend(
+        (f"- {item}" for item in result.evidence_conflicts) if result.evidence_conflicts else ("- None",)
+    )
+    if result.raw_untrusted_output is not None:
+        lines.extend(("", "Bounded raw untrusted output:", result.raw_untrusted_output))
+    lines.extend(
+        (
+            "",
+            f"Snapshot hash: {result.snapshot_hash}",
+            f"Observer configuration hash: {result.observer_configuration_hash}",
+            f"Error category: {result.error_category or '(none)'}",
+            "",
+            "METADATA ONLY — NO AUTHORITY",
+        )
+    )
+    return "\n".join(lines)
 
 
 class MainWindow(tk.Tk):
@@ -140,7 +220,7 @@ class MainWindow(tk.Tk):
         self.observer_rail.pack(fill="x", pady=(6, 0))
         for column in range(3):
             self.observer_rail.columnconfigure(column, weight=1, uniform="observer")
-        self.observer_cards: list[dict[str, tk.Label]] = []
+        self.observer_cards: list[dict[str, tk.Widget]] = []
         for index in range(3):
             card = tk.Frame(self.observer_rail, bg=theme.PANEL, highlightbackground=theme.BORDER, highlightthickness=1)
             card.grid(row=0, column=index, sticky="nsew", padx=(0 if index == 0 else 5, 0 if index == 2 else 5))
@@ -151,8 +231,17 @@ class MainWindow(tk.Tk):
             route = tk.Label(card, bg=theme.PANEL, fg=theme.TEXT, anchor="w", wraplength=350, justify="left")
             route.pack(fill="x", padx=12, pady=(5, 3))
             result = tk.Label(card, bg=theme.PANEL, fg=theme.TEXT_MUTED, anchor="w", justify="left", wraplength=350)
-            result.pack(fill="x", padx=12, pady=(0, 10))
-            self.observer_cards.append({"role": role, "state": state, "route": route, "result": result})
+            result.pack(fill="x", padx=12, pady=(0, 5))
+            details = ttk.Button(
+                card,
+                text="View full result",
+                state="disabled",
+                command=lambda slot_index=index: self._show_observer_result(slot_index),
+            )
+            details.pack(anchor="w", padx=12, pady=(0, 10))
+            self.observer_cards.append(
+                {"role": role, "state": state, "route": route, "result": result, "details": details}
+            )
 
     def _build_conversation(self) -> None:
         conversation = tk.Frame(self, bg=theme.PANEL, highlightbackground=theme.BORDER, highlightthickness=1)
@@ -263,35 +352,141 @@ class MainWindow(tk.Tk):
     # --- critical prompt loop ------------------------------------------------
 
     def _render_observers(self) -> None:
-        for slot, widgets in zip(self.cockpit.observer_slots, self.observer_cards, strict=True):
-            enabled = "ENABLED" if slot.enabled else "DISABLED"
-            widgets["role"].configure(text=slot.role)
-            widgets["state"].configure(text=f"{enabled} • {slot.state}", fg=theme.ACCENT if slot.enabled else theme.TEXT_MUTED)
-            route = f"Provider: {slot.provider_id or 'not selected'}\nModel: {slot.model_id or 'not selected'}"
-            widgets["route"].configure(text=route)
-            widgets["result"].configure(text=f"{slot.result}\nMETADATA ONLY • NO AUTHORITY")
+        for index, (slot, widgets) in enumerate(
+            zip(self.cockpit.observer_slots, self.observer_cards, strict=True), start=1
+        ):
+            review_result = slot.review_result
+            if review_result is None:
+                enabled = "ENABLED" if slot.enabled else "DISABLED"
+                widgets["role"].configure(text=f"OBSERVER {index} — {slot.role}")
+                widgets["state"].configure(
+                    text=f"{enabled} • {slot.state}",
+                    fg=theme.ACCENT if slot.enabled else theme.TEXT_MUTED,
+                )
+                route = f"Provider: {slot.provider_id or 'not selected'}\nModel: {slot.model_id or 'not selected'}"
+                widgets["route"].configure(text=route)
+                widgets["result"].configure(text=f"{slot.result}\nMETADATA ONLY • NO AUTHORITY")
+                widgets["details"].configure(state="disabled")
+                continue
+
+            status_color = theme.ACCENT if review_result.execution_status is ExecutionStatus.COMPLETED else theme.WARN
+            if review_result.execution_status is ExecutionStatus.DISABLED:
+                status_color = theme.TEXT_MUTED
+            widgets["role"].configure(text=f"OBSERVER {index} — {review_result.role}")
+            widgets["state"].configure(text=review_result.execution_status.value, fg=status_color)
+            widgets["route"].configure(
+                text=(
+                    f"Provider: {review_result.provider_id or 'not selected'}\n"
+                    f"Model: {review_result.model_id or 'not selected'}"
+                )
+            )
+            stale_note = ""
+            current_hash = self._current_primary_snapshot_hash()
+            if current_hash != review_result.snapshot_hash:
+                stale_note = "\nEarlier captured primary snapshot"
+            widgets["result"].configure(
+                text=(
+                    f"{review_result.concise_summary}\n"
+                    f"Trace: {review_result.snapshot_hash[:12]}{stale_note}\n"
+                    "METADATA ONLY • NO AUTHORITY"
+                )
+            )
+            widgets["details"].configure(state="normal")
 
     def _run_critical_review(self) -> None:
-        status = self.cockpit.review_status(
-            self.controller.settings.configured_provider_ids(), self._available_models_by_provider()
-        )
-        if status != CRITIC_BACKEND_UNAVAILABLE:
-            self.critical_loop_label.configure(text="Critical loop: configuration incomplete", fg=theme.WARN)
+        if self.controller.critical_review_active:
+            self.status_message_label.configure(text="Critical review is already running.", fg=theme.WARN)
+            return
+        try:
+            snapshot = self.controller.capture_review_snapshot()
+        except ReviewValidationError:
             self._show_alert(
-                "Observer configuration incomplete",
-                "Enable and complete each selected observer with a configured provider, model, and role before running review.",
+                "Critical review unavailable",
+                "UNAVAILABLE — PRIMARY SNAPSHOT FAILED CLOSED VALIDATION",
                 self.review_button,
             )
-            self.status_message_label.configure(text="Critical review blocked: observer configuration incomplete.", fg=theme.WARN)
+            self.status_message_label.configure(text="Critical review snapshot validation failed closed.", fg=theme.WARN)
+            return
+        if snapshot is None:
+            message = "UNAVAILABLE — NO COMPLETED PRIMARY RESPONSE"
+            self._show_alert("Critical review unavailable", message, self.review_button)
+            self.status_message_label.configure(text=message, fg=theme.WARN)
+            return
+
+        try:
+            configs = tuple(
+                ObserverConfig(
+                    slot_id=f"observer-{index}",
+                    enabled=slot.enabled,
+                    role_id=slot.role,
+                    provider_connection_id=slot.provider_id,
+                    model_id=slot.model_id,
+                )
+                for index, slot in enumerate(self.cockpit.observer_slots, start=1)
+            )
+        except ReviewValidationError:
+            self._show_alert(
+                "Critical review unavailable",
+                "Observer configuration failed closed validation.",
+                self.review_button,
+            )
+            self.status_message_label.configure(text="Observer configuration failed closed validation.", fg=theme.WARN)
             return
         for slot in self.cockpit.observer_slots:
+            slot.review_result = None
             if slot.enabled:
-                slot.state = "Unavailable"
-                slot.result = CRITIC_BACKEND_UNAVAILABLE
+                slot.state = "PENDING"
+                slot.result = "Waiting for one bounded observer response."
+            else:
+                slot.state = "Disabled"
+                slot.result = "Observer disabled; no provider call will be made."
         self._render_observers()
-        self.critical_loop_label.configure(text="Critical loop: unavailable", fg=theme.WARN)
-        self.status_message_label.configure(text=CRITIC_BACKEND_UNAVAILABLE, fg=theme.WARN)
-        self._show_alert("Critical review unavailable", CRITIC_BACKEND_UNAVAILABLE, self.review_button)
+        self.review_button.configure(state="disabled")
+        self.critical_loop_label.configure(text="Critical loop: running", fg=theme.ACCENT)
+        self.status_message_label.configure(text="Running bounded independent observer review…", fg=theme.TEXT_MUTED)
+        started = self.controller.submit_critical_review(
+            snapshot,
+            configs,
+            on_done=self._on_critical_review_done,
+            on_scheduled_callback=lambda func: self.after(0, func),
+        )
+        if not started:
+            self.review_button.configure(state="normal")
+            self.critical_loop_label.configure(text="Critical loop: blocked", fg=theme.WARN)
+            self.status_message_label.configure(text="Critical review did not start.", fg=theme.WARN)
+
+    def _on_critical_review_done(self, completion: CriticalReviewCompletion) -> None:
+        self.review_button.configure(state="normal")
+        if completion.error_category is not None:
+            self.critical_loop_label.configure(text="Critical loop: failed closed", fg=theme.WARN)
+            self.status_message_label.configure(text="Critical review failed closed before observer calls.", fg=theme.WARN)
+            self._show_alert(
+                "Critical review failed",
+                f"Local error category: {completion.error_category}",
+                self.review_button,
+            )
+            return
+        self.cockpit.apply_review_results(completion.results)
+        self._render_observers()
+        self.critical_loop_label.configure(text="Critical loop: complete", fg=theme.ACCENT)
+        self.status_message_label.configure(
+            text="Bounded review finished. Results are metadata only and have no authority.",
+            fg=theme.TEXT_MUTED,
+        )
+
+    def _current_primary_snapshot_hash(self) -> str | None:
+        try:
+            snapshot = self.controller.capture_review_snapshot()
+        except ReviewValidationError:
+            return None
+        return snapshot.snapshot_hash if snapshot is not None else None
+
+    def _show_observer_result(self, slot_index: int) -> None:
+        slot = self.cockpit.observer_slots[slot_index]
+        if slot.review_result is None:
+            return
+        opener = self.observer_cards[slot_index]["details"]
+        ObserverResultDialog(self, slot.review_result, opener)
 
     # --- chat ---------------------------------------------------------------
 
@@ -341,6 +536,7 @@ class MainWindow(tk.Tk):
             return
         chat_result = result.chat_result
         assert chat_result is not None
+        self.controller.accept_completed_primary_turn(result)
         self.controller.session.add_assistant_message(chat_result.content)
         footer = SUGGESTION_LABEL + (f"\n{SOURCES_LABEL}" if result.evidence_count else "")
         self._append_transcript_line("assistant", "Assistant", chat_result.content, footer=footer)
