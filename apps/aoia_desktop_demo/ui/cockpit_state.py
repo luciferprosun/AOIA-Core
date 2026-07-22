@@ -1,0 +1,77 @@
+"""Inert, UI-only state for the desktop cockpit.
+
+This module deliberately has no provider imports and cannot dispatch a model
+request.  It keeps primary and observer selections separate so the visual
+Critical Prompt Loop remains honest until a critic backend exists.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Iterable
+
+
+CRITIC_BACKEND_UNAVAILABLE = "UNAVAILABLE — CRITIC BACKEND NOT IMPLEMENTED"
+OBSERVER_ROLES = (
+    "Logic & Claims",
+    "Safety & Authority",
+    "Evidence & Consistency",
+)
+
+
+@dataclass
+class ObserverSlot:
+    role: str
+    enabled: bool = False
+    provider_id: str = ""
+    model_id: str = ""
+    state: str = "Not configured"
+    result: str = "No review has run. METADATA ONLY — NO AUTHORITY."
+
+    def is_complete(self, configured_providers: Iterable[str], models: dict[str, tuple[str, ...]]) -> bool:
+        return (
+            self.enabled
+            and self.provider_id in set(configured_providers)
+            and self.model_id in models.get(self.provider_id, ())
+            and bool(self.role)
+        )
+
+
+@dataclass
+class CockpitState:
+    """Local UI state; it is intentionally not persisted or serialized."""
+
+    primary_model_id: str = ""
+    observer_slots: list[ObserverSlot] = field(
+        default_factory=lambda: [ObserverSlot(role=role) for role in OBSERVER_ROLES]
+    )
+
+    def __post_init__(self) -> None:
+        if len(self.observer_slots) != 3:
+            raise ValueError("The desktop cockpit has exactly three observer slots.")
+
+    def set_primary_model(self, model_id: str) -> None:
+        self.primary_model_id = model_id
+
+    def models_for_provider(self, provider_id: str, models: dict[str, tuple[str, ...]]) -> tuple[str, ...]:
+        return models.get(provider_id, ())
+
+    def review_status(self, configured_providers: Iterable[str], models: dict[str, tuple[str, ...]]) -> str:
+        enabled = [slot for slot in self.observer_slots if slot.enabled]
+        if not enabled or any(not slot.is_complete(configured_providers, models) for slot in enabled):
+            return "OBSERVER CONFIGURATION INCOMPLETE"
+        return CRITIC_BACKEND_UNAVAILABLE
+
+
+def configured_model_ids(
+    *, provider_id: str, saved_model_id: str, fetched_model_ids: Iterable[str]
+) -> dict[str, tuple[str, ...]]:
+    """Return only models tied to an actual saved provider connection.
+
+    A manually saved model is valid even before an operator explicitly refreshes
+    the provider catalog.  Fetched values are merged, never invented.
+    """
+    if not provider_id or not saved_model_id:
+        return {}
+    values = tuple(dict.fromkeys(model_id for model_id in (saved_model_id, *fetched_model_ids) if model_id))
+    return {provider_id: values}
