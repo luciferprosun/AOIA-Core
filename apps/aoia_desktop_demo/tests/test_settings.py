@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import json
-import os
 import unittest
 from dataclasses import fields
 from pathlib import Path
+from types import SimpleNamespace
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from apps.aoia_desktop_demo.state import settings as settings_module
-from apps.aoia_desktop_demo.state.settings import DemoSettings, SessionSecrets
+from apps.aoia_desktop_demo.providers.openrouter import OPENROUTER_BASE_URL
+from apps.aoia_desktop_demo.state.settings import DemoSettings, PROVIDER_CATALOG, SessionSecrets
+from apps.aoia_desktop_demo.ui.settings_dialog import SettingsDialog
 
 
 class NonSecretPersistenceTests(unittest.TestCase):
@@ -25,11 +27,17 @@ class NonSecretPersistenceTests(unittest.TestCase):
 
     def test_save_and_load_roundtrip(self) -> None:
         with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
-            original = DemoSettings(selected_model_id="vendor/model-x", knowledge_profile_id="linux_unix")
+            original = DemoSettings(
+                provider="openrouter",
+                api_base_url=OPENROUTER_BASE_URL,
+                selected_model_id="openai/gpt-4.1-nano",
+                knowledge_profile_id="linux_unix",
+            )
             settings_module.save_settings(original)
             loaded = settings_module.load_settings()
-            self.assertEqual(loaded.selected_model_id, "vendor/model-x")
+            self.assertEqual(loaded.selected_model_id, "openai/gpt-4.1-nano")
             self.assertEqual(loaded.knowledge_profile_id, "linux_unix")
+            self.assertEqual(loaded.configured_provider_ids(), ("openrouter",))
 
     def test_saved_file_never_contains_key_shaped_content(self) -> None:
         with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
@@ -54,22 +62,85 @@ class NonSecretPersistenceTests(unittest.TestCase):
 
     def test_load_settings_ignores_unexpected_keys(self) -> None:
         with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+            settings_module.save_settings(DemoSettings())
+            payload = json.loads(settings_module.CONFIG_PATH.read_text(encoding="utf-8"))
+            payload.update({"selected_model_id": "openai/gpt-4.1-nano", "api_key": "should-be-ignored"})
+            settings_module.CONFIG_PATH.write_text(json.dumps(payload), encoding="utf-8")
+            loaded = settings_module.load_settings()
+            self.assertEqual(loaded.selected_model_id, "openai/gpt-4.1-nano")
+            self.assertFalse(hasattr(loaded, "api_key"))
+
+    def test_fresh_start_has_no_configured_connections_or_active_model(self) -> None:
+        fresh = DemoSettings()
+        self.assertEqual(fresh.configured_provider_ids(), ())
+        self.assertEqual(fresh.provider, "")
+        self.assertEqual(fresh.api_base_url, "")
+        self.assertEqual(fresh.manual_model_id, "")
+        self.assertEqual(fresh.selected_model_id, "")
+
+    def test_provider_catalog_is_not_a_configured_connection(self) -> None:
+        self.assertEqual(PROVIDER_CATALOG, ("openrouter",))
+        self.assertEqual(DemoSettings().configured_provider_ids(), ())
+
+    def test_legacy_seeded_settings_are_removed_once_and_do_not_reappear(self) -> None:
+        with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
             settings_module.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
             settings_module.CONFIG_PATH.write_text(
-                json.dumps({"selected_model_id": "vendor/x", "api_key": "should-be-ignored"}),
+                json.dumps(
+                    {
+                        "provider": "openrouter",
+                        "api_base_url": OPENROUTER_BASE_URL,
+                        "manual_model_id": "openai/gpt-4.1-nano",
+                    }
+                ),
                 encoding="utf-8",
             )
-            loaded = settings_module.load_settings()
-            self.assertEqual(loaded.selected_model_id, "vendor/x")
-            self.assertFalse(hasattr(loaded, "api_key"))
+            self.assertEqual(settings_module.load_settings(), DemoSettings())
+            self.assertFalse(settings_module.CONFIG_PATH.exists())
+            self.assertEqual(settings_module.load_settings(), DemoSettings())
+
+    def test_operator_created_configuration_survives_restart(self) -> None:
+        with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+            operator_settings = DemoSettings(
+                provider="openrouter",
+                api_base_url=OPENROUTER_BASE_URL,
+                manual_model_id="openai/gpt-4.1-nano",
+            )
+            settings_module.save_settings(operator_settings)
+            restored = settings_module.load_settings()
+            self.assertEqual(restored.configured_provider_ids(), ("openrouter",))
+            self.assertEqual(restored.manual_model_id, "openai/gpt-4.1-nano")
+
+    def test_malformed_or_incomplete_records_stay_inactive(self) -> None:
+        incomplete = DemoSettings(provider="openrouter", api_base_url=OPENROUTER_BASE_URL)
+        malformed = DemoSettings(
+            provider="openrouter", api_base_url=OPENROUTER_BASE_URL, manual_model_id="not a model identifier"
+        )
+        self.assertEqual(incomplete.configured_provider_ids(), ())
+        self.assertEqual(malformed.configured_provider_ids(), ())
+
+    def test_manual_openrouter_form_values_can_be_stored(self) -> None:
+        dialog = object.__new__(SettingsDialog)
+        settings = DemoSettings()
+        dialog.controller = SimpleNamespace(settings=settings)
+        dialog.provider_var = SimpleNamespace(get=lambda: "OpenRouter")
+        dialog.base_url_var = SimpleNamespace(get=lambda: OPENROUTER_BASE_URL)
+        dialog.app_title_var = SimpleNamespace(get=lambda: "AOIA Control Chat Competition Demo")
+        dialog.timeout_var = SimpleNamespace(get=lambda: "30")
+        dialog.manual_model_var = SimpleNamespace(get=lambda: "openai/gpt-4.1-nano")
+        dialog.max_tokens_var = SimpleNamespace(get=lambda: "")
+        dialog._apply_non_secret_fields()
+        self.assertEqual(settings.provider, "openrouter")
+        self.assertEqual(settings.api_base_url, OPENROUTER_BASE_URL)
+        self.assertEqual(settings.manual_model_id, "openai/gpt-4.1-nano")
+        self.assertEqual(settings.configured_provider_ids(), ("openrouter",))
 
 
 class SessionSecretsTests(unittest.TestCase):
-    def test_from_environment_reads_but_does_not_persist(self) -> None:
-        with patch.dict(os.environ, {"OPENROUTER_API_KEY": "env-key-value"}, clear=False):
-            secrets = SessionSecrets.from_environment()
-            self.assertEqual(secrets.api_key, "env-key-value")
-            self.assertEqual(secrets.source, "environment")
+    def test_no_api_key_is_part_of_fresh_or_serialized_state(self) -> None:
+        fresh = DemoSettings()
+        self.assertNotIn("api_key", fresh.to_json_dict())
+        self.assertNotIn("apiKey", fresh.to_json_dict())
 
     def test_repr_never_includes_key_value(self) -> None:
         secrets = SessionSecrets(api_key="super-secret-value")
@@ -83,8 +154,9 @@ class SessionSecretsTests(unittest.TestCase):
 
     def test_set_for_session_updates_source(self) -> None:
         secrets = SessionSecrets()
-        secrets.set_for_session("abc")
+        secrets.set_for_session("sk-or-test-redacted")
         self.assertEqual(secrets.source, "session-entry")
+        self.assertNotIn("sk-or-test-redacted", repr(secrets))
         secrets.set_for_session("")
         self.assertEqual(secrets.source, "none")
         self.assertIsNone(secrets.api_key)

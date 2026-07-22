@@ -48,6 +48,7 @@ class MainWindow(tk.Tk):
         self._build_layout()
         self._refresh_knowledge_dropdown()
         self._update_status_strip()
+        self._render_connection_state()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
     # --- layout construction ------------------------------------------------
@@ -72,13 +73,13 @@ class MainWindow(tk.Tk):
             font=theme.base_font(theme.FONT_SIZE_HEADING, "bold"),
         ).pack(side="left", padx=12, pady=8)
 
-        self.provider_label = tk.Label(bar, text="Provider: OpenRouter", bg=theme.PANEL, fg=theme.TEXT_MUTED)
+        self.provider_label = tk.Label(bar, text="Provider: (not configured)", bg=theme.PANEL, fg=theme.TEXT_MUTED)
         self.provider_label.pack(side="left", padx=8)
 
         self.model_label = tk.Label(bar, text="Model: (none selected)", bg=theme.PANEL, fg=theme.TEXT_MUTED)
         self.model_label.pack(side="left", padx=8)
 
-        self.connection_label = tk.Label(bar, text="Connection: unknown", bg=theme.PANEL, fg=theme.TEXT_MUTED)
+        self.connection_label = tk.Label(bar, text="Connection: not configured", bg=theme.PANEL, fg=theme.TEXT_MUTED)
         self.connection_label.pack(side="left", padx=8)
 
         ttk.Button(bar, text="Settings", command=self._open_settings).pack(side="right", padx=12)
@@ -216,7 +217,19 @@ class MainWindow(tk.Tk):
         SettingsDialog(self, self.controller, on_saved=self._on_settings_saved)
 
     def _on_settings_saved(self) -> None:
-        self.connection_label.configure(text="Connection: settings saved")
+        self._render_connection_state()
+
+    def _render_connection_state(self) -> None:
+        provider = self.controller.settings.provider
+        model_id = self.controller.effective_model_id()
+        self.provider_label.configure(text=f"Provider: {provider or '(not configured)'}")
+        self.model_label.configure(text=f"Model: {model_id or '(none selected)'}")
+        if self.controller.provider_route_is_eligible():
+            self.connection_label.configure(text="Connection: eligible for manual use")
+        elif self.controller.settings.has_configured_provider_connection():
+            self.connection_label.configure(text="Connection: API key required")
+        else:
+            self.connection_label.configure(text="Connection: not configured")
 
     def _on_refresh_models(self) -> None:
         self.status_message_label.configure(text="Refreshing model list...")
@@ -234,7 +247,7 @@ class MainWindow(tk.Tk):
         raw = self.model_var.get()
         model_id = raw.split("(")[-1].rstrip(")") if "(" in raw else raw
         self.controller.settings.selected_model_id = model_id
-        self.model_label.configure(text=f"Model: {model_id}")
+        self._render_connection_state()
 
     def _on_knowledge_selected(self) -> None:
         selected_name = self.knowledge_var.get()

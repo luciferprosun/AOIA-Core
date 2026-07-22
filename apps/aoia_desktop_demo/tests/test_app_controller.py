@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import threading
 import unittest
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -9,6 +10,7 @@ from unittest.mock import patch
 from apps.aoia_desktop_demo.app import AppController
 from apps.aoia_desktop_demo.knowledge.registry import NONE_PROFILE_ID
 from apps.aoia_desktop_demo.providers.base import ChatResult, ProviderError
+from apps.aoia_desktop_demo.providers.openrouter import OPENROUTER_BASE_URL
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -63,6 +65,8 @@ class AppControllerModelOnlyModeTests(unittest.TestCase):
         _FakeOpenRouterClient.next_error = None
         self.controller = AppController(REPO_ROOT)
         self.controller.secrets.set_for_session("test-key")
+        self.controller.settings.provider = "openrouter"
+        self.controller.settings.api_base_url = OPENROUTER_BASE_URL
         self.controller.settings.manual_model_id = "vendor/test-model"
 
     def tearDown(self) -> None:
@@ -104,6 +108,24 @@ class AppControllerModelOnlyModeTests(unittest.TestCase):
             controller.refresh_models()
         controller.shutdown()
 
+    def test_route_is_inactive_until_manual_configuration_is_complete(self) -> None:
+        controller = AppController(REPO_ROOT)
+        self.assertFalse(controller.provider_route_is_eligible())
+        controller.settings.provider = "openrouter"
+        controller.settings.api_base_url = OPENROUTER_BASE_URL
+        controller.settings.manual_model_id = "openai/gpt-4.1-nano"
+        self.assertFalse(controller.provider_route_is_eligible())
+        controller.secrets.set_for_session("sk-or-test-redacted")
+        self.assertTrue(controller.provider_route_is_eligible())
+        controller.shutdown()
+
+    def test_environment_key_does_not_restore_a_connection(self) -> None:
+        with patch.dict(os.environ, {"OPENROUTER_API_KEY": "sk-or-test-redacted"}, clear=False):
+            controller = AppController(REPO_ROOT)
+            self.assertIsNone(controller.secrets.api_key)
+            self.assertFalse(controller.provider_route_is_eligible())
+            controller.shutdown()
+
     def test_manual_model_id_takes_precedence_over_selected(self) -> None:
         self.controller.settings.selected_model_id = "vendor/from-dropdown"
         self.controller.settings.manual_model_id = "vendor/manual-override"
@@ -119,6 +141,8 @@ class CancellationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.controller = AppController(REPO_ROOT)
         self.controller.secrets.set_for_session("test-key")
+        self.controller.settings.provider = "openrouter"
+        self.controller.settings.api_base_url = OPENROUTER_BASE_URL
         self.controller.settings.manual_model_id = "vendor/test-model"
 
     def tearDown(self) -> None:

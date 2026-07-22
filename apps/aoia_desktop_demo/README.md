@@ -68,10 +68,6 @@ python3 -m apps.aoia_desktop_demo
 4. Optionally click **Test connection** to confirm it works before
    chatting.
 
-You can instead set the `OPENROUTER_API_KEY` environment variable before
-launching; the app will pick it up automatically for the session (still
-never written back to disk).
-
 If your OS has a secure keyring available in a future revision of this
 demo, an explicit opt-in persistent-storage option may be offered — as
 shipped, storage is session-only.
@@ -132,9 +128,8 @@ your API key).
 
 ## Security and privacy notes
 
-- The API key lives in memory only for the lifetime of the running
-  process, unless you set it via the `OPENROUTER_API_KEY` environment
-  variable (still memory-only within the app).
+- The API key is entered manually and lives only in memory for the
+  lifetime of the running process.
 - Non-secret preferences (selected provider/model, window size,
   timeout, selected knowledge profile) are stored at
   `~/.config/aoia-control-chat-demo/config.json`.

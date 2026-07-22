@@ -16,7 +16,7 @@ from .knowledge.prompt_context import build_knowledge_system_message
 from .knowledge.registry import NONE_PROFILE_ID, KnowledgeProfile, discover_profiles, find_profile
 from .knowledge.retrieval_adapter import retrieve_linux_evidence
 from .providers.base import ChatResult, ModelInfo, ProviderError
-from .providers.openrouter import OpenRouterClient, OpenRouterConfig
+from .providers.openrouter import OPENROUTER_BASE_URL, OpenRouterClient, OpenRouterConfig
 from .security.secret_redaction import redact_exception
 from .state.chat_session import ChatSession
 from .state.settings import DemoSettings, SessionSecrets, load_settings, save_settings
@@ -41,7 +41,7 @@ class AppController:
     def __init__(self, repo_root: Path) -> None:
         self.repo_root = repo_root
         self.settings: DemoSettings = load_settings()
-        self.secrets: SessionSecrets = SessionSecrets.from_environment()
+        self.secrets = SessionSecrets()
         self.session = ChatSession()
         self.knowledge_profiles: list[KnowledgeProfile] = discover_profiles(repo_root)
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix="aoia-provider")
@@ -62,6 +62,10 @@ class AppController:
     def _build_client(self) -> OpenRouterClient:
         if not self.secrets.api_key:
             raise ProviderError("No API key set for this session. Open Settings to add one.")
+        if self.settings.provider != "openrouter":
+            raise ProviderError("Select OpenRouter in Settings before using a provider connection.")
+        if self.settings.api_base_url.rstrip("/") != OPENROUTER_BASE_URL:
+            raise ProviderError("Enter the OpenRouter API Base URL in Settings before using a provider connection.")
         config = OpenRouterConfig(
             api_key=self.secrets.api_key,
             base_url=self.settings.api_base_url,
@@ -92,6 +96,13 @@ class AppController:
 
     def effective_model_id(self) -> str:
         return self.settings.manual_model_id.strip() or self.settings.selected_model_id.strip()
+
+    def provider_route_is_eligible(self) -> bool:
+        """Return eligibility only after complete, manual operator entry.
+
+        This is not verification and never performs a provider call.
+        """
+        return self.settings.has_configured_provider_connection() and bool(self.secrets.api_key)
 
     # --- chat ------------------------------------------------------------
 

@@ -9,6 +9,8 @@ from . import theme
 from ..app import AppController
 from ..providers.base import ProviderError
 
+API_KEY_ENTRY_MASK = "*"
+
 
 class SettingsDialog(tk.Toplevel):
     def __init__(self, parent: tk.Widget, controller: AppController, on_saved) -> None:
@@ -31,10 +33,8 @@ class SettingsDialog(tk.Toplevel):
 
         row = 0
         tk.Label(self, text="Provider", bg=theme.BG, fg=theme.TEXT_MUTED).grid(row=row, column=0, sticky="w", **pad)
-        self.provider_var = tk.StringVar(value="openrouter")
-        ttk.Combobox(self, textvariable=self.provider_var, values=["openrouter"], state="readonly", width=30).grid(
-            row=row, column=1, sticky="w", **pad
-        )
+        self.provider_var = tk.StringVar()
+        tk.Entry(self, textvariable=self.provider_var, width=42).grid(row=row, column=1, sticky="w", **pad)
 
         row += 1
         tk.Label(self, text="API Base URL", bg=theme.BG, fg=theme.TEXT_MUTED).grid(row=row, column=0, sticky="w", **pad)
@@ -44,21 +44,8 @@ class SettingsDialog(tk.Toplevel):
         row += 1
         tk.Label(self, text="API Key", bg=theme.BG, fg=theme.TEXT_MUTED).grid(row=row, column=0, sticky="w", **pad)
         self.api_key_var = tk.StringVar()
-        self._key_entry = tk.Entry(self, textvariable=self.api_key_var, width=42, show="*")
+        self._key_entry = tk.Entry(self, textvariable=self.api_key_var, width=42, show=API_KEY_ENTRY_MASK)
         self._key_entry.grid(row=row, column=1, sticky="w", **pad)
-
-        row += 1
-        self._show_key_var = tk.BooleanVar(value=False)
-        tk.Checkbutton(
-            self,
-            text="Show key",
-            variable=self._show_key_var,
-            command=self._toggle_key_visibility,
-            bg=theme.BG,
-            fg=theme.TEXT,
-            selectcolor=theme.PANEL,
-            activebackground=theme.BG,
-        ).grid(row=row, column=1, sticky="w", padx=10)
 
         row += 1
         tk.Label(self, text="App Title", bg=theme.BG, fg=theme.TEXT_MUTED).grid(row=row, column=0, sticky="w", **pad)
@@ -98,25 +85,24 @@ class SettingsDialog(tk.Toplevel):
 
     # --- behavior ------------------------------------------------------------
 
-    def _toggle_key_visibility(self) -> None:
-        self._key_entry.configure(show="" if self._show_key_var.get() else "*")
-
     def _load_from_settings(self) -> None:
         settings = self.controller.settings
+        self.provider_var.set(settings.provider)
         self.base_url_var.set(settings.api_base_url)
         self.app_title_var.set(settings.app_title)
         self.timeout_var.set(str(settings.timeout_seconds))
         self.manual_model_var.set(settings.manual_model_id)
         self.max_tokens_var.set(str(settings.max_response_tokens) if settings.max_response_tokens else "")
+        # Do not prefill a secret field, even from an in-memory session key.
         if self.controller.secrets.api_key:
-            self.api_key_var.set(self.controller.secrets.api_key)
-            self._set_status(f"API key present (source: {self.controller.secrets.source}).", theme.TEXT_MUTED)
+            self._set_status("API key set for this session (masked; not persisted).", theme.TEXT_MUTED)
         else:
             self._set_status("No API key set. This field stays session-only unless a secure keyring is used.", theme.TEXT_MUTED)
 
     def _apply_non_secret_fields(self) -> None:
         settings = self.controller.settings
-        settings.api_base_url = self.base_url_var.get().strip() or settings.api_base_url
+        settings.provider = self.provider_var.get().strip().casefold()
+        settings.api_base_url = self.base_url_var.get().strip()
         settings.app_title = self.app_title_var.get().strip() or settings.app_title
         try:
             settings.timeout_seconds = max(1.0, float(self.timeout_var.get().strip()))
@@ -140,6 +126,7 @@ class SettingsDialog(tk.Toplevel):
         self._set_status("Session API key cleared.", theme.TEXT_MUTED)
 
     def _on_test_connection(self) -> None:
+        self._apply_non_secret_fields()
         self._on_use_for_session()
         self._set_status("Testing connection...", theme.TEXT_MUTED)
         self.update_idletasks()

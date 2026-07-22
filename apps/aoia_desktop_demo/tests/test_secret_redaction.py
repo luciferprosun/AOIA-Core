@@ -8,9 +8,13 @@ from apps.aoia_desktop_demo.security.secret_redaction import (
     redact_secret_data,
     redact_secret_text,
 )
+from apps.aoia_desktop_demo.ui.settings_dialog import API_KEY_ENTRY_MASK
 
 
 class SecretRedactionTests(unittest.TestCase):
+    def test_settings_api_key_is_always_masked(self) -> None:
+        self.assertEqual(API_KEY_ENTRY_MASK, "*")
+
     def test_redacts_bearer_token(self) -> None:
         text = "Authorization: Bearer sk-abcdef1234567890abcdef"
         self.assertNotIn("sk-abcdef1234567890abcdef", redact_secret_text(text))
