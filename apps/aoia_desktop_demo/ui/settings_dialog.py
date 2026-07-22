@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import tkinter as tk
 from collections.abc import Callable
 from tkinter import ttk
@@ -26,7 +27,9 @@ class SettingsDialog(tk.Toplevel):
     ) -> None:
         super().__init__(parent)
         self.controller = controller
-        self.cockpit = cockpit
+        self._live_cockpit = cockpit
+        self.cockpit = deepcopy(cockpit)
+        self._committed_settings = deepcopy(controller.settings)
         self._model_supplier = model_supplier
         self._on_saved = on_saved
         self._on_refresh_models = on_refresh_models
@@ -128,10 +131,27 @@ class SettingsDialog(tk.Toplevel):
 
     def _build_loop_tab(self) -> None:
         self.loop_tab.columnconfigure(2, weight=1)
+        self.pre_delivery_var = tk.BooleanVar(
+            value=self.controller.settings.pre_delivery_critical_loop_enabled
+        )
+        tk.Checkbutton(
+            self.loop_tab,
+            text=(
+                "Enable pre-delivery sequential review — one Send runs primary draft → "
+                "Observer 1 → Observer 2 → Observer 3 → final primary answer"
+            ),
+            variable=self.pre_delivery_var,
+            bg=theme.BG,
+            fg=theme.ACCENT,
+            selectcolor=theme.PANEL_ALT,
+            activebackground=theme.BG,
+            wraplength=670,
+            justify="left",
+        ).grid(row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(14, 6))
         self.observer_vars: list[dict[str, tk.Variable]] = []
         for index, slot in enumerate(self.cockpit.observer_slots):
             frame = tk.Frame(self.loop_tab, bg=theme.PANEL, highlightbackground=theme.BORDER, highlightthickness=1)
-            frame.grid(row=index, column=0, columnspan=3, sticky="ew", padx=14, pady=(14 if index == 0 else 5, 5))
+            frame.grid(row=index + 1, column=0, columnspan=3, sticky="ew", padx=14, pady=5)
             frame.columnconfigure(4, weight=1)
             enabled = tk.BooleanVar(value=slot.enabled)
             provider = tk.StringVar(value=slot.provider_id)
@@ -155,8 +175,17 @@ class SettingsDialog(tk.Toplevel):
                 variable.trace_add("write", lambda *_args, n=index: self._sync_observer(n))
             variables["provider_combo"] = provider_combo
             variables["model_combo"] = model_combo
-        tk.Label(self.loop_tab, text="Run Critical Review is manual. Each enabled valid observer receives one bounded independent request; review never starts automatically.",
-                 bg=theme.BG, fg=theme.WARN, wraplength=650, justify="left").grid(row=3, column=0, columnspan=3, sticky="w", padx=16, pady=10)
+        tk.Label(
+            self.loop_tab,
+            text=(
+                "Disabled: Run Critical Review remains manual and post-response. Enabled: one explicit Send "
+                "authorizes at most five sequential provider calls; there is no retry, fallback, or model switch."
+            ),
+            bg=theme.BG,
+            fg=theme.WARN,
+            wraplength=650,
+            justify="left",
+        ).grid(row=4, column=0, columnspan=3, sticky="w", padx=16, pady=10)
 
     def _build_telemetry_tab(self) -> None:
         tk.Label(self.telemetry_tab, text="SMART ROUTER TELEMETRY — NOT CONNECTED IN THIS DEMO", bg=theme.BG, fg=theme.WARN,
@@ -168,7 +197,7 @@ class SettingsDialog(tk.Toplevel):
         tk.Label(self.safety_tab, text="Session and safety boundary", bg=theme.BG, fg=theme.TEXT, font=theme.base_font(12, "bold")).pack(
             anchor="w", padx=18, pady=(22, 8)
         )
-        tk.Label(self.safety_tab, text="Provider output remains untrusted. Observer output is metadata only and has no authority. Requests are sent only after an operator presses Send; there is no retry, fallback, streaming, or automatic model switch.",
+        tk.Label(self.safety_tab, text="Provider output remains untrusted. Observer output is metadata only and has no authority. When pre-delivery mode is enabled, one operator press of Send explicitly authorizes the bounded draft, three sequential reviews, and final revision; there is no retry, fallback, streaming, or automatic model switch.",
                  bg=theme.BG, fg=theme.TEXT_MUTED, wraplength=620, justify="left").pack(anchor="w", padx=18)
         tk.Label(
             self.safety_tab,
@@ -185,6 +214,7 @@ class SettingsDialog(tk.Toplevel):
         self.app_title_var.set(settings.app_title)
         self.timeout_var.set(str(settings.timeout_seconds))
         self.max_tokens_var.set(str(settings.max_response_tokens) if settings.max_response_tokens else "")
+        self.pre_delivery_var.set(settings.pre_delivery_critical_loop_enabled)
         self._populate_model_controls()
         self._set_status(
             "API key set for this session (masked; not persisted)." if self.controller.secrets.api_key else "No API key set for this session.",
@@ -227,9 +257,12 @@ class SettingsDialog(tk.Toplevel):
                 self.cockpit.set_primary_model(selected)
         raw_max_tokens = self.max_tokens_var.get().strip()
         settings.max_response_tokens = int(raw_max_tokens) if raw_max_tokens.isdigit() else None
+        if hasattr(self, "pre_delivery_var"):
+            settings.pre_delivery_critical_loop_enabled = bool(self.pre_delivery_var.get())
         if hasattr(self, "observer_vars"):
             for index in range(3):
                 self._sync_observer(index)
+            settings.observer_slots = self.cockpit.observer_preferences()
 
     def _on_primary_selected(self) -> None:
         selected = self.primary_model_var.get().strip()
@@ -292,6 +325,9 @@ class SettingsDialog(tk.Toplevel):
     def _on_save(self) -> None:
         self._apply_non_secret_fields()
         self.controller.save_current_settings()
+        self._live_cockpit.set_primary_model(self.cockpit.primary_model_id)
+        self._live_cockpit.restore_observer_preferences(self.cockpit.observer_preferences())
+        self._committed_settings = deepcopy(self.controller.settings)
         self._on_saved()
         self._set_status("Non-secret settings saved. API keys are never written to disk.", theme.ACCENT)
 
@@ -299,5 +335,6 @@ class SettingsDialog(tk.Toplevel):
         self.status_label.configure(text=text, fg=color)
 
     def _close(self) -> None:
+        self.controller.settings = deepcopy(self._committed_settings)
         self.grab_release()
         self.destroy()

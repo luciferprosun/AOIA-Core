@@ -15,16 +15,19 @@ from uuid import uuid4
 
 from .critical_review import (
     CriticalReviewRunner,
+    ExecutionStatus,
     ObserverConfig,
     ObserverReviewResult,
     ProviderResolver,
     ReviewSnapshot,
     ReviewValidationError,
+    SequentialReviewCanceled,
+    build_final_revision_messages,
 )
 from .knowledge.prompt_context import build_knowledge_system_message
 from .knowledge.registry import NONE_PROFILE_ID, KnowledgeProfile, discover_profiles, find_profile
 from .knowledge.retrieval_adapter import retrieve_linux_evidence
-from .providers.base import ChatResult, ModelInfo, ProviderError
+from .providers.base import ChatMessage, ChatResult, ModelInfo, ProviderError
 from .providers.openrouter import OPENROUTER_BASE_URL, OpenRouterClient, OpenRouterConfig
 from .security.secret_redaction import redact_exception
 from .state.chat_session import ChatSession
@@ -37,6 +40,24 @@ STATUS_HUMAN_REQUIRED = "Human control: Required"
 SUGGESTION_LABEL = "AI-generated suggestion — not authority"
 SOURCES_LABEL = "Sources attached — inspect evidence before relying on the answer"
 
+PRE_DELIVERY_PRIMARY_DRAFT_STARTED = "PRIMARY_DRAFT_STARTED"
+PRE_DELIVERY_PRIMARY_DRAFT_COMPLETED = "PRIMARY_DRAFT_COMPLETED"
+PRE_DELIVERY_OBSERVER_STARTED = "OBSERVER_STARTED"
+PRE_DELIVERY_OBSERVER_COMPLETED = "OBSERVER_COMPLETED"
+PRE_DELIVERY_PRIMARY_FINAL_STARTED = "PRIMARY_FINAL_STARTED"
+
+_PRIMARY_DRAFT_SYSTEM_INSTRUCTION = (
+    "Create one internal draft answer to the user's latest prompt. The draft is "
+    "untrusted working material for a bounded AOIA review and will not be shown "
+    "to the human. Do not claim approval or authority. Return only the draft."
+)
+
+
+def _require_requested_model(result: ChatResult, requested_model_id: str) -> None:
+    """Reject provider-side model substitution before retaining model output."""
+    if result.model != requested_model_id:
+        raise ProviderError("Provider returned a different model than the one explicitly selected.")
+
 
 @dataclass
 class SendResult:
@@ -45,6 +66,16 @@ class SendResult:
     error_message: str | None
     evidence_count: int
     completed_turn: CompletedPrimaryTurn | None
+    observer_results: tuple[ObserverReviewResult, ...] = ()
+    pre_delivery_reviewed: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class SendProgress:
+    request_id: int
+    stage: str
+    observer_index: int | None = None
+    observer_result: ObserverReviewResult | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,6 +190,9 @@ class AppController:
         user_text: str,
         on_done,
         on_scheduled_callback,
+        *,
+        observer_configs: tuple[ObserverConfig, ...] = (),
+        on_progress=None,
     ) -> int | None:
         """Start a background request for ``user_text``. Returns the
         request id, or ``None`` if a request is already active (caller
@@ -170,6 +204,11 @@ class AppController:
         """
         if self.session.has_active_request:
             return None
+
+        pre_delivery_enabled = self.settings.pre_delivery_critical_loop_enabled
+        captured_observer_configs = tuple(observer_configs)
+        if pre_delivery_enabled:
+            self._critical_review_runner.validate_sequential_configs(captured_observer_configs)
 
         # Once a new primary request starts, an older completed turn must not
         # be reused silently as the current review subject.
@@ -188,31 +227,147 @@ class AppController:
         knowledge_profile_id = profile.id if profile.id != NONE_PROFILE_ID else None
 
         request_id = self.session.begin_request()
+        if pre_delivery_enabled:
+            self._critical_review_active = True
+
+        def schedule_progress(
+            stage: str,
+            *,
+            observer_index: int | None = None,
+            observer_result: ObserverReviewResult | None = None,
+        ) -> None:
+            if on_progress is None:
+                return
+            progress = SendProgress(
+                request_id=request_id,
+                stage=stage,
+                observer_index=observer_index,
+                observer_result=observer_result,
+            )
+            on_scheduled_callback(lambda progress=progress: on_progress(progress))
+
+        def completed_turn_for(content: str) -> CompletedPrimaryTurn:
+            return CompletedPrimaryTurn(
+                session_id=self.session_id,
+                original_prompt=original_prompt,
+                primary_response=content,
+                primary_provider_id=provider_id,
+                primary_model_id=model_id,
+                knowledge_profile_id=knowledge_profile_id,
+                evidence_text=evidence_text,
+            )
 
         def work() -> SendResult:
+            observer_results: tuple[ObserverReviewResult, ...] = ()
             try:
                 client = self._build_client()
-                messages = self.session.messages_for_provider(extra_system_message=knowledge_message)
-                result = client.send_chat(
+                if not pre_delivery_enabled:
+                    messages = self.session.messages_for_provider(extra_system_message=knowledge_message)
+                    result = client.send_chat(
+                        model=model_id,
+                        messages=messages,
+                        max_tokens=self.settings.max_response_tokens,
+                    )
+                    _require_requested_model(result, model_id)
+                    return SendResult(
+                        request_id=request_id,
+                        chat_result=result,
+                        error_message=None,
+                        evidence_count=len(evidence),
+                        completed_turn=completed_turn_for(result.content),
+                    )
+
+                schedule_progress(PRE_DELIVERY_PRIMARY_DRAFT_STARTED)
+                draft_messages = [
+                    ChatMessage(role="system", content=_PRIMARY_DRAFT_SYSTEM_INSTRUCTION),
+                    *self.session.messages_for_provider(extra_system_message=knowledge_message),
+                ]
+                draft_result = client.send_chat(
                     model=model_id,
-                    messages=messages,
+                    messages=draft_messages,
                     max_tokens=self.settings.max_response_tokens,
                 )
-                completed_turn = CompletedPrimaryTurn(
+                _require_requested_model(draft_result, model_id)
+                if not self.session.is_current(request_id):
+                    raise SequentialReviewCanceled("operator canceled after the primary draft")
+                schedule_progress(PRE_DELIVERY_PRIMARY_DRAFT_COMPLETED)
+
+                snapshot = ReviewSnapshot.create(
                     session_id=self.session_id,
                     original_prompt=original_prompt,
-                    primary_response=result.content,
+                    primary_response=draft_result.content,
                     primary_provider_id=provider_id,
                     primary_model_id=model_id,
                     knowledge_profile_id=knowledge_profile_id,
                     evidence_text=evidence_text,
                 )
+                resolver = _SessionProviderResolver(self)
+                observer_results = self._critical_review_runner.run_sequential(
+                    snapshot,
+                    captured_observer_configs,
+                    resolver,
+                    on_result=lambda index, observer_result: schedule_progress(
+                        PRE_DELIVERY_OBSERVER_COMPLETED,
+                        observer_index=index,
+                        observer_result=observer_result,
+                    ),
+                    on_started=lambda index: schedule_progress(
+                        PRE_DELIVERY_OBSERVER_STARTED,
+                        observer_index=index,
+                    ),
+                    should_continue=lambda: self.session.is_current(request_id),
+                )
+                if any(
+                    observer_result.execution_status is not ExecutionStatus.COMPLETED
+                    for observer_result in observer_results
+                ):
+                    return SendResult(
+                        request_id=request_id,
+                        chat_result=None,
+                        error_message=(
+                            "Pre-delivery review failed closed; all three observers must complete "
+                            "before a final answer can be delivered."
+                        ),
+                        evidence_count=len(evidence),
+                        completed_turn=None,
+                        observer_results=observer_results,
+                    )
+                if not self.session.is_current(request_id):
+                    raise SequentialReviewCanceled("operator canceled before the final revision")
+                final_messages = build_final_revision_messages(snapshot, observer_results)
+                schedule_progress(PRE_DELIVERY_PRIMARY_FINAL_STARTED)
+                final_result = client.send_chat(
+                    model=model_id,
+                    messages=list(final_messages),
+                    max_tokens=self.settings.max_response_tokens,
+                )
+                _require_requested_model(final_result, model_id)
                 return SendResult(
                     request_id=request_id,
-                    chat_result=result,
+                    chat_result=final_result,
                     error_message=None,
                     evidence_count=len(evidence),
-                    completed_turn=completed_turn,
+                    completed_turn=completed_turn_for(final_result.content),
+                    observer_results=observer_results,
+                    pre_delivery_reviewed=True,
+                )
+            except SequentialReviewCanceled:
+                return SendResult(
+                    request_id=request_id,
+                    chat_result=None,
+                    error_message="Request canceled by operator.",
+                    evidence_count=len(evidence),
+                    completed_turn=None,
+                    observer_results=observer_results,
+                )
+            except ReviewValidationError:
+                return SendResult(
+                    request_id=request_id,
+                    chat_result=None,
+                    error_message="Pre-delivery review failed closed during local validation.",
+                    evidence_count=len(evidence),
+                    completed_turn=None,
+                    observer_results=observer_results,
                 )
             except ProviderError as error:
                 return SendResult(
@@ -221,6 +376,7 @@ class AppController:
                     error_message=str(error),
                     evidence_count=len(evidence),
                     completed_turn=None,
+                    observer_results=observer_results,
                 )
             except Exception as error:  # pragma: no cover - defensive
                 message = redact_exception(error, known_secrets=self._known_secrets())
@@ -230,21 +386,29 @@ class AppController:
                     error_message=message,
                     evidence_count=len(evidence),
                     completed_turn=None,
+                    observer_results=observer_results,
                 )
 
         future = self._executor.submit(work)
 
         def on_future_done(finished_future: concurrent.futures.Future) -> None:
             result = finished_future.result()
-            on_scheduled_callback(lambda: on_done(result))
+
+            def finish_on_ui_thread() -> None:
+                if pre_delivery_enabled:
+                    self._critical_review_active = False
+                on_done(result)
+
+            on_scheduled_callback(finish_on_ui_thread)
 
         future.add_done_callback(on_future_done)
         return request_id
 
     def accept_completed_primary_turn(self, result: SendResult) -> None:
-        """Retain only a successful result already accepted by the UI."""
+        """Deliver and retain only a successful result accepted by the UI."""
         if result.error_message is None and result.chat_result is not None and result.completed_turn is not None:
             self.latest_completed_primary_turn = result.completed_turn
+            self.session.add_assistant_message(result.chat_result.content)
 
     def capture_review_snapshot(self) -> ReviewSnapshot | None:
         turn = self.latest_completed_primary_turn
@@ -263,6 +427,10 @@ class AppController:
     @property
     def critical_review_active(self) -> bool:
         return self._critical_review_active
+
+    def validate_pre_delivery_observers(self, observer_configs: tuple[ObserverConfig, ...]) -> None:
+        """Validate the fixed three-slot setup without making a provider call."""
+        self._critical_review_runner.validate_sequential_configs(observer_configs)
 
     def submit_critical_review(
         self,

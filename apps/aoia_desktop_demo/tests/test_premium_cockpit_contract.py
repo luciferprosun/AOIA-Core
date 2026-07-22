@@ -29,7 +29,7 @@ def test_primary_selector_is_readonly_and_has_no_automatic_switch_path() -> None
     assert "fallback" in source.lower()
 
 
-def test_three_observer_slots_are_exact_and_manual_only() -> None:
+def test_three_observer_slots_are_exact_and_have_no_provider_authority() -> None:
     source = (UI_DIR / "cockpit_state.py").read_text(encoding="utf-8")
     assert "if len(self.observer_slots) != 3" in source
     assert "send_chat" not in source
@@ -55,6 +55,14 @@ def test_api_key_widget_is_masked_and_never_prefilled() -> None:
     assert "never saved" in source
 
 
+def test_settings_edits_are_staged_until_the_operator_saves() -> None:
+    source = (UI_DIR / "settings_dialog.py").read_text(encoding="utf-8")
+    assert "self._live_cockpit = cockpit" in source
+    assert "self.cockpit = deepcopy(cockpit)" in source
+    assert "self._live_cockpit.restore_observer_preferences" in source
+    assert "self.controller.settings = deepcopy(self._committed_settings)" in source
+
+
 def test_no_telemetry_integration_or_automatic_observer_request_is_added() -> None:
     source = (UI_DIR / "main_window.py").read_text(encoding="utf-8")
     assert "SMART ROUTER TELEMETRY — NOT CONNECTED IN THIS DEMO" in source
@@ -62,3 +70,22 @@ def test_no_telemetry_integration_or_automatic_observer_request_is_added() -> No
     assert "submit_message" not in review_body
     assert "send_chat" not in review_body
     assert "submit_critical_review" in review_body
+
+
+def test_pre_delivery_sequence_requires_an_explicit_persisted_mode_and_send() -> None:
+    main_source = (UI_DIR / "main_window.py").read_text(encoding="utf-8")
+    settings_source = (UI_DIR / "settings_dialog.py").read_text(encoding="utf-8")
+    assert "pre_delivery_critical_loop_enabled" in main_source
+    assert "pre_delivery_critical_loop_enabled" in settings_source
+    assert "one explicit Send" in settings_source
+    assert "at most five sequential provider calls" in settings_source
+    assert "submit_message" in main_source.split("def _on_send", 1)[1]
+    assert "observer configuration required" in main_source
+
+
+def test_observer_results_have_bounded_previews_and_visible_vertical_scrollbar() -> None:
+    source = (UI_DIR / "main_window.py").read_text(encoding="utf-8")
+    assert "observer_summary_preview" in source
+    assert "height=5" in source
+    assert 'ttk.Scrollbar(content, orient="vertical")' in source
+    assert "yscrollcommand=scrollbar.set" in source

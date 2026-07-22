@@ -16,8 +16,14 @@ from ..app import (
     STATUS_UNTRUSTED,
     SOURCES_LABEL,
     SUGGESTION_LABEL,
+    PRE_DELIVERY_OBSERVER_COMPLETED,
+    PRE_DELIVERY_OBSERVER_STARTED,
+    PRE_DELIVERY_PRIMARY_DRAFT_COMPLETED,
+    PRE_DELIVERY_PRIMARY_DRAFT_STARTED,
+    PRE_DELIVERY_PRIMARY_FINAL_STARTED,
     AppController,
     CriticalReviewCompletion,
+    SendProgress,
     SendResult,
 )
 from ..critical_review import (
@@ -33,6 +39,7 @@ APP_TITLE = "AOIA Control Chat — Competition Demo"
 DEFAULT_SIZE = (1440, 900)
 MIN_SIZE = (1280, 720)
 TELEMETRY_STATUS = "SMART ROUTER TELEMETRY — NOT CONNECTED IN THIS DEMO"
+OBSERVER_PREVIEW_CHARS = 110
 
 
 class AlertWindow(tk.Toplevel):
@@ -75,8 +82,12 @@ class ObserverResultDialog(tk.Toplevel):
         self.geometry("760x620")
         self.minsize(620, 480)
         self.transient(parent)
+        content = tk.Frame(self, bg=theme.BG)
+        content.pack(fill="both", expand=True, padx=10, pady=(10, 4))
+        scrollbar = ttk.Scrollbar(content, orient="vertical")
+        scrollbar.pack(side="right", fill="y")
         text = tk.Text(
-            self,
+            content,
             bg=theme.BG,
             fg=theme.TEXT,
             wrap="word",
@@ -84,8 +95,10 @@ class ObserverResultDialog(tk.Toplevel):
             padx=16,
             pady=14,
             state="normal",
+            yscrollcommand=scrollbar.set,
         )
-        text.pack(fill="both", expand=True, padx=10, pady=(10, 4))
+        text.pack(side="left", fill="both", expand=True)
+        scrollbar.configure(command=text.yview)
         text.insert("1.0", format_observer_result(result))
         text.configure(state="disabled")
         close_button = ttk.Button(self, text="Close", command=self._close)
@@ -137,12 +150,21 @@ def format_observer_result(result: ObserverReviewResult) -> str:
     return "\n".join(lines)
 
 
+def observer_summary_preview(summary: str) -> str:
+    """Return a single bounded card preview so the composer stays visible."""
+    collapsed = " ".join(summary.split())
+    if len(collapsed) <= OBSERVER_PREVIEW_CHARS:
+        return collapsed
+    return collapsed[: OBSERVER_PREVIEW_CHARS - 1].rstrip() + "…"
+
+
 class MainWindow(tk.Tk):
     def __init__(self, repo_root: Path) -> None:
         super().__init__()
         self.controller = AppController(repo_root)
         self._model_infos: list[ModelInfo] = []
         self.cockpit = CockpitState(primary_model_id=self.controller.effective_model_id())
+        self.cockpit.restore_observer_preferences(self.controller.settings.observer_slots)
 
         self.title(APP_TITLE)
         self.configure(bg=theme.BG)
@@ -155,6 +177,7 @@ class MainWindow(tk.Tk):
         self._refresh_knowledge_dropdown()
         self._render_connection_state()
         self._render_observers()
+        self._sync_critical_loop_mode()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _configure_style(self) -> None:
@@ -230,7 +253,15 @@ class MainWindow(tk.Tk):
             state.pack(fill="x", padx=12)
             route = tk.Label(card, bg=theme.PANEL, fg=theme.TEXT, anchor="w", wraplength=350, justify="left")
             route.pack(fill="x", padx=12, pady=(5, 3))
-            result = tk.Label(card, bg=theme.PANEL, fg=theme.TEXT_MUTED, anchor="w", justify="left", wraplength=350)
+            result = tk.Label(
+                card,
+                bg=theme.PANEL,
+                fg=theme.TEXT_MUTED,
+                anchor="nw",
+                justify="left",
+                wraplength=350,
+                height=5,
+            )
             result.pack(fill="x", padx=12, pady=(0, 5))
             details = ttk.Button(
                 card,
@@ -286,12 +317,15 @@ class MainWindow(tk.Tk):
     # --- state and settings -------------------------------------------------
 
     def _available_models_by_provider(self) -> dict[str, tuple[str, ...]]:
-        if not self.controller.settings.has_configured_provider_connection():
-            return {}
         return configured_model_ids(
             provider_id=self.controller.settings.provider,
             saved_model_id=self.controller.effective_model_id(),
             fetched_model_ids=(model.id for model in self._model_infos),
+            additional_saved_model_ids=(
+                slot.model_id
+                for slot in self.cockpit.observer_slots
+                if slot.provider_id == self.controller.settings.provider
+            ),
         )
 
     def _open_settings(self) -> None:
@@ -306,8 +340,32 @@ class MainWindow(tk.Tk):
 
     def _on_settings_saved(self) -> None:
         self.cockpit.set_primary_model(self.controller.effective_model_id())
+        self.cockpit.clear_review_results()
         self._render_connection_state()
         self._render_observers()
+        self._sync_critical_loop_mode()
+
+    def _sync_critical_loop_mode(self) -> None:
+        if self.controller.session.has_active_request:
+            self.review_button.configure(state="disabled")
+            return
+        if self.controller.settings.pre_delivery_critical_loop_enabled:
+            self.review_button.configure(text="Pre-delivery review runs on Send", state="disabled")
+            try:
+                self.controller.validate_pre_delivery_observers(self._captured_observer_configs())
+            except ReviewValidationError:
+                self.critical_loop_label.configure(
+                    text="Critical loop: observer configuration required",
+                    fg=theme.WARN,
+                )
+                return
+            self.critical_loop_label.configure(
+                text="Critical loop: pre-delivery ready",
+                fg=theme.ACCENT,
+            )
+        else:
+            self.review_button.configure(text="Run Critical Review", state="normal")
+            self.critical_loop_label.configure(text="Critical loop: manual only", fg=theme.TEXT_MUTED)
 
     def _render_connection_state(self) -> None:
         provider = self.controller.settings.provider or "(not configured)"
@@ -351,6 +409,18 @@ class MainWindow(tk.Tk):
 
     # --- critical prompt loop ------------------------------------------------
 
+    def _captured_observer_configs(self) -> tuple[ObserverConfig, ...]:
+        return tuple(
+            ObserverConfig(
+                slot_id=f"observer-{index}",
+                enabled=slot.enabled,
+                role_id=slot.role,
+                provider_connection_id=slot.provider_id,
+                model_id=slot.model_id,
+            )
+            for index, slot in enumerate(self.cockpit.observer_slots, start=1)
+        )
+
     def _render_observers(self) -> None:
         for index, (slot, widgets) in enumerate(
             zip(self.cockpit.observer_slots, self.observer_cards, strict=True), start=1
@@ -381,12 +451,13 @@ class MainWindow(tk.Tk):
                 )
             )
             stale_note = ""
-            current_hash = self._current_primary_snapshot_hash()
-            if current_hash != review_result.snapshot_hash:
+            if self.controller.settings.pre_delivery_critical_loop_enabled:
+                stale_note = "\nInternal pre-delivery draft snapshot"
+            elif self._current_primary_snapshot_hash() != review_result.snapshot_hash:
                 stale_note = "\nEarlier captured primary snapshot"
             widgets["result"].configure(
                 text=(
-                    f"{review_result.concise_summary}\n"
+                    f"{observer_summary_preview(review_result.concise_summary)}\n"
                     f"Trace: {review_result.snapshot_hash[:12]}{stale_note}\n"
                     "METADATA ONLY • NO AUTHORITY"
                 )
@@ -394,6 +465,12 @@ class MainWindow(tk.Tk):
             widgets["details"].configure(state="normal")
 
     def _run_critical_review(self) -> None:
+        if self.controller.settings.pre_delivery_critical_loop_enabled:
+            self.status_message_label.configure(
+                text="Pre-delivery review starts only from an explicit Send.",
+                fg=theme.WARN,
+            )
+            return
         if self.controller.critical_review_active:
             self.status_message_label.configure(text="Critical review is already running.", fg=theme.WARN)
             return
@@ -414,16 +491,7 @@ class MainWindow(tk.Tk):
             return
 
         try:
-            configs = tuple(
-                ObserverConfig(
-                    slot_id=f"observer-{index}",
-                    enabled=slot.enabled,
-                    role_id=slot.role,
-                    provider_connection_id=slot.provider_id,
-                    model_id=slot.model_id,
-                )
-                for index, slot in enumerate(self.cockpit.observer_slots, start=1)
-            )
+            configs = self._captured_observer_configs()
         except ReviewValidationError:
             self._show_alert(
                 "Critical review unavailable",
@@ -517,40 +585,128 @@ class MainWindow(tk.Tk):
             self.status_message_label.configure(text="Provider request blocked.", fg=theme.WARN)
             self._show_alert("Provider request blocked", reason, self.send_button)
             return
+        observer_configs: tuple[ObserverConfig, ...] = ()
+        if self.controller.settings.pre_delivery_critical_loop_enabled:
+            try:
+                observer_configs = self._captured_observer_configs()
+                self.controller.validate_pre_delivery_observers(observer_configs)
+            except ReviewValidationError:
+                message = "Pre-delivery mode requires all three enabled observers with valid provider and model selections."
+                self.status_message_label.configure(text=message, fg=theme.WARN)
+                self._show_alert("Pre-delivery review unavailable", message, self.send_button)
+                return
+            for slot in self.cockpit.observer_slots:
+                slot.review_result = None
+                slot.state = "QUEUED"
+                slot.result = "Waiting for the internal primary draft."
+            self._render_observers()
+            self.critical_loop_label.configure(text="Critical loop: preparing draft", fg=theme.ACCENT)
         self.input_text.delete("1.0", "end")
         self._append_transcript_line("user", "You", text)
         self._set_busy(True)
-        request_id = self.controller.submit_message(text, on_done=self._on_send_result, on_scheduled_callback=lambda func: self.after(0, func))
+        try:
+            request_id = self.controller.submit_message(
+                text,
+                on_done=self._on_send_result,
+                on_scheduled_callback=lambda func: self.after(0, func),
+                observer_configs=observer_configs,
+                on_progress=self._on_send_progress,
+            )
+        except ReviewValidationError:
+            request_id = None
+            self._show_alert(
+                "Pre-delivery review unavailable",
+                "Observer configuration failed closed before any provider call.",
+                self.send_button,
+            )
         if request_id is None:
             self._set_busy(False)
+
+    def _on_send_progress(self, progress: SendProgress) -> None:
+        if not self.controller.session.is_current(progress.request_id):
+            return
+        if progress.stage == PRE_DELIVERY_PRIMARY_DRAFT_STARTED:
+            self.critical_loop_label.configure(text="Critical loop: primary draft", fg=theme.ACCENT)
+            self.status_message_label.configure(text="Primary model is creating an internal draft…", fg=theme.TEXT_MUTED)
+            return
+        if progress.stage == PRE_DELIVERY_PRIMARY_DRAFT_COMPLETED:
+            self.status_message_label.configure(text="Internal draft captured; starting sequential review…", fg=theme.TEXT_MUTED)
+            return
+        if progress.stage == PRE_DELIVERY_OBSERVER_STARTED and progress.observer_index is not None:
+            slot = self.cockpit.observer_slots[progress.observer_index - 1]
+            slot.review_result = None
+            slot.state = "PENDING"
+            slot.result = "Reviewing the internal draft and earlier observer metadata."
+            self.critical_loop_label.configure(
+                text=f"Critical loop: observer {progress.observer_index}/3",
+                fg=theme.ACCENT,
+            )
+            self._render_observers()
+            return
+        if progress.stage == PRE_DELIVERY_OBSERVER_COMPLETED and progress.observer_result is not None:
+            self.cockpit.apply_review_results((progress.observer_result,))
+            self._render_observers()
+            return
+        if progress.stage == PRE_DELIVERY_PRIMARY_FINAL_STARTED:
+            self.critical_loop_label.configure(text="Critical loop: final primary revision", fg=theme.ACCENT)
+            self.status_message_label.configure(
+                text="Original primary model is creating the final suggested answer…",
+                fg=theme.TEXT_MUTED,
+            )
 
     def _on_send_result(self, result: SendResult) -> None:
         if not self.controller.session.is_current(result.request_id):
             return
         self.controller.session.end_request(result.request_id)
         self._set_busy(False)
+        if result.observer_results:
+            self.cockpit.apply_review_results(result.observer_results)
+            self._render_observers()
         if result.error_message:
             self.controller.session.add_error_message(result.error_message)
             self._append_transcript_line("error", "Provider request failed", result.error_message)
+            if self.controller.settings.pre_delivery_critical_loop_enabled:
+                self.critical_loop_label.configure(text="Critical loop: failed closed", fg=theme.WARN)
             self._show_alert("Provider request failed", result.error_message, self.send_button)
             return
         chat_result = result.chat_result
         assert chat_result is not None
         self.controller.accept_completed_primary_turn(result)
-        self.controller.session.add_assistant_message(chat_result.content)
         footer = SUGGESTION_LABEL + (f"\n{SOURCES_LABEL}" if result.evidence_count else "")
         self._append_transcript_line("assistant", "Assistant", chat_result.content, footer=footer)
+        if result.pre_delivery_reviewed:
+            self.critical_loop_label.configure(text="Critical loop: complete • final delivered", fg=theme.ACCENT)
+            self.status_message_label.configure(
+                text="Final suggested answer delivered after three sequential observer reports.",
+                fg=theme.TEXT_MUTED,
+            )
 
     def _on_cancel(self) -> None:
         self.controller.cancel_active_request()
         self._set_busy(False)
+        if self.controller.settings.pre_delivery_critical_loop_enabled:
+            for slot in self.cockpit.observer_slots:
+                if slot.review_result is None:
+                    slot.state = "CANCELED"
+                    slot.result = "Operator canceled before this stage completed."
+            self._render_observers()
+            self.critical_loop_label.configure(text="Critical loop: canceled", fg=theme.WARN)
         self.status_message_label.configure(text="Request canceled by operator.", fg=theme.WARN)
 
     def _set_busy(self, busy: bool) -> None:
         self.send_button.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")
         if busy:
-            self.status_message_label.configure(text="Sending one controlled provider request…", fg=theme.TEXT_MUTED)
+            self.review_button.configure(state="disabled")
+        else:
+            self._sync_critical_loop_mode()
+        if busy:
+            message = (
+                "Running one bounded pre-delivery sequence…"
+                if self.controller.settings.pre_delivery_critical_loop_enabled
+                else "Sending one controlled provider request…"
+            )
+            self.status_message_label.configure(text=message, fg=theme.TEXT_MUTED)
         else:
             self.status_message_label.configure(text="Ready for operator input.", fg=theme.TEXT_MUTED)
 

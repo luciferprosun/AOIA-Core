@@ -125,6 +125,38 @@ class OpenRouterClient:
         messages: list[ChatMessage],
         max_tokens: int | None = None,
     ) -> ChatResult:
+        return self._send_chat(model, messages, max_tokens=max_tokens)
+
+    def send_structured_chat(
+        self,
+        model: str,
+        messages: list[ChatMessage],
+        *,
+        json_schema: dict[str, object],
+        max_tokens: int | None = None,
+    ) -> ChatResult:
+        """Send one request with OpenRouter's native strict JSON schema.
+
+        This is used only by the bounded observer path. It does not retry,
+        select another model, or repair provider output locally.
+        """
+        if not isinstance(json_schema, dict) or not json_schema:
+            raise ProviderError("A non-empty JSON schema is required for structured output.")
+        return self._send_chat(
+            model,
+            messages,
+            max_tokens=max_tokens,
+            response_format={"type": "json_schema", "json_schema": json_schema},
+        )
+
+    def _send_chat(
+        self,
+        model: str,
+        messages: list[ChatMessage],
+        *,
+        max_tokens: int | None = None,
+        response_format: dict[str, object] | None = None,
+    ) -> ChatResult:
         if not model:
             raise ProviderError("No model selected. Choose or enter a model ID before sending.")
         if not messages:
@@ -137,6 +169,8 @@ class OpenRouterClient:
         }
         if max_tokens is not None:
             body["max_tokens"] = int(max_tokens)
+        if response_format is not None:
+            body["response_format"] = response_format
 
         payload = self._request("POST", "/chat/completions", body)
 

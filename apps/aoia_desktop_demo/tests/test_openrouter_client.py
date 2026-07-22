@@ -55,6 +55,30 @@ class RequestConstructionTests(unittest.TestCase):
         self.assertEqual(body["model"], "test/model")
         self.assertEqual(body["stream"], False)
         self.assertEqual(body["messages"], [{"role": "user", "content": "hello"}])
+        self.assertNotIn("response_format", body)
+
+    @patch("apps.aoia_desktop_demo.providers.openrouter.urllib.request.urlopen")
+    def test_structured_chat_adds_strict_json_schema_to_one_request(self, mock_urlopen) -> None:
+        mock_urlopen.return_value = FakeResponse(
+            {"model": "test/model", "choices": [{"message": {"content": "{}"}, "finish_reason": "stop"}], "usage": {}}
+        )
+        schema = {
+            "name": "observer_review",
+            "strict": True,
+            "schema": {"type": "object", "properties": {}, "additionalProperties": False},
+        }
+
+        _client().send_structured_chat(
+            "test/model",
+            [ChatMessage(role="user", content="review")],
+            json_schema=schema,
+            max_tokens=900,
+        )
+
+        self.assertEqual(mock_urlopen.call_count, 1)
+        body = json.loads(mock_urlopen.call_args[0][0].data.decode("utf-8"))
+        self.assertEqual(body["response_format"], {"type": "json_schema", "json_schema": schema})
+        self.assertEqual(body["max_tokens"], 900)
 
     @patch("apps.aoia_desktop_demo.providers.openrouter.urllib.request.urlopen")
     def test_no_retry_on_failure(self, mock_urlopen) -> None:

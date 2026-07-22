@@ -32,12 +32,81 @@ class NonSecretPersistenceTests(unittest.TestCase):
                 api_base_url=OPENROUTER_BASE_URL,
                 selected_model_id="openai/gpt-4.1-nano",
                 knowledge_profile_id="linux_unix",
+                pre_delivery_critical_loop_enabled=True,
+                observer_slots=[
+                    {
+                        "enabled": True,
+                        "role": "Logic & Claims",
+                        "provider_id": "openrouter",
+                        "model_id": "google/gemma-3-4b-it",
+                    },
+                    {
+                        "enabled": True,
+                        "role": "Safety & Authority",
+                        "provider_id": "openrouter",
+                        "model_id": "anthropic/claude-3.5-haiku",
+                    },
+                    {
+                        "enabled": True,
+                        "role": "Evidence & Consistency",
+                        "provider_id": "openrouter",
+                        "model_id": "google/gemini-2.5-flash",
+                    },
+                ],
             )
             settings_module.save_settings(original)
             loaded = settings_module.load_settings()
             self.assertEqual(loaded.selected_model_id, "openai/gpt-4.1-nano")
             self.assertEqual(loaded.knowledge_profile_id, "linux_unix")
+            self.assertEqual(loaded.observer_slots, original.observer_slots)
+            self.assertTrue(loaded.pre_delivery_critical_loop_enabled)
             self.assertEqual(loaded.configured_provider_ids(), ("openrouter",))
+
+    def test_malformed_observer_preferences_fail_closed(self) -> None:
+        with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+            settings_module.save_settings(DemoSettings())
+            payload = json.loads(settings_module.CONFIG_PATH.read_text(encoding="utf-8"))
+            payload["observer_slots"] = [
+                {
+                    "enabled": True,
+                    "role": "Logic & Claims",
+                    "provider_id": "openrouter",
+                    "model_id": "not-a-model-id",
+                }
+            ]
+            settings_module.CONFIG_PATH.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertEqual(settings_module.load_settings(), DemoSettings())
+
+    def test_non_string_observer_role_fails_closed_without_crashing(self) -> None:
+        with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+            settings_module.save_settings(
+                DemoSettings(
+                    observer_slots=[
+                        {
+                            "enabled": True,
+                            "role": role,
+                            "provider_id": "openrouter",
+                            "model_id": f"vendor/model-{index}",
+                        }
+                        for index, role in enumerate(
+                            ("Logic & Claims", "Safety & Authority", "Evidence & Consistency"),
+                            start=1,
+                        )
+                    ]
+                )
+            )
+            payload = json.loads(settings_module.CONFIG_PATH.read_text(encoding="utf-8"))
+            payload["observer_slots"][0]["role"] = []
+            settings_module.CONFIG_PATH.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertEqual(settings_module.load_settings(), DemoSettings())
+
+    def test_non_boolean_pre_delivery_mode_fails_closed(self) -> None:
+        with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+            settings_module.save_settings(DemoSettings())
+            payload = json.loads(settings_module.CONFIG_PATH.read_text(encoding="utf-8"))
+            payload["pre_delivery_critical_loop_enabled"] = "yes"
+            settings_module.CONFIG_PATH.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertEqual(settings_module.load_settings(), DemoSettings())
 
     def test_saved_file_never_contains_key_shaped_content(self) -> None:
         with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):

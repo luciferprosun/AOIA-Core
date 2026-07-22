@@ -35,7 +35,16 @@ _ALLOWED_KEYS = {
     "knowledge_profile_id",
     "window_width",
     "window_height",
+    "observer_slots",
+    "pre_delivery_critical_loop_enabled",
 }
+
+_OBSERVER_ROLES = {
+    "Logic & Claims",
+    "Safety & Authority",
+    "Evidence & Consistency",
+}
+_OBSERVER_KEYS = {"enabled", "role", "provider_id", "model_id"}
 
 
 @dataclass
@@ -50,6 +59,8 @@ class DemoSettings:
     knowledge_profile_id: str = "none"
     window_width: int = 1100
     window_height: int = 720
+    observer_slots: list[dict[str, object]] = field(default_factory=list)
+    pre_delivery_critical_loop_enabled: bool = False
 
     def to_json_dict(self) -> dict:
         data = asdict(self)
@@ -172,5 +183,25 @@ def _settings_fields_are_well_formed(values: dict[str, object]) -> bool:
         return False
     for key in ("window_width", "window_height"):
         if key in values and (isinstance(values[key], bool) or not isinstance(values[key], int)):
+            return False
+    if "pre_delivery_critical_loop_enabled" in values and not isinstance(
+        values["pre_delivery_critical_loop_enabled"], bool
+    ):
+        return False
+    observer_slots = values.get("observer_slots", [])
+    if not isinstance(observer_slots, list) or len(observer_slots) not in {0, 3}:
+        return False
+    for slot in observer_slots:
+        if not isinstance(slot, dict) or set(slot) != _OBSERVER_KEYS:
+            return False
+        if not isinstance(slot["enabled"], bool):
+            return False
+        if not isinstance(slot["role"], str) or slot["role"] not in _OBSERVER_ROLES:
+            return False
+        if not isinstance(slot["provider_id"], str) or slot["provider_id"].casefold() not in {"", *PROVIDER_CATALOG}:
+            return False
+        if not isinstance(slot["model_id"], str):
+            return False
+        if slot["model_id"] and not _MODEL_ID_PATTERN.fullmatch(slot["model_id"]):
             return False
     return True

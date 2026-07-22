@@ -11,6 +11,12 @@ def test_operator_saved_model_is_the_only_initial_configured_model() -> None:
     ) == {"openrouter": ("openai/gpt-4.1-nano",)}
 
 
+def test_refreshed_catalog_can_seed_the_first_operator_model_selection() -> None:
+    assert configured_model_ids(
+        provider_id="openrouter", saved_model_id="", fetched_model_ids=("vendor/model",)
+    ) == {"openrouter": ("vendor/model",)}
+
+
 def test_primary_and_three_observers_are_independent() -> None:
     state = CockpitState(primary_model_id="openai/gpt-4.1-nano")
     state.observer_slots[0].enabled = True
@@ -38,3 +44,39 @@ def test_complete_observer_configuration_is_ready_only_for_manual_review() -> No
     models = {"openrouter": ("openai/gpt-4.1-nano",)}
 
     assert state.review_status(("openrouter",), models) == "READY FOR MANUAL REVIEW"
+
+
+def test_observer_preferences_roundtrip_without_review_output() -> None:
+    original = CockpitState()
+    for index, slot in enumerate(original.observer_slots, start=1):
+        slot.enabled = True
+        slot.provider_id = "openrouter"
+        slot.model_id = f"vendor/observer-{index}"
+        slot.result = "untrusted runtime output"
+
+    restored = CockpitState()
+    restored.restore_observer_preferences(original.observer_preferences())
+
+    assert [slot.model_id for slot in restored.observer_slots] == [
+        "vendor/observer-1",
+        "vendor/observer-2",
+        "vendor/observer-3",
+    ]
+    assert all(slot.enabled for slot in restored.observer_slots)
+    assert all(slot.result != "untrusted runtime output" for slot in restored.observer_slots)
+
+
+def test_saved_observer_models_remain_selectable_before_catalog_refresh() -> None:
+    assert configured_model_ids(
+        provider_id="openrouter",
+        saved_model_id="google/gemma-3-27b-it",
+        additional_saved_model_ids=("vendor/observer-1", "vendor/observer-2", "vendor/observer-3"),
+        fetched_model_ids=(),
+    ) == {
+        "openrouter": (
+            "google/gemma-3-27b-it",
+            "vendor/observer-1",
+            "vendor/observer-2",
+            "vendor/observer-3",
+        )
+    }
