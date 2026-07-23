@@ -37,3 +37,7 @@ secrets/
 .private/
 .runtime-secrets/
 .local-secrets/
+
+# Private operator Knowledge HAT bindings (the sanitized example remains tracked)
+/config/knowledge_hats/local_bindings.json
+/.hat_bindings.json

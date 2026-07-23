@@ -17,7 +17,7 @@ from ..providers.openrouter import DEFAULT_APP_TITLE, OPENROUTER_BASE_URL
 
 CONFIG_DIR = Path.home() / ".config" / "aoia-control-chat-demo"
 CONFIG_PATH = CONFIG_DIR / "config.json"
-CONFIG_SCHEMA_VERSION = 2
+CONFIG_SCHEMA_VERSION = 3
 
 # Provider types available to the form. This catalog does not represent a
 # configured connection and never makes a route active by itself.
@@ -32,7 +32,7 @@ _ALLOWED_KEYS = {
     "manual_model_id",
     "selected_model_id",
     "max_response_tokens",
-    "knowledge_profile_id",
+    "knowledge_hat_id",
     "window_width",
     "window_height",
     "observer_slots",
@@ -56,7 +56,8 @@ class DemoSettings:
     manual_model_id: str = ""
     selected_model_id: str = ""
     max_response_tokens: int | None = None
-    knowledge_profile_id: str = "none"
+    knowledge_hat_id: str = "none"
+    knowledge_hat_configuration_notice: str = field(default="", repr=False, compare=False)
     window_width: int = 1100
     window_height: int = 720
     observer_slots: list[dict[str, object]] = field(default_factory=list)
@@ -64,6 +65,7 @@ class DemoSettings:
 
     def to_json_dict(self) -> dict:
         data = asdict(self)
+        data.pop("knowledge_hat_configuration_notice", None)
         assert set(data) <= _ALLOWED_KEYS, "attempted to persist an unexpected settings field"
         return data
 
@@ -94,16 +96,66 @@ def load_settings() -> DemoSettings:
     if not isinstance(raw, dict):
         return DemoSettings()
 
-    if raw.get("schema_version") != CONFIG_SCHEMA_VERSION or raw.get("operator_created") is not True:
+    if raw.get("operator_created") is not True:
+        clear_settings()
+        return DemoSettings()
+
+    schema_version = raw.get("schema_version")
+    if schema_version not in {2, CONFIG_SCHEMA_VERSION}:
         clear_settings()
         return DemoSettings()
 
     defaults = DemoSettings()
+    if schema_version == 2:
+        legacy_allowed = (_ALLOWED_KEYS - {"knowledge_hat_id"}) | {"knowledge_profile_id"}
+        filtered = {key: value for key, value in raw.items() if key in legacy_allowed}
+        legacy_profile = filtered.pop("knowledge_profile_id", "none")
+        if not _settings_fields_are_well_formed(filtered, legacy_profile_id=legacy_profile):
+            defaults.knowledge_hat_configuration_notice = (
+                "Malformed legacy knowledge profile configuration is unavailable; "
+                "selection resolved safely to None."
+            )
+            return defaults
+        notice = ""
+        if legacy_profile != "none":
+            notice = (
+                "Legacy knowledge profile configuration is unavailable in the generic HAT "
+                "registry; selection resolved safely to None."
+            )
+        filtered["knowledge_hat_id"] = "none"
+        try:
+            return DemoSettings(
+                **{**asdict(defaults), **filtered, "knowledge_hat_configuration_notice": notice}
+            )
+        except TypeError:
+            return defaults
+
     filtered = {key: value for key, value in raw.items() if key in _ALLOWED_KEYS}
+    selected_hat = filtered.get("knowledge_hat_id", "none")
+    notice = ""
+    if not isinstance(selected_hat, str) or not re.fullmatch(
+        r"[a-z0-9][a-z0-9_-]*",
+        selected_hat,
+    ):
+        filtered["knowledge_hat_id"] = "none"
+        notice = (
+            "Malformed Knowledge HAT configuration is unavailable; selection resolved "
+            "safely to None."
+        )
     if not _settings_fields_are_well_formed(filtered):
         return defaults
+    selected_hat = filtered.get("knowledge_hat_id", "none")
+    supported_hat_ids = _supported_hat_ids()
+    if selected_hat not in supported_hat_ids:
+        filtered["knowledge_hat_id"] = "none"
+        notice = (
+            "Unknown Knowledge HAT configuration is unavailable; selection resolved safely "
+            "to None."
+        )
     try:
-        return DemoSettings(**{**asdict(defaults), **filtered})
+        return DemoSettings(
+            **{**asdict(defaults), **filtered, "knowledge_hat_configuration_notice": notice}
+        )
     except TypeError:
         return defaults
 
@@ -159,7 +211,11 @@ class SessionSecrets:
         return f"SessionSecrets(source={self.source!r}, has_key={bool(self.api_key)})"
 
 
-def _settings_fields_are_well_formed(values: dict[str, object]) -> bool:
+def _settings_fields_are_well_formed(
+    values: dict[str, object],
+    *,
+    legacy_profile_id: object | None = None,
+) -> bool:
     """Reject malformed persisted state before it can look active."""
     string_fields = {
         "provider",
@@ -167,9 +223,16 @@ def _settings_fields_are_well_formed(values: dict[str, object]) -> bool:
         "app_title",
         "manual_model_id",
         "selected_model_id",
-        "knowledge_profile_id",
+        "knowledge_hat_id",
     }
     if any(key in values and not isinstance(values[key], str) for key in string_fields):
+        return False
+    if legacy_profile_id is not None and not isinstance(legacy_profile_id, str):
+        return False
+    if "knowledge_hat_id" in values and not re.fullmatch(
+        r"[a-z0-9][a-z0-9_-]*",
+        str(values["knowledge_hat_id"]),
+    ):
         return False
     if "provider" in values and values["provider"].strip().casefold() not in {"", *PROVIDER_CATALOG}:
         return False
@@ -205,3 +268,12 @@ def _settings_fields_are_well_formed(values: dict[str, object]) -> bool:
         if slot["model_id"] and not _MODEL_ID_PATTERN.fullmatch(slot["model_id"]):
             return False
     return True
+
+
+def _supported_hat_ids() -> set[str]:
+    try:
+        from ..knowledge.hats.catalog import load_catalog
+
+        return {"none", *(entry.descriptor.hat_id for entry in load_catalog())}
+    except Exception:
+        return {"none"}

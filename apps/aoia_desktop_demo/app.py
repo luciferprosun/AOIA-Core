@@ -24,9 +24,10 @@ from .critical_review import (
     SequentialReviewCanceled,
     build_final_revision_messages,
 )
-from .knowledge.prompt_context import build_knowledge_system_message
-from .knowledge.registry import NONE_PROFILE_ID, KnowledgeProfile, discover_profiles, find_profile
-from .knowledge.retrieval_adapter import retrieve_linux_evidence
+from .knowledge.hats.contracts import HatAttachment, HatDescriptor, HatStatus
+from .knowledge.hats.prompt_rendering import HAT_SYSTEM_INSTRUCTION, build_primary_user_data
+from .knowledge.hats.registry import NONE_HAT_ID
+from .knowledge.hats.service import HatAttachmentService, HatServiceError
 from .providers.base import ChatMessage, ChatResult, ModelInfo, ProviderError
 from .providers.openrouter import OPENROUTER_BASE_URL, OpenRouterClient, OpenRouterConfig
 from .security.secret_redaction import redact_exception
@@ -87,6 +88,7 @@ class CompletedPrimaryTurn:
     primary_model_id: str
     knowledge_profile_id: str | None
     evidence_text: str
+    hat_attachment: HatAttachment | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,14 +115,20 @@ class _SessionProviderResolver:
 
 
 class AppController:
-    def __init__(self, repo_root: Path) -> None:
+    def __init__(
+        self,
+        repo_root: Path,
+        *,
+        hat_service: HatAttachmentService | None = None,
+    ) -> None:
         self.repo_root = repo_root
         self.settings: DemoSettings = load_settings()
         self.secrets = SessionSecrets()
         self.session = ChatSession()
         self.session_id = f"desktop-session-{uuid4().hex}"
         self.latest_completed_primary_turn: CompletedPrimaryTurn | None = None
-        self.knowledge_profiles: list[KnowledgeProfile] = discover_profiles(repo_root)
+        self.hat_service = hat_service or HatAttachmentService.default()
+        self.knowledge_hats = self.hat_service.list_descriptors()
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix="aoia-provider")
         self._critical_review_runner = CriticalReviewRunner()
         self._critical_review_active = False
@@ -130,11 +138,41 @@ class AppController:
     def save_current_settings(self) -> None:
         save_settings(self.settings)
 
-    def current_knowledge_profile(self) -> KnowledgeProfile:
-        return find_profile(self.knowledge_profiles, self.settings.knowledge_profile_id)
+    def current_knowledge_hat(self) -> HatDescriptor:
+        selected = next(
+            (
+                descriptor
+                for descriptor in self.knowledge_hats
+                if descriptor.hat_id == self.settings.knowledge_hat_id
+            ),
+            None,
+        )
+        if selected is None:
+            self.settings.knowledge_hat_configuration_notice = (
+                "Unknown Knowledge HAT configuration is unavailable; selection resolved "
+                "safely to None."
+            )
+            self.settings.knowledge_hat_id = NONE_HAT_ID
+            return self.knowledge_hats[0]
+        return selected
 
-    def set_knowledge_profile(self, profile_id: str) -> None:
-        self.settings.knowledge_profile_id = profile_id
+    def set_knowledge_hat(self, hat_id: str) -> None:
+        if not any(descriptor.hat_id == hat_id for descriptor in self.knowledge_hats):
+            self.settings.knowledge_hat_id = NONE_HAT_ID
+            self.settings.knowledge_hat_configuration_notice = (
+                "Unknown Knowledge HAT configuration is unavailable; selection resolved "
+                "safely to None."
+            )
+            return
+        self.settings.knowledge_hat_id = hat_id
+        self.settings.knowledge_hat_configuration_notice = ""
+
+    def inspect_knowledge_hat(self, hat_id: str | None = None) -> HatStatus:
+        return self.hat_service.inspect(hat_id or self.current_knowledge_hat().hat_id)
+
+    def retained_hat_attachment(self) -> HatAttachment | None:
+        turn = self.latest_completed_primary_turn
+        return turn.hat_attachment if turn is not None else None
 
     # --- provider client -------------------------------------------------
 
@@ -216,15 +254,8 @@ class AppController:
         original_prompt = user_text.strip()
         self.session.add_user_message(original_prompt)
         model_id = self.effective_model_id()
-        profile = self.current_knowledge_profile()
+        selected_hat_id = self.current_knowledge_hat().hat_id
         provider_id = self.settings.provider
-
-        evidence = []
-        if profile.id != NONE_PROFILE_ID:
-            evidence = retrieve_linux_evidence(self.repo_root, original_prompt)
-        knowledge_message = build_knowledge_system_message(evidence)
-        evidence_text = knowledge_message or ""
-        knowledge_profile_id = profile.id if profile.id != NONE_PROFILE_ID else None
 
         request_id = self.session.begin_request()
         if pre_delivery_enabled:
@@ -246,26 +277,65 @@ class AppController:
             )
             on_scheduled_callback(lambda progress=progress: on_progress(progress))
 
-        def completed_turn_for(content: str) -> CompletedPrimaryTurn:
+        def completed_turn_for(
+            content: str,
+            attachment: HatAttachment | None,
+        ) -> CompletedPrimaryTurn:
             return CompletedPrimaryTurn(
                 session_id=self.session_id,
                 original_prompt=original_prompt,
                 primary_response=content,
                 primary_provider_id=provider_id,
                 primary_model_id=model_id,
-                knowledge_profile_id=knowledge_profile_id,
-                evidence_text=evidence_text,
+                knowledge_profile_id=(
+                    attachment.descriptor.hat_id if attachment is not None else None
+                ),
+                evidence_text=(
+                    attachment.rendered_evidence if attachment is not None else ""
+                ),
+                hat_attachment=attachment,
             )
 
         def work() -> SendResult:
             observer_results: tuple[ObserverReviewResult, ...] = ()
+            attachment: HatAttachment | None = None
+            evidence_count = 0
             try:
+                attachment = self.hat_service.prepare_attachment(
+                    selected_hat_id,
+                    original_prompt,
+                )
+                if attachment is not None:
+                    self.hat_service.verify_attachment(attachment)
+                    evidence_count = len(attachment.bundle.passages)
                 client = self._build_client()
+
+                base_messages = self.session.messages_for_provider()
+                if attachment is not None:
+                    if (
+                        not base_messages
+                        or base_messages[-1].role != "user"
+                        or base_messages[-1].content != original_prompt
+                    ):
+                        raise ReviewValidationError(
+                            "current operator prompt is not the final conversation item"
+                        )
+                    base_messages = [
+                        ChatMessage(role="system", content=HAT_SYSTEM_INSTRUCTION),
+                        *base_messages[:-1],
+                        ChatMessage(
+                            role="user",
+                            content=build_primary_user_data(
+                                original_prompt,
+                                attachment,
+                            ),
+                        ),
+                    ]
+
                 if not pre_delivery_enabled:
-                    messages = self.session.messages_for_provider(extra_system_message=knowledge_message)
                     result = client.send_chat(
                         model=model_id,
-                        messages=messages,
+                        messages=base_messages,
                         max_tokens=self.settings.max_response_tokens,
                     )
                     _require_requested_model(result, model_id)
@@ -273,15 +343,17 @@ class AppController:
                         request_id=request_id,
                         chat_result=result,
                         error_message=None,
-                        evidence_count=len(evidence),
-                        completed_turn=completed_turn_for(result.content),
+                        evidence_count=evidence_count,
+                        completed_turn=completed_turn_for(result.content, attachment),
                     )
 
                 schedule_progress(PRE_DELIVERY_PRIMARY_DRAFT_STARTED)
                 draft_messages = [
                     ChatMessage(role="system", content=_PRIMARY_DRAFT_SYSTEM_INSTRUCTION),
-                    *self.session.messages_for_provider(extra_system_message=knowledge_message),
+                    *base_messages,
                 ]
+                if attachment is not None:
+                    self.hat_service.verify_attachment(attachment)
                 draft_result = client.send_chat(
                     model=model_id,
                     messages=draft_messages,
@@ -298,8 +370,13 @@ class AppController:
                     primary_response=draft_result.content,
                     primary_provider_id=provider_id,
                     primary_model_id=model_id,
-                    knowledge_profile_id=knowledge_profile_id,
-                    evidence_text=evidence_text,
+                    knowledge_profile_id=(
+                        attachment.descriptor.hat_id if attachment is not None else None
+                    ),
+                    evidence_text=(
+                        attachment.rendered_evidence if attachment is not None else ""
+                    ),
+                    hat_attachment=attachment,
                 )
                 resolver = _SessionProviderResolver(self)
                 observer_results = self._critical_review_runner.run_sequential(
@@ -328,12 +405,14 @@ class AppController:
                             "Pre-delivery review failed closed; all three observers must complete "
                             "before a final answer can be delivered."
                         ),
-                        evidence_count=len(evidence),
+                        evidence_count=evidence_count,
                         completed_turn=None,
                         observer_results=observer_results,
                     )
                 if not self.session.is_current(request_id):
                     raise SequentialReviewCanceled("operator canceled before the final revision")
+                if attachment is not None:
+                    self.hat_service.verify_attachment(attachment)
                 final_messages = build_final_revision_messages(snapshot, observer_results)
                 schedule_progress(PRE_DELIVERY_PRIMARY_FINAL_STARTED)
                 final_result = client.send_chat(
@@ -346,8 +425,8 @@ class AppController:
                     request_id=request_id,
                     chat_result=final_result,
                     error_message=None,
-                    evidence_count=len(evidence),
-                    completed_turn=completed_turn_for(final_result.content),
+                    evidence_count=evidence_count,
+                    completed_turn=completed_turn_for(final_result.content, attachment),
                     observer_results=observer_results,
                     pre_delivery_reviewed=True,
                 )
@@ -356,7 +435,19 @@ class AppController:
                     request_id=request_id,
                     chat_result=None,
                     error_message="Request canceled by operator.",
-                    evidence_count=len(evidence),
+                    evidence_count=evidence_count,
+                    completed_turn=None,
+                    observer_results=observer_results,
+                )
+            except HatServiceError:
+                return SendResult(
+                    request_id=request_id,
+                    chat_result=None,
+                    error_message=(
+                        "Knowledge HAT failed closed before provider delivery; no model-only "
+                        "fallback was used."
+                    ),
+                    evidence_count=evidence_count,
                     completed_turn=None,
                     observer_results=observer_results,
                 )
@@ -365,7 +456,7 @@ class AppController:
                     request_id=request_id,
                     chat_result=None,
                     error_message="Pre-delivery review failed closed during local validation.",
-                    evidence_count=len(evidence),
+                    evidence_count=evidence_count,
                     completed_turn=None,
                     observer_results=observer_results,
                 )
@@ -374,7 +465,7 @@ class AppController:
                     request_id=request_id,
                     chat_result=None,
                     error_message=str(error),
-                    evidence_count=len(evidence),
+                    evidence_count=evidence_count,
                     completed_turn=None,
                     observer_results=observer_results,
                 )
@@ -384,7 +475,7 @@ class AppController:
                     request_id=request_id,
                     chat_result=None,
                     error_message=message,
-                    evidence_count=len(evidence),
+                    evidence_count=evidence_count,
                     completed_turn=None,
                     observer_results=observer_results,
                 )
@@ -422,6 +513,7 @@ class AppController:
             primary_model_id=turn.primary_model_id,
             knowledge_profile_id=turn.knowledge_profile_id,
             evidence_text=turn.evidence_text,
+            hat_attachment=turn.hat_attachment,
         )
 
     @property

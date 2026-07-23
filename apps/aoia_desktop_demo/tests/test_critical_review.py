@@ -558,7 +558,7 @@ class ControllerAndUiBoundaryTests(unittest.TestCase):
             snapshot = controller.capture_review_snapshot()
             assert snapshot is not None
             controller.settings.manual_model_id = "vendor/later-model"
-            controller.settings.knowledge_profile_id = "none"
+            controller.settings.knowledge_hat_id = "none"
             self.assertEqual(snapshot.primary_model_id, "vendor/model")
             self.assertEqual(snapshot.knowledge_profile_id, "linux_unix")
             self.assertEqual(snapshot.evidence_text, "exact bounded evidence")

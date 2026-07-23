@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "hat_id": "german_federal_employment_worker_law",
+  "display_name": "German Federal Law",
+  "domain": "german_federal_employment_law",
+  "adapter_id": "german_federal_employment_worker_law_v1",
+  "descriptor_schema_version": 1,
+  "evidence_schema_version": 1,
+  "external_resource": true,
+  "corpus_committed": false,
+  "authoritative": false,
+  "binding_key": "german_federal_employment_worker_law_local",
+  "library_id": "de-law-federal-1a",
+  "library_version": "1a",
+  "manifest_id": "federal-temporal-1a-fe9ce34784e92af97651fe0378672d4c",
+  "manifest_digest": "602922920c30dcae567a1bc4f8459060a24ae507b4d432ebf82673320e20a7a2",
+  "index_id": "german-law-fts5+federal-temporal-graph-1a",
+  "index_digest": "8491438dd28a428a69a9bf5c49b215f63ff35507124378f0c635bf11b2448f19",
+  "indexed_source_count": 370039,
+  "required_capabilities": [
+    "local_read_only_retrieval",
+    "stable_source_ids",
+    "provenance",
+    "deterministic_evidence_hash"
+  ]
+}

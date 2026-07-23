@@ -57,16 +57,19 @@ class SettingsDialog(tk.Toplevel):
         notebook.pack(fill="both", expand=True, padx=12, pady=12)
         self.connections_tab = tk.Frame(notebook, bg=theme.BG)
         self.primary_tab = tk.Frame(notebook, bg=theme.BG)
+        self.hat_tab = tk.Frame(notebook, bg=theme.BG)
         self.loop_tab = tk.Frame(notebook, bg=theme.BG)
         self.telemetry_tab = tk.Frame(notebook, bg=theme.BG)
         self.safety_tab = tk.Frame(notebook, bg=theme.BG)
         notebook.add(self.connections_tab, text="Provider Connections")
         notebook.add(self.primary_tab, text="Primary Model")
+        notebook.add(self.hat_tab, text="Knowledge HAT")
         notebook.add(self.loop_tab, text="Critical Prompt Loop")
         notebook.add(self.telemetry_tab, text="Telemetry")
         notebook.add(self.safety_tab, text="Session / Safety")
         self._build_connections_tab()
         self._build_primary_tab()
+        self._build_hat_tab()
         self._build_loop_tab()
         self._build_telemetry_tab()
         self._build_safety_tab()
@@ -128,6 +131,70 @@ class SettingsDialog(tk.Toplevel):
             text="Only model IDs from a configured provider connection are shown. No model is invented, selected automatically, or switched after an error.",
             bg=theme.BG, fg=theme.TEXT_MUTED, wraplength=600, justify="left",
         ).grid(row=2, column=0, columnspan=2, sticky="w", padx=16, pady=10)
+
+    def _build_hat_tab(self) -> None:
+        self.hat_tab.columnconfigure(1, weight=1)
+        tk.Label(
+            self.hat_tab,
+            text="Knowledge HAT",
+            bg=theme.BG,
+            fg=theme.TEXT_MUTED,
+        ).grid(row=0, column=0, sticky="w", padx=16, pady=(18, 7))
+        self.hat_var = tk.StringVar()
+        self.hat_combo = ttk.Combobox(
+            self.hat_tab,
+            textvariable=self.hat_var,
+            state="readonly",
+            width=48,
+            values=tuple(
+                descriptor.display_name for descriptor in self.controller.knowledge_hats
+            ),
+        )
+        self.hat_combo.grid(row=0, column=1, sticky="ew", padx=16, pady=(18, 7))
+        self.hat_combo.bind(
+            "<<ComboboxSelected>>",
+            lambda _event: self._on_hat_selected(),
+        )
+        tk.Label(
+            self.hat_tab,
+            text=(
+                "A HAT is enabled only by this explicit operator selection. Evidence, "
+                "catalog metadata, hashes, and status are never authority or approval."
+            ),
+            bg=theme.BG,
+            fg=theme.TEXT_MUTED,
+            wraplength=620,
+            justify="left",
+        ).grid(row=1, column=0, columnspan=2, sticky="w", padx=16, pady=(4, 12))
+        self.hat_status_labels: dict[str, tk.Label] = {}
+        status_fields = (
+            ("state", "State"),
+            ("library", "Library"),
+            ("manifest", "Manifest identity"),
+            ("index", "Index identity"),
+            ("count", "Indexed source count"),
+            ("local", "Local-only"),
+            ("read_only", "Read-only"),
+            ("authority", "Authority"),
+        )
+        for row, (key, label) in enumerate(status_fields, start=2):
+            tk.Label(
+                self.hat_tab,
+                text=label,
+                bg=theme.BG,
+                fg=theme.TEXT_MUTED,
+            ).grid(row=row, column=0, sticky="nw", padx=16, pady=4)
+            value = tk.Label(
+                self.hat_tab,
+                text="—",
+                bg=theme.BG,
+                fg=theme.TEXT,
+                anchor="w",
+                justify="left",
+                wraplength=470,
+            )
+            value.grid(row=row, column=1, sticky="ew", padx=16, pady=4)
+            self.hat_status_labels[key] = value
 
     def _build_loop_tab(self) -> None:
         self.loop_tab.columnconfigure(2, weight=1)
@@ -215,6 +282,8 @@ class SettingsDialog(tk.Toplevel):
         self.timeout_var.set(str(settings.timeout_seconds))
         self.max_tokens_var.set(str(settings.max_response_tokens) if settings.max_response_tokens else "")
         self.pre_delivery_var.set(settings.pre_delivery_critical_loop_enabled)
+        self.hat_var.set(self.controller.current_knowledge_hat().display_name)
+        self._render_hat_status()
         self._populate_model_controls()
         self._set_status(
             "API key set for this session (masked; not persisted)." if self.controller.secrets.api_key else "No API key set for this session.",
@@ -257,6 +326,16 @@ class SettingsDialog(tk.Toplevel):
                 self.cockpit.set_primary_model(selected)
         raw_max_tokens = self.max_tokens_var.get().strip()
         settings.max_response_tokens = int(raw_max_tokens) if raw_max_tokens.isdigit() else None
+        if hasattr(self, "hat_var"):
+            descriptor = next(
+                (
+                    item
+                    for item in self.controller.knowledge_hats
+                    if item.display_name == self.hat_var.get()
+                ),
+                self.controller.knowledge_hats[0],
+            )
+            self.controller.set_knowledge_hat(descriptor.hat_id)
         if hasattr(self, "pre_delivery_var"):
             settings.pre_delivery_critical_loop_enabled = bool(self.pre_delivery_var.get())
         if hasattr(self, "observer_vars"):
@@ -269,6 +348,60 @@ class SettingsDialog(tk.Toplevel):
         if selected:
             self.cockpit.set_primary_model(selected)
             self._set_status("Primary model selected for this session. Save to retain it after restart.", theme.ACCENT)
+
+    def _on_hat_selected(self) -> None:
+        descriptor = next(
+            (
+                item
+                for item in self.controller.knowledge_hats
+                if item.display_name == self.hat_var.get()
+            ),
+            self.controller.knowledge_hats[0],
+        )
+        self.controller.set_knowledge_hat(descriptor.hat_id)
+        self._render_hat_status()
+        self._set_status(
+            "Knowledge HAT selection changed explicitly; save to retain it.",
+            theme.ACCENT,
+        )
+
+    def _render_hat_status(self) -> None:
+        status = self.controller.inspect_knowledge_hat()
+        notice = self.controller.settings.knowledge_hat_configuration_notice
+        state_text = status.state
+        if notice:
+            state_text = f"unavailable configuration — {notice}"
+        values = {
+            "state": state_text,
+            "library": (
+                f"{status.library_id} {status.library_version}"
+                if status.library_id and status.library_version
+                else "unavailable"
+            ),
+            "manifest": (
+                f"{status.manifest_id} • SHA-256 {status.manifest_digest}"
+                if status.manifest_id and status.manifest_digest
+                else "unavailable"
+            ),
+            "index": (
+                f"{status.index_id} • SHA-256 {status.index_digest}"
+                if status.index_id and status.index_digest
+                else "unavailable"
+            ),
+            "count": (
+                str(status.indexed_source_count)
+                if status.indexed_source_count is not None
+                else "unavailable"
+            ),
+            "local": "yes" if status.local_only else "no",
+            "read_only": "yes" if status.read_only else "no",
+            "authority": "EVIDENCE ONLY — NON-AUTHORITATIVE",
+        }
+        for key, value in values.items():
+            self.hat_status_labels[key].configure(
+                text=value,
+                fg=theme.ACCENT if key == "state" and status.state == "ready" else theme.TEXT,
+            )
 
     def _on_observer_provider_changed(self, index: int) -> None:
         variables = self.observer_vars[index]

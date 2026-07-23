@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "bindings": {
+    "german_federal_employment_worker_law": {
+      "binding_key": "german_federal_employment_worker_law_local",
+      "root": "REPLACE_WITH_ABSOLUTE_EXTERNAL_CORPUS_ROOT"
+    }
+  }
+}

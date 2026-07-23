@@ -31,7 +31,7 @@ class NonSecretPersistenceTests(unittest.TestCase):
                 provider="openrouter",
                 api_base_url=OPENROUTER_BASE_URL,
                 selected_model_id="openai/gpt-4.1-nano",
-                knowledge_profile_id="linux_unix",
+                knowledge_hat_id="german_federal_employment_worker_law",
                 pre_delivery_critical_loop_enabled=True,
                 observer_slots=[
                     {
@@ -57,7 +57,10 @@ class NonSecretPersistenceTests(unittest.TestCase):
             settings_module.save_settings(original)
             loaded = settings_module.load_settings()
             self.assertEqual(loaded.selected_model_id, "openai/gpt-4.1-nano")
-            self.assertEqual(loaded.knowledge_profile_id, "linux_unix")
+            self.assertEqual(
+                loaded.knowledge_hat_id,
+                "german_federal_employment_worker_law",
+            )
             self.assertEqual(loaded.observer_slots, original.observer_slots)
             self.assertTrue(loaded.pre_delivery_critical_loop_enabled)
             self.assertEqual(loaded.configured_provider_ids(), ("openrouter",))
@@ -179,6 +182,61 @@ class NonSecretPersistenceTests(unittest.TestCase):
             restored = settings_module.load_settings()
             self.assertEqual(restored.configured_provider_ids(), ("openrouter",))
             self.assertEqual(restored.manual_model_id, "openai/gpt-4.1-nano")
+
+    def test_schema_two_none_migrates_to_none_without_enabling_a_hat(self) -> None:
+        with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+            settings_module.CONFIG_DIR.mkdir(parents=True)
+            settings_module.CONFIG_PATH.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "operator_created": True,
+                        "knowledge_profile_id": "none",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            loaded = settings_module.load_settings()
+            self.assertEqual(loaded.knowledge_hat_id, "none")
+            self.assertEqual(loaded.knowledge_hat_configuration_notice, "")
+
+    def test_legacy_enabled_profile_never_auto_migrates_to_german_hat(self) -> None:
+        with TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+            settings_module.CONFIG_DIR.mkdir(parents=True)
+            settings_module.CONFIG_PATH.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "operator_created": True,
+                        "knowledge_profile_id": "linux_unix",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            loaded = settings_module.load_settings()
+            self.assertEqual(loaded.knowledge_hat_id, "none")
+            self.assertIn("unavailable", loaded.knowledge_hat_configuration_notice)
+
+    def test_unknown_or_malformed_hat_selection_resolves_visibly_to_none(self) -> None:
+        for selected in ("unknown_hat", ["malformed"]):
+            with self.subTest(selected=selected), TemporaryDirectory() as tmp_dir, self._with_temp_config(tmp_dir):
+                settings_module.CONFIG_DIR.mkdir(parents=True)
+                settings_module.CONFIG_PATH.write_text(
+                    json.dumps(
+                        {
+                            "schema_version": settings_module.CONFIG_SCHEMA_VERSION,
+                            "operator_created": True,
+                            "knowledge_hat_id": selected,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                loaded = settings_module.load_settings()
+                self.assertEqual(loaded.knowledge_hat_id, "none")
+                self.assertIn("unavailable", loaded.knowledge_hat_configuration_notice)
+
+    def test_fresh_settings_require_explicit_hat_enablement(self) -> None:
+        self.assertEqual(DemoSettings().knowledge_hat_id, "none")
 
     def test_malformed_or_incomplete_records_stay_inactive(self) -> None:
         incomplete = DemoSettings(provider="openrouter", api_base_url=OPENROUTER_BASE_URL)

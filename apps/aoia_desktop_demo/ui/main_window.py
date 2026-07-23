@@ -8,6 +8,7 @@ from tkinter import ttk
 
 from . import theme
 from .cockpit_state import CockpitState, configured_model_ids
+from .hat_evidence_dialog import HatEvidenceDialog
 from .settings_dialog import SettingsDialog
 from ..app import (
     STATUS_ACTIONS_DISABLED,
@@ -32,7 +33,7 @@ from ..critical_review import (
     ObserverReviewResult,
     ReviewValidationError,
 )
-from ..knowledge.registry import NONE_PROFILE_ID
+from ..knowledge.hats.registry import NONE_HAT_ID
 from ..providers.base import ModelInfo, ProviderError
 
 APP_TITLE = "AOIA Control Chat — Competition Demo"
@@ -174,7 +175,7 @@ class MainWindow(tk.Tk):
         self.minsize(*MIN_SIZE)
         self._configure_style()
         self._build_layout()
-        self._refresh_knowledge_dropdown()
+        self._render_hat_state()
         self._render_connection_state()
         self._render_observers()
         self._sync_critical_loop_mode()
@@ -282,10 +283,20 @@ class MainWindow(tk.Tk):
         tk.Label(top, text="CONVERSATION", bg=theme.PANEL, fg=theme.TEXT, font=theme.base_font(11, "bold")).pack(
             side="left", padx=12, pady=8
         )
-        self.knowledge_var = tk.StringVar()
-        self.knowledge_combo = ttk.Combobox(top, textvariable=self.knowledge_var, state="readonly", width=34)
-        self.knowledge_combo.pack(side="right", padx=12, pady=7)
-        self.knowledge_combo.bind("<<ComboboxSelected>>", lambda _event: self._on_knowledge_selected())
+        self.view_hat_evidence_button = ttk.Button(
+            top,
+            text="View HAT Evidence",
+            command=self._view_hat_evidence,
+            state="disabled",
+        )
+        self.view_hat_evidence_button.pack(side="right", padx=(4, 12), pady=7)
+        self.hat_status_label = tk.Label(
+            top,
+            bg=theme.PANEL,
+            fg=theme.TEXT_MUTED,
+            anchor="e",
+        )
+        self.hat_status_label.pack(side="right", padx=8, pady=7)
         self.transcript = tk.Text(
             conversation, bg=theme.BG, fg=theme.TEXT, wrap="word", state="disabled", relief="flat", padx=14, pady=10,
             insertbackground=theme.TEXT,
@@ -342,6 +353,7 @@ class MainWindow(tk.Tk):
         self.cockpit.set_primary_model(self.controller.effective_model_id())
         self.cockpit.clear_review_results()
         self._render_connection_state()
+        self._render_hat_state()
         self._render_observers()
         self._sync_critical_loop_mode()
 
@@ -393,19 +405,28 @@ class MainWindow(tk.Tk):
 
     # --- knowledge ----------------------------------------------------------
 
-    def _refresh_knowledge_dropdown(self) -> None:
-        profiles = self.controller.knowledge_profiles
-        self.knowledge_combo.configure(values=[profile.display_name for profile in profiles])
-        self.knowledge_var.set(self.controller.current_knowledge_profile().display_name)
-
-    def _on_knowledge_selected(self) -> None:
-        profile = next(
-            (item for item in self.controller.knowledge_profiles if item.display_name == self.knowledge_var.get()),
-            self.controller.knowledge_profiles[0],
+    def _render_hat_state(self) -> None:
+        descriptor = self.controller.current_knowledge_hat()
+        status = self.controller.inspect_knowledge_hat(descriptor.hat_id)
+        state = "disabled" if descriptor.hat_id == NONE_HAT_ID else status.state
+        self.hat_status_label.configure(
+            text=f"Knowledge HAT: {descriptor.display_name} • {state} • EVIDENCE ONLY",
+            fg=theme.ACCENT if status.state == "ready" else theme.WARN,
         )
-        self.controller.set_knowledge_profile(profile.id)
-        suffix = "no local evidence selected" if profile.id == NONE_PROFILE_ID else f"{profile.document_count or 0} local records; evidence only"
-        self.status_message_label.configure(text=f"Knowledge profile: {profile.display_name} — {suffix}", fg=theme.TEXT_MUTED)
+        self.view_hat_evidence_button.configure(
+            state="normal" if self.controller.retained_hat_attachment() is not None else "disabled"
+        )
+
+    def _view_hat_evidence(self) -> None:
+        attachment = self.controller.retained_hat_attachment()
+        if attachment is None:
+            self._show_alert(
+                "View HAT Evidence",
+                "No retained HAT attachment exists for the completed reviewed turn.",
+                self.view_hat_evidence_button,
+            )
+            return
+        HatEvidenceDialog(self, attachment, self.view_hat_evidence_button)
 
     # --- critical prompt loop ------------------------------------------------
 
@@ -574,6 +595,14 @@ class MainWindow(tk.Tk):
             return "No primary model selected. Choose a valid configured-provider model in Settings → Primary Model."
         if not self.controller.secrets.api_key:
             return "Missing API key. Enter it manually in Settings for this session; it remains masked and is not saved."
+        descriptor = self.controller.current_knowledge_hat()
+        if descriptor.hat_id != NONE_HAT_ID:
+            status = self.controller.inspect_knowledge_hat(descriptor.hat_id)
+            if status.state != "ready":
+                return (
+                    "Selected Knowledge HAT is not ready. Open Settings → Knowledge HAT "
+                    "and inspect the read-only status."
+                )
         return None
 
     def _on_send(self) -> None:
@@ -672,6 +701,7 @@ class MainWindow(tk.Tk):
         chat_result = result.chat_result
         assert chat_result is not None
         self.controller.accept_completed_primary_turn(result)
+        self._render_hat_state()
         footer = SUGGESTION_LABEL + (f"\n{SOURCES_LABEL}" if result.evidence_count else "")
         self._append_transcript_line("assistant", "Assistant", chat_result.content, footer=footer)
         if result.pre_delivery_reviewed:

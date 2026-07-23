@@ -21,9 +21,10 @@ from apps.aoia_desktop_demo.critical_review import (
     ObserverConfig,
     ReviewValidationError,
 )
-from apps.aoia_desktop_demo.knowledge.registry import NONE_PROFILE_ID
+from apps.aoia_desktop_demo.knowledge.hats.registry import NONE_HAT_ID
 from apps.aoia_desktop_demo.providers.base import ChatResult, ProviderError
 from apps.aoia_desktop_demo.providers.openrouter import OPENROUTER_BASE_URL
+from apps.aoia_desktop_demo.tests.knowledge_hat_test_support import make_attachment
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -158,6 +159,7 @@ class AppControllerModelOnlyModeTests(unittest.TestCase):
         self.controller.settings.provider = "openrouter"
         self.controller.settings.api_base_url = OPENROUTER_BASE_URL
         self.controller.settings.manual_model_id = "vendor/test-model"
+        self.controller.settings.knowledge_hat_id = NONE_HAT_ID
         self.controller.settings.pre_delivery_critical_loop_enabled = False
 
     def tearDown(self) -> None:
@@ -165,7 +167,7 @@ class AppControllerModelOnlyModeTests(unittest.TestCase):
 
     @patch("apps.aoia_desktop_demo.app.OpenRouterClient", _FakeOpenRouterClient)
     def test_model_only_mode_sends_no_knowledge_evidence(self) -> None:
-        self.controller.set_knowledge_profile(NONE_PROFILE_ID)
+        self.controller.set_knowledge_hat(NONE_HAT_ID)
         _FakeOpenRouterClient.next_result = ChatResult(content="hello", model="vendor/test-model")
         _request_id, result = _run_and_wait(self.controller, "hello there")
         self.assertEqual(result.evidence_count, 0)
@@ -178,19 +180,23 @@ class AppControllerModelOnlyModeTests(unittest.TestCase):
 
     @patch("apps.aoia_desktop_demo.app.OpenRouterClient", _FakeOpenRouterClient)
     def test_knowledge_mode_can_attach_evidence(self) -> None:
-        self.controller.set_knowledge_profile("linux_unix")
+        self.controller.set_knowledge_hat("german_federal_employment_worker_law")
+        attachment = make_attachment(self.controller.current_knowledge_hat())
         _FakeOpenRouterClient.next_result = ChatResult(content="answer", model="vendor/test-model")
-        with patch(
-            "apps.aoia_desktop_demo.app.retrieve_linux_evidence", return_value=[object()]
-        ), patch(
-            "apps.aoia_desktop_demo.app.build_knowledge_system_message",
-            return_value="exact bounded primary evidence",
+        with patch.object(
+            self.controller.hat_service,
+            "prepare_attachment",
+            return_value=attachment,
         ):
             _request_id, result = _run_and_wait(self.controller, "how do I check disk usage")
         self.assertIsNone(result.error_message)
         self.assertEqual(result.evidence_count, 1)
-        self.assertEqual(result.completed_turn.evidence_text, "exact bounded primary evidence")
-        self.assertEqual(result.completed_turn.knowledge_profile_id, "linux_unix")
+        self.assertEqual(result.completed_turn.evidence_text, attachment.rendered_evidence)
+        self.assertEqual(
+            result.completed_turn.knowledge_profile_id,
+            "german_federal_employment_worker_law",
+        )
+        self.assertIs(result.completed_turn.hat_attachment, attachment)
 
     @patch("apps.aoia_desktop_demo.app.OpenRouterClient", _FakeOpenRouterClient)
     def test_exactly_one_provider_call_per_submit_no_hidden_retry(self) -> None:
@@ -253,7 +259,7 @@ class PreDeliverySequentialControllerTests(unittest.TestCase):
         self.controller.settings.provider = "openrouter"
         self.controller.settings.api_base_url = OPENROUTER_BASE_URL
         self.controller.settings.manual_model_id = "vendor/primary-model"
-        self.controller.settings.knowledge_profile_id = NONE_PROFILE_ID
+        self.controller.settings.knowledge_hat_id = NONE_HAT_ID
         self.controller.settings.pre_delivery_critical_loop_enabled = True
 
     def tearDown(self) -> None:
