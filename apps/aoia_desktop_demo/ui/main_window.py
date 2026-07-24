@@ -695,7 +695,14 @@ class MainWindow(tk.Tk):
             self.controller.session.add_error_message(result.error_message)
             self._append_transcript_line("error", "Provider request failed", result.error_message)
             if self.controller.settings.pre_delivery_critical_loop_enabled:
+                if not result.observer_results:
+                    self._mark_unrun_observers()
+                    self._render_observers()
                 self.critical_loop_label.configure(text="Critical loop: failed closed", fg=theme.WARN)
+                self.status_message_label.configure(
+                    text="Request failed closed. No final answer was delivered.",
+                    fg=theme.WARN,
+                )
             self._show_alert("Provider request failed", result.error_message, self.send_button)
             return
         chat_result = result.chat_result
@@ -710,6 +717,15 @@ class MainWindow(tk.Tk):
                 text="Final suggested answer delivered after three sequential observer reports.",
                 fg=theme.TEXT_MUTED,
             )
+
+    def _mark_unrun_observers(self) -> None:
+        for slot in self.cockpit.observer_slots:
+            if slot.review_result is None:
+                slot.state = "NOT RUN"
+                slot.result = (
+                    "The sequence failed closed before observer review; no observer result "
+                    "was produced."
+                )
 
     def _on_cancel(self) -> None:
         self.controller.cancel_active_request()

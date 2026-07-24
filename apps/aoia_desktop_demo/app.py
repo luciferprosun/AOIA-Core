@@ -27,7 +27,11 @@ from .critical_review import (
 from .knowledge.hats.contracts import HatAttachment, HatDescriptor, HatStatus
 from .knowledge.hats.prompt_rendering import HAT_SYSTEM_INSTRUCTION, build_primary_user_data
 from .knowledge.hats.registry import NONE_HAT_ID
-from .knowledge.hats.service import HatAttachmentService, HatServiceError
+from .knowledge.hats.service import (
+    HatAttachmentService,
+    HatNoEvidenceError,
+    HatServiceError,
+)
 from .providers.base import ChatMessage, ChatResult, ModelInfo, ProviderError
 from .providers.openrouter import OPENROUTER_BASE_URL, OpenRouterClient, OpenRouterConfig
 from .security.secret_redaction import redact_exception
@@ -40,6 +44,11 @@ STATUS_ACTIONS_DISABLED = "Actions: Disabled"
 STATUS_HUMAN_REQUIRED = "Human control: Required"
 SUGGESTION_LABEL = "AI-generated suggestion — not authority"
 SOURCES_LABEL = "Sources attached — inspect evidence before relying on the answer"
+HAT_NO_EVIDENCE_MESSAGE = (
+    "Selected Knowledge HAT found no required evidence for this prompt; no provider call "
+    "was made. Ask an in-scope question, or explicitly select None in Settings → "
+    "Knowledge HAT for model-only mode."
+)
 
 PRE_DELIVERY_PRIMARY_DRAFT_STARTED = "PRIMARY_DRAFT_STARTED"
 PRE_DELIVERY_PRIMARY_DRAFT_COMPLETED = "PRIMARY_DRAFT_COMPLETED"
@@ -435,6 +444,15 @@ class AppController:
                     request_id=request_id,
                     chat_result=None,
                     error_message="Request canceled by operator.",
+                    evidence_count=evidence_count,
+                    completed_turn=None,
+                    observer_results=observer_results,
+                )
+            except HatNoEvidenceError:
+                return SendResult(
+                    request_id=request_id,
+                    chat_result=None,
+                    error_message=HAT_NO_EVIDENCE_MESSAGE,
                     evidence_count=evidence_count,
                     completed_turn=None,
                     observer_results=observer_results,

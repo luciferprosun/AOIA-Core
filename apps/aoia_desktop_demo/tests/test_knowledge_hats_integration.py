@@ -8,7 +8,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from apps.aoia_desktop_demo.app import AppController
+from apps.aoia_desktop_demo.app import HAT_NO_EVIDENCE_MESSAGE, AppController
 from apps.aoia_desktop_demo.critical_review import ReviewSnapshot, ReviewValidationError
 from apps.aoia_desktop_demo.knowledge.hats.canonical import verify_attachment
 from apps.aoia_desktop_demo.knowledge.hats.contracts import HatStatus
@@ -17,7 +17,10 @@ from apps.aoia_desktop_demo.knowledge.hats.registry import (
     NONE_HAT_ID,
     HatRegistry,
 )
-from apps.aoia_desktop_demo.knowledge.hats.service import HatAttachmentService
+from apps.aoia_desktop_demo.knowledge.hats.service import (
+    HatAttachmentService,
+    HatNoEvidenceError,
+)
 from apps.aoia_desktop_demo.providers.base import ChatResult
 from apps.aoia_desktop_demo.providers.openrouter import OPENROUTER_BASE_URL
 from apps.aoia_desktop_demo.state.settings import DemoSettings
@@ -121,6 +124,16 @@ class _CountingHatService:
         verify_attachment(attachment)
         if attachment.descriptor != self.descriptor:
             raise AssertionError("descriptor drift")
+
+
+class _NoEvidenceHatService(_CountingHatService):
+    def prepare_attachment(self, hat_id: str, query: str, **_kwargs):
+        self.prepare_count += 1
+        self.prepared_query = query
+        self.provider_calls_at_retrieval = _FakeOpenRouterClient.call_count
+        if hat_id != self.descriptor.hat_id:
+            raise AssertionError("unexpected fixture HAT id")
+        raise HatNoEvidenceError("HAT retrieval returned no required evidence")
 
 
 class HatFiveCallIntegrationTests(unittest.TestCase):
@@ -311,6 +324,27 @@ class HatFiveCallIntegrationTests(unittest.TestCase):
         self.assertIsNone(result.chat_result)
         self.assertIsNone(result.completed_turn)
         self.assertIn("failed closed", result.error_message)
+
+    @patch("apps.aoia_desktop_demo.app.OpenRouterClient", _FakeOpenRouterClient)
+    def test_no_evidence_reports_operator_remediation_without_provider_call(self) -> None:
+        self.controller.shutdown()
+        service = _NoEvidenceHatService()
+        self.controller = _configured_controller(hat_service=service)
+        self.controller.set_knowledge_hat(GERMAN_HAT_ID)
+
+        _request_id, result = _run_and_wait(
+            self.controller,
+            "hello",
+            observer_configs=_sequential_observer_configs(),
+        )
+
+        self.assertEqual(service.prepare_count, 1)
+        self.assertEqual(service.provider_calls_at_retrieval, 0)
+        self.assertEqual(_FakeOpenRouterClient.call_count, 0)
+        self.assertEqual(result.error_message, HAT_NO_EVIDENCE_MESSAGE)
+        self.assertIn("explicitly select None", result.error_message)
+        self.assertIsNone(result.chat_result)
+        self.assertIsNone(result.completed_turn)
 
     def test_reconstructed_stale_attachment_is_rejected_by_snapshot(self) -> None:
         snapshot = ReviewSnapshot.create(

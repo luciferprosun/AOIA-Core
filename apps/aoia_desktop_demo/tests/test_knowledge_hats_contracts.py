@@ -42,6 +42,7 @@ from apps.aoia_desktop_demo.knowledge.hats.registry import (
 )
 from apps.aoia_desktop_demo.knowledge.hats.service import (
     HatAttachmentService,
+    HatNoEvidenceError,
     HatServiceError,
 )
 from apps.aoia_desktop_demo.tests.knowledge_hat_test_support import (
@@ -347,7 +348,7 @@ class BindingAndServiceBoundaryTests(unittest.TestCase):
                 passages=(),
             )
             adapter.bundle = empty
-            with self.assertRaises(HatServiceError):
+            with self.assertRaises(HatNoEvidenceError):
                 service.prepare_attachment(entry.descriptor.hat_id, "fixture query")
             adapter.bundle = make_attachment(entry.descriptor).bundle
             with self.assertRaises(HatServiceError):

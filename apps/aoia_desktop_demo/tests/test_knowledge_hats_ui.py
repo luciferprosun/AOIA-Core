@@ -12,6 +12,7 @@ from apps.aoia_desktop_demo.app import (
 from apps.aoia_desktop_demo.knowledge.hats.contracts import HatDescriptor, HatStatus
 from apps.aoia_desktop_demo.knowledge.hats.registry import HatRegistry
 from apps.aoia_desktop_demo.tests.knowledge_hat_test_support import make_attachment
+from apps.aoia_desktop_demo.ui.cockpit_state import CockpitState
 from apps.aoia_desktop_demo.ui.hat_evidence_dialog import (
     EVIDENCE_ONLY_MARKER,
     HUMAN_REVIEW_MARKER,
@@ -135,6 +136,27 @@ class EvidencePreviewTests(unittest.TestCase):
 
 
 class HatSettingsUiStateTests(unittest.TestCase):
+    def test_failed_sequence_marks_queued_observers_as_not_run(self) -> None:
+        window = object.__new__(MainWindow)
+        window.cockpit = CockpitState()
+        for slot in window.cockpit.observer_slots:
+            slot.enabled = True
+            slot.state = "QUEUED"
+            slot.result = "Waiting for the internal primary draft."
+
+        MainWindow._mark_unrun_observers(window)
+
+        self.assertEqual(
+            [slot.state for slot in window.cockpit.observer_slots],
+            ["NOT RUN", "NOT RUN", "NOT RUN"],
+        )
+        self.assertTrue(
+            all(
+                "no observer result was produced" in slot.result
+                for slot in window.cockpit.observer_slots
+            )
+        )
+
     def test_operator_selection_explicitly_sets_logical_hat_id(self) -> None:
         none = HatDescriptor(
             hat_id="none",

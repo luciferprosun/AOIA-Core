@@ -29,6 +29,10 @@ class HatServiceError(HatValidationError):
     """Fail-closed service error raised before any provider call."""
 
 
+class HatNoEvidenceError(HatServiceError):
+    """The enabled HAT returned no evidence required for provider delivery."""
+
+
 class HatAttachmentService:
     def __init__(
         self,
@@ -110,7 +114,7 @@ class HatAttachmentService:
             raise HatServiceError("HAT control identity changed during retrieval")
         self._validate_bundle(status, bundle, limits, expected_query=normalize_text(query))
         if not bundle.passages:
-            raise HatServiceError("HAT retrieval returned no required evidence")
+            raise HatNoEvidenceError("HAT retrieval returned no required evidence")
         descriptor = self._registry.entry(hat_id).descriptor
         rendered_evidence = render_evidence_bundle(bundle)
         try:
