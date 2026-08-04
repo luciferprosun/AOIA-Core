@@ -103,15 +103,30 @@ class LocalWorkspaceRunContextPolicyTests(unittest.TestCase):
                     default_relative_output_path="../escape.md",
                 )
 
-            result = run_durable_local_agent_in_workspace(
-                goal="Create a contained artifact.",
+            with self.assertRaises(ValueError):
+                prepare_local_workspace_run_context(
+                    base_workspace_root=base,
+                    run_id="absolute_output_run",
+                    default_relative_output_path="/tmp/escape.md",
+                )
+
+            context = prepare_local_workspace_run_context(
                 base_workspace_root=base,
                 run_id="contained_artifact_run",
             )
 
-            artifact_path = Path(result.artifact_path or "").resolve()
-            expected_root = (Path(base) / "runs" / "contained_artifact_run" / "artifacts").resolve()
-            self.assertTrue(str(artifact_path).startswith(str(expected_root)))
+            artifact_root = Path(context.artifact_workspace_root).resolve()
+            predicted_artifact_path = (
+                Path(context.artifact_workspace_root)
+                / context.default_relative_output_path
+            ).resolve()
+
+            self.assertFalse(Path(context.artifact_workspace_root).is_symlink())
+            self.assertEqual(artifact_root, predicted_artifact_path.parent)
+            self.assertEqual(
+                context.default_relative_output_path,
+                predicted_artifact_path.relative_to(artifact_root).as_posix(),
+            )
 
     def test_duplicate_run_id_is_rejected_by_default(self) -> None:
         with TemporaryDirectory() as base:
