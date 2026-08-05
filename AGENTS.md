@@ -119,16 +119,22 @@ git rev-parse HEAD
 git diff --name-only
 ```
 
-Confirm the intended branch is:
+The current task must explicitly identify its intended Git identity as either an
+intended branch or, for audit/certification only, an exact commit SHA with
+explicit authorization to use detached HEAD.
 
-```text
-feature/m2-b0-provider-critic-inert-core
-```
+If the task provides neither identity, stop and report.
 
-If the branch is wrong, stop and report.
+For branch work, confirm the current branch exactly matches the branch named by
+the task. For explicitly authorized detached audit/certification work, confirm
+HEAD is detached and exactly matches the commit SHA named by the task.
+Otherwise, stop and report.
 
 If the worktree is dirty before the task, stop and report the dirty files unless
 the task explicitly says to clean known files.
+
+Do not automatically checkout, reset, or clean to satisfy these identity or
+cleanliness checks.
 
 ## 8. Required Task-End Report
 
