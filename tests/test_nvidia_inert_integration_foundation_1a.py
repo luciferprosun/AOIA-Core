@@ -123,6 +123,99 @@ class NvidiaInertIntegrationFoundation1ATests(unittest.TestCase):
                 self.assertNotIn(sensitive_marker, serialized)
                 self.assertNotIn(sensitive_marker, repr(resolution))
 
+    def test_secret_like_correlation_ids_are_rejected_before_storage(self):
+        for index, marker in enumerate(self.secret_like_identifiers()):
+            request = None
+            with self.subTest(case=index):
+                with self.assertRaises(ValueError) as captured:
+                    request = create_nvidia_advisory_request(
+                        correlation_id=marker,
+                        capability_identity="nvidia.advisory.guardrail",
+                        evidence_hashes=("a" * 64,),
+                        created_at_tick=7,
+                    )
+
+                self.assertIsNone(request)
+                self.assertNotIn(marker, str(captured.exception))
+                self.assertNotIn(marker, repr(captured.exception))
+
+    def test_provenance_and_response_reject_secret_like_replacement(self):
+        response = InertNvidiaAdapter().request_advisory(self.request())
+        marker = self.secret_like_identifiers()[0]
+        cases = (
+            (
+                "provenance",
+                response.provenance,
+                {"request_correlation_id": marker},
+            ),
+            ("response", response, {"correlation_id": marker}),
+        )
+
+        for surface, target, changes in cases:
+            replacement = None
+            with self.subTest(surface=surface):
+                with self.assertRaises(ValueError) as captured:
+                    replacement = replace(target, **changes)
+
+                self.assertIsNone(replacement)
+                self.assertNotIn(marker, str(captured.exception))
+                self.assertNotIn(marker, repr(captured.exception))
+
+    def test_secret_like_identifier_normalization_variants_fail_closed(self):
+        prefix = "".join(("s", "k"))
+        suffix = "certification-dummy-sensitive-material"
+        hyphen_form = f"{prefix}-{suffix}"
+        variants = (
+            hyphen_form,
+            f"{prefix}_{suffix}",
+            hyphen_form.upper(),
+            f"  {hyphen_form}  ",
+        )
+
+        for index, marker in enumerate(variants):
+            with self.subTest(case=index), self.assertRaises(ValueError) as captured:
+                create_nvidia_advisory_request(
+                    correlation_id=marker,
+                    capability_identity="nvidia.advisory.guardrail",
+                    evidence_hashes=("a" * 64,),
+                    created_at_tick=7,
+                )
+
+            self.assertNotIn(marker, str(captured.exception))
+            self.assertNotIn(marker, repr(captured.exception))
+
+    def test_valid_correlation_ids_remain_compatible(self):
+        cases = (
+            ("nvidia-request-1a", "nvidia-request-1a"),
+            (" Run-20260805-0001 ", "run-20260805-0001"),
+            ("audit:correlation.17", "audit:correlation.17"),
+            ("provider_request_42", "provider_request_42"),
+        )
+
+        for supplied, expected in cases:
+            with self.subTest(expected=expected):
+                request = create_nvidia_advisory_request(
+                    correlation_id=supplied,
+                    capability_identity="nvidia.advisory.guardrail",
+                    evidence_hashes=("a" * 64,),
+                    created_at_tick=7,
+                )
+                response = InertNvidiaAdapter().request_advisory(request)
+                data = response.to_dict()
+
+                self.assertEqual(expected, request.correlation_id)
+                self.assertEqual(expected, request.to_dict()["correlation_id"])
+                self.assertEqual(
+                    expected, response.provenance.request_correlation_id
+                )
+                self.assertEqual(expected, response.correlation_id)
+                self.assertEqual(expected, data["correlation_id"])
+                self.assertEqual(
+                    expected,
+                    data["provenance"]["request_correlation_id"],
+                )
+                self.assert_inert_response(data)
+
     def test_direct_configuration_contract_rejects_activation(self):
         cases = (
             {"enabled": True},
@@ -432,6 +525,16 @@ class NvidiaInertIntegrationFoundation1ATests(unittest.TestCase):
             capability_identity="nvidia.advisory.guardrail",
             evidence_hashes=("a" * 64,),
             created_at_tick=7,
+        )
+
+    @staticmethod
+    def secret_like_identifiers():
+        suffix = "certification-dummy-sensitive-material"
+        return (
+            "".join(("s", "k", "-", suffix)),
+            "".join(("s", "k", "_", suffix)),
+            "".join(("g", "h", "p", "_", suffix)),
+            "".join(("x", "o", "x", "b", "-", suffix)),
         )
 
     def assert_inert_response(self, data):

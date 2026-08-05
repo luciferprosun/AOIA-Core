@@ -48,6 +48,12 @@ _ALLOWED_CONFIG_FIELDS = frozenset(
 _IDENTIFIER_CHARACTERS = frozenset(
     "abcdefghijklmnopqrstuvwxyz0123456789-._:"
 )
+_SECRET_LIKE_IDENTIFIER_PREFIXES = (
+    "s" + "k" + "-",
+    "s" + "k" + "_",
+    "g" + "h" + "p" + "_",
+    "x" + "o" + "x" + "b" + "-",
+)
 _EFFECT_AND_AUTHORITY_FIELDS = (
     "network_called",
     "gpu_used",
@@ -556,6 +562,11 @@ def _required_identifier(value: object) -> str:
     if not isinstance(value, str):
         raise ValueError("identifier must be text")
     normalized = value.strip().casefold()
+    if any(
+        normalized.startswith(prefix)
+        for prefix in _SECRET_LIKE_IDENTIFIER_PREFIXES
+    ):
+        raise ValueError("identifier is not permitted")
     if (
         not normalized
         or len(normalized) > 128
