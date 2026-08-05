@@ -4,6 +4,7 @@ import hashlib
 import json
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from knowledge.tools.promote_candidates import run_triage, triage_record
 
@@ -82,12 +83,13 @@ class CandidateTriageTests(unittest.TestCase):
 
     def test_accept_records_preserve_provenance(self) -> None:
         payload = {"records": [base_record()]}
-        temp_path = PROJECT_ROOT / "runtime" / "knowledge" / "candidates" / ".tmp_candidate_triage_test.json"
-        try:
+        with TemporaryDirectory(
+            prefix="aoia-candidate-triage-test-",
+            dir="/tmp",
+        ) as temporary_root:
+            temp_path = Path(temporary_root) / "candidate_command_index.json"
             temp_path.write_text(json.dumps(payload), encoding="utf-8")
             result = run_triage(temp_path, write=False)
-        finally:
-            temp_path.unlink(missing_ok=True)
 
         accepted = result["buckets"]["ACCEPT"]
         self.assertEqual(len(accepted), 1)
