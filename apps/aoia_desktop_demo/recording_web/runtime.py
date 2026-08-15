@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 import threading
+import unicodedata
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
 from uuid import uuid4
@@ -71,8 +72,53 @@ OBSERVER_ROLES = (
     "Evidence & Consistency",
 )
 PRIMARY_CASE_ID = "primary-entry-into-force"
+BACKUP_CASE_ID = "backup-special-case-reservation"
 MAXIMUM_PROMPT_BYTES = 24 * 1024
 MAXIMUM_HISTORY_MESSAGES = 12
+
+# These terms only select an existing hash-bound Golden Case.  The answer and
+# evidence still come from the canonical CockroachDB retrieval request below.
+_GUIDED_INTENT_TERMS = {
+    PRIMARY_CASE_ID: frozenset(
+        {
+            "date",
+            "datum",
+            "effect",
+            "effective",
+            "enter",
+            "entered",
+            "force",
+            "inkraft",
+            "inkrafttreten",
+            "kiedy",
+            "kraft",
+            "obowiazuje",
+            "obowiazywac",
+            "tritt",
+            "wann",
+            "when",
+            "weszla",
+            "wszedl",
+            "zycie",
+        }
+    ),
+    BACKUP_CASE_ID: frozenset(
+        {
+            "abschnitt",
+            "appointment",
+            "besondere",
+            "dismissal",
+            "entlassung",
+            "ernennung",
+            "nicht",
+            "reservation",
+            "reserved",
+            "section",
+            "special",
+            "vorbehalten",
+        }
+    ),
+}
 
 _KNOWLEDGE_SYSTEM = (
     "You are the selected model in AIOA German Law Knowledge. The JSON user "
@@ -246,6 +292,11 @@ class GermanLawKnowledge:
         self._guided_by_question = {
             case.question: case for case in self._suite.cases
         }
+        self._guided_by_id = {
+            case.case_id: case
+            for case in self._suite.cases
+            if case.case_id in _GUIDED_INTENT_TERMS
+        }
 
     @property
     def demo_prompt(self) -> str:
@@ -253,6 +304,9 @@ class GermanLawKnowledge:
 
     def retrieve(self, prompt: str, request_id: str) -> tuple[EvidenceProjection, ...]:
         guided = self._guided_by_question.get(prompt)
+        if guided is None:
+            guided_case_id = _guided_case_id(prompt)
+            guided = self._guided_by_id.get(guided_case_id)
         case = guided or self._suite.case(PRIMARY_CASE_ID)
         bindings = current_flow._route_bindings(
             case,
@@ -647,6 +701,24 @@ def _retrieval_queries(prompt: str) -> tuple[str, ...]:
         queries.append(" ".join(selected))
         queries.extend(selected)
     return tuple(dict.fromkeys(queries))
+
+
+def _guided_case_id(prompt: str) -> str | None:
+    normalized = unicodedata.normalize("NFKD", prompt.casefold()).translate(
+        str.maketrans({"ł": "l"})
+    )
+    terms = frozenset(re.findall(r"[a-z0-9]+", normalized))
+    if "bmjernano" not in terms:
+        return None
+    scores = {
+        case_id: len(terms.intersection(markers))
+        for case_id, markers in _GUIDED_INTENT_TERMS.items()
+    }
+    best_score = max(scores.values())
+    if best_score == 0:
+        return None
+    winners = [case_id for case_id, score in scores.items() if score == best_score]
+    return winners[0] if len(winners) == 1 else None
 
 
 def _canonical(value: object) -> str:

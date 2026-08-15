@@ -13,6 +13,7 @@ from apps.aoia_desktop_demo.recording_web.runtime import (
     DemoRuntimeError,
     OBSERVER_ROLES,
     ProviderCallLedger,
+    _guided_case_id,
 )
 
 
@@ -75,6 +76,27 @@ class CallLedgerTests(unittest.TestCase):
         ledger.reserve(5)
         with self.assertRaises(DemoRuntimeError):
             ledger.reserve(1)
+
+
+class GermanLawIntentRoutingTests(unittest.TestCase):
+    def test_entry_into_force_variants_select_the_existing_primary_case(self) -> None:
+        for prompt in (
+            "When did the BMJErnAnO enter into force?",
+            "Kiedy weszła w życie BMJErnAnO?",
+            "What date did the German BMJErnAnO take effect?",
+        ):
+            with self.subTest(prompt=prompt):
+                self.assertEqual(_guided_case_id(prompt), "primary-entry-into-force")
+
+    def test_section_two_variant_selects_the_existing_backup_case(self) -> None:
+        self.assertEqual(
+            _guided_case_id("What does section II BMJErnAnO reserve for special cases?"),
+            "backup-special-case-reservation",
+        )
+
+    def test_unrelated_or_ambiguous_prompt_is_not_forced_to_a_memory_hit(self) -> None:
+        self.assertIsNone(_guided_case_id("When did an unrelated law enter into force?"))
+        self.assertIsNone(_guided_case_id("Tell me about BMJErnAnO."))
 
 
 class BrowserSurfaceContractTests(unittest.TestCase):
