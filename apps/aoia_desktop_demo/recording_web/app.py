@@ -36,6 +36,8 @@ class _Run:
     stage: str = "queued"
     status_text: str = "Waiting for the bounded local worker."
     observers: list[dict[str, object]] = field(default_factory=list)
+    trace: list[str] = field(default_factory=lambda: ["queued"])
+    failed_stage: str | None = None
     result: dict[str, object] | None = None
     error_code: str | None = None
 
@@ -49,6 +51,8 @@ class _Run:
             "critical_loop": self.critical_loop,
             "german_law": self.german_law,
             "observers": list(self.observers),
+            "trace": list(self.trace),
+            "failed_stage": self.failed_stage,
             "result": self.result,
             "error_code": self.error_code,
         }
@@ -111,6 +115,11 @@ class _RunStore:
             changes: dict[str, Any] = {"stage": stage, "status_text": text}
             if observers is not None:
                 changes["observers"] = [dict(value) for value in observers]
+            with self._lock:
+                trace = self._runs[run_id].trace
+                if not trace or trace[-1] != stage:
+                    trace.append(stage)
+            print(f"recording_run id={run_id} stage={stage}", flush=True)
             self._update(run_id, **changes)
 
         with self._lock:
@@ -125,19 +134,35 @@ class _RunStore:
         try:
             result = self._engine.execute(run_id=run_id, progress=progress, **request)
         except DemoRuntimeError as error:
+            with self._lock:
+                failed_stage = self._runs[run_id].stage
+            print(
+                f"recording_run id={run_id} failed_stage={failed_stage} "
+                f"error_code={error}",
+                flush=True,
+            )
             self._update(
                 run_id,
                 state="FAILED",
                 stage="failed",
+                failed_stage=failed_stage,
                 status_text="The selected flow stopped safely.",
                 error_code=str(error),
             )
             return
         except Exception:
+            with self._lock:
+                failed_stage = self._runs[run_id].stage
+            print(
+                f"recording_run id={run_id} failed_stage={failed_stage} "
+                "error_code=LOCAL_RUNTIME_FAILURE",
+                flush=True,
+            )
             self._update(
                 run_id,
                 state="FAILED",
                 stage="failed",
+                failed_stage=failed_stage,
                 status_text="The local runtime stopped safely.",
                 error_code="LOCAL_RUNTIME_FAILURE",
             )

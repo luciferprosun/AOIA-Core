@@ -219,6 +219,15 @@ async function sendPrompt() {
     const result = completed.result;
     const metadata = [{text: selectedModel ? selectedModel.label : modelId, active: false}];
     if (germanLaw) {
+      appendMessage(
+        "assistant-primary",
+        `${selectedModel ? selectedModel.label : "Gemma"} — Primary · UNVERIFIED`,
+        result.primary_response,
+        [
+          {text: "PRIMARY", active: false},
+          {text: "UNVERIFIED", active: false},
+        ],
+      );
       metadata.push(
         {text: "German Law Knowledge", active: true},
         {text: "CockroachDB", active: true},
@@ -230,7 +239,10 @@ async function sendPrompt() {
       }
     }
     if (criticalLoop) metadata.push({text: "Critical Prompt Loop · 1+3+1", active: true});
-    appendMessage("assistant", selectedModel ? selectedModel.label : "Assistant", result.answer, metadata);
+    const finalSpeaker = germanLaw
+      ? `${selectedModel ? selectedModel.label : "Gemma"} — Final · ${result.verified ? "VERIFIED" : "LIMITED"}`
+      : selectedModel ? selectedModel.label : "Assistant";
+    appendMessage("assistant", finalSpeaker, result.answer, metadata);
     setStatus("Response delivered. Ready for operator input.", "neutral");
   } catch (error) {
     appendMessage("error", "Request stopped safely", error.message || "LOCAL_REQUEST_FAILED");

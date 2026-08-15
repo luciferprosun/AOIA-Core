@@ -435,6 +435,16 @@ select {
   background: var(--cyan-soft);
 }
 
+.message.assistant-primary .message-body {
+  border-color: rgba(245, 189, 87, 0.34);
+  color: #d7e1e7;
+  background: rgba(245, 189, 87, 0.055);
+}
+
+.message.assistant-primary .message-label {
+  color: var(--amber);
+}
+
 .message.error .message-body {
   border-color: rgba(251, 113, 133, 0.4);
   color: #fecdd3;
