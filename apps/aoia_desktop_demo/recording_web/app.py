@@ -31,6 +31,7 @@ class _Run:
     model_id: str
     critical_loop: bool
     german_law: bool
+    demo_preset: bool
     observer_models: tuple[str, ...]
     state: str = "QUEUED"
     stage: str = "queued"
@@ -50,6 +51,7 @@ class _Run:
             "model_id": self.model_id,
             "critical_loop": self.critical_loop,
             "german_law": self.german_law,
+            "demo_preset": self.demo_preset,
             "observers": list(self.observers),
             "trace": list(self.trace),
             "failed_stage": self.failed_stage,
@@ -72,6 +74,7 @@ class _RunStore:
         model_id: str,
         critical_loop: bool,
         german_law: bool,
+        demo_preset: bool,
         observer_models: tuple[str, ...],
     ) -> dict[str, object]:
         run = _Run(
@@ -80,6 +83,7 @@ class _RunStore:
             model_id=model_id,
             critical_loop=critical_loop,
             german_law=german_law,
+            demo_preset=demo_preset,
             observer_models=observer_models,
         )
         with self._lock:
@@ -129,6 +133,7 @@ class _RunStore:
                 "model_id": run.model_id,
                 "critical_loop": run.critical_loop,
                 "german_law": run.german_law,
+                "demo_preset": run.demo_preset,
                 "observer_models": run.observer_models,
             }
         try:
@@ -282,12 +287,14 @@ def create_app(
         model_id = payload.get("model_id")
         critical_loop = payload.get("critical_loop")
         german_law = payload.get("german_law")
+        demo_preset = payload.get("demo_preset", False)
         observer_models = payload.get("observer_models", [])
         if (
             not isinstance(prompt, str)
             or not isinstance(model_id, str)
             or not isinstance(critical_loop, bool)
             or not isinstance(german_law, bool)
+            or not isinstance(demo_preset, bool)
             or not isinstance(observer_models, list)
             or any(not isinstance(value, str) for value in observer_models)
         ):
@@ -297,12 +304,18 @@ def create_app(
                 status_code=409,
                 detail="COMPOSITION_UNAVAILABLE_RECORDING_BUILD",
             )
+        if demo_preset and not german_law:
+            raise HTTPException(
+                status_code=409,
+                detail="DEMO_PRESET_REQUIRES_GERMAN_LAW",
+            )
         try:
             projection = store.submit(
                 prompt=prompt,
                 model_id=model_id,
                 critical_loop=critical_loop,
                 german_law=german_law,
+                demo_preset=demo_preset,
                 observer_models=tuple(observer_models),
             )
         except DemoRuntimeError as error:

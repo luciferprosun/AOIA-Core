@@ -27,6 +27,7 @@ const state = {
   demoPrompt: "",
   busy: false,
   runId: null,
+  demoPreset: false,
 };
 
 function setStatus(text, kind = "neutral") {
@@ -198,8 +199,10 @@ async function sendPrompt() {
   const selectedModel = state.models.find((model) => model.id === modelId);
   const criticalLoop = elements.cplToggle.checked;
   const germanLaw = elements.knowledgeToggle.checked;
+  const demoPreset = germanLaw && state.demoPreset;
   appendMessage("user", "You", prompt);
   elements.prompt.value = "";
+  state.demoPreset = false;
   setBusy(true);
   setStatus("Submitting one bounded real provider run...", "busy");
   if (criticalLoop) updateObservers([], "primary-draft");
@@ -211,6 +214,7 @@ async function sendPrompt() {
         model_id: modelId,
         critical_loop: criticalLoop,
         german_law: germanLaw,
+        demo_preset: demoPreset,
         observer_models: criticalLoop ? selectedObserverModels() : [],
       }),
     });
@@ -269,6 +273,7 @@ async function clearConversation() {
     empty.append(title, subtitle);
     elements.history.append(empty);
     elements.emptyChat = empty;
+    state.demoPreset = false;
     setStatus("Conversation cleared.", "neutral");
   } catch (error) {
     setStatus(`Could not clear: ${error.message}`, "error");
@@ -300,7 +305,12 @@ elements.send.addEventListener("click", sendPrompt);
 elements.clear.addEventListener("click", clearConversation);
 elements.preset.addEventListener("click", () => {
   elements.prompt.value = state.demoPrompt;
+  state.demoPreset = true;
+  setStatus("Recording question loaded. Structured verification is armed for this send.", "neutral");
   elements.prompt.focus();
+});
+elements.prompt.addEventListener("input", (event) => {
+  if (event.isTrusted) state.demoPreset = false;
 });
 elements.prompt.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) {

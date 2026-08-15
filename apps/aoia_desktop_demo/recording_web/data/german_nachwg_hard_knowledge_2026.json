@@ -232,6 +232,9 @@
       "no_employment_conditions_document": "NOT PERMITTED",
       "paper_with_handwritten_signature_always_required": "NO",
       "can_pdf_or_email_be_sufficient": "DEPENDS",
+      "qes_required": false,
+      "evidence_duty_separate": true,
+      "maximum_fine_eur": 2000,
       "maximum_explanation_words": 150,
       "required_record_ids": [
         "DE-EMPLOYMENT-FORM-2021-001",
@@ -259,7 +262,7 @@
         "document can be stored",
         "document can be printed",
         "employer asks for proof of receipt with transmission",
-        "employee is outside a §2a(1) SchwarzArbG sector",
+        "Textform is unavailable for employees in a §2a(1) SchwarzArbG sector; this employee is outside that sector",
         "employee retains the right to demand the written signed record"
       ]
     },

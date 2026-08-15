@@ -12,6 +12,11 @@ from fastapi.testclient import TestClient
 
 from apps.aoia_desktop_demo.recording_web.app import create_app
 from apps.aoia_desktop_demo.recording_web import cockroach_runtime
+from apps.aoia_desktop_demo.recording_web.final_contract import (
+    FINAL_ANSWER_JSON_SCHEMA,
+    render_final_contract,
+    validate_final_contract,
+)
 from apps.aoia_desktop_demo.recording_web.runtime import (
     DEFAULT_MODEL_ID,
     DemoEngine,
@@ -42,9 +47,47 @@ PACK = (
 )
 
 
+def _contract_requirements() -> dict[str, object]:
+    oracle = load_pack()["audit"]["oracle"]
+    return json.loads(json.dumps(oracle, ensure_ascii=False))
+
+
+def _valid_contract_payload() -> dict[str, object]:
+    requirements = _contract_requirements()
+    deadlines = requirements["required_deadline_groups"]
+    return {
+        "contract_status": "VALID",
+        "document_status": "NOT_PERMITTED",
+        "paper_always_required": False,
+        "pdf_or_email_acceptable": "DEPENDS",
+        "qes_required": False,
+        "evidence_duty_separate": True,
+        "maximum_fine_eur": 2000,
+        "statutory_basis": list(requirements["required_statutory_basis"]),
+        "deadlines": {
+            "day_one_items": list(deadlines["first_day"]),
+            "seventh_calendar_day_items": list(
+                deadlines["seventh_calendar_day"]
+            ),
+            "one_month_items": list(deadlines["one_month"]),
+        },
+        "textform_conditions": list(
+            requirements["required_textform_conditions"]
+        ),
+        "reasoning": (
+            "An ordinary open-ended oral employment contract is generally valid, "
+            "while the employer has a separate evidence duty. Electronic delivery "
+            "can work only under all verified conditions and the sector restriction. "
+            "Missing evidence does not invalidate the contract but can trigger the "
+            "stated administrative fine."
+        ),
+    }
+
+
 class _FakeEngine(DemoEngine):
     def __init__(self) -> None:
         self.cleared = False
+        self.last_request = None
 
     @property
     def available_models(self):
@@ -61,6 +104,7 @@ class _FakeEngine(DemoEngine):
         self.cleared = True
 
     def execute(self, **request):
+        self.last_request = dict(request)
         request["progress"]("completed", "Response delivered.", ())
         return {
             "answer": "AIOA_DEMO_OK",
@@ -93,7 +137,7 @@ class CallLedgerTests(unittest.TestCase):
     def test_invalid_or_excess_plan_fails_closed(self) -> None:
         ledger = ProviderCallLedger(maximum_calls=5)
         with self.assertRaises(DemoRuntimeError):
-            ledger.reserve(3)
+            ledger.reserve(4)
         ledger.reserve(5)
         with self.assertRaises(DemoRuntimeError):
             ledger.reserve(1)
@@ -216,6 +260,7 @@ class DeterministicHatTests(unittest.TestCase):
             self.evidence,
             "2026-07-22",
             self.pack["demo_prompt"],
+            demo_preset=True,
         )
         self.assertEqual(audit.verdict, "CORRECTION_REQUIRED")
         self.assertGreaterEqual(len(audit.corrections), 4)
@@ -245,15 +290,146 @@ class DeterministicHatTests(unittest.TestCase):
             self.evidence,
             "2026-07-22",
             self.pack["demo_prompt"],
+            demo_preset=True,
         )
         self.assertEqual(audit.verdict, "PASS")
-        self.assertTrue(postcheck_final(final, audit, self.evidence))
+        self.assertTrue(
+            postcheck_final(final, audit, self.evidence, demo_preset=True)
+        )
         self.assertLessEqual(len(final.split()), 150)
         self.assertFalse(
             postcheck_final(
                 final + "\n" + "additional " * 151,
                 audit,
                 self.evidence,
+                demo_preset=True,
+            )
+        )
+        negative_reference = (
+            final
+            + "\nNeither §630 BGB nor §630a BGB is applicable to the initial "
+            "employment-conditions documentation duty."
+        )
+        negative_audit = audit_response(
+            negative_reference,
+            self.evidence,
+            "2026-07-22",
+            self.pack["demo_prompt"],
+            demo_preset=True,
+        )
+        self.assertEqual(negative_audit.verdict, "PASS")
+
+    def test_normal_conversation_does_not_infer_demo_oracle(self) -> None:
+        response = (
+            "An ordinary employment contract is generally valid under §105 GewO "
+            "and §611a BGB. A separate documentation obligation follows from "
+            "§2 NachwG."
+        )
+        audit = audit_response(
+            response,
+            self.evidence,
+            "2026-07-22",
+            "Is an oral German employment contract valid?",
+            demo_preset=False,
+        )
+        self.assertEqual(audit.verdict, "PASS")
+        self.assertFalse(
+            any("CONTRACT STATUS:" in str(value) for value in audit.claims)
+        )
+        self.assertFalse(audit.temporal_context["demo_preset"])
+
+
+class FinalAnswerContractTests(unittest.TestCase):
+    def test_valid_contract_normalizes_enums_and_renders_all_fields(self) -> None:
+        payload = _valid_contract_payload()
+        payload["contract_status"] = " valid "
+        payload["document_status"] = "Not Permitted"
+        validation = validate_final_contract(
+            json.dumps(payload, ensure_ascii=False),
+            _contract_requirements(),
+        )
+        self.assertTrue(validation.valid)
+        rendered = render_final_contract(validation.contract)
+        self.assertIn("CONTRACT STATUS: VALID", rendered)
+        self.assertIn("§105 GewO", rendered)
+        self.assertIn("QES is not required for Textform: YES", rendered)
+        self.assertIn("seventh calendar day items 2, 3, 4, 5, 6, 9, 10", rendered)
+
+    def test_missing_bad_enum_and_overlong_reasoning_fail_closed(self) -> None:
+        payload = _valid_contract_payload()
+        payload.pop("qes_required")
+        payload["contract_status"] = "MAYBE"
+        payload["reasoning"] = "word " * 151
+        validation = validate_final_contract(
+            json.dumps(payload, ensure_ascii=False),
+            _contract_requirements(),
+        )
+        self.assertFalse(validation.valid)
+        codes = {(value.field, value.code) for value in validation.issues}
+        self.assertIn(("qes_required", "REQUIRED_FIELD_MISSING"), codes)
+        self.assertIn(("contract_status", "ENUM_INVALID"), codes)
+        self.assertIn(("reasoning", "WORD_LIMIT_EXCEEDED"), codes)
+
+    def test_schema_avoids_known_provider_incompatible_keywords(self) -> None:
+        encoded = json.dumps(FINAL_ANSWER_JSON_SCHEMA, sort_keys=True)
+        self.assertNotIn("uniqueItems", encoded)
+        self.assertNotIn("oneOf", encoded)
+        self.assertNotIn("anyOf", encoded)
+        reasoning_schema = FINAL_ANSWER_JSON_SCHEMA["schema"]["properties"][
+            "reasoning"
+        ]
+        self.assertLessEqual(reasoning_schema["maxLength"], 800)
+
+    def test_reasoning_may_repeat_a_supported_statutory_citation(self) -> None:
+        payload = _valid_contract_payload()
+        payload["reasoning"] = (
+            "The separate documentation obligation follows from §2 NachwG, "
+            "while §630a BGB is not relevant to that duty. The ordinary "
+            "open-ended agreement itself remains valid."
+        )
+        validation = validate_final_contract(
+            json.dumps(payload, ensure_ascii=False),
+            _contract_requirements(),
+        )
+        self.assertTrue(validation.valid)
+
+        payload["statutory_basis"].append("§630a BGB")
+        forbidden = validate_final_contract(
+            json.dumps(payload, ensure_ascii=False),
+            _contract_requirements(),
+        )
+        self.assertFalse(forbidden.valid)
+        self.assertIn(
+            ("statutory_basis", "FORBIDDEN_CITATION"),
+            {(value.field, value.code) for value in forbidden.issues},
+        )
+
+    def test_rendered_contract_passes_semantic_hat_without_counting_metadata(self) -> None:
+        pack = load_pack()
+        evidence = tuple(
+            value for value in pack["records"] if value["status"] == "CURRENT"
+        )
+        validation = validate_final_contract(
+            json.dumps(_valid_contract_payload(), ensure_ascii=False),
+            _contract_requirements(),
+        )
+        rendered = render_final_contract(validation.contract)
+        audit = audit_response(
+            rendered,
+            evidence,
+            "2026-07-22",
+            pack["demo_prompt"],
+            demo_preset=True,
+        )
+        self.assertEqual(audit.verdict, "PASS")
+        self.assertTrue(
+            postcheck_final(
+                rendered,
+                audit,
+                evidence,
+                original_user_prompt=pack["demo_prompt"],
+                demo_preset=True,
+                enforce_word_limit=False,
             )
         )
 
@@ -264,13 +440,9 @@ class _ResponseCentricKnowledge:
 
     @property
     def finalization_requirements(self):
-        return {
-            "contract_status": "VALID",
-            "maximum_explanation_words": 150,
-            "required_statutory_basis": ["§2 NachwG"],
-        }
+        return _contract_requirements()
 
-    def finalization_evidence(self, evidence):
+    def finalization_evidence(self, evidence, required_ids=None):
         return [value.as_dict() for value in evidence]
 
     def retrieve_for_response(self, *, user_prompt, draft_response, request_id):
@@ -302,53 +474,79 @@ class _ResponseCentricKnowledge:
 
 
 class _ResponseCentricProvider:
-    def __init__(self, events: list[tuple[str, str]]) -> None:
+    def __init__(
+        self,
+        events: list[tuple[str, str]],
+        structured_payloads: list[dict[str, object]] | None = None,
+    ) -> None:
         self.events = events
         self.call_count = 0
+        self.structured_call_count = 0
         self.final_material = None
+        self.structured_payloads = structured_payloads or [_valid_contract_payload()]
 
     def send_chat(self, model, messages, max_tokens=None):
         self.call_count += 1
-        if self.call_count == 1:
-            self.events.append(("provider-primary", messages[-1].content))
-            return ChatResult("Gemma primary response.", model)
+        self.events.append(("provider-primary", messages[-1].content))
+        return ChatResult("Gemma primary response.", model)
+
+    def send_structured_chat(
+        self,
+        model,
+        messages,
+        *,
+        json_schema,
+        max_tokens=None,
+    ):
+        self.call_count += 1
+        self.structured_call_count += 1
         material = json.loads(messages[-1].content)
         self.final_material = material
-        self.events.append(("provider-final", material["primary_response"]))
-        return ChatResult("Gemma final corrected response.", model)
+        previous = material.get("previous_final_contract")
+        event = "provider-repair" if previous is not None else "provider-final"
+        self.events.append((event, material.get("primary_response", "")))
+        index = min(self.structured_call_count - 1, len(self.structured_payloads) - 1)
+        return ChatResult(
+            json.dumps(self.structured_payloads[index], ensure_ascii=False),
+            model,
+        )
 
 
-def _response_centric_engine():
+def _response_centric_engine(structured_payloads=None):
     events: list[tuple[str, str]] = []
     engine = DemoEngine.__new__(DemoEngine)
     engine._api_key = "test-only"
-    engine._provider = _ResponseCentricProvider(events)
-    engine._ledger = ProviderCallLedger(maximum_calls=2)
+    engine._provider = _ResponseCentricProvider(events, structured_payloads)
+    engine._ledger = ProviderCallLedger(maximum_calls=3)
     engine._knowledge = _ResponseCentricKnowledge(events)
     engine._conversation = []
     engine._lock = threading.Lock()
     return engine, events
 
 
+def _test_hat_audit(verdict="CORRECTION_REQUIRED"):
+    return HatAuditResult(
+        verdict=verdict,
+        claims=({"claim": "draft", "status": "INCORRECT"},),
+        corrections=(
+            {
+                "exact_point": "wrong duty basis",
+                "corrected_proposition": "Use §2 NachwG.",
+                "statutory_basis": ["§2 NachwG"],
+                "knowledge_ids": ["DE-NACHWG-DUTY-2022-001"],
+            },
+        ),
+        missing_information=(),
+        temporal_context={"scenario_date": "2026-07-22", "demo_preset": True},
+        finalization_instructions=("Correct the duty basis.",),
+        evidence_ids=("DE-NACHWG-DUTY-2022-001",),
+    )
+
+
 class GermanLawResponseReviewTests(unittest.TestCase):
     def test_hat_audits_primary_then_returns_brief_to_gemma_final(self) -> None:
         engine, events = _response_centric_engine()
-        audit = HatAuditResult(
-            verdict="CORRECTION_REQUIRED",
-            claims=({"claim": "draft", "status": "INCORRECT"},),
-            corrections=(
-                {
-                    "exact_point": "wrong duty basis",
-                    "corrected_proposition": "Use §2 NachwG.",
-                    "statutory_basis": ["§2 NachwG"],
-                    "knowledge_ids": ["DE-NACHWG-DUTY-2022-001"],
-                },
-            ),
-            missing_information=(),
-            temporal_context={"scenario_date": "2026-07-22"},
-            finalization_instructions=("Correct the duty basis.",),
-            evidence_ids=("DE-NACHWG-DUTY-2022-001",),
-        )
+        audit = _test_hat_audit()
 
         def fake_audit(**kwargs):
             events.append(("hat-audit", kwargs["primary_response"]))
@@ -370,6 +568,7 @@ class GermanLawResponseReviewTests(unittest.TestCase):
                 "A normal conversational German-law question, not a preset.",
                 DEFAULT_MODEL_ID,
                 lambda *_args: None,
+                demo_preset=True,
             )
         self.assertEqual(
             [event[0] for event in events],
@@ -384,7 +583,7 @@ class GermanLawResponseReviewTests(unittest.TestCase):
         self.assertEqual(events[1][1], "Gemma primary response.")
         self.assertEqual(events[2][1], "Gemma primary response.")
         self.assertEqual(events[3][1], "Gemma primary response.")
-        self.assertEqual(result["answer"], "Gemma final corrected response.")
+        self.assertIn("CONTRACT STATUS: VALID", result["answer"])
         self.assertEqual(result["classification"], "CORRECTION_REQUIRED")
         self.assertEqual(result["provider_calls"], 2)
         self.assertEqual(result["audit_summary"]["step18_count"], 36)
@@ -422,7 +621,60 @@ class GermanLawResponseReviewTests(unittest.TestCase):
                     "German-law question",
                     DEFAULT_MODEL_ID,
                     lambda *_args: None,
+                    demo_preset=True,
                 )
+
+    def test_one_bounded_repair_fixes_only_failed_contract(self) -> None:
+        invalid = _valid_contract_payload()
+        invalid["qes_required"] = True
+        engine, events = _response_centric_engine(
+            [invalid, _valid_contract_payload()]
+        )
+        with patch(
+            "apps.aoia_desktop_demo.recording_web.runtime.audit_response",
+            return_value=_test_hat_audit(),
+        ), patch(
+            "apps.aoia_desktop_demo.recording_web.runtime.postcheck_final",
+            return_value=True,
+        ):
+            result = engine._run_knowledge(
+                "run-repair",
+                "Recording question",
+                DEFAULT_MODEL_ID,
+                lambda *_args: None,
+                demo_preset=True,
+            )
+        self.assertEqual(result["provider_calls"], 3)
+        self.assertTrue(result["audit_summary"]["repair_used"])
+        self.assertEqual(
+            [value[0] for value in events],
+            ["provider-primary", "retrieval", "provider-final", "provider-repair"],
+        )
+
+    def test_repair_is_never_retried_and_second_failure_is_blocked(self) -> None:
+        invalid = _valid_contract_payload()
+        invalid["qes_required"] = True
+        engine, _events = _response_centric_engine([invalid, invalid])
+        with patch(
+            "apps.aoia_desktop_demo.recording_web.runtime.audit_response",
+            return_value=_test_hat_audit(),
+        ), patch(
+            "apps.aoia_desktop_demo.recording_web.runtime.postcheck_final",
+            return_value=True,
+        ):
+            with self.assertRaisesRegex(
+                DemoRuntimeError,
+                "FINAL_RESPONSE_VERIFICATION_FAILED",
+            ):
+                engine._run_knowledge(
+                    "run-repair-fail",
+                    "Recording question",
+                    DEFAULT_MODEL_ID,
+                    lambda *_args: None,
+                    demo_preset=True,
+                )
+        self.assertEqual(engine._provider.call_count, 3)
+        self.assertEqual(engine._provider.structured_call_count, 2)
 
 
 class BrowserSurfaceContractTests(unittest.TestCase):
@@ -438,6 +690,9 @@ class BrowserSurfaceContractTests(unittest.TestCase):
         self.assertIn("state.roles.forEach", script)
         self.assertIn("Primary · UNVERIFIED", script)
         self.assertIn("Final · ${result.verified ? \"VERIFIED\" : \"LIMITED\"}", script)
+        self.assertIn("demo_preset: demoPreset", script)
+        self.assertIn("state.demoPreset = true", script)
+        self.assertIn("if (event.isTrusted) state.demoPreset = false", script)
         self.assertEqual(
             OBSERVER_ROLES,
             ("Logic & Claims", "Safety & Authority", "Evidence & Consistency"),
@@ -500,6 +755,42 @@ class LoopbackApiTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.json()["detail"], "COMPOSITION_UNAVAILABLE_RECORDING_BUILD")
+
+    def test_demo_preset_is_explicit_and_requires_german_law(self) -> None:
+        invalid = self.client.post(
+            "/api/runs",
+            headers=self.headers,
+            json={
+                "prompt": "test",
+                "model_id": DEFAULT_MODEL_ID,
+                "critical_loop": False,
+                "german_law": False,
+                "demo_preset": True,
+                "observer_models": [],
+            },
+        )
+        self.assertEqual(invalid.status_code, 409)
+        response = self.client.post(
+            "/api/runs",
+            headers=self.headers,
+            json={
+                "prompt": "test",
+                "model_id": DEFAULT_MODEL_ID,
+                "critical_loop": False,
+                "german_law": True,
+                "demo_preset": True,
+                "observer_models": [],
+            },
+        )
+        self.assertEqual(response.status_code, 202)
+        run_id = response.json()["run_id"]
+        for _ in range(50):
+            projection = self.client.get(f"/api/runs/{run_id}").json()
+            if projection["state"] == "COMPLETED":
+                break
+            time.sleep(0.01)
+        self.assertTrue(projection["demo_preset"])
+        self.assertTrue(self.engine.last_request["demo_preset"])
 
     def test_normal_run_completes_and_reset_clears_conversation(self) -> None:
         response = self.client.post(

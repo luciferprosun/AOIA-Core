@@ -314,6 +314,8 @@ def audit_response(
     evidence: object,
     scenario_date: str | date | datetime,
     original_user_prompt: str,
+    *,
+    demo_preset: bool = False,
 ) -> HatAuditResult:
     """Audit Gemma's actual primary response against retrieved evidence only."""
 
@@ -323,6 +325,7 @@ def audit_response(
         scenario_date=scenario_date,
         original_user_prompt=original_user_prompt,
         require_scope=True,
+        demo_preset=demo_preset,
     )
 
 
@@ -330,12 +333,20 @@ def postcheck_final(
     final_response: str,
     original_audit: HatAuditResult | Mapping[str, object],
     evidence: object,
+    *,
+    original_user_prompt: str = "",
+    demo_preset: bool = False,
+    enforce_word_limit: bool = True,
 ) -> bool:
     """Fail closed unless the final response satisfies the same evidence oracle."""
 
     if not isinstance(final_response, str) or not final_response.strip():
         return False
-    if _explanation_word_count(final_response) > _maximum_explanation_words():
+    if (
+        demo_preset
+        and enforce_word_limit
+        and _explanation_word_count(final_response) > _maximum_explanation_words()
+    ):
         return False
     verdict = _audit_value(original_audit, "verdict")
     if verdict == VERDICT_INSUFFICIENT_KNOWLEDGE:
@@ -347,16 +358,36 @@ def postcheck_final(
     if scenario_date is None:
         return False
     try:
-        check = _audit_response(
-            primary_response=final_response,
+        check = audit_final_response(
+            final_response=final_response,
             evidence=evidence,
             scenario_date=scenario_date,
-            original_user_prompt="",
-            require_scope=False,
+            original_user_prompt=original_user_prompt,
+            demo_preset=demo_preset,
         )
     except (TypeError, ValueError):
         return False
     return check.verdict == VERDICT_PASS
+
+
+def audit_final_response(
+    final_response: str,
+    evidence: object,
+    scenario_date: str | date | datetime,
+    *,
+    original_user_prompt: str = "",
+    demo_preset: bool = False,
+) -> HatAuditResult:
+    """Return the deterministic semantic audit used by the final postcheck."""
+
+    return _audit_response(
+        primary_response=final_response,
+        evidence=evidence,
+        scenario_date=scenario_date,
+        original_user_prompt=original_user_prompt,
+        require_scope=False,
+        demo_preset=demo_preset,
+    )
 
 
 def _maximum_explanation_words() -> int:
@@ -390,14 +421,16 @@ def _audit_response(
     scenario_date: str | date | datetime,
     original_user_prompt: str,
     require_scope: bool,
+    demo_preset: bool,
 ) -> HatAuditResult:
     if not isinstance(primary_response, str) or not primary_response.strip():
         raise ValueError("HAT_PRIMARY_RESPONSE_INVALID")
     if not isinstance(original_user_prompt, str):
         raise ValueError("HAT_ORIGINAL_PROMPT_INVALID")
     as_of = _parse_date(scenario_date, required=True)
-    raw_records, scenario = _evidence_parts(evidence)
-    if not scenario:
+    raw_records, evidence_scenario = _evidence_parts(evidence)
+    scenario: Mapping[str, object] = evidence_scenario if demo_preset else {}
+    if demo_preset and not scenario:
         try:
             default_pack = load_pack()
         except ValueError:
@@ -419,6 +452,7 @@ def _audit_response(
     temporal_context: dict[str, object] = {
         "scenario_date": as_of.isoformat(),
         "applicable_version": "as_of",
+        "demo_preset": demo_preset,
         "applicable_knowledge_ids": list(evidence_ids),
         "excluded_knowledge_ids": sorted({record.knowledge_id for record in excluded}),
     }
@@ -453,27 +487,37 @@ def _audit_response(
             evidence_ids=(),
         )
 
-    oracle = _oracle_from_evidence(evidence, scenario, applicable)
-    required_ids = _required_ids_from_evidence(scenario, applicable)
-    missing_ids = tuple(sorted(set(required_ids) - set(evidence_ids)))
-    if missing_ids:
-        missing_information.append(
-            "Required authoritative records were not retrieved: " + ", ".join(missing_ids)
-        )
-    temporally_unknown = tuple(
-        record.knowledge_id
-        for record in applicable
-        if record.knowledge_id in required_ids and record.valid_from is None
+    oracle = (
+        _oracle_from_evidence(evidence, scenario, applicable)
+        if demo_preset
+        else {}
     )
-    if temporally_unknown:
-        missing_information.append(
-            "Required records lack valid_from metadata: "
-            + ", ".join(sorted(temporally_unknown))
+    required_ids = (
+        _required_ids_from_evidence(scenario, applicable)
+        if demo_preset
+        else _generic_audit_ids(original_user_prompt, primary_response, applicable)
+    )
+    if demo_preset:
+        missing_ids = tuple(sorted(set(required_ids) - set(evidence_ids)))
+        if missing_ids:
+            missing_information.append(
+                "Required authoritative records were not retrieved: "
+                + ", ".join(missing_ids)
+            )
+        temporally_unknown = tuple(
+            record.knowledge_id
+            for record in applicable
+            if record.knowledge_id in required_ids and record.valid_from is None
         )
-    if set(oracle) != set(_DEMO_LABELS):
-        missing_information.append(
-            "The four-label recording oracle was not present in retrieved metadata."
-        )
+        if temporally_unknown:
+            missing_information.append(
+                "Required records lack valid_from metadata: "
+                + ", ".join(sorted(temporally_unknown))
+            )
+        if set(oracle) != set(_DEMO_LABELS):
+            missing_information.append(
+                "The four-label recording oracle was not present in retrieved metadata."
+            )
 
     if missing_information:
         return _result(
@@ -487,10 +531,11 @@ def _audit_response(
 
     claims: list[dict[str, object]] = []
     corrections: list[dict[str, object]] = []
-    observed_labels = _extract_label_values(primary_response)
+    observed_labels = _extract_label_values(primary_response) if demo_preset else {}
     records_by_id = {record.knowledge_id: record for record in applicable}
+    audit_ids = set(required_ids)
 
-    for label in _DEMO_LABELS:
+    for label in _DEMO_LABELS if demo_preset else ():
         expectation = oracle[label]
         observed = observed_labels.get(label)
         supporting = _supporting_records(expectation, label, applicable)
@@ -555,7 +600,11 @@ def _audit_response(
         )
 
     duty_record = records_by_id.get("DE-NACHWG-DUTY-2022-001")
-    if duty_record is not None and not _mentions_section_2_nachwg(primary_response):
+    if (
+        duty_record is not None
+        and duty_record.knowledge_id in audit_ids
+        and not _mentions_section_2_nachwg(primary_response)
+    ):
         claims.append(
             _claim(
                 claim="Statutory basis for the employment-conditions evidence duty",
@@ -573,7 +622,6 @@ def _audit_response(
             )
         )
 
-    audit_ids = set(required_ids) if required_ids else set(evidence_ids)
     normalized_response = _normalize(primary_response)
     for record in applicable:
         if record.knowledge_id not in audit_ids:
@@ -873,6 +921,60 @@ def _required_ids_from_evidence(
     return tuple(dict.fromkeys(result))
 
 
+def _generic_audit_ids(
+    prompt: str,
+    response: str,
+    records: Sequence[_Record],
+) -> tuple[str, ...]:
+    """Select audit rules from the actual conversation, never the demo oracle."""
+
+    context = _normalize(prompt + "\n" + response)
+    result: list[str] = []
+    anchors: dict[str, tuple[str, ...]] = {
+        "DE-EMPLOYMENT-FORM-2021-001": (
+            "employment contract",
+            "oral contract",
+            "contract status",
+            "contract valid",
+            "form free",
+        ),
+        "DE-NACHWG-DUTY-2022-001": (
+            "employment condition",
+            "evidence duty",
+            "documentation duty",
+            "nachwg",
+            "nachweisgesetz",
+        ),
+        "DE-NACHWG-TEXTFORM-2025-001": ("textform", "text form", "pdf", "email"),
+        "DE-NACHWG-PAPER-DEMAND-2025-001": (
+            "paper",
+            "written signed",
+            "handwritten signature",
+        ),
+        "DE-NACHWG-SECTOR-EXCLUSION-2025-001": (
+            "schwarzarbg",
+            "sector exclusion",
+        ),
+        "DE-NACHWG-PDF-EMAIL-2025-001": ("pdf", "email"),
+        "DE-NACHWG-QES-2025-001": ("qes", "qualified electronic signature"),
+        "DE-NACHWG-DEADLINE-DAY1-2022-001": ("deadline", "first day", "day one"),
+        "DE-NACHWG-DEADLINE-DAY7-2022-001": ("deadline", "seven days", "seventh"),
+        "DE-NACHWG-DEADLINE-MONTH-2022-001": ("deadline", "one month"),
+        "DE-NACHWG-FINE-2022-001": ("fine", "administrative offence", "administrative offense"),
+    }
+    for record in records:
+        groups = _required_concepts(record)
+        concept_hit = any(
+            _contains_any(context, alternatives) for _name, alternatives in groups
+        )
+        anchor_hit = any(
+            value in context for value in anchors.get(record.knowledge_id, ())
+        )
+        if concept_hit or anchor_hit:
+            result.append(record.knowledge_id)
+    return tuple(dict.fromkeys(result))
+
+
 def _supporting_records(
     expectation: _OracleExpectation,
     label: str,
@@ -958,12 +1060,16 @@ def _citation_used_as_authority(response: str, citation: str) -> bool:
         window = response[max(0, match.start() - 90) : min(len(response), match.end() + 120)]
         normalized = _normalize(window)
         rejection_markers = (
+            "neither",
             "not the basis",
             "not a basis",
+            "not applicable",
             "not relevant",
             "irrelevant",
+            "inapplicable",
             "incorrect",
             "wrong citation",
+            "do not apply",
             "does not govern",
             "does not apply",
             "nicht einschlägig",
@@ -1232,6 +1338,7 @@ __all__ = [
     "VERDICT_CORRECTION_REQUIRED",
     "VERDICT_INSUFFICIENT_KNOWLEDGE",
     "VERDICT_PASS",
+    "audit_final_response",
     "audit_response",
     "load_pack",
     "postcheck_final",

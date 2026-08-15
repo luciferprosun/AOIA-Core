@@ -69,7 +69,19 @@ from apps.aoia_desktop_demo.providers.openrouter import (
 )
 from apps.aoia_desktop_demo.security.secret_redaction import redact_exception
 
-from .nachwg_hat import audit_response, load_pack, postcheck_final
+from .final_contract import (
+    ContractIssue,
+    FINAL_ANSWER_JSON_SCHEMA,
+    render_final_contract,
+    targeted_evidence_ids,
+    validate_final_contract,
+)
+from .nachwg_hat import (
+    audit_final_response,
+    audit_response,
+    load_pack,
+    postcheck_final,
+)
 
 
 TENANT_ID = "memory-patch-recording-1a"
@@ -97,7 +109,8 @@ MAXIMUM_PROMPT_BYTES = 24 * 1024
 MAXIMUM_HISTORY_MESSAGES = 12
 
 _FINALIZATION_SYSTEM = (
-    "You are the selected primary model revising your own previous answer. "
+    "You are the selected primary model revising your own previous answer into "
+    "one strict JSON contract. "
     "The JSON user message contains the original request, your unverified primary "
     "response, a deterministic HAT verdict and corrective brief, and the complete "
     "temporally applicable authoritative evidence selected from CockroachDB for "
@@ -108,16 +121,36 @@ _FINALIZATION_SYSTEM = (
     "provisions not supported by the evidence. Do not mention HAT, Memory Patch, "
     "CockroachDB, the primary draft, or internal verification unless explicitly "
     "asked. If the verdict is INSUFFICIENT_KNOWLEDGE, retain clear uncertainty. "
-    "The mandatory_final_check object at the end of the JSON is a mandatory "
-    "machine-checked checklist. Copy each exact_required_label_lines entry as "
-    "its own opening line. Incorporate every mandatory_verified_points entry, "
-    "every required_statutory_basis token, every deadline group, and every "
-    "Textform condition and exclusion. Do not turn a request for receipt proof "
-    "into a requirement that the employee actually acknowledge receipt. Omit "
-    "every forbidden citation. If the word limit is tight, compress prose with "
-    "semicolons; never drop a checklist item. Do not add unrelated headings or "
-    "citations. Silently check the checklist and every HAT correction before returning. "
-    "Return only the final answer to the original user."
+    "The mandatory_final_check object is machine-checked. Do not repeat any "
+    "citation listed in forbidden_as_documentation_duty_basis anywhere in the "
+    "contract, including as a negative example. Put status answers, "
+    "statutory bases, deadlines, QES, the separate evidence duty, fine, and all "
+    "Textform conditions in their dedicated JSON fields. The reasoning field is "
+    "the only prose field, must stay under 100 words, and must contain no headings or "
+    "internal-process terms. Do not turn a request for receipt proof into a "
+    "requirement that the employee actually acknowledge receipt. Never drop a "
+    "checklist item. Return only the JSON object required by the response schema."
+)
+
+_REPAIR_SYSTEM = (
+    "You are the selected primary model performing the one permitted bounded "
+    "repair of your own structured final answer. The JSON user message contains "
+    "your prior contract, exact deterministic field errors, targeted authoritative "
+    "records, and the mandatory contract. Change every invalid field and preserve "
+    "valid fields. Apply every supplied semantic correction. If reasoning is "
+    "named by a field error or semantic correction, rewrite it in at most 90 "
+    "words; otherwise preserve it. Never mention internal verification. "
+    "Return only the complete JSON object required by the response schema."
+)
+
+_GENERIC_FINALIZATION_SYSTEM = (
+    "You are the selected primary model revising your own previous answer. The "
+    "JSON user message contains the original request, your unverified primary "
+    "answer, a response-centric HAT corrective brief, and temporally applicable "
+    "authoritative evidence. Preserve the user's requested format. Apply every "
+    "verified correction, state uncertainty when knowledge is insufficient, do "
+    "not mention HAT, Memory Patch, CockroachDB, or the draft, and do not invent "
+    "provisions beyond the supplied records. Return only the final user answer."
 )
 
 
@@ -190,7 +223,7 @@ class ProviderCallLedger:
         self._lock = threading.Lock()
 
     def reserve(self, count: int) -> None:
-        if count not in {1, 2, 5}:
+        if count not in {1, 2, 3, 5}:
             raise DemoRuntimeError("CALL_PLAN_INVALID")
         with self._lock:
             if self._reserved + count > self._maximum_calls:
@@ -309,6 +342,9 @@ class GermanLawKnowledge:
             "no_employment_conditions_document",
             "paper_with_handwritten_signature_always_required",
             "can_pdf_or_email_be_sufficient",
+            "qes_required",
+            "evidence_duty_separate",
+            "maximum_fine_eur",
             "maximum_explanation_words",
             "required_statutory_basis",
             "forbidden_as_documentation_duty_basis",
@@ -356,6 +392,7 @@ class GermanLawKnowledge:
     def finalization_evidence(
         self,
         evidence: Sequence[EvidenceProjection],
+        required_ids: Sequence[str] | None = None,
     ) -> list[dict[str, object]]:
         """Return only the scenario-relevant authoritative records to Gemma.
 
@@ -366,11 +403,12 @@ class GermanLawKnowledge:
         """
 
         oracle = self.finalization_requirements
-        required = {
-            str(value)
-            for value in oracle.get("required_record_ids", ())
-            if isinstance(value, str)
-        }
+        source_ids = (
+            required_ids
+            if required_ids is not None
+            else oracle.get("required_record_ids", ())
+        )
+        required = {str(value) for value in source_ids if isinstance(value, str)}
         result: list[dict[str, object]] = []
         for item in evidence:
             if item.knowledge_id not in required:
@@ -630,8 +668,13 @@ class DemoEngine:
         german_law: bool,
         observer_models: Sequence[str],
         progress: Callable[[str, str, Sequence[dict[str, object]] | None], None],
+        demo_preset: bool = False,
     ) -> dict[str, object]:
         prompt = _validated_prompt(prompt)
+        if not isinstance(demo_preset, bool):
+            raise DemoRuntimeError("DEMO_PRESET_INVALID")
+        if demo_preset and not german_law:
+            raise DemoRuntimeError("DEMO_PRESET_REQUIRES_GERMAN_LAW")
         self._validate_model(model_id)
         observer_models = tuple(observer_models)
         if critical_loop and german_law:
@@ -645,7 +688,13 @@ class DemoEngine:
                 run_id, prompt, model_id, observer_models, progress
             )
         if german_law:
-            return self._run_knowledge(run_id, prompt, model_id, progress)
+            return self._run_knowledge(
+                run_id,
+                prompt,
+                model_id,
+                progress,
+                demo_preset=demo_preset,
+            )
         return self._run_direct(prompt, model_id, progress)
 
     def _run_direct(self, prompt: str, model_id: str, progress) -> dict[str, object]:
@@ -677,8 +726,10 @@ class DemoEngine:
         prompt: str,
         model_id: str,
         progress,
+        *,
+        demo_preset: bool = False,
     ) -> dict[str, object]:
-        self._ledger.reserve(2)
+        self._ledger.reserve(3 if demo_preset else 2)
         before = self._ledger.snapshot()["completed"]
         client = _MeteredClient(self._provider, self._ledger, "direct")
         progress("primary", "Gemma is creating the evidence-blind primary response.", None)
@@ -721,6 +772,7 @@ class DemoEngine:
                 evidence=retrieval.evidence,
                 scenario_date=retrieval.scenario_date,
                 original_user_prompt=prompt,
+                demo_preset=demo_preset,
             )
         except Exception:
             raise DemoRuntimeError("HAT_AUDIT_FAILED") from None
@@ -729,60 +781,34 @@ class DemoEngine:
             f"HAT verdict: {audit.verdict}.",
             None,
         )
-        audit_brief = audit.as_dict()
-        audit_brief.pop("claims", None)
-        material = {
-            "original_user_prompt": prompt,
-            "primary_model": model_id,
-            "primary_response": primary.content,
-            "hat_audit": audit_brief,
-            "authoritative_evidence": self._knowledge.finalization_evidence(
-                retrieval.evidence
-            ),
-            "finalization_constraints": {
-                "preserve_original_requested_format": True,
-                "four_label_lines_must_be_exact": True,
-                "one_concise_explanation_within_word_limit": True,
-                "explicitly_satisfy_every_required_claim_check": True,
-                "do_not_add_unrelated_headings_or_statutory_citations": True,
-                "do_not_mention_internal_hat_machinery": True,
-                "do_not_invent_beyond_verified_evidence": True,
-            },
-            # Keep the concise mandatory contract last so it cannot be buried
-            # by the complete authoritative evidence package above it.
-            "mandatory_final_check": self._knowledge.finalization_requirements,
-        }
-        progress("finalizing", "Gemma is revising its answer from the verified brief.", None)
-        try:
-            final = client.send_chat(
-                model_id,
-                [
-                    ChatMessage(role="system", content=_FINALIZATION_SYSTEM),
-                    ChatMessage(role="user", content=_canonical(material)),
-                ],
-                max_tokens=900,
+        if demo_preset:
+            answer, repair_used = self._run_structured_final(
+                client=client,
+                model_id=model_id,
+                prompt=prompt,
+                primary_response=primary.content,
+                audit=audit,
+                retrieval=retrieval,
+                progress=progress,
             )
-            _require_requested_model(final, model_id)
-        except Exception as error:
-            raise self._safe_provider_error(
-                error,
-                fallback_code="GEMMA_FINAL_FAILED",
-            ) from None
-        try:
-            final_valid = postcheck_final(
-                final_response=final.content,
-                original_audit=audit,
-                evidence=retrieval.evidence,
+            contract_mode = "STRUCTURED_DEMO_PRESET"
+        else:
+            answer = self._run_generic_final(
+                client=client,
+                model_id=model_id,
+                prompt=prompt,
+                primary_response=primary.content,
+                audit=audit,
+                retrieval=retrieval,
+                progress=progress,
             )
-        except Exception:
-            raise DemoRuntimeError("FINAL_RESPONSE_VERIFICATION_FAILED") from None
-        if not final_valid:
-            raise DemoRuntimeError("FINAL_RESPONSE_VERIFICATION_FAILED")
-        self._retain_turn(prompt, final.content)
+            repair_used = False
+            contract_mode = "CONVERSATIONAL"
+        self._retain_turn(prompt, answer)
         progress("final-verified", "Gemma Final passed the bounded response check.", None)
         progress("completed", "Verified final response delivered.", None)
         return {
-            "answer": final.content,
+            "answer": answer,
             "primary_response": primary.content,
             "classification": audit.verdict,
             "verified": audit.verdict != "INSUFFICIENT_KNOWLEDGE",
@@ -798,10 +824,228 @@ class DemoEngine:
                 "applicable_count": retrieval.applicable_count,
                 "evidence_ids": list(audit.evidence_ids),
                 "corrective_brief_returned": bool(audit.corrections),
+                "contract_mode": contract_mode,
+                "repair_used": repair_used,
             },
             "observers": [],
             "provider_calls": self._ledger.snapshot()["completed"] - before,
         }
+
+    def _run_structured_final(
+        self,
+        *,
+        client: _MeteredClient,
+        model_id: str,
+        prompt: str,
+        primary_response: str,
+        audit,
+        retrieval: KnowledgeRetrieval,
+        progress,
+    ) -> tuple[str, bool]:
+        requirements = self._knowledge.finalization_requirements
+        audit_brief = audit.as_dict()
+        audit_brief.pop("claims", None)
+        material = {
+            "original_user_prompt": prompt,
+            "primary_model": model_id,
+            "primary_response": primary_response,
+            "hat_audit": audit_brief,
+            "authoritative_evidence": self._knowledge.finalization_evidence(
+                retrieval.evidence
+            ),
+            "field_rules": {
+                "reasoning_is_the_only_free_text_field": True,
+                "all_arrays_must_be_complete": True,
+                "do_not_expose_internal_verification": True,
+                "omit_forbidden_citations_entirely": requirements.get(
+                    "forbidden_as_documentation_duty_basis",
+                    (),
+                ),
+            },
+            "mandatory_final_check": requirements,
+        }
+        progress("finalizing", "Gemma is producing the structured Final contract.", None)
+        try:
+            final = client.send_structured_chat(
+                model_id,
+                [
+                    ChatMessage(role="system", content=_FINALIZATION_SYSTEM),
+                    ChatMessage(role="user", content=_canonical(material)),
+                ],
+                json_schema=FINAL_ANSWER_JSON_SCHEMA,
+                max_tokens=900,
+            )
+            _require_requested_model(final, model_id)
+        except Exception as error:
+            raise self._safe_provider_error(
+                error,
+                fallback_code="GEMMA_FINAL_FAILED",
+            ) from None
+        progress("validating-final", "Validating the structured Final contract.", None)
+        validation = validate_final_contract(final.content, requirements)
+        rendered = (
+            render_final_contract(validation.contract)
+            if validation.contract is not None
+            else None
+        )
+        issues = validation.issues
+        semantic_audit = None
+        if rendered is not None:
+            try:
+                semantic_valid = postcheck_final(
+                    final_response=rendered,
+                    original_audit=audit,
+                    evidence=retrieval.evidence,
+                    original_user_prompt=prompt,
+                    demo_preset=True,
+                    enforce_word_limit=False,
+                )
+            except Exception:
+                semantic_valid = False
+            if not semantic_valid:
+                try:
+                    semantic_audit = audit_final_response(
+                        final_response=rendered,
+                        evidence=retrieval.evidence,
+                        scenario_date=retrieval.scenario_date,
+                        original_user_prompt=prompt,
+                        demo_preset=True,
+                    )
+                except Exception:
+                    semantic_audit = None
+                rendered = None
+                issues = (*issues, *_semantic_contract_issues(semantic_audit))
+        if rendered is not None and not issues:
+            return rendered, False
+
+        print(
+            "recording_contract stage=validating-final issues="
+            + _contract_issue_signature(issues),
+            flush=True,
+        )
+
+        progress("repairing", "Gemma is performing the one bounded field repair.", None)
+        target_ids = _contract_issue_evidence_ids(issues) or targeted_evidence_ids(
+            issues
+        )
+        repair_material = {
+            "previous_final_contract": _safe_contract_payload(final.content),
+            "field_errors": [value.as_dict() for value in issues],
+            "targeted_authoritative_evidence": self._knowledge.finalization_evidence(
+                retrieval.evidence,
+                target_ids,
+            ),
+            "mandatory_final_check": requirements,
+        }
+        try:
+            repaired = client.send_structured_chat(
+                model_id,
+                [
+                    ChatMessage(role="system", content=_REPAIR_SYSTEM),
+                    ChatMessage(role="user", content=_canonical(repair_material)),
+                ],
+                json_schema=FINAL_ANSWER_JSON_SCHEMA,
+                max_tokens=900,
+            )
+            _require_requested_model(repaired, model_id)
+        except Exception as error:
+            raise self._safe_provider_error(
+                error,
+                fallback_code="GEMMA_REPAIR_FAILED",
+            ) from None
+        progress("repair-validating", "Validating the one bounded repair.", None)
+        repaired_validation = validate_final_contract(repaired.content, requirements)
+        if not repaired_validation.valid or repaired_validation.contract is None:
+            print(
+                "recording_contract stage=repair-validating issues="
+                + _contract_issue_signature(repaired_validation.issues),
+                flush=True,
+            )
+            raise DemoRuntimeError("FINAL_RESPONSE_VERIFICATION_FAILED")
+        rendered = render_final_contract(repaired_validation.contract)
+        try:
+            semantic_valid = postcheck_final(
+                final_response=rendered,
+                original_audit=audit,
+                evidence=retrieval.evidence,
+                original_user_prompt=prompt,
+                demo_preset=True,
+                enforce_word_limit=False,
+            )
+        except Exception:
+            semantic_valid = False
+        if not semantic_valid:
+            try:
+                repaired_audit = audit_final_response(
+                    final_response=rendered,
+                    evidence=retrieval.evidence,
+                    scenario_date=retrieval.scenario_date,
+                    original_user_prompt=prompt,
+                    demo_preset=True,
+                )
+            except Exception:
+                repaired_audit = None
+            print(
+                "recording_contract stage=repair-validating "
+                "issues="
+                + _contract_issue_signature(
+                    _semantic_contract_issues(repaired_audit)
+                ),
+                flush=True,
+            )
+            raise DemoRuntimeError("FINAL_RESPONSE_VERIFICATION_FAILED")
+        return rendered, True
+
+    def _run_generic_final(
+        self,
+        *,
+        client: _MeteredClient,
+        model_id: str,
+        prompt: str,
+        primary_response: str,
+        audit,
+        retrieval: KnowledgeRetrieval,
+        progress,
+    ) -> str:
+        audit_brief = audit.as_dict()
+        audit_brief.pop("claims", None)
+        material = {
+            "original_user_prompt": prompt,
+            "primary_response": primary_response,
+            "hat_audit": audit_brief,
+            "authoritative_evidence": [
+                item.as_dict() for item in retrieval.evidence
+            ],
+        }
+        progress("finalizing", "Gemma is revising its conversational answer.", None)
+        try:
+            final = client.send_chat(
+                model_id,
+                [
+                    ChatMessage(role="system", content=_GENERIC_FINALIZATION_SYSTEM),
+                    ChatMessage(role="user", content=_canonical(material)),
+                ],
+                max_tokens=900,
+            )
+            _require_requested_model(final, model_id)
+        except Exception as error:
+            raise self._safe_provider_error(
+                error,
+                fallback_code="GEMMA_FINAL_FAILED",
+            ) from None
+        try:
+            valid = postcheck_final(
+                final_response=final.content,
+                original_audit=audit,
+                evidence=retrieval.evidence,
+                original_user_prompt=prompt,
+                demo_preset=False,
+            )
+        except Exception:
+            valid = False
+        if not valid:
+            raise DemoRuntimeError("FINAL_RESPONSE_VERIFICATION_FAILED")
+        return final.content
 
     def _run_critical(
         self,
@@ -1031,6 +1275,85 @@ def _scenario_date(prompt: str) -> datetime:
 
 def _canonical(value: object) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _safe_contract_payload(value: str) -> object:
+    """Bound one provider-produced repair input without logging its contents."""
+
+    try:
+        parsed = json.loads(value)
+    except (TypeError, json.JSONDecodeError):
+        return str(value)[:12_000]
+    return parsed if isinstance(parsed, dict) else str(value)[:12_000]
+
+
+def _contract_issue_signature(issues: Sequence[ContractIssue]) -> str:
+    """Return field/code diagnostics only; never provider-generated values."""
+
+    safe: list[str] = []
+    for issue in issues[:32]:
+        field = issue.field if re.fullmatch(r"[A-Za-z0-9_.$-]{1,96}", issue.field) else "$"
+        code = issue.code if re.fullmatch(r"[A-Z0-9_]{1,96}", issue.code) else "INVALID"
+        identifiers = _contract_issue_evidence_ids((issue,))
+        suffix = "@[" + "+".join(identifiers) + "]" if identifiers else ""
+        safe.append(f"{field}:{code}{suffix}")
+    return ",".join(safe) or "$:UNKNOWN"
+
+
+def _semantic_contract_issues(audit) -> tuple[ContractIssue, ...]:
+    """Project a failed deterministic HAT check into bounded repair fields."""
+
+    corrections = getattr(audit, "corrections", ()) if audit is not None else ()
+    result: list[ContractIssue] = []
+    if isinstance(corrections, Sequence):
+        for correction in corrections[:16]:
+            if not isinstance(correction, Mapping):
+                continue
+            raw_ids = correction.get("knowledge_ids", ())
+            ids = [
+                value
+                for value in raw_ids
+                if isinstance(value, str)
+                and re.fullmatch(r"[A-Z0-9-]{3,96}", value) is not None
+            ] if isinstance(raw_ids, Sequence) and not isinstance(raw_ids, str) else []
+            expected = {
+                "exact_point": str(correction.get("exact_point", ""))[:320],
+                "corrected_proposition": str(
+                    correction.get("corrected_proposition", "")
+                )[:1600],
+                "knowledge_ids": ids[:12],
+            }
+            result.append(
+                ContractIssue(
+                    "reasoning",
+                    "SEMANTIC_CLAIM_MISMATCH",
+                    expected,
+                )
+            )
+    return tuple(result) or (
+        ContractIssue("$", "SEMANTIC_HAT_VALIDATION_FAILED"),
+    )
+
+
+def _contract_issue_evidence_ids(
+    issues: Sequence[ContractIssue],
+) -> tuple[str, ...]:
+    result: list[str] = []
+    for issue in issues:
+        expected = issue.expected
+        if not isinstance(expected, Mapping):
+            continue
+        raw_ids = expected.get("knowledge_ids")
+        if not isinstance(raw_ids, Sequence) or isinstance(raw_ids, str):
+            continue
+        for value in raw_ids:
+            if (
+                isinstance(value, str)
+                and re.fullmatch(r"[A-Z0-9-]{3,96}", value) is not None
+                and value not in result
+            ):
+                result.append(value)
+    return tuple(result)
 
 
 def _sha(value: str) -> str:
