@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIOA / Memory Patch</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">FINAL RECORDING DEMO</p>
+        <h1>AIOA <span>/ MEMORY PATCH</span></h1>
+      </div>
+      <div class="runtime-ready" aria-label="Local runtime ready">
+        <span class="status-dot"></span>
+        LOCAL RUNTIME
+      </div>
+    </header>
+
+    <section class="control-bar" aria-label="Conversation controls">
+      <label class="model-control">
+        <span>MODEL</span>
+        <select id="model-select" data-test="model-select" disabled></select>
+      </label>
+
+      <label class="switch-control">
+        <span class="switch-copy">
+          <strong>CRITICAL PROMPT LOOP</strong>
+          <small id="cpl-state">OFF</small>
+        </span>
+        <input id="cpl-toggle" data-test="cpl-toggle" type="checkbox">
+        <span class="switch" aria-hidden="true"></span>
+      </label>
+
+      <label class="switch-control">
+        <span class="switch-copy">
+          <strong>GERMAN LAW KNOWLEDGE</strong>
+          <small id="knowledge-state">OFF</small>
+        </span>
+        <input id="knowledge-toggle" data-test="knowledge-toggle" type="checkbox">
+        <span class="switch" aria-hidden="true"></span>
+      </label>
+    </section>
+
+    <div id="knowledge-indicator" class="knowledge-indicator" hidden>
+      <span class="status-dot"></span>
+      <strong>German Law Knowledge</strong>
+      <span>CONNECTED / ACTIVE</span>
+      <span class="database-label">CockroachDB</span>
+    </div>
+
+    <div id="composition-warning" class="composition-warning" role="status" hidden>
+      Combined CPL + German Law is intentionally unavailable in this recording build. A/B/C remain isolated and stable.
+    </div>
+
+    <section id="cpl-panel" class="cpl-panel" data-test="cpl-panel" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">OPTIONAL REVIEW</p>
+          <h2>Critical Prompt Loop</h2>
+        </div>
+        <p>Historical five-call flow: primary draft, three observers, final revision.</p>
+      </div>
+      <div id="observer-grid" class="observer-grid"></div>
+    </section>
+
+    <section class="chat-panel" aria-label="Chat">
+      <div class="chat-heading">
+        <div>
+          <p class="eyebrow">CHAT HISTORY</p>
+          <h2>Conversation</h2>
+        </div>
+        <button id="clear-button" class="text-button" type="button">Clear</button>
+      </div>
+
+      <div id="chat-history" class="chat-history" data-test="chat-history" aria-live="polite">
+        <div id="empty-chat" class="empty-chat">
+          <p>Ask anything.</p>
+          <span>Gemma answers directly unless you enable one of the independent modules above.</span>
+        </div>
+      </div>
+
+      <div id="run-status" class="run-status" data-test="run-status" role="status">
+        <span class="status-dot neutral"></span>
+        <span id="run-status-text">Ready for operator input.</span>
+      </div>
+
+      <div class="composer">
+        <textarea id="prompt-input" data-test="prompt-input" rows="3" placeholder="Ask anything..." aria-label="Prompt"></textarea>
+        <div class="composer-actions">
+          <button id="preset-button" class="text-button" type="button">Insert German law demo question</button>
+          <span>Enter to send · Shift+Enter for newline</span>
+        </div>
+        <button id="send-button" data-test="send-button" class="send-button" type="button" disabled>SEND</button>
+      </div>
+    </section>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
