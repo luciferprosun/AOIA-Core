@@ -137,6 +137,7 @@ class AOIATerminalApp(App):
             result = self.runtime.run_text_request(
                 raw,
                 trace_context=trace_context,
+                ingress="TUI",
             )
             transcript = result.get("transcript", "")
             self.call_from_thread(self._complete_request, transcript, None)

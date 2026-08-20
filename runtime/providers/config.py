@@ -143,30 +143,44 @@ class ProviderManager:
                 self.provider = provider
                 self.current_model = full_model
                 self.last_used_model = provider.full_name
-                if on_attempt is not None:
-                    on_attempt(
-                        "succeeded",
-                        model_call,
-                        provider_id,
-                        full_model,
-                        provider_attempt,
-                    )
-                return TracedModelOutput(
-                    text=response,
-                    model_call=model_call,
-                    provider=provider_id,
-                    model=full_model,
-                )
             except Exception as error:
                 if on_attempt is not None:
-                    on_attempt(
-                        "failed",
-                        model_call,
-                        provider_id,
-                        full_model,
-                        provider_attempt,
-                    )
+                    try:
+                        on_attempt(
+                            "failed",
+                            model_call,
+                            provider_id,
+                            full_model,
+                            provider_attempt,
+                        )
+                    except Exception as observer_error:
+                        try:
+                            observer_error.add_note(
+                                "Provider call also failed; provider failure type: "
+                                f"{type(error).__name__}."
+                            )
+                        except AttributeError:  # pragma: no cover
+                            pass
+                        raise observer_error from error
                 errors.append(f"{full_model}: {error}")
+                continue
+            # A terminal observer is a security persistence boundary, not part
+            # of the provider call. Its failure must not be misclassified as a
+            # provider failure or trigger a second provider dispatch.
+            if on_attempt is not None:
+                on_attempt(
+                    "succeeded",
+                    model_call,
+                    provider_id,
+                    full_model,
+                    provider_attempt,
+                )
+            return TracedModelOutput(
+                text=response,
+                model_call=model_call,
+                provider=provider_id,
+                model=full_model,
+            )
 
         if not errors:
             raise RuntimeError("No enabled cloud providers are configured.")

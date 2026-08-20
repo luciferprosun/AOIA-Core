@@ -61,6 +61,11 @@ from .idempotency import (
 )
 from .memory import MemoryStore
 from .project_scanner import scan_project
+from .provenance import (
+    AppendOnlyProvenanceStore,
+    RuntimeProvenanceEventType,
+    new_runtime_provenance_event,
+)
 from .shell_tools import (
     _legacy_shell_execution_enabled,
     shell_execute,
@@ -84,7 +89,13 @@ class ToolSpec:
 class ExecutionEngine:
     """Dispatch structured legacy tool actions; execution surfaces are frozen by default."""
 
-    def __init__(self, project_dir: Path, memory_store: MemoryStore) -> None:
+    def __init__(
+        self,
+        project_dir: Path,
+        memory_store: MemoryStore,
+        *,
+        provenance_store: AppendOnlyProvenanceStore | None = None,
+    ) -> None:
         self.project_dir = canonical_project_root(project_dir)
         self.memory_store = memory_store
         self.cwd = resolve_path(
@@ -101,6 +112,10 @@ class ExecutionEngine:
         )
         self.tools = self._build_tool_registry()
         self.idempotency_store = DurableIdempotencyStore(
+            memory_store.paths.state_dir,
+            lock_timeout_seconds=memory_store.state_lock_timeout_seconds,
+        )
+        self.provenance_store = provenance_store or AppendOnlyProvenanceStore(
             memory_store.paths.state_dir,
             lock_timeout_seconds=memory_store.state_lock_timeout_seconds,
         )
@@ -129,6 +144,12 @@ class ExecutionEngine:
         decision = evaluate_action_policy(authoritative_action, authoritative_context)
         name = decision.action_name
         operation = operation_context or OperationContext.new_operation()
+        self._record_capability_decision(
+            authoritative_action,
+            decision,
+            authoritative_context,
+            operation,
+        )
 
         if not decision.allowed:
             blocked_result = self._blocked_policy_result(decision)
@@ -161,6 +182,13 @@ class ExecutionEngine:
                 authoritative_action,
                 decision,
                 authoritative_context,
+            )
+            self._record_approval_decision(
+                approved,
+                authoritative_action,
+                decision,
+                authoritative_context,
+                operation,
             )
             if not approved:
                 cancelled_result = {
@@ -214,13 +242,74 @@ class ExecutionEngine:
             )
             return result
 
-        dispatch_record = self._transition_operation(
-            operation,
-            authoritative_context,
-            fingerprint,
-            IdempotencyState.DISPATCH_STARTED,
-            "IDEMPOTENCY_DISPATCH_STARTED",
-        )
+        # The synchronous, fsynced provenance start is the final dispatch gate.
+        # Never put this event in the outbox: recovery must not later claim a
+        # dispatch started when the handler was actually blocked.
+        try:
+            self._before_tool_dispatch(
+                authoritative_action,
+                decision,
+                authoritative_context,
+                operation,
+                reservation.record,
+            )
+        except Exception as start_error:
+            try:
+                failed_record = self._transition_operation(
+                    operation,
+                    authoritative_context,
+                    fingerprint,
+                    IdempotencyState.FAILED_BEFORE_DISPATCH,
+                    IDEMPOTENCY_STATE_REASON_CODES[
+                        IdempotencyState.FAILED_BEFORE_DISPATCH
+                    ],
+                    terminal_receipt={
+                        "receipt_schema_version": "AOIA_IDEMPOTENCY_RECEIPT_1A",
+                        "success": False,
+                    },
+                )
+                self._after_idempotency_transition(
+                    failed_record,
+                    authoritative_action,
+                    decision,
+                    authoritative_context,
+                    operation,
+                )
+            except Exception as cleanup_error:
+                self._attach_secondary_failure(
+                    start_error,
+                    cleanup_error,
+                    "Pre-dispatch provenance failed and durable failure terminalization also failed.",
+                )
+            raise
+
+        try:
+            dispatch_record = self._transition_operation(
+                operation,
+                authoritative_context,
+                fingerprint,
+                IdempotencyState.DISPATCH_STARTED,
+                "IDEMPOTENCY_DISPATCH_STARTED",
+            )
+        except Exception as transition_error:
+            try:
+                self._record_persistence_failure(
+                    authoritative_action,
+                    decision,
+                    authoritative_context,
+                    operation,
+                    idempotency_state=IdempotencyState.RESERVED,
+                    dispatched=False,
+                    reason_code="IDEMPOTENCY_TRANSITION_FAILED",
+                    action_fingerprint=fingerprint,
+                )
+            except Exception as provenance_error:
+                self._attach_secondary_failure(
+                    transition_error,
+                    provenance_error,
+                    "Idempotency dispatch transition and persistence-failure provenance both failed.",
+                )
+            raise
         self._after_idempotency_transition(
             dispatch_record,
             authoritative_action,
@@ -229,21 +318,11 @@ class ExecutionEngine:
             operation,
         )
         try:
-            # P0.8 inserts its durable provenance dispatch gate at this seam.
-            # It is deliberately after DISPATCH_STARTED persistence and before
-            # the first handler instruction can create a side effect.
-            self._before_tool_dispatch(
-                authoritative_action,
-                decision,
-                authoritative_context,
-                operation,
-                dispatch_record,
-            )
             result = self._correlate_result(
                 tool.handler(authoritative_action),
                 authoritative_context,
             )
-        except Exception:
+        except Exception as handler_error:
             # Once DISPATCH_STARTED is durable, an exception cannot prove that
             # no effect occurred. Never make the key retryable automatically.
             try:
@@ -267,25 +346,42 @@ class ExecutionEngine:
                     operation,
                 )
             except Exception as transition_error:
-                # Preserve both failures for diagnosis while leaving the
-                # durable DISPATCH_STARTED record as the conservative truth.
-                try:
-                    transition_error.add_note(
-                        "Handler/pre-dispatch failure left the operation in DISPATCH_STARTED."
-                    )
-                except AttributeError:  # pragma: no cover - Python 3.12 has add_note
-                    pass
+                self._attach_secondary_failure(
+                    handler_error,
+                    transition_error,
+                    "Handler failure could not be durably terminalized; operation may remain DISPATCH_STARTED and provenance may be pending.",
+                )
             raise
 
         terminal_state, terminal_reason = self._terminal_state_for_result(result)
-        terminal_record = self._transition_operation(
-            operation,
-            authoritative_context,
-            fingerprint,
-            terminal_state,
-            terminal_reason,
-            terminal_receipt=build_safe_result_receipt(result),
-        )
+        try:
+            terminal_record = self._transition_operation(
+                operation,
+                authoritative_context,
+                fingerprint,
+                terminal_state,
+                terminal_reason,
+                terminal_receipt=build_safe_result_receipt(result),
+            )
+        except Exception as transition_error:
+            try:
+                self._record_persistence_failure(
+                    authoritative_action,
+                    decision,
+                    authoritative_context,
+                    operation,
+                    idempotency_state=IdempotencyState.DISPATCH_STARTED,
+                    dispatched=True,
+                    reason_code="IDEMPOTENCY_TRANSITION_FAILED",
+                    action_fingerprint=fingerprint,
+                )
+            except Exception as provenance_error:
+                self._attach_secondary_failure(
+                    transition_error,
+                    provenance_error,
+                    "Terminal idempotency transition and persistence-failure provenance both failed.",
+                )
+            raise
         self._after_idempotency_transition(
             terminal_record,
             authoritative_action,
@@ -300,12 +396,32 @@ class ExecutionEngine:
             replayed=False,
             dispatched=True,
         )
-        self._record_execution(
-            authoritative_action,
-            result,
-            authoritative_context,
-            operation_context=operation,
-        )
+        try:
+            self._record_execution(
+                authoritative_action,
+                result,
+                authoritative_context,
+                operation_context=operation,
+            )
+        except PersistenceError as operational_error:
+            try:
+                self._record_persistence_failure(
+                    authoritative_action,
+                    decision,
+                    authoritative_context,
+                    operation,
+                    idempotency_state=terminal_record.state,
+                    dispatched=True,
+                    reason_code="OPERATIONAL_LOG_PERSISTENCE_FAILED",
+                    action_fingerprint=terminal_record.action_fingerprint,
+                )
+            except Exception as provenance_error:
+                self._attach_secondary_failure(
+                    operational_error,
+                    provenance_error,
+                    "Operational logging and persistence-failure provenance both failed.",
+                )
+            raise
         return result
 
     def _record_without_dispatch(
@@ -523,9 +639,22 @@ class ExecutionEngine:
         operation_context: OperationContext,
         idempotency_record: IdempotencyRecord,
     ) -> None:
-        """Extension seam for the P0.8 durable provenance dispatch gate."""
+        """Commit dispatch-start truth before idempotency dispatch and handler."""
 
-        _ = (action, decision, action_context, operation_context, idempotency_record)
+        self.provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.ACTION_DISPATCH_STARTED,
+                action_context=action_context,
+                operation_context=operation_context,
+                action_name=decision.action_name,
+                action_fingerprint=idempotency_record.action_fingerprint,
+                capability_class=decision.capability_class,
+                idempotency_state=idempotency_record.state,
+                replayed=False,
+                dispatched=True,
+                reason_code=RuntimeProvenanceEventType.ACTION_DISPATCH_STARTED.value,
+            )
+        )
 
     def _after_idempotency_resolution(
         self,
@@ -535,9 +664,56 @@ class ExecutionEngine:
         action_context: ActionContext,
         operation_context: OperationContext,
     ) -> None:
-        """P0.8 hook for reservation, replay, conflict, and unknown outcomes."""
+        """Record reservation/replay/conflict truth after the P0.7 boundary."""
 
-        _ = (resolution, action, decision, action_context, operation_context)
+        attempted_fingerprint = canonical_action_fingerprint(
+            action,
+            project_dir=self.project_dir,
+            capability_class=decision.capability_class,
+        )
+        kind = getattr(resolution.kind, "value", resolution.kind)
+        if kind == IdempotencyResolutionKind.RESERVED.value:
+            event_type = RuntimeProvenanceEventType.IDEMPOTENCY_RESERVED
+            terminal = False
+            success = None
+        elif kind == IdempotencyResolutionKind.REPLAYED.value:
+            event_type = RuntimeProvenanceEventType.IDEMPOTENCY_REPLAYED
+            terminal = False
+            success = bool((resolution.record.terminal_receipt or {}).get("success", False))
+        elif kind == IdempotencyResolutionKind.CONFLICT.value:
+            event_type = RuntimeProvenanceEventType.IDEMPOTENCY_CONFLICT
+            terminal = False
+            success = False
+        elif kind in {
+            IdempotencyResolutionKind.IN_PROGRESS.value,
+            IdempotencyResolutionKind.UNKNOWN_OUTCOME.value,
+        }:
+            event_type = RuntimeProvenanceEventType.UNKNOWN_OUTCOME_DETECTED
+            terminal = True
+            success = False
+        else:  # pragma: no cover - P0.7 enum is closed
+            raise RuntimeError("Unsupported idempotency resolution kind.")
+        event = new_runtime_provenance_event(
+            event_type,
+            action_context=action_context,
+            operation_context=operation_context,
+            action_name=decision.action_name,
+            action_fingerprint=attempted_fingerprint,
+            capability_class=decision.capability_class,
+            idempotency_state=(
+                IdempotencyState.CONFLICT
+                if kind == IdempotencyResolutionKind.CONFLICT.value
+                else resolution.record.state
+            ),
+            replayed=resolution.replayed,
+            dispatched=False,
+            success=success,
+            reason_code=resolution.reason_code,
+        )
+        if terminal:
+            self.provenance_store.append_terminal(event)
+        else:
+            self.provenance_store.append_runtime_event(event)
 
     def _after_idempotency_transition(
         self,
@@ -547,9 +723,157 @@ class ExecutionEngine:
         action_context: ActionContext,
         operation_context: OperationContext,
     ) -> None:
-        """P0.8 hook invoked only after an idempotency transition is durable."""
+        """Append terminal action truth only after P0.7 made it durable."""
 
-        _ = (record, action, decision, action_context, operation_context)
+        _ = action
+        state = getattr(record.state, "value", record.state)
+        mapping = {
+            IdempotencyState.SUCCEEDED.value: (
+                RuntimeProvenanceEventType.ACTION_DISPATCH_SUCCEEDED,
+                True,
+                True,
+            ),
+            IdempotencyState.BLOCKED.value: (
+                RuntimeProvenanceEventType.ACTION_DISPATCH_BLOCKED,
+                False,
+                False,
+            ),
+            IdempotencyState.CANCELLED.value: (
+                RuntimeProvenanceEventType.ACTION_DISPATCH_CANCELLED,
+                False,
+                False,
+            ),
+            IdempotencyState.FAILED_BEFORE_DISPATCH.value: (
+                RuntimeProvenanceEventType.ACTION_DISPATCH_FAILED,
+                False,
+                False,
+            ),
+            IdempotencyState.FAILED_REPORTED.value: (
+                RuntimeProvenanceEventType.ACTION_DISPATCH_FAILED,
+                False,
+                True,
+            ),
+            IdempotencyState.TIMED_OUT_OR_UNKNOWN.value: (
+                RuntimeProvenanceEventType.ACTION_DISPATCH_TIMED_OUT,
+                False,
+                True,
+            ),
+            IdempotencyState.UNKNOWN_OUTCOME.value: (
+                RuntimeProvenanceEventType.UNKNOWN_OUTCOME_DETECTED,
+                False,
+                True,
+            ),
+        }
+        terminal = mapping.get(state)
+        if terminal is None:
+            # DISPATCH_STARTED has already been recorded at the synchronous
+            # provenance gate. RESERVED is represented by its resolution event.
+            return
+        event_type, success, dispatched = terminal
+        self.provenance_store.append_terminal(
+            new_runtime_provenance_event(
+                event_type,
+                action_context=action_context,
+                operation_context=operation_context,
+                action_name=decision.action_name,
+                action_fingerprint=record.action_fingerprint,
+                capability_class=decision.capability_class,
+                idempotency_state=state,
+                replayed=False,
+                dispatched=dispatched,
+                success=success,
+                reason_code=record.reason_code,
+            )
+        )
+
+    def _record_capability_decision(
+        self,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation_context: OperationContext,
+    ) -> None:
+        _ = action
+        self.provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.CAPABILITY_DECISION,
+                action_context=action_context,
+                operation_context=operation_context,
+                action_name=decision.action_name or "unknown_action",
+                capability_class=decision.capability_class,
+                policy_allowed=decision.allowed,
+                approval_required=decision.requires_confirmation,
+                reason_code=decision.reason_code,
+            )
+        )
+
+    def _record_approval_decision(
+        self,
+        approved: bool,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation_context: OperationContext,
+    ) -> None:
+        _ = action
+        self.provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                (
+                    RuntimeProvenanceEventType.APPROVAL_GRANTED
+                    if approved
+                    else RuntimeProvenanceEventType.APPROVAL_DENIED
+                ),
+                action_context=action_context,
+                operation_context=operation_context,
+                action_name=decision.action_name,
+                capability_class=decision.capability_class,
+                approval_required=True,
+                success=approved,
+            )
+        )
+
+    def _record_persistence_failure(
+        self,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation_context: OperationContext,
+        *,
+        idempotency_state: IdempotencyState,
+        dispatched: bool,
+        reason_code: str,
+        action_fingerprint: str | None = None,
+    ) -> None:
+        _ = action
+        self.provenance_store.append_terminal(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.PERSISTENCE_FAILURE,
+                action_context=action_context,
+                operation_context=operation_context,
+                action_name=decision.action_name,
+                action_fingerprint=action_fingerprint,
+                capability_class=decision.capability_class,
+                idempotency_state=idempotency_state,
+                dispatched=dispatched,
+                success=False,
+                reason_code=reason_code,
+            )
+        )
+
+    @staticmethod
+    def _attach_secondary_failure(
+        primary_error: BaseException,
+        secondary_error: BaseException,
+        message: str,
+    ) -> None:
+        note = (
+            f"{message} Secondary failure type: "
+            f"{type(secondary_error).__name__}."
+        )
+        try:
+            primary_error.add_note(note)
+        except AttributeError:  # pragma: no cover - supported Python has add_note
+            pass
 
     @staticmethod
     def _decision_fields(decision: ActionPolicyDecision) -> dict[str, Any]:

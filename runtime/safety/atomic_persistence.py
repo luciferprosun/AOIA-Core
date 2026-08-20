@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import os
+import stat
 import tempfile
 import time
 from collections.abc import Callable, Mapping
@@ -384,9 +385,29 @@ def locked_update_json(
     try:
         with InterProcessFileLock(lock_path, timeout_seconds=lock_timeout_seconds):
             current: Any | None = None
-            if target.exists():
+            try:
+                metadata = target.lstat()
+            except FileNotFoundError:
+                metadata = None
+            if metadata is not None:
+                if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+                    raise StateCorruptionError(
+                        "AOIA state snapshot target is not a safe regular file.",
+                        target_path=target,
+                    )
+                flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
+                flags |= getattr(os, "O_NOFOLLOW", 0)
                 try:
-                    raw = target.read_text(encoding="utf-8", errors="strict")
+                    descriptor = os.open(target, flags)
+                    with os.fdopen(descriptor, "r", encoding="utf-8", errors="strict") as handle:
+                        opened = os.fstat(handle.fileno())
+                        if (
+                            not stat.S_ISREG(opened.st_mode)
+                            or (opened.st_dev, opened.st_ino)
+                            != (metadata.st_dev, metadata.st_ino)
+                        ):
+                            raise OSError("state snapshot changed during locked open")
+                        raw = handle.read()
                 except UnicodeError as exc:
                     raise StateCorruptionError(
                         "AOIA state snapshot is not valid UTF-8.",

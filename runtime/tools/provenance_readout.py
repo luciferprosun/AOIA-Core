@@ -5,7 +5,13 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from tools.provenance import ProvenanceVerificationResult, verify_provenance_chain
+from tools.provenance import (
+    GENESIS_PREV_HASH,
+    ProvenanceError,
+    ProvenanceVerificationResult,
+    load_provenance_entries,
+    verify_provenance_chain,
+)
 
 
 def _result_label(value: bool) -> str:
@@ -47,8 +53,18 @@ def render_integrity_report(
 
 
 def verify_file(log_path: Path) -> tuple[ProvenanceVerificationResult, bool]:
-    first = verify_provenance_chain(log_path)
-    second = verify_provenance_chain(log_path)
+    try:
+        snapshot = load_provenance_entries(log_path)
+    except ProvenanceError as exc:
+        failed = ProvenanceVerificationResult(
+            ok=False,
+            entry_count=0,
+            terminal_hash=GENESIS_PREV_HASH,
+            issues=(exc.reason_code,),
+        )
+        return failed, True
+    first = verify_provenance_chain(snapshot)
+    second = verify_provenance_chain(snapshot)
     return first, first == second
 
 

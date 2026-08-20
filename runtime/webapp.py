@@ -63,7 +63,7 @@ class WebRuntimeService:
 
     def run_prompt(self, prompt: str) -> dict:
         with self.lock:
-            result = self.runtime.run_text_request(prompt)
+            result = self.runtime.run_text_request(prompt, ingress="WEB")
             return {
                 "ok": True,
                 "transcript": result["transcript"],
@@ -425,9 +425,21 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
     try:
         from runtime.providers.contracts import LIVE_SUCCESS, ProviderActivationStatus
         from runtime.providers.selector import run_selected_provider
+        from runtime.runtime_paths import runtime_state_dir
+        from runtime.tools.provenance import (
+            AppendOnlyProvenanceStore,
+            RuntimeProvenanceEventType,
+            new_runtime_provenance_event,
+        )
     except ModuleNotFoundError:  # pragma: no cover - script launch path
         from providers.contracts import LIVE_SUCCESS, ProviderActivationStatus
         from providers.selector import run_selected_provider
+        from runtime_paths import runtime_state_dir
+        from tools.provenance import (
+            AppendOnlyProvenanceStore,
+            RuntimeProvenanceEventType,
+            new_runtime_provenance_event,
+        )
 
     provider_id = str(payload.get("provider_id", "kimi_chat")).strip() or "kimi_chat"
     model_id = str(payload.get("model_id", "moonshot-v1-8k")).strip() or "moonshot-v1-8k"
@@ -436,16 +448,97 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
         raise ValueError("prompt is required")
     trace_context = TraceContext.new_request()
     model_call = trace_context.new_model_call()
-    result = run_selected_provider(
-        provider_id=provider_id,
-        model_id=model_id,
-        prompt=prompt,
-        max_tokens=512,
-        live=True,
-        acknowledge_live_provider_test=True,
-        activation_status=ProviderActivationStatus.LIVE_ALLOWED_FOR_MANUAL_TEST,
-        selected_by="operator",
-        created_at="operator-chat-manual",
+    provenance_store = AppendOnlyProvenanceStore(
+        runtime_state_dir(PROJECT_DIR) / "state"
+    )
+    provenance_store.append_runtime_event(
+        new_runtime_provenance_event(
+            RuntimeProvenanceEventType.REQUEST_STARTED,
+            trace_context=trace_context,
+            ingress="OPERATOR_API",
+            request_length=len(prompt),
+            slash_command=False,
+        )
+    )
+    provenance_store.append_runtime_event(
+        new_runtime_provenance_event(
+            RuntimeProvenanceEventType.MODEL_CALL_STARTED,
+            model_call=model_call,
+            requested_provider=provider_id,
+            requested_model=model_id,
+            retry_attempt=1,
+            provider_attempt=1,
+        )
+    )
+    try:
+        result = run_selected_provider(
+            provider_id=provider_id,
+            model_id=model_id,
+            prompt=prompt,
+            max_tokens=512,
+            live=True,
+            acknowledge_live_provider_test=True,
+            activation_status=ProviderActivationStatus.LIVE_ALLOWED_FOR_MANUAL_TEST,
+            selected_by="operator",
+            created_at="operator-chat-manual",
+        )
+    except Exception as provider_error:
+        try:
+            provenance_store.append_terminal(
+                new_runtime_provenance_event(
+                    RuntimeProvenanceEventType.MODEL_CALL_FAILED,
+                    model_call=model_call,
+                    requested_provider=provider_id,
+                    requested_model=model_id,
+                    retry_attempt=1,
+                    provider_attempt=1,
+                    success=False,
+                )
+            )
+            provenance_store.append_terminal(
+                new_runtime_provenance_event(
+                    RuntimeProvenanceEventType.REQUEST_COMPLETED,
+                    trace_context=trace_context,
+                    ingress="OPERATOR_API",
+                    success=False,
+                    reason_code="REQUEST_FAILED",
+                )
+            )
+        except Exception as provenance_error:
+            try:
+                provider_error.add_note(
+                    "Operator provider failure provenance is pending or degraded; "
+                    f"secondary failure type: {type(provenance_error).__name__}."
+                )
+            except AttributeError:  # pragma: no cover
+                pass
+        raise
+    provider_succeeded = result.status == LIVE_SUCCESS
+    provenance_store.append_terminal(
+        new_runtime_provenance_event(
+            (
+                RuntimeProvenanceEventType.MODEL_CALL_COMPLETED
+                if provider_succeeded
+                else RuntimeProvenanceEventType.MODEL_CALL_FAILED
+            ),
+            model_call=model_call,
+            requested_provider=provider_id,
+            requested_model=model_id,
+            retry_attempt=1,
+            provider_attempt=1,
+            success=provider_succeeded,
+        )
+    )
+    provenance_store.append_terminal(
+        new_runtime_provenance_event(
+            RuntimeProvenanceEventType.REQUEST_COMPLETED,
+            trace_context=trace_context,
+            ingress="OPERATOR_API",
+            success=provider_succeeded,
+            reason_code=(
+                "REQUEST_COMPLETED" if provider_succeeded else "REQUEST_FAILED"
+            ),
+        )
     )
     result_payload = result.to_dict()
     return {

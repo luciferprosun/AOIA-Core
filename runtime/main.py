@@ -36,6 +36,11 @@ from runtime.safety.atomic_persistence import (
     state_resource_lock_path,
 )
 from tools.executor import ExecutionEngine
+from tools.provenance import (
+    AppendOnlyProvenanceStore,
+    RuntimeProvenanceEventType,
+    new_runtime_provenance_event,
+)
 from memory.gemma_worker_memory import GemmaWorkerMemory
 from tools.memory_hats import MemoryHatStore
 from tools.memory import MemoryStore
@@ -55,6 +60,12 @@ PROMPT_FILE = PROJECT_DIR / "prompts" / "system_prompt.txt"
 MAX_AGENT_STEPS = 8
 DEBUG_RAW_RESPONSE = os.getenv("AGENT_DEBUG", "0") == "1"
 MODEL_RETRY_DELAYS = (1.0, 2.0, 4.0)
+OPERATIONAL_LOG_AUTHORITY = {
+    "classification": "operational_event",
+    "retention": "replay_only",
+    "non_authoritative": True,
+    "canonical_evidence": False,
+}
 EXTERNAL_URL_RE = re.compile(r"\bhttps?://\S+", re.IGNORECASE)
 REPOSITORY_HOST_RE = re.compile(r"\b(?:github\.com|gitlab\.com)(?:/|\b)", re.IGNORECASE)
 REPOSITORY_INTENT_RE = re.compile(
@@ -177,7 +188,15 @@ class AgentRuntime:
         )
         self.hat_store = MemoryHatStore(project_dir, initialize_defaults=False)
         self.worker_memory = GemmaWorkerMemory(project_dir)
-        self.executor = ExecutionEngine(project_dir, self.memory_store)
+        self.provenance_store = AppendOnlyProvenanceStore(
+            self.memory_store.paths.state_dir,
+            lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+        )
+        self.executor = ExecutionEngine(
+            project_dir,
+            self.memory_store,
+            provenance_store=self.provenance_store,
+        )
         self.desktop_dir = detect_desktop_dir(Path.home())
         self.local_router = LocalRouter(self.desktop_dir)
         self.knowledge_router = KnowledgeRouter(project_dir)
@@ -383,6 +402,8 @@ class AgentRuntime:
                     print("\n[DEBUG] RAW MODEL OUTPUT:")
                     print(raw_result.text)
                 return raw_result
+            except PersistenceError:
+                raise
             except Exception as error:
                 last_error = error
                 if is_daily_quota_error(error):
@@ -396,6 +417,8 @@ class AgentRuntime:
                 time.sleep(delay_seconds)
 
         assert last_error is not None
+        if isinstance(last_error, PersistenceError):
+            raise last_error
         raise RuntimeError(f"Model request failed after retries: {last_error}")
 
     def _log_model_attempt(
@@ -408,6 +431,32 @@ class AgentRuntime:
         retry_attempt: int,
         provider_attempt: int,
     ) -> None:
+        event_types = {
+            "started": RuntimeProvenanceEventType.MODEL_CALL_STARTED,
+            "succeeded": RuntimeProvenanceEventType.MODEL_CALL_COMPLETED,
+            "failed": RuntimeProvenanceEventType.MODEL_CALL_FAILED,
+        }
+        event_type = event_types.get(status)
+        if event_type is None:
+            raise ValueError("Unsupported runtime model-call lifecycle status.")
+        event = new_runtime_provenance_event(
+            event_type,
+            model_call=model_call,
+            requested_provider=provider,
+            requested_model=model,
+            retry_attempt=retry_attempt,
+            provider_attempt=provider_attempt,
+            success=(
+                None
+                if status == "started"
+                else status == "succeeded"
+            ),
+            reason_code=event_type.value,
+        )
+        if status == "started":
+            self.provenance_store.append_runtime_event(event)
+        else:
+            self.provenance_store.append_terminal(event)
         self.log_session_event(
             "model_call_attempt",
             {
@@ -487,6 +536,8 @@ class AgentRuntime:
             try:
                 model_output = self.ask_model(prompt, trace_context)
                 raw_output = model_output.text
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -515,6 +566,8 @@ class AgentRuntime:
                 action = strip_untrusted_identity_fields(
                     validate_action(extract_json_object(raw_output))
                 )
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -544,6 +597,8 @@ class AgentRuntime:
                     action,
                     action_context=action_context,
                 )
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -634,6 +689,8 @@ class AgentRuntime:
                     trace_context=trace_context,
                 )
                 return True
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -710,6 +767,8 @@ class AgentRuntime:
                     provider_attempt=provider_attempt,
                 ),
             )
+        except PersistenceError:
+            raise
         except Exception as error:
             self.log_error(
                 {
@@ -758,6 +817,8 @@ class AgentRuntime:
                     ),
                 )
                 action = strip_untrusted_identity_fields(action)
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -779,6 +840,8 @@ class AgentRuntime:
                     action,
                     action_context=action_context,
                 )
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -835,6 +898,8 @@ class AgentRuntime:
             model_output = self.ask_model(prompt, trace_context)
             raw_output = model_output.text
             payload = extract_json_object(raw_output)
+        except PersistenceError:
+            raise
         except Exception as error:
             self.log_error(
                 {
@@ -864,6 +929,8 @@ class AgentRuntime:
                 planned_actions.append(
                     strip_untrusted_identity_fields(validate_action(raw_action))
                 )
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -944,6 +1011,8 @@ class AgentRuntime:
                     action,
                     action_context=action_context,
                 )
+            except PersistenceError:
+                raise
             except Exception as error:
                 self.log_error(
                     {
@@ -1006,9 +1075,20 @@ class AgentRuntime:
         self,
         user_input: str,
         trace_context: TraceContext,
+        *,
+        ingress: str = "RUNTIME",
     ) -> None:
         """Dispatch one already-identified CLI, TUI, or web request."""
 
+        self.provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.REQUEST_STARTED,
+                trace_context=trace_context,
+                ingress=ingress,
+                request_length=len(user_input),
+                slash_command=user_input.strip().startswith("/"),
+            )
+        )
         self.log_session_event(
             "request_started",
             {
@@ -1028,13 +1108,39 @@ class AgentRuntime:
                     print(f"\nAgent> {command_result.message}")
             else:
                 self.handle_user_request(user_input, trace_context)
-        except Exception:
+        except Exception as request_error:
+            try:
+                self.provenance_store.append_terminal(
+                    new_runtime_provenance_event(
+                        RuntimeProvenanceEventType.REQUEST_COMPLETED,
+                        trace_context=trace_context,
+                        ingress=ingress,
+                        success=False,
+                        reason_code="REQUEST_FAILED",
+                    )
+                )
+            except Exception as terminal_error:
+                try:
+                    request_error.add_note(
+                        "Request failure provenance is pending or degraded; "
+                        f"secondary failure type: {type(terminal_error).__name__}."
+                    )
+                except AttributeError:  # pragma: no cover
+                    pass
             self.log_session_event(
                 "request_completed",
                 {"status": "failed"},
                 trace_context=trace_context,
             )
             raise
+        self.provenance_store.append_terminal(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.REQUEST_COMPLETED,
+                trace_context=trace_context,
+                ingress=ingress,
+                success=True,
+            )
+        )
         self.log_session_event(
             "request_completed",
             {"status": "completed"},
@@ -1045,12 +1151,18 @@ class AgentRuntime:
         self,
         user_input: str,
         trace_context: TraceContext | None = None,
+        *,
+        ingress: str = "RUNTIME",
     ) -> dict[str, Any]:
         """Execute one text request and capture the textual transcript."""
         trace_context = trace_context or TraceContext.new_request()
         transcript_buffer = io.StringIO()
         with redirect_stdout(transcript_buffer):
-            self.dispatch_text_request(user_input, trace_context)
+            self.dispatch_text_request(
+                user_input,
+                trace_context,
+                ingress=ingress,
+            )
         transcript = transcript_buffer.getvalue().strip()
         return {
             "transcript": transcript,
@@ -1403,6 +1515,7 @@ class AgentRuntime:
             "timestamp": dt.datetime.now().isoformat(),
             "kind": kind,
             **identity,
+            "authority": dict(OPERATIONAL_LOG_AUTHORITY),
             "payload": payload,
         }
         try:
@@ -1566,7 +1679,7 @@ def main() -> None:
                 break
 
             trace_context = TraceContext.new_request()
-            runtime.dispatch_text_request(user_input, trace_context)
+            runtime.dispatch_text_request(user_input, trace_context, ingress="CLI")
         except KeyboardInterrupt:
             print("\nInterrupted by user.")
             break
