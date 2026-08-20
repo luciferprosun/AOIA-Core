@@ -25,7 +25,11 @@ from runtime.safety.atomic_persistence import (
 
 
 GENESIS_PREV_HASH = "0" * 64
-RUNTIME_PROVENANCE_SCHEMA_VERSION = "AOIA_RUNTIME_PROVENANCE_1A"
+RUNTIME_PROVENANCE_SCHEMA_VERSION = "AOIA_RUNTIME_PROVENANCE_1B"
+LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION = "AOIA_RUNTIME_PROVENANCE_1A"
+RUNTIME_PROVENANCE_SCHEMA_VERSIONS = frozenset(
+    {LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION, RUNTIME_PROVENANCE_SCHEMA_VERSION}
+)
 RUNTIME_PROVENANCE_AUTHORITY = {
     "classification": "L1_SECURITY_RECEIPT",
     "non_authoritative": True,
@@ -45,10 +49,12 @@ _SAFE_ACTION_NAME = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
 _ID_PREFIXES = {
     "request_id": "request",
     "trace_id": "trace",
+    "task_id": "task",
     "model_call_id": "model_call",
     "action_id": "action",
     "operation_key": "operation",
     "event_id": "provenance_event",
+    "checkpoint_event_id": "provenance_event",
 }
 
 
@@ -73,10 +79,13 @@ class RuntimeProvenanceEventType(str, Enum):
     UNKNOWN_OUTCOME_DETECTED = "UNKNOWN_OUTCOME_DETECTED"
     PERSISTENCE_FAILURE = "PERSISTENCE_FAILURE"
     PROVENANCE_RECOVERY = "PROVENANCE_RECOVERY"
+    TASK_CHECKPOINT_PREPARED = "TASK_CHECKPOINT_PREPARED"
+    TASK_CHECKPOINT_ABORTED = "TASK_CHECKPOINT_ABORTED"
+    TASK_CHECKPOINTED = "TASK_CHECKPOINTED"
 
 
 RUNTIME_PROVENANCE_EVENT_TYPES = frozenset(item.value for item in RuntimeProvenanceEventType)
-RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
+LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
     {
         "schema_version", "event_id", "timestamp_utc", "event_type",
         "actor", "actor_type", "status", "outcome",
@@ -90,8 +99,32 @@ RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
         "authority",
     }
 )
+RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
+    {
+        *LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS,
+        "task_id",
+        "checkpoint_version",
+        "checkpoint_hash",
+        "checkpoint_parent_hash",
+        "checkpoint_event_id",
+        "task_state",
+        "task_phase",
+    }
+)
+LEGACY_RUNTIME_PROVENANCE_RECORD_FIELDS = frozenset(
+    {
+        *LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS,
+        "sequence",
+        "prev_hash",
+        "event_hash",
+        "entry_hash",
+    }
+)
 RUNTIME_PROVENANCE_RECORD_FIELDS = frozenset(
     {*RUNTIME_PROVENANCE_EVENT_FIELDS, "sequence", "prev_hash", "event_hash", "entry_hash"}
+)
+LEGACY_RUNTIME_PROVENANCE_OUTBOX_FIELDS = frozenset(
+    {*LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS, "event_hash"}
 )
 RUNTIME_PROVENANCE_OUTBOX_FIELDS = frozenset(
     {*RUNTIME_PROVENANCE_EVENT_FIELDS, "event_hash"}
@@ -99,10 +132,10 @@ RUNTIME_PROVENANCE_OUTBOX_FIELDS = frozenset(
 LEGACY_PROVENANCE_RECORD_FIELDS = frozenset(
     {"timestamp", "event_type", "payload_hash", "prev_hash", "entry_hash", "payload"}
 )
-_BASE_IDS = frozenset({"request_id", "trace_id"})
+_BASE_IDS = frozenset({"task_id", "request_id", "trace_id"})
 _ACTION_FIELDS = frozenset(
     {
-        "request_id", "trace_id", "model_call_id", "action_id", "operation_key",
+        "task_id", "request_id", "trace_id", "model_call_id", "action_id", "operation_key",
         "action_name", "action_fingerprint", "capability_class",
     }
 )
@@ -164,10 +197,40 @@ _EVENT_ALLOWED_FIELDS: dict[str, frozenset[str]] = {
         "idempotency_state", "dispatched", "success", "reason_code",
     },
     "PROVENANCE_RECOVERY": frozenset({"success", "reason_code", "recovered_count"}),
+    "TASK_CHECKPOINTED": _BASE_IDS
+    | {
+        "checkpoint_version",
+        "checkpoint_hash",
+        "task_state",
+        "task_phase",
+        "success",
+        "reason_code",
+    },
+    "TASK_CHECKPOINT_PREPARED": _BASE_IDS
+    | {
+        "checkpoint_version",
+        "checkpoint_hash",
+        "checkpoint_parent_hash",
+        "checkpoint_event_id",
+        "task_state",
+        "task_phase",
+        "reason_code",
+    },
+    "TASK_CHECKPOINT_ABORTED": _BASE_IDS
+    | {
+        "checkpoint_version",
+        "checkpoint_hash",
+        "checkpoint_parent_hash",
+        "checkpoint_event_id",
+        "task_state",
+        "task_phase",
+        "success",
+        "reason_code",
+    },
 }
 _REQUIRED_ACTION = frozenset(
     {
-        "request_id", "trace_id", "action_id", "operation_key",
+        "task_id", "request_id", "trace_id", "action_id", "operation_key",
         "action_name", "capability_class",
     }
 )
@@ -228,6 +291,36 @@ _EVENT_REQUIRED_FIELDS: dict[str, frozenset[str]] = {
     },
     "PERSISTENCE_FAILURE": frozenset({"success", "reason_code"}),
     "PROVENANCE_RECOVERY": frozenset({"success", "reason_code", "recovered_count"}),
+    "TASK_CHECKPOINTED": _BASE_IDS
+    | {
+        "checkpoint_version",
+        "checkpoint_hash",
+        "task_state",
+        "task_phase",
+        "success",
+        "reason_code",
+    },
+    "TASK_CHECKPOINT_PREPARED": _BASE_IDS
+    | {
+        "checkpoint_version",
+        "checkpoint_hash",
+        "checkpoint_parent_hash",
+        "checkpoint_event_id",
+        "task_state",
+        "task_phase",
+        "reason_code",
+    },
+    "TASK_CHECKPOINT_ABORTED": _BASE_IDS
+    | {
+        "checkpoint_version",
+        "checkpoint_hash",
+        "checkpoint_parent_hash",
+        "checkpoint_event_id",
+        "task_state",
+        "task_phase",
+        "success",
+        "reason_code",
+    },
 }
 _EVENT_FIXED_VALUES: dict[str, dict[str, Any]] = {
     "MODEL_CALL_COMPLETED": {"success": True},
@@ -263,6 +356,8 @@ _EVENT_FIXED_VALUES: dict[str, dict[str, Any]] = {
     },
     "PERSISTENCE_FAILURE": {"success": False},
     "PROVENANCE_RECOVERY": {"success": True},
+    "TASK_CHECKPOINTED": {"success": True},
+    "TASK_CHECKPOINT_ABORTED": {"success": False},
 }
 _CAPABILITY_REASON_CODES = frozenset(
     {
@@ -304,6 +399,9 @@ _EVENT_REASON_CODES: dict[str, frozenset[str]] = {
         }
     ),
     "PROVENANCE_RECOVERY": frozenset({"PROVENANCE_OUTBOX_RECOVERED"}),
+    "TASK_CHECKPOINTED": frozenset({"TASK_CHECKPOINTED"}),
+    "TASK_CHECKPOINT_PREPARED": frozenset({"TASK_CHECKPOINT_PREPARED"}),
+    "TASK_CHECKPOINT_ABORTED": frozenset({"TASK_CHECKPOINT_ABORTED"}),
 }
 _SAFE_REASON_CODES = frozenset(
     RUNTIME_PROVENANCE_EVENT_TYPES
@@ -323,6 +421,9 @@ _SAFE_REASON_CODES = frozenset(
         "ACTION_FAILED_REPORTED", "ACTION_TIMED_OUT_OR_UNKNOWN",
         "PROVENANCE_OUTBOX_RECOVERED", "PROVENANCE_APPEND_FAILED",
         "IDEMPOTENCY_TRANSITION_FAILED", "OPERATIONAL_LOG_PERSISTENCE_FAILED",
+        "TASK_CHECKPOINTED",
+        "TASK_CHECKPOINT_PREPARED",
+        "TASK_CHECKPOINT_ABORTED",
     }
 )
 _INGRESS_VALUES = frozenset({"CLI", "TUI", "WEB", "OPERATOR_API", "RUNTIME"})
@@ -339,6 +440,31 @@ _IDEMPOTENCY_VALUES = frozenset(
         "UNKNOWN_OUTCOME", "CONFLICT",
     }
 )
+_TASK_STATE_PHASE_PAIRS = frozenset(
+    {
+        ("CREATED", "TASK_CREATED"),
+        ("RUNNING", "BETWEEN_STEPS"),
+        ("RUNNING", "BEFORE_MODEL_CALL"),
+        ("RUNNING", "AFTER_MODEL_CALL"),
+        ("RUNNING", "BEFORE_ACTION_POLICY"),
+        ("WAITING_FOR_APPROVAL", "WAITING_FOR_APPROVAL"),
+        ("RUNNING", "BEFORE_DISPATCH"),
+        ("RUNNING", "IDEMPOTENCY_RESERVED"),
+        ("RUNNING", "PROVENANCE_DISPATCH_RECORDED"),
+        ("RUNNING", "DISPATCH_IN_FLIGHT"),
+        ("RUNNING", "AFTER_ACTION"),
+        ("PAUSED", "BETWEEN_STEPS"),
+        ("RECOVERY_REQUIRED", "IDEMPOTENCY_RESERVED"),
+        ("RECOVERY_REQUIRED", "PROVENANCE_DISPATCH_RECORDED"),
+        ("RECOVERY_REQUIRED", "DISPATCH_IN_FLIGHT"),
+        ("RECOVERY_REQUIRED", "AFTER_ACTION"),
+        ("COMPLETED", "TERMINAL"),
+        ("PARTIAL", "TERMINAL"),
+        ("BLOCKED", "TERMINAL"),
+        ("CANCELLED", "TERMINAL"),
+        ("FAILED", "TERMINAL"),
+    }
+)
 _TERMINAL_EVENT_TYPES = frozenset(
     {
         "REQUEST_COMPLETED", "MODEL_CALL_COMPLETED", "MODEL_CALL_FAILED",
@@ -346,6 +472,7 @@ _TERMINAL_EVENT_TYPES = frozenset(
         "ACTION_DISPATCH_TIMED_OUT", "ACTION_DISPATCH_BLOCKED",
         "ACTION_DISPATCH_CANCELLED", "UNKNOWN_OUTCOME_DETECTED",
         "PERSISTENCE_FAILURE",
+        "TASK_CHECKPOINTED",
     }
 )
 
@@ -427,6 +554,82 @@ def _entry_hash(record_without_entry_hash: Mapping[str, Any]) -> str:
     return _sha256(dict(record_without_entry_hash))
 
 
+def _task_checkpoint_order_issues(
+    entries: Iterable[Mapping[str, Any]],
+) -> list[str]:
+    """Validate the anchored PREPARED -> CHECKPOINTED protocol per task."""
+
+    completed: dict[str, tuple[int, str]] = {}
+    pending: dict[str, Mapping[str, Any]] = {}
+    issues: list[str] = []
+    for index, entry in enumerate(entries):
+        event_type = entry.get("event_type")
+        if event_type not in {
+            "TASK_CHECKPOINT_PREPARED",
+            "TASK_CHECKPOINT_ABORTED",
+            "TASK_CHECKPOINTED",
+        }:
+            continue
+        task_id = entry.get("task_id")
+        version = entry.get("checkpoint_version")
+        checkpoint_hash = entry.get("checkpoint_hash")
+        if not isinstance(task_id, str) or not isinstance(version, int):
+            continue
+        if event_type == "TASK_CHECKPOINT_PREPARED":
+            previous_version, previous_hash = completed.get(
+                task_id, (0, GENESIS_PREV_HASH)
+            )
+            if task_id in pending:
+                issues.append(
+                    f"entry[{index}]: task has an unresolved prepared checkpoint"
+                )
+                continue
+            if version != previous_version + 1:
+                issues.append(
+                    f"entry[{index}]: task checkpoint preparation is not monotonic"
+                )
+            if entry.get("checkpoint_parent_hash") != previous_hash:
+                issues.append(
+                    f"entry[{index}]: task checkpoint parent hash mismatch"
+                )
+            pending[task_id] = entry
+            continue
+
+        prepared = pending.get(task_id)
+        if prepared is None:
+            issues.append(
+                f"entry[{index}]: task checkpoint lacks a durable preparation"
+            )
+            continue
+        expected_checkpoint_event_id = (
+            entry.get("event_id")
+            if event_type == "TASK_CHECKPOINTED"
+            else entry.get("checkpoint_event_id")
+        )
+        if (
+            prepared.get("checkpoint_event_id") != expected_checkpoint_event_id
+            or prepared.get("checkpoint_version") != version
+            or prepared.get("checkpoint_hash") != checkpoint_hash
+            or (
+                event_type == "TASK_CHECKPOINT_ABORTED"
+                and prepared.get("checkpoint_parent_hash")
+                != entry.get("checkpoint_parent_hash")
+            )
+            or prepared.get("task_state") != entry.get("task_state")
+            or prepared.get("task_phase") != entry.get("task_phase")
+            or prepared.get("request_id") != entry.get("request_id")
+            or prepared.get("trace_id") != entry.get("trace_id")
+        ):
+            issues.append(
+                f"entry[{index}]: task checkpoint does not match its preparation"
+            )
+            continue
+        if event_type == "TASK_CHECKPOINTED":
+            completed[task_id] = (version, str(checkpoint_hash))
+        del pending[task_id]
+    return issues
+
+
 def _hash_requested_label(value: object | None) -> str | None:
     if value is None:
         return None
@@ -499,6 +702,9 @@ def _runtime_status_outcome(
         "UNKNOWN_OUTCOME_DETECTED": ("UNKNOWN", "UNKNOWN"),
         "PERSISTENCE_FAILURE": ("DEGRADED", "FAILED"),
         "PROVENANCE_RECOVERY": ("RECOVERED", "RECOVERED"),
+        "TASK_CHECKPOINTED": ("CHECKPOINTED", "PERSISTED"),
+        "TASK_CHECKPOINT_PREPARED": ("PREPARED", "PENDING"),
+        "TASK_CHECKPOINT_ABORTED": ("ABORTED", "NOT_PERSISTED"),
     }
     if event_type == "REQUEST_COMPLETED":
         return ("COMPLETED", "SUCCEEDED") if success else ("FAILED", "FAILED")
@@ -514,6 +720,7 @@ class RuntimeProvenanceEvent:
     event_id: str
     timestamp_utc: str
     event_type: str
+    task_id: str | None = None
     request_id: str | None = None
     trace_id: str | None = None
     model_call_id: str | None = None
@@ -537,10 +744,19 @@ class RuntimeProvenanceEvent:
     success: bool | None = None
     reason_code: str | None = None
     recovered_count: int | None = None
+    checkpoint_version: int | None = None
+    checkpoint_hash: str | None = None
+    checkpoint_parent_hash: str | None = None
+    checkpoint_event_id: str | None = None
+    task_state: str | None = None
+    task_phase: str | None = None
+    schema_version: str = RUNTIME_PROVENANCE_SCHEMA_VERSION
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "event_type", _event_type_value(self.event_type))
         object.__setattr__(self, "timestamp_utc", _timestamp_value(self.timestamp_utc))
+        if self.schema_version not in RUNTIME_PROVENANCE_SCHEMA_VERSIONS:
+            raise ProvenanceSchemaError("Runtime provenance schema version is invalid.")
         for field in _ID_PREFIXES:
             _validate_id(field, getattr(self, field))
         for field in (
@@ -553,6 +769,7 @@ class RuntimeProvenanceEvent:
         for field, maximum in (
             ("request_length", 10_000_000), ("retry_attempt", 1_000),
             ("provider_attempt", 1_000), ("recovered_count", 1_000_000),
+            ("checkpoint_version", 1_000_000),
         ):
             value = getattr(self, field)
             if value is not None and (
@@ -569,6 +786,21 @@ class RuntimeProvenanceEvent:
             or not _HEX_DIGEST.fullmatch(self.action_fingerprint)
         ):
             raise ProvenanceSchemaError("Runtime provenance action fingerprint is invalid.")
+        for field in ("checkpoint_hash", "checkpoint_parent_hash"):
+            value = getattr(self, field)
+            if value is not None and (
+                not isinstance(value, str) or not _HEX_DIGEST.fullmatch(value)
+            ):
+                raise ProvenanceSchemaError(
+                    f"Runtime provenance {field} is invalid."
+                )
+        for field in ("task_state", "task_phase"):
+            value = getattr(self, field)
+            if value is not None and (
+                not isinstance(value, str)
+                or not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", value)
+            ):
+                raise ProvenanceSchemaError(f"Runtime provenance {field} is invalid.")
         if self.capability_class is not None and self.capability_class not in _CAPABILITY_VALUES:
             raise ProvenanceSchemaError("Runtime provenance capability class is invalid.")
         if self.idempotency_state is not None and self.idempotency_state not in _IDEMPOTENCY_VALUES:
@@ -592,16 +824,19 @@ class RuntimeProvenanceEvent:
         populated = {
             name
             for name, value in values.items()
-            if name not in {"event_id", "timestamp_utc", "event_type"}
+            if name not in {"schema_version", "event_id", "timestamp_utc", "event_type"}
             and value is not None
         }
         if populated - _EVENT_ALLOWED_FIELDS[self.event_type]:
             raise ProvenanceSchemaError(
                 "Runtime provenance event contains fields outside its exact schema."
             )
+        required_fields = _EVENT_REQUIRED_FIELDS[self.event_type]
+        if self.schema_version == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION:
+            required_fields = required_fields - {"task_id"}
         missing = {
             name
-            for name in _EVENT_REQUIRED_FIELDS[self.event_type]
+            for name in required_fields
             if values.get(name) is None
         }
         if missing:
@@ -613,6 +848,10 @@ class RuntimeProvenanceEvent:
                 raise ProvenanceSchemaError(
                     "Runtime provenance event contradicts its fixed semantics."
                 )
+        if self.schema_version == RUNTIME_PROVENANCE_SCHEMA_VERSION:
+            _validate_id("task_id", self.task_id, required=self.event_type != "PROVENANCE_RECOVERY")
+        elif self.task_id is not None:
+            raise ProvenanceSchemaError("Legacy provenance cannot contain task identity.")
         if self.event_type.startswith("REQUEST_"):
             _validate_id("request_id", self.request_id, required=True)
             _validate_id("trace_id", self.trace_id, required=True)
@@ -621,6 +860,13 @@ class RuntimeProvenanceEvent:
         elif self.event_type.startswith("MODEL_CALL_"):
             for field in ("request_id", "trace_id", "model_call_id"):
                 _validate_id(field, getattr(self, field), required=True)
+        elif self.event_type in {
+            "TASK_CHECKPOINT_PREPARED",
+            "TASK_CHECKPOINT_ABORTED",
+            "TASK_CHECKPOINTED",
+        }:
+            for field in ("task_id", "request_id", "trace_id"):
+                _validate_id(field, getattr(self, field), required=True)
         elif self.event_type not in {"PERSISTENCE_FAILURE", "PROVENANCE_RECOVERY"}:
             for field in ("request_id", "trace_id", "action_id", "operation_key"):
                 _validate_id(field, getattr(self, field), required=True)
@@ -628,6 +874,27 @@ class RuntimeProvenanceEvent:
                 raise ProvenanceSchemaError(
                     "Action provenance requires action and capability class."
                 )
+        if self.event_type in {
+            "TASK_CHECKPOINT_PREPARED",
+            "TASK_CHECKPOINT_ABORTED",
+            "TASK_CHECKPOINTED",
+        }:
+            if (
+                self.checkpoint_version is None
+                or self.checkpoint_version < 1
+                or self.checkpoint_hash is None
+                or self.task_state is None
+                or self.task_phase is None
+            ):
+                raise ProvenanceSchemaError("Task checkpoint provenance is incomplete.")
+            if (self.task_state, self.task_phase) not in _TASK_STATE_PHASE_PAIRS:
+                raise ProvenanceSchemaError(
+                    "Task checkpoint provenance state and phase contradict each other."
+                )
+        if self.event_type in {"TASK_CHECKPOINT_PREPARED", "TASK_CHECKPOINT_ABORTED"} and (
+            self.checkpoint_parent_hash is None or self.checkpoint_event_id is None
+        ):
+            raise ProvenanceSchemaError("Task checkpoint preparation is incomplete.")
         if self.event_type == "REQUEST_STARTED" and (
             self.request_length is None or self.slash_command is None
         ):
@@ -729,8 +996,7 @@ class RuntimeProvenanceEvent:
             success=self.success,
             policy_allowed=self.policy_allowed,
         )
-        return {
-            "schema_version": RUNTIME_PROVENANCE_SCHEMA_VERSION,
+        document = {
             **asdict(self),
             "actor": RUNTIME_PROVENANCE_ACTOR,
             "actor_type": RUNTIME_PROVENANCE_ACTOR_TYPE,
@@ -738,6 +1004,12 @@ class RuntimeProvenanceEvent:
             "outcome": outcome,
             "authority": dict(RUNTIME_PROVENANCE_AUTHORITY),
         }
+        fields = (
+            LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
+            if self.schema_version == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
+            else RUNTIME_PROVENANCE_EVENT_FIELDS
+        )
+        return {field: document[field] for field in fields}
 
     def outbox_document(self) -> dict[str, Any]:
         document = self.event_document()
@@ -747,19 +1019,27 @@ class RuntimeProvenanceEvent:
     def from_event_document(
         cls, document: Mapping[str, Any]
     ) -> "RuntimeProvenanceEvent":
-        if frozenset(document) != RUNTIME_PROVENANCE_EVENT_FIELDS:
+        schema = document.get("schema_version")
+        expected_fields = (
+            LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
+            if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
+            else RUNTIME_PROVENANCE_EVENT_FIELDS
+        )
+        if frozenset(document) != expected_fields:
             raise ProvenanceSchemaError(
                 "Runtime provenance event document has an inexact schema."
             )
-        if document.get("schema_version") != RUNTIME_PROVENANCE_SCHEMA_VERSION:
+        if schema not in RUNTIME_PROVENANCE_SCHEMA_VERSIONS:
             raise ProvenanceSchemaError("Runtime provenance schema version is invalid.")
         if document.get("authority") != RUNTIME_PROVENANCE_AUTHORITY:
             raise ProvenanceSchemaError("Runtime provenance authority block is invalid.")
         event = cls(
             **{
-                field: document[field]
+                field: document.get(field)
                 for field in RuntimeProvenanceEvent.__dataclass_fields__
-            }
+                if field != "schema_version"
+            },
+            schema_version=schema,
         )
         status, outcome = _runtime_status_outcome(
             event.event_type,
@@ -803,6 +1083,10 @@ def new_runtime_provenance_event(
     success: bool | None = None,
     reason_code: str | None = None,
     recovered_count: int | None = None,
+    checkpoint_version: int | None = None,
+    checkpoint_hash: str | None = None,
+    task_state: str | None = None,
+    task_phase: str | None = None,
     clock: Callable[[], dt.datetime] | None = None,
 ) -> RuntimeProvenanceEvent:
     """Build one runtime-owned event without accepting generic metadata."""
@@ -825,6 +1109,7 @@ def new_runtime_provenance_event(
         event_id=f"provenance_event_{uuid.uuid4().hex}",
         timestamp_utc=timestamp.astimezone(dt.UTC).isoformat().replace("+00:00", "Z"),
         event_type=event_name,
+        task_id=identities.get("task_id"),
         request_id=identities.get("request_id"),
         trace_id=identities.get("trace_id"),
         model_call_id=identities.get("model_call_id"),
@@ -848,6 +1133,10 @@ def new_runtime_provenance_event(
         success=success,
         reason_code=reason_code or event_name,
         recovered_count=recovered_count,
+        checkpoint_version=checkpoint_version,
+        checkpoint_hash=checkpoint_hash,
+        task_state=task_state,
+        task_phase=task_phase,
     )
 
 
@@ -910,19 +1199,35 @@ def _verify_entries(
     issues = list(parse_issues)
     previous_hash = GENESIS_PREV_HASH
     runtime_mode: bool | None = None
+    seen_runtime_1b = False
     seen_ids: dict[str, str] = {}
     for index, entry in enumerate(values):
-        runtime = entry.get("schema_version") == RUNTIME_PROVENANCE_SCHEMA_VERSION
+        schema = entry.get("schema_version")
+        runtime = schema in RUNTIME_PROVENANCE_SCHEMA_VERSIONS
         if runtime_mode is None:
             runtime_mode = runtime
         elif runtime_mode != runtime:
             issues.append(f"entry[{index}]: legacy and runtime schemas cannot be mixed")
         if runtime:
-            if frozenset(entry) != RUNTIME_PROVENANCE_RECORD_FIELDS:
+            if schema == RUNTIME_PROVENANCE_SCHEMA_VERSION:
+                seen_runtime_1b = True
+            elif seen_runtime_1b:
+                issues.append(f"entry[{index}]: runtime schema downgrade from 1B to 1A")
+            event_fields = (
+                LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
+                if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                else RUNTIME_PROVENANCE_EVENT_FIELDS
+            )
+            record_fields = (
+                LEGACY_RUNTIME_PROVENANCE_RECORD_FIELDS
+                if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                else RUNTIME_PROVENANCE_RECORD_FIELDS
+            )
+            if frozenset(entry) != record_fields:
                 issues.append(f"entry[{index}]: runtime record schema mismatch")
                 continue
             try:
-                event_doc = {key: entry[key] for key in RUNTIME_PROVENANCE_EVENT_FIELDS}
+                event_doc = {key: entry[key] for key in event_fields}
                 RuntimeProvenanceEvent.from_event_document(event_doc)
             except ProvenanceError as exc:
                 issues.append(f"entry[{index}]: {exc.reason_code}")
@@ -990,6 +1295,7 @@ def _verify_entries(
             previous_hash = expected
         elif isinstance(stored_entry_hash, str):
             previous_hash = stored_entry_hash
+    issues.extend(_task_checkpoint_order_issues(values))
     return ProvenanceVerificationResult(
         ok=not issues,
         entry_count=len(values),
@@ -1349,7 +1655,7 @@ class AppendOnlyProvenanceStore:
         def build(
             entries: list[dict[str, Any]], previous_hash: str
         ) -> tuple[dict[str, Any], dict[str, Any]]:
-            if entries and entries[0].get("schema_version") == RUNTIME_PROVENANCE_SCHEMA_VERSION:
+            if entries and entries[0].get("schema_version") in RUNTIME_PROVENANCE_SCHEMA_VERSIONS:
                 raise ProvenanceSchemaError(
                     "Legacy events cannot be appended to a runtime provenance ledger."
                 )
@@ -1384,9 +1690,19 @@ class AppendOnlyProvenanceStore:
         def build(
             entries: list[dict[str, Any]], previous_hash: str
         ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-            if entries and entries[0].get("schema_version") != RUNTIME_PROVENANCE_SCHEMA_VERSION:
+            if entries and entries[0].get("schema_version") not in RUNTIME_PROVENANCE_SCHEMA_VERSIONS:
                 raise ProvenanceSchemaError(
                     "Runtime events cannot be appended to a legacy provenance ledger."
+                )
+            if (
+                event.schema_version == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                and any(
+                    item.get("schema_version") == RUNTIME_PROVENANCE_SCHEMA_VERSION
+                    for item in entries
+                )
+            ):
+                raise ProvenanceSchemaError(
+                    "Runtime provenance schema cannot downgrade from 1B to 1A."
                 )
             for existing in entries:
                 if existing.get("event_id") != event.event_id:
@@ -1395,6 +1711,14 @@ class AppendOnlyProvenanceStore:
                     return None, existing
                 raise ProvenanceEventConflictError(
                     "Runtime provenance event ID conflicts with different content.",
+                    target_path=self.runtime_log_path,
+                )
+            checkpoint_order_issues = _task_checkpoint_order_issues(
+                [*entries, event_document]
+            )
+            if checkpoint_order_issues:
+                raise ProvenanceEventConflictError(
+                    checkpoint_order_issues[-1],
                     target_path=self.runtime_log_path,
                 )
             without_entry = {
@@ -1525,16 +1849,28 @@ class AppendOnlyProvenanceStore:
                         "Provenance outbox entry is malformed.",
                         target_path=pending_path,
                     ) from exc
+                schema = document.get("schema_version") if isinstance(document, dict) else None
+                outbox_fields = (
+                    LEGACY_RUNTIME_PROVENANCE_OUTBOX_FIELDS
+                    if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                    else RUNTIME_PROVENANCE_OUTBOX_FIELDS
+                )
+                event_fields = (
+                    LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
+                    if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                    else RUNTIME_PROVENANCE_EVENT_FIELDS
+                )
                 if (
                     not isinstance(document, dict)
-                    or frozenset(document) != RUNTIME_PROVENANCE_OUTBOX_FIELDS
+                    or schema not in RUNTIME_PROVENANCE_SCHEMA_VERSIONS
+                    or frozenset(document) != outbox_fields
                 ):
                     raise ProvenanceOutboxError(
                         "Provenance outbox entry has an inexact schema.",
                         target_path=pending_path,
                     )
                 event_document = {
-                    key: document[key] for key in RUNTIME_PROVENANCE_EVENT_FIELDS
+                    key: document[key] for key in event_fields
                 }
                 if document.get("event_hash") != _event_hash(event_document):
                     raise ProvenanceOutboxError(

@@ -16,6 +16,13 @@ from runtime.providers.selector import (
     run_selected_provider,
 )
 from runtime.runtime_paths import runtime_state_dir
+from runtime.task_checkpoints import (
+    ApprovalState,
+    DurableTaskCheckpointStore,
+    TaskPhase,
+    TaskState,
+    safe_context_metadata,
+)
 from runtime.provenance_lifecycle import (
     AppendOnlyProvenanceStore,
     RuntimeProvenanceEventType,
@@ -71,6 +78,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         and args.activate_manual_live_test
     )
     provenance_store = None
+    task_checkpoint_store = None
+    step_reservation = None
     trace_context = None
     model_call = None
     if live_attempt:
@@ -99,8 +108,29 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             trace_context = TraceContext.new_request()
             model_call = trace_context.new_model_call()
-            provenance_store = AppendOnlyProvenanceStore(
-                runtime_state_dir(Path(__file__).resolve().parents[1]) / "state"
+            project_dir = Path(__file__).resolve().parents[1]
+            state_dir = runtime_state_dir(project_dir) / "state"
+            provenance_store = AppendOnlyProvenanceStore(state_dir)
+            task_checkpoint_store = DurableTaskCheckpointStore(
+                state_dir,
+                project_dir=project_dir,
+                provenance_store=provenance_store,
+            )
+            checkpoint = task_checkpoint_store.create_task(
+                trace_context,
+                max_steps=1,
+                retry_budget=1,
+                safe_context=safe_context_metadata(prompt),
+            )
+            task_checkpoint_store.transition(
+                trace_context.task_id,
+                expected_version=checkpoint.checkpoint_version,
+                state=TaskState.RUNNING,
+                phase=TaskPhase.BETWEEN_STEPS,
+                reason_code="TASK_STARTED",
+                latest_request_id=trace_context.request_id,
+                latest_trace_id=trace_context.trace_id,
+                approval_state=ApprovalState.NOT_APPLICABLE,
             )
             provenance_store.append_runtime_event(
                 new_runtime_provenance_event(
@@ -110,6 +140,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                     request_length=len(prompt),
                     slash_command=False,
                 )
+            )
+            step_reservation = task_checkpoint_store.reserve_step(
+                trace_context.task_id
+            )
+            task_checkpoint_store.consume_provider_attempt(
+                model_call,
+                step_reservation=step_reservation,
             )
             provenance_store.append_runtime_event(
                 new_runtime_provenance_event(
@@ -129,44 +166,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 2
-    try:
-        result = run_selected_provider(
-            provider_id=provider_id,
-            model_id=model_id,
-            prompt=prompt,
-            max_tokens=args.max_tokens,
-            live=args.live,
-            acknowledge_live_provider_test=args.acknowledge_live_provider_test,
-            activation_status=activation,
-            selected_by="manual",
-            created_at=args.created_at,
-        )
-    except ValueError as error:
-        if provenance_store is not None and trace_context is not None and model_call is not None:
-            provenance_store.append_terminal(
-                new_runtime_provenance_event(
-                    RuntimeProvenanceEventType.MODEL_CALL_FAILED,
-                    model_call=model_call,
-                    requested_provider=provider_id,
-                    requested_model=model_id,
-                    retry_attempt=1,
-                    provider_attempt=1,
-                    success=False,
-                )
-            )
-            provenance_store.append_terminal(
-                new_runtime_provenance_event(
-                    RuntimeProvenanceEventType.REQUEST_COMPLETED,
-                    trace_context=trace_context,
-                    ingress="CLI",
-                    success=False,
-                    reason_code="REQUEST_FAILED",
-                )
-            )
-        print(json.dumps({"status": "invalid", "error_message": str(error)}, sort_keys=True))
-        return 2
-    if provenance_store is not None and trace_context is not None and model_call is not None:
-        succeeded = result.status == LIVE_SUCCESS
+
+    def terminalize_live_attempt(succeeded: bool) -> None:
+        if not live_attempt:
+            return
+        assert provenance_store is not None
+        assert task_checkpoint_store is not None
+        assert step_reservation is not None
+        assert trace_context is not None
+        assert model_call is not None
         provenance_store.append_terminal(
             new_runtime_provenance_event(
                 (
@@ -182,6 +190,40 @@ def main(argv: Sequence[str] | None = None) -> int:
                 success=succeeded,
             )
         )
+        checkpoint = task_checkpoint_store.load(trace_context.task_id)
+        assert checkpoint is not None
+        task_checkpoint_store.transition(
+            trace_context.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.RUNNING,
+            phase=(
+                TaskPhase.AFTER_MODEL_CALL
+                if succeeded
+                else TaskPhase.BEFORE_MODEL_CALL
+            ),
+            reason_code=(
+                "TASK_MODEL_CALL_COMPLETED"
+                if succeeded
+                else "TASK_MODEL_CALL_FAILED"
+            ),
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            current_model_call_id=model_call.model_call_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
+        )
+        task_checkpoint_store.close_step_reservation(step_reservation)
+        checkpoint = task_checkpoint_store.load(trace_context.task_id)
+        assert checkpoint is not None
+        task_checkpoint_store.transition(
+            trace_context.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.COMPLETED if succeeded else TaskState.FAILED,
+            phase=TaskPhase.TERMINAL,
+            reason_code="TASK_COMPLETED" if succeeded else "TASK_FAILED",
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
+        )
         provenance_store.append_terminal(
             new_runtime_provenance_event(
                 RuntimeProvenanceEventType.REQUEST_COMPLETED,
@@ -193,6 +235,36 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ),
             )
         )
+
+    try:
+        result = run_selected_provider(
+            provider_id=provider_id,
+            model_id=model_id,
+            prompt=prompt,
+            max_tokens=args.max_tokens,
+            live=args.live,
+            acknowledge_live_provider_test=args.acknowledge_live_provider_test,
+            activation_status=activation,
+            selected_by="manual",
+            created_at=args.created_at,
+        )
+    except ValueError as error:
+        terminalize_live_attempt(False)
+        print(json.dumps({"status": "invalid", "error_message": str(error)}, sort_keys=True))
+        return 2
+    except Exception as provider_error:
+        try:
+            terminalize_live_attempt(False)
+        except Exception as lifecycle_error:
+            try:
+                provider_error.add_note(
+                    "CLI provider failure lifecycle is pending or degraded; "
+                    f"secondary failure type: {type(lifecycle_error).__name__}."
+                )
+            except AttributeError:  # pragma: no cover
+                pass
+        raise
+    terminalize_live_attempt(result.status == LIVE_SUCCESS)
     print(json.dumps(result.to_dict(), sort_keys=True))
     return 0 if result.status in {"dry_run_preview", "live_success"} else 2
 

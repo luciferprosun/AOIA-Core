@@ -25,7 +25,9 @@ from .capability_policy import CapabilityClass
 from .validator import ALLOWED_ACTIONS
 
 
-IDEMPOTENCY_SCHEMA_VERSION = "AOIA_IDEMPOTENCY_1A"
+IDEMPOTENCY_SCHEMA_VERSION = "AOIA_IDEMPOTENCY_1B"
+LEGACY_IDEMPOTENCY_SCHEMA_VERSION = "AOIA_IDEMPOTENCY_1A"
+IDEMPOTENCY_FINGERPRINT_SCHEMA_VERSION = "AOIA_IDEMPOTENCY_1A"
 IDEMPOTENCY_KEY_CONFLICT_REASON_CODE = "IDEMPOTENCY_KEY_CONFLICT"
 IDEMPOTENCY_OPERATION_IN_PROGRESS_REASON_CODE = "IDEMPOTENCY_OPERATION_IN_PROGRESS"
 IDEMPOTENCY_UNKNOWN_OUTCOME_REASON_CODE = "IDEMPOTENCY_UNKNOWN_OUTCOME"
@@ -34,6 +36,7 @@ IDEMPOTENCY_RESERVED_REASON_CODE = "IDEMPOTENCY_RESERVED"
 IDEMPOTENCY_OWNER_MISMATCH_REASON_CODE = "IDEMPOTENCY_OWNER_MISMATCH"
 IDEMPOTENCY_ILLEGAL_TRANSITION_REASON_CODE = "IDEMPOTENCY_ILLEGAL_TRANSITION"
 IDEMPOTENCY_STORE_CORRUPT_REASON_CODE = "IDEMPOTENCY_STORE_CORRUPT"
+MAX_IDEMPOTENCY_RECORD_BYTES = 64 * 1024
 
 
 _HEX_DIGEST = re.compile(r"^[0-9a-f]{64}$")
@@ -54,7 +57,7 @@ IDEMPOTENCY_RECEIPT_FIELDS = frozenset(
         "omitted_field_count",
     }
 )
-IDEMPOTENCY_RECORD_FIELDS = frozenset(
+LEGACY_IDEMPOTENCY_RECORD_FIELDS = frozenset(
     {
         "schema_version",
         "operation_key",
@@ -71,6 +74,9 @@ IDEMPOTENCY_RECORD_FIELDS = frozenset(
         "reason_code",
         "terminal_receipt",
     }
+)
+IDEMPOTENCY_RECORD_FIELDS = frozenset(
+    {*LEGACY_IDEMPOTENCY_RECORD_FIELDS, "task_id"}
 )
 
 
@@ -256,12 +262,21 @@ class OperationContext:
     def identity_fields(self) -> dict[str, str]:
         return {"operation_key": self.operation_key}
 
+    def runtime_task_id(self) -> str:
+        """Derive one stable runtime-owned task binding for direct trusted retries."""
+
+        suffix = hashlib.sha256(
+            f"AOIA_OPERATION_TASK:{self.operation_key}".encode("ascii")
+        ).hexdigest()[:32]
+        return f"task_{suffix}"
+
 
 @dataclass(frozen=True)
 class IdempotencyRecord:
     schema_version: str
     operation_key: str
     project_scope: str
+    task_id: str | None
     request_id: str
     trace_id: str
     action_id: str
@@ -275,10 +290,11 @@ class IdempotencyRecord:
     terminal_receipt: dict[str, Any] | None = None
 
     def to_payload(self) -> dict[str, Any]:
-        return {
+        payload = {
             "schema_version": self.schema_version,
             "operation_key": self.operation_key,
             "project_scope": self.project_scope,
+            "task_id": self.task_id,
             "request_id": self.request_id,
             "trace_id": self.trace_id,
             "action_id": self.action_id,
@@ -291,6 +307,9 @@ class IdempotencyRecord:
             "reason_code": self.reason_code,
             "terminal_receipt": self.terminal_receipt,
         }
+        if self.schema_version == LEGACY_IDEMPOTENCY_SCHEMA_VERSION:
+            payload.pop("task_id")
+        return payload
 
     @classmethod
     def from_payload(cls, payload: object) -> IdempotencyRecord:
@@ -298,12 +317,19 @@ class IdempotencyRecord:
             raise IdempotencyStoreCorruptionError(
                 "Durable idempotency record must be one JSON object."
             )
-        if set(payload) != IDEMPOTENCY_RECORD_FIELDS:
+        schema = payload.get("schema_version")
+        expected_fields = (
+            LEGACY_IDEMPOTENCY_RECORD_FIELDS
+            if schema == LEGACY_IDEMPOTENCY_SCHEMA_VERSION
+            else IDEMPOTENCY_RECORD_FIELDS
+        )
+        if set(payload) != expected_fields:
             raise IdempotencyStoreCorruptionError(
                 "Durable idempotency record fields do not match its exact schema."
             )
-        string_fields = IDEMPOTENCY_RECORD_FIELDS - {
+        string_fields = expected_fields - {
             "model_call_id",
+            "task_id",
             "terminal_receipt",
         }
         if any(not isinstance(payload[field], str) for field in string_fields):
@@ -316,6 +342,12 @@ class IdempotencyRecord:
             raise IdempotencyStoreCorruptionError(
                 "Durable idempotency model-call identity has an invalid type."
             )
+        if schema == IDEMPOTENCY_SCHEMA_VERSION and not isinstance(
+            payload.get("task_id"), str
+        ):
+            raise IdempotencyStoreCorruptionError(
+                "Durable idempotency task identity has an invalid type."
+            )
         if payload["terminal_receipt"] is not None and not isinstance(
             payload["terminal_receipt"], dict
         ):
@@ -327,6 +359,11 @@ class IdempotencyRecord:
                 schema_version=payload["schema_version"],
                 operation_key=payload["operation_key"],
                 project_scope=payload["project_scope"],
+                task_id=(
+                    payload.get("task_id")
+                    if schema == IDEMPOTENCY_SCHEMA_VERSION
+                    else None
+                ),
                 request_id=payload["request_id"],
                 trace_id=payload["trace_id"],
                 action_id=payload["action_id"],
@@ -355,7 +392,10 @@ class IdempotencyRecord:
         return record
 
     def validate(self) -> None:
-        if self.schema_version != IDEMPOTENCY_SCHEMA_VERSION:
+        if self.schema_version not in {
+            IDEMPOTENCY_SCHEMA_VERSION,
+            LEGACY_IDEMPOTENCY_SCHEMA_VERSION,
+        }:
             raise IdempotencyStoreCorruptionError(
                 "Durable idempotency record has an unsupported schema version."
             )
@@ -380,6 +420,16 @@ class IdempotencyRecord:
         _validate_runtime_identity(self.request_id, "request")
         _validate_runtime_identity(self.trace_id, "trace")
         _validate_runtime_identity(self.action_id, "action")
+        if self.schema_version == IDEMPOTENCY_SCHEMA_VERSION:
+            if self.task_id is None:
+                raise IdempotencyStoreCorruptionError(
+                    "Durable idempotency record is missing task identity."
+                )
+            _validate_runtime_identity(self.task_id, "task")
+        elif self.task_id is not None:
+            raise IdempotencyStoreCorruptionError(
+                "Legacy idempotency record unexpectedly contains task identity."
+            )
         if self.model_call_id is not None:
             _validate_runtime_identity(self.model_call_id, "model_call")
         if self.capability_class not in {item.value for item in CapabilityClass}:
@@ -454,7 +504,7 @@ def canonical_action_fingerprint(
             "Unclassified capability cannot receive an idempotency fingerprint."
         ) from exc
     canonical = {
-        "schema_version": IDEMPOTENCY_SCHEMA_VERSION,
+        "schema_version": IDEMPOTENCY_FINGERPRINT_SCHEMA_VERSION,
         "project_scope": project_scope_fingerprint(project_dir),
         "capability_class": capability_value,
         "action": action_name,
@@ -632,7 +682,11 @@ class DurableIdempotencyStore:
     def load(self, operation: OperationContext) -> IdempotencyRecord | None:
         path = self.record_path(operation.operation_key)
         try:
-            payload = read_json_snapshot(path)
+            payload = read_json_snapshot(
+                path,
+                reject_duplicate_keys=True,
+                maximum_bytes=MAX_IDEMPOTENCY_RECORD_BYTES,
+            )
         except StateCorruptionError as exc:
             raise IdempotencyStoreCorruptionError(
                 "Durable idempotency record is corrupt."
@@ -672,6 +726,7 @@ class DurableIdempotencyStore:
             schema_version=IDEMPOTENCY_SCHEMA_VERSION,
             operation_key=operation.operation_key,
             project_scope=project_scope,
+            task_id=action_context.task_id,
             request_id=action_context.request_id,
             trace_id=action_context.trace_id,
             action_id=action_context.action_id,
@@ -700,6 +755,14 @@ class DurableIdempotencyStore:
                 raise IdempotencyStoreCorruptionError(
                     "Durable idempotency record key does not match its resource."
                 )
+            if existing.task_id is None:
+                raise IdempotencyOwnerMismatchError(
+                    "Legacy idempotency record is not bound to a runtime task."
+                )
+            if existing.task_id != action_context.task_id:
+                raise IdempotencyOwnerMismatchError(
+                    "Idempotency operation belongs to a different runtime task."
+                )
             resolution = self._resolve_existing(existing, candidate)
             return existing.to_payload(), resolution
 
@@ -709,6 +772,8 @@ class DurableIdempotencyStore:
             lock_path=state_resource_lock_path(self.state_dir, path),
             lock_timeout_seconds=self.lock_timeout_seconds,
             sort_keys=True,
+            reject_duplicate_keys=True,
+            maximum_bytes=MAX_IDEMPOTENCY_RECORD_BYTES,
         )
 
     def transition(
@@ -787,6 +852,8 @@ class DurableIdempotencyStore:
             lock_path=state_resource_lock_path(self.state_dir, path),
             lock_timeout_seconds=self.lock_timeout_seconds,
             sort_keys=True,
+            reject_duplicate_keys=True,
+            maximum_bytes=MAX_IDEMPOTENCY_RECORD_BYTES,
         )
 
     @staticmethod

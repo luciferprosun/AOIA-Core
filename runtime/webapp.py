@@ -426,6 +426,13 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
         from runtime.providers.contracts import LIVE_SUCCESS, ProviderActivationStatus
         from runtime.providers.selector import run_selected_provider
         from runtime.runtime_paths import runtime_state_dir
+        from runtime.task_checkpoints import (
+            ApprovalState,
+            DurableTaskCheckpointStore,
+            TaskPhase,
+            TaskState,
+            safe_context_metadata,
+        )
         from runtime.tools.provenance import (
             AppendOnlyProvenanceStore,
             RuntimeProvenanceEventType,
@@ -435,6 +442,13 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
         from providers.contracts import LIVE_SUCCESS, ProviderActivationStatus
         from providers.selector import run_selected_provider
         from runtime_paths import runtime_state_dir
+        from task_checkpoints import (
+            ApprovalState,
+            DurableTaskCheckpointStore,
+            TaskPhase,
+            TaskState,
+            safe_context_metadata,
+        )
         from tools.provenance import (
             AppendOnlyProvenanceStore,
             RuntimeProvenanceEventType,
@@ -451,6 +465,27 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
     provenance_store = AppendOnlyProvenanceStore(
         runtime_state_dir(PROJECT_DIR) / "state"
     )
+    task_checkpoint_store = DurableTaskCheckpointStore(
+        runtime_state_dir(PROJECT_DIR) / "state",
+        project_dir=PROJECT_DIR,
+        provenance_store=provenance_store,
+    )
+    checkpoint = task_checkpoint_store.create_task(
+        trace_context,
+        max_steps=1,
+        retry_budget=1,
+        safe_context=safe_context_metadata(prompt),
+    )
+    task_checkpoint_store.transition(
+        trace_context.task_id,
+        expected_version=checkpoint.checkpoint_version,
+        state=TaskState.RUNNING,
+        phase=TaskPhase.BETWEEN_STEPS,
+        reason_code="TASK_STARTED",
+        latest_request_id=trace_context.request_id,
+        latest_trace_id=trace_context.trace_id,
+        approval_state=ApprovalState.NOT_APPLICABLE,
+    )
     provenance_store.append_runtime_event(
         new_runtime_provenance_event(
             RuntimeProvenanceEventType.REQUEST_STARTED,
@@ -459,6 +494,11 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
             request_length=len(prompt),
             slash_command=False,
         )
+    )
+    step_reservation = task_checkpoint_store.reserve_step(trace_context.task_id)
+    task_checkpoint_store.consume_provider_attempt(
+        model_call,
+        step_reservation=step_reservation,
     )
     provenance_store.append_runtime_event(
         new_runtime_provenance_event(
@@ -470,6 +510,57 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
             provider_attempt=1,
         )
     )
+
+    def terminalize_model_and_task(succeeded: bool) -> None:
+        provenance_store.append_terminal(
+            new_runtime_provenance_event(
+                (
+                    RuntimeProvenanceEventType.MODEL_CALL_COMPLETED
+                    if succeeded
+                    else RuntimeProvenanceEventType.MODEL_CALL_FAILED
+                ),
+                model_call=model_call,
+                requested_provider=provider_id,
+                requested_model=model_id,
+                retry_attempt=1,
+                provider_attempt=1,
+                success=succeeded,
+            )
+        )
+        checkpoint = task_checkpoint_store.load(trace_context.task_id)
+        assert checkpoint is not None
+        task_checkpoint_store.transition(
+            trace_context.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.RUNNING,
+            phase=(
+                TaskPhase.AFTER_MODEL_CALL
+                if succeeded
+                else TaskPhase.BEFORE_MODEL_CALL
+            ),
+            reason_code=(
+                "TASK_MODEL_CALL_COMPLETED"
+                if succeeded
+                else "TASK_MODEL_CALL_FAILED"
+            ),
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            current_model_call_id=model_call.model_call_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
+        )
+        task_checkpoint_store.close_step_reservation(step_reservation)
+        checkpoint = task_checkpoint_store.load(trace_context.task_id)
+        assert checkpoint is not None
+        task_checkpoint_store.transition(
+            trace_context.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.COMPLETED if succeeded else TaskState.FAILED,
+            phase=TaskPhase.TERMINAL,
+            reason_code="TASK_COMPLETED" if succeeded else "TASK_FAILED",
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
+        )
     try:
         result = run_selected_provider(
             provider_id=provider_id,
@@ -484,17 +575,7 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
         )
     except Exception as provider_error:
         try:
-            provenance_store.append_terminal(
-                new_runtime_provenance_event(
-                    RuntimeProvenanceEventType.MODEL_CALL_FAILED,
-                    model_call=model_call,
-                    requested_provider=provider_id,
-                    requested_model=model_id,
-                    retry_attempt=1,
-                    provider_attempt=1,
-                    success=False,
-                )
-            )
+            terminalize_model_and_task(False)
             provenance_store.append_terminal(
                 new_runtime_provenance_event(
                     RuntimeProvenanceEventType.REQUEST_COMPLETED,
@@ -514,21 +595,7 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
                 pass
         raise
     provider_succeeded = result.status == LIVE_SUCCESS
-    provenance_store.append_terminal(
-        new_runtime_provenance_event(
-            (
-                RuntimeProvenanceEventType.MODEL_CALL_COMPLETED
-                if provider_succeeded
-                else RuntimeProvenanceEventType.MODEL_CALL_FAILED
-            ),
-            model_call=model_call,
-            requested_provider=provider_id,
-            requested_model=model_id,
-            retry_attempt=1,
-            provider_attempt=1,
-            success=provider_succeeded,
-        )
-    )
+    terminalize_model_and_task(provider_succeeded)
     provenance_store.append_terminal(
         new_runtime_provenance_event(
             RuntimeProvenanceEventType.REQUEST_COMPLETED,

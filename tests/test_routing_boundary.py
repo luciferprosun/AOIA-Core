@@ -6,6 +6,10 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import main
+from runtime.task_checkpoints import StepReservation, TaskState
+from tools.executor import ToolSpec
+from tools.idempotency import IdempotencyState, OperationContext
+from trace_context import TraceContext
 
 
 PROMPT_TEMPLATE = """
@@ -60,26 +64,19 @@ class RecordingKernel:
 
 
 class RecordingExecutor:
-    def __init__(self) -> None:
+    def __init__(self, delegate) -> None:
+        self.delegate = delegate
         self.actions: list[dict] = []
+        self.step_reservations: list[StepReservation | None] = []
 
-    def execute(self, action: dict, require_approval: bool = True, **_identity):
-        _ = require_approval
+    def execute(self, action: dict, require_approval: bool = True, **identity):
         self.actions.append(action)
-        if action["action"] == "browser_open":
-            return {
-                "success": True,
-                "message": f"Opened {action['url']}",
-                "current_url": action["url"],
-                "open_tabs": [action["url"]],
-            }
-        if action["action"] == "browser_get_visible_text":
-            return {
-                "success": True,
-                "message": "Read visible page text.",
-                "text": "GitHub page text",
-            }
-        raise AssertionError(f"Unexpected action: {action}")
+        self.step_reservations.append(identity.get("step_reservation"))
+        return self.delegate.execute(
+            action,
+            require_approval=require_approval,
+            **identity,
+        )
 
 
 class RoutingBoundaryTests(unittest.TestCase):
@@ -110,19 +107,71 @@ class RoutingBoundaryTests(unittest.TestCase):
             project_dir = Path(tmp) / "project"
             project_dir.mkdir()
             runtime = main.AgentRuntime(FakeProvider(), PROMPT_TEMPLATE, project_dir)
-            executor = RecordingExecutor()
+            engine = runtime.executor
+            engine.tools["browser_open"] = ToolSpec(
+                "browser_open",
+                lambda action: {
+                    "success": True,
+                    "message": f"Opened {action['url']}",
+                    "current_url": action["url"],
+                    "open_tabs": [action["url"]],
+                },
+                "Synthetic external route handler.",
+            )
+            engine.tools["browser_get_visible_text"] = ToolSpec(
+                "browser_get_visible_text",
+                lambda _action: {
+                    "success": True,
+                    "message": "Read visible page text.",
+                    "text": "GitHub page text",
+                },
+                "Synthetic external route handler.",
+            )
+            executor = RecordingExecutor(engine)
             runtime.executor = executor
             runtime.aoia_kernel = RaisingKernel()
+            trace = TraceContext.new_request()
 
-            with patch("sys.stdout", new_callable=StringIO) as fake_stdout:
-                runtime.handle_user_request("https://github.com/luciferprosun/AOIA-Core")
+            with (
+                patch("sys.stdout", new_callable=StringIO) as fake_stdout,
+                patch("builtins.input", return_value=""),
+            ):
+                runtime.handle_user_request(
+                    "https://github.com/luciferprosun/AOIA-Core",
+                    trace,
+                )
 
             transcript = fake_stdout.getvalue()
             self.assertEqual([action["action"] for action in executor.actions], ["browser_open", "browser_get_visible_text"])
+            self.assertEqual(2, len(executor.step_reservations))
+            self.assertTrue(
+                all(
+                    isinstance(reservation, StepReservation)
+                    and reservation.task_id == trace.task_id
+                    for reservation in executor.step_reservations
+                )
+            )
             self.assertIn("Opened https://github.com/luciferprosun/AOIA-Core", transcript)
             self.assertIn("Current URL: https://github.com/luciferprosun/AOIA-Core", transcript)
             self.assertIn("GitHub page text", transcript)
             self.assertNotIn("AOIA deterministic epistemic kernel hit", transcript)
+
+            checkpoint = runtime.task_checkpoint_store.load(trace.task_id)
+            self.assertIsNotNone(checkpoint)
+            self.assertEqual(TaskState.COMPLETED, checkpoint.state)
+            starts = [
+                record
+                for record in runtime.provenance_store.read_runtime_all()
+                if record["event_type"] == "ACTION_DISPATCH_STARTED"
+                and record["task_id"] == trace.task_id
+            ]
+            self.assertEqual(2, len(starts))
+            for start in starts:
+                idempotency = engine.idempotency_store.load(
+                    OperationContext(start["operation_key"])
+                )
+                self.assertIsNotNone(idempotency)
+                self.assertEqual(IdempotencyState.SUCCEEDED, idempotency.state)
 
     def test_repository_intent_does_not_trigger_rhcsa_kernel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

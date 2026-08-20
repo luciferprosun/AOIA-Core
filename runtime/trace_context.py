@@ -1,14 +1,68 @@
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+import sys
+from dataclasses import dataclass, field
 from typing import Any, Mapping
+
+
+if __name__ == "runtime.trace_context":
+    sys.modules.setdefault("trace_context", sys.modules[__name__])
+elif __name__ == "trace_context":
+    sys.modules.setdefault("runtime.trace_context", sys.modules[__name__])
 
 
 UNTRUSTED_IDENTITY_FIELDS = frozenset(
     {
         "request_id",
         "trace_id",
+        "task_id",
+        "checkpoint_id",
+        "checkpoint_version",
+        "checkpoint_hash",
+        "checkpoint_event_id",
+        "checkpoint_parent_hash",
+        "root_request_id",
+        "root_trace_id",
+        "latest_request_id",
+        "latest_trace_id",
+        "task_state",
+        "task_phase",
+        "max_steps",
+        "step_index",
+        "recovery_attempt_id",
+        "claim_generation",
+        "claim_owner",
+        "claim_owner_id",
+        "claim_expires_at",
+        "lease_expires_at",
+        "recovery_claim_id",
+        "recovery_state",
+        "safe_resume_classification",
+        "approval_state",
+        "remaining_steps",
+        "remaining_retry_budget",
+        "provider_attempts_used",
+        "current_model_call_id",
+        "current_action_id",
+        "current_idempotency_key",
+        "current_action_fingerprint",
+        "current_idempotency_state",
+        "current_action_name",
+        "current_capability_class",
+        "current_policy_reason_code",
+        "latest_provenance_event_id",
+        "causal_provenance_event_id",
+        "transitions",
+        "transition_hash",
+        "from_state",
+        "from_phase",
+        "to_state",
+        "to_phase",
+        "phase",
+        "safe_context",
+        "request_hash",
+        "context_hashes",
         "model_call_id",
         "action_id",
         "idempotency_key",
@@ -115,27 +169,48 @@ def _require_identifier(value: str, prefix: str) -> str:
 
 
 @dataclass(frozen=True)
+class TaskContext:
+    """Stable runtime-owned identity for one logical AOIA task."""
+
+    task_id: str
+
+    def __post_init__(self) -> None:
+        _require_identifier(self.task_id, "task")
+
+    @classmethod
+    def new_task(cls) -> "TaskContext":
+        return cls(task_id=_new_identifier("task"))
+
+    def identity_fields(self) -> dict[str, str]:
+        return {"task_id": self.task_id}
+
+
+@dataclass(frozen=True)
 class TraceContext:
     """Runtime-owned identity shared by every step of one top-level request."""
 
     request_id: str
     trace_id: str
+    task_id: str = field(default_factory=lambda: _new_identifier("task"))
 
     def __post_init__(self) -> None:
         _require_identifier(self.request_id, "request")
         _require_identifier(self.trace_id, "trace")
+        _require_identifier(self.task_id, "task")
 
     @classmethod
-    def new_request(cls) -> "TraceContext":
+    def new_request(cls, task_context: TaskContext | None = None) -> "TraceContext":
         return cls(
             request_id=_new_identifier("request"),
             trace_id=_new_identifier("trace"),
+            task_id=(task_context or TaskContext.new_task()).task_id,
         )
 
     def new_model_call(self) -> "ModelCallContext":
         return ModelCallContext(
             request_id=self.request_id,
             trace_id=self.trace_id,
+            task_id=self.task_id,
             model_call_id=_new_identifier("model_call"),
         )
 
@@ -146,6 +221,7 @@ class TraceContext:
         if model_call is not None and (
             model_call.request_id != self.request_id
             or model_call.trace_id != self.trace_id
+            or model_call.task_id != self.task_id
         ):
             raise TraceIdentityError(
                 "Model-call identity does not belong to the current request trace."
@@ -153,6 +229,7 @@ class TraceContext:
         return ActionContext(
             request_id=self.request_id,
             trace_id=self.trace_id,
+            task_id=self.task_id,
             action_id=_new_identifier("action"),
             model_call_id=model_call.model_call_id if model_call else None,
         )
@@ -161,6 +238,7 @@ class TraceContext:
         return {
             "request_id": self.request_id,
             "trace_id": self.trace_id,
+            "task_id": self.task_id,
         }
 
 
@@ -170,17 +248,20 @@ class ModelCallContext:
 
     request_id: str
     trace_id: str
+    task_id: str
     model_call_id: str
 
     def __post_init__(self) -> None:
         _require_identifier(self.request_id, "request")
         _require_identifier(self.trace_id, "trace")
+        _require_identifier(self.task_id, "task")
         _require_identifier(self.model_call_id, "model_call")
 
     def identity_fields(self) -> dict[str, str]:
         return {
             "request_id": self.request_id,
             "trace_id": self.trace_id,
+            "task_id": self.task_id,
             "model_call_id": self.model_call_id,
         }
 
@@ -191,12 +272,14 @@ class ActionContext:
 
     request_id: str
     trace_id: str
+    task_id: str
     action_id: str
     model_call_id: str | None = None
 
     def __post_init__(self) -> None:
         _require_identifier(self.request_id, "request")
         _require_identifier(self.trace_id, "trace")
+        _require_identifier(self.task_id, "task")
         _require_identifier(self.action_id, "action")
         if self.model_call_id is not None:
             _require_identifier(self.model_call_id, "model_call")
@@ -205,6 +288,7 @@ class ActionContext:
         fields = {
             "request_id": self.request_id,
             "trace_id": self.trace_id,
+            "task_id": self.task_id,
             "action_id": self.action_id,
         }
         if self.model_call_id is not None:

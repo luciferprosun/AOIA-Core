@@ -46,6 +46,7 @@ class ActionPolicyDecision:
     model_requests_confirmation: bool
     request_id: str | None = None
     trace_id: str | None = None
+    task_id: str | None = None
     action_id: str | None = None
     model_call_id: str | None = None
 
@@ -311,6 +312,7 @@ def evaluate_action_policy(
         decision,
         request_id=action_context.request_id,
         trace_id=action_context.trace_id,
+        task_id=action_context.task_id,
         action_id=action_context.action_id,
         model_call_id=action_context.model_call_id,
     )

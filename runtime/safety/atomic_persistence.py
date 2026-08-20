@@ -7,7 +7,7 @@ import json
 import math
 import os
 import stat
-import tempfile
+import uuid
 import time
 from collections.abc import Callable, Mapping
 from numbers import Real
@@ -25,6 +25,7 @@ STATE_CORRUPT_REASON_CODE = "STATE_CORRUPT"
 DEFAULT_STATE_LOCK_TIMEOUT_SECONDS = 5.0
 MAX_STATE_LOCK_TIMEOUT_SECONDS = 300.0
 LOCK_POLL_INTERVAL_SECONDS = 0.01
+DEFAULT_MAX_JSON_SNAPSHOT_BYTES = 64 * 1024 * 1024
 
 
 _UpdateResult = TypeVar("_UpdateResult")
@@ -42,7 +43,13 @@ class PersistenceError(RuntimeError):
 
     def attach_correlation(self, identity: Mapping[str, object]) -> PersistenceError:
         """Attach existing runtime identity without fabricating low-level IDs."""
-        for field in ("request_id", "trace_id", "model_call_id", "action_id"):
+        for field in (
+            "task_id",
+            "request_id",
+            "trace_id",
+            "model_call_id",
+            "action_id",
+        ):
             value = identity.get(field)
             if isinstance(value, str) and value.strip():
                 self.correlation[field] = value
@@ -371,6 +378,11 @@ def locked_update_json(
     sort_keys: bool = False,
     trailing_newline: bool = False,
     mode: int = 0o600,
+    reject_duplicate_keys: bool = False,
+    maximum_bytes: int = DEFAULT_MAX_JSON_SNAPSHOT_BYTES,
+    expected_parent_identity: tuple[int, int] | None = None,
+    parent_directory_descriptor: int | None = None,
+    directory_identity_validator: Callable[[], None] | None = None,
 ) -> _UpdateResult:
     """Atomically read, transform, and replace one JSON resource under one lock.
 
@@ -382,51 +394,40 @@ def locked_update_json(
     """
 
     target = Path(target_path)
+    maximum_bytes = _validate_maximum_bytes(maximum_bytes)
+    directory_descriptor: int | None = None
     try:
         with InterProcessFileLock(lock_path, timeout_seconds=lock_timeout_seconds):
+            directory_descriptor, opened_parent = _open_pinned_parent(
+                target,
+                expected_identity=expected_parent_identity,
+                parent_directory_descriptor=parent_directory_descriptor,
+            )
+            _run_directory_identity_validator(directory_identity_validator)
+            raw = _read_snapshot_text_at(
+                target,
+                directory_descriptor,
+                maximum_bytes=maximum_bytes,
+            )
             current: Any | None = None
-            try:
-                metadata = target.lstat()
-            except FileNotFoundError:
-                metadata = None
-            if metadata is not None:
-                if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
-                    raise StateCorruptionError(
-                        "AOIA state snapshot target is not a safe regular file.",
-                        target_path=target,
+            if raw is not None:
+                try:
+                    current = json.loads(
+                        raw,
+                        object_pairs_hook=(
+                            _reject_duplicate_json_keys
+                            if reject_duplicate_keys
+                            else None
+                        ),
                     )
-                flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
-                flags |= getattr(os, "O_NOFOLLOW", 0)
-                try:
-                    descriptor = os.open(target, flags)
-                    with os.fdopen(descriptor, "r", encoding="utf-8", errors="strict") as handle:
-                        opened = os.fstat(handle.fileno())
-                        if (
-                            not stat.S_ISREG(opened.st_mode)
-                            or (opened.st_dev, opened.st_ino)
-                            != (metadata.st_dev, metadata.st_ino)
-                        ):
-                            raise OSError("state snapshot changed during locked open")
-                        raw = handle.read()
-                except UnicodeError as exc:
-                    raise StateCorruptionError(
-                        "AOIA state snapshot is not valid UTF-8.",
-                        target_path=target,
-                    ) from exc
-                except OSError as exc:
-                    raise PersistenceReadError(
-                        "AOIA state snapshot could not be read for update.",
-                        target_path=target,
-                    ) from exc
-                try:
-                    current = json.loads(raw)
-                except json.JSONDecodeError as exc:
+                except (json.JSONDecodeError, ValueError) as exc:
                     raise StateCorruptionError(
                         "AOIA state snapshot is corrupt JSON.",
                         target_path=target,
                     ) from exc
 
             replacement, result = update(current)
+            _run_directory_identity_validator(directory_identity_validator)
             try:
                 text = json.dumps(
                     replacement,
@@ -449,7 +450,19 @@ def locked_update_json(
                     "AOIA state text serialization failed.",
                     target_path=target,
                 ) from exc
-            _atomic_replace_bytes_unlocked(target, payload, mode=mode)
+            if len(payload) > maximum_bytes:
+                raise StateSerializationError(
+                    "AOIA state JSON snapshot exceeds its configured size bound.",
+                    target_path=target,
+                )
+            _atomic_replace_bytes_at(
+                target,
+                payload,
+                mode=mode,
+                directory_descriptor=directory_descriptor,
+                opened_parent=opened_parent,
+                directory_identity_validator=directory_identity_validator,
+            )
             return result
     except PersistenceError:
         raise
@@ -458,6 +471,9 @@ def locked_update_json(
             "AOIA locked JSON state update failed.",
             target_path=target,
         ) from exc
+    finally:
+        if directory_descriptor is not None:
+            os.close(directory_descriptor)
 
 
 def locked_unlink(
@@ -481,54 +497,216 @@ def locked_unlink(
         ) from exc
 
 
-def read_json_snapshot(target_path: Path) -> Any | None:
+def read_json_snapshot(
+    target_path: Path,
+    *,
+    reject_duplicate_keys: bool = False,
+    maximum_bytes: int = DEFAULT_MAX_JSON_SNAPSHOT_BYTES,
+    expected_parent_identity: tuple[int, int] | None = None,
+    parent_directory_descriptor: int | None = None,
+    directory_identity_validator: Callable[[], None] | None = None,
+) -> Any | None:
     """Read a complete JSON snapshot; missing and corrupt are distinct states."""
     target = Path(target_path)
-    if not target.exists():
-        return None
+    maximum_bytes = _validate_maximum_bytes(maximum_bytes)
+    directory_descriptor: int | None = None
     try:
-        raw = target.read_text(encoding="utf-8", errors="strict")
-    except UnicodeError as exc:
-        raise StateCorruptionError(
-            "AOIA state snapshot is not valid UTF-8.",
-            target_path=target,
-        ) from exc
+        directory_descriptor, opened_parent = _open_pinned_parent(
+            target,
+            expected_identity=expected_parent_identity,
+            parent_directory_descriptor=parent_directory_descriptor,
+        )
+        _run_directory_identity_validator(directory_identity_validator)
+        raw = _read_snapshot_text_at(
+            target,
+            directory_descriptor,
+            maximum_bytes=maximum_bytes,
+        )
+        _run_directory_identity_validator(directory_identity_validator)
+        _validate_pinned_parent(target, opened_parent)
     except OSError as exc:
         raise PersistenceReadError(
             "AOIA state snapshot could not be read.",
             target_path=target,
         ) from exc
+    finally:
+        if directory_descriptor is not None:
+            os.close(directory_descriptor)
+    if raw is None:
+        return None
     try:
-        return json.loads(raw)
-    except json.JSONDecodeError as exc:
+        return json.loads(
+            raw,
+            object_pairs_hook=(
+                _reject_duplicate_json_keys if reject_duplicate_keys else None
+            ),
+        )
+    except (json.JSONDecodeError, ValueError) as exc:
         raise StateCorruptionError(
             "AOIA state snapshot is corrupt JSON.",
             target_path=target,
         ) from exc
 
 
-def _atomic_replace_bytes_unlocked(target: Path, payload: bytes, *, mode: int) -> None:
+def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError("duplicate JSON object key")
+        value[key] = item
+    return value
+
+
+def _validate_maximum_bytes(value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ValueError("JSON snapshot byte limit must be a positive integer")
+    return value
+
+
+def _open_pinned_parent(
+    target: Path,
+    *,
+    expected_identity: tuple[int, int] | None = None,
+    parent_directory_descriptor: int | None = None,
+) -> tuple[int, os.stat_result]:
+    """Open a no-follow parent directory and bind it to its canonical inode."""
+
+    if parent_directory_descriptor is not None:
+        descriptor = os.dup(parent_directory_descriptor)
+        try:
+            opened_parent = os.fstat(descriptor)
+            if not stat.S_ISDIR(opened_parent.st_mode):
+                raise StateCorruptionError(
+                    "AOIA state snapshot parent descriptor is not a directory.",
+                    target_path=target.parent,
+                )
+            if expected_identity is not None and (
+                opened_parent.st_dev,
+                opened_parent.st_ino,
+            ) != expected_identity:
+                raise StateCorruptionError(
+                    "AOIA state snapshot parent identity is not authoritative.",
+                    target_path=target.parent,
+                )
+            return descriptor, opened_parent
+        except BaseException:
+            os.close(descriptor)
+            raise
+
     target.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path: Path | None = None
-    descriptor: int | None = None
-    try:
-        descriptor, raw_temporary_path = tempfile.mkstemp(
-            dir=target.parent,
-            prefix=f".{target.name}.",
-            suffix=".tmp",
+    parent_metadata = target.parent.lstat()
+    if stat.S_ISLNK(parent_metadata.st_mode) or not stat.S_ISDIR(parent_metadata.st_mode):
+        raise StateCorruptionError(
+            "AOIA state snapshot parent is not a safe directory.",
+            target_path=target.parent,
         )
-        temporary_path = Path(raw_temporary_path)
-        os.fchmod(descriptor, mode)
-        with os.fdopen(descriptor, "wb") as handle:
-            descriptor = None
-            written = handle.write(payload)
-            if written != len(payload):
-                raise OSError("short atomic state write")
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary_path, target)
-        temporary_path = None
-        _fsync_directory(target.parent)
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    flags |= getattr(os, "O_CLOEXEC", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(target.parent, flags)
+    try:
+        opened_parent = os.fstat(descriptor)
+        if (opened_parent.st_dev, opened_parent.st_ino) != (
+            parent_metadata.st_dev,
+            parent_metadata.st_ino,
+        ):
+            raise OSError("state snapshot parent changed during no-follow open")
+        if expected_identity is not None and (
+            opened_parent.st_dev,
+            opened_parent.st_ino,
+        ) != expected_identity:
+            raise StateCorruptionError(
+                "AOIA state snapshot parent identity is not authoritative.",
+                target_path=target.parent,
+            )
+        return descriptor, opened_parent
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
+def _run_directory_identity_validator(
+    validator: Callable[[], None] | None,
+) -> None:
+    if validator is not None:
+        validator()
+
+
+def _validate_pinned_parent(target: Path, opened_parent: os.stat_result) -> None:
+    canonical_parent = target.parent.lstat()
+    if (
+        stat.S_ISLNK(canonical_parent.st_mode)
+        or not stat.S_ISDIR(canonical_parent.st_mode)
+        or (canonical_parent.st_dev, canonical_parent.st_ino)
+        != (opened_parent.st_dev, opened_parent.st_ino)
+    ):
+        raise OSError("state snapshot parent path changed during operation")
+
+
+def _read_snapshot_text_at(
+    target: Path,
+    directory_descriptor: int,
+    *,
+    maximum_bytes: int,
+) -> str | None:
+    try:
+        metadata = os.stat(target.name, dir_fd=directory_descriptor, follow_symlinks=False)
+    except FileNotFoundError:
+        return None
+    if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+        raise StateCorruptionError(
+            "AOIA state snapshot target is not a safe regular file.",
+            target_path=target,
+        )
+    if metadata.st_size > maximum_bytes:
+        raise StateCorruptionError(
+            "AOIA state snapshot exceeds its configured size bound.",
+            target_path=target,
+        )
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(target.name, flags, dir_fd=directory_descriptor)
+    try:
+        opened = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(opened.st_mode)
+            or (opened.st_dev, opened.st_ino) != (metadata.st_dev, metadata.st_ino)
+            or opened.st_size > maximum_bytes
+        ):
+            raise OSError("state snapshot changed during locked open")
+        payload = bytearray()
+        while len(payload) <= maximum_bytes:
+            chunk = os.read(descriptor, min(64 * 1024, maximum_bytes + 1 - len(payload)))
+            if not chunk:
+                break
+            payload.extend(chunk)
+        if len(payload) > maximum_bytes:
+            raise StateCorruptionError(
+                "AOIA state snapshot exceeds its configured size bound.",
+                target_path=target,
+            )
+        try:
+            return bytes(payload).decode("utf-8", errors="strict")
+        except UnicodeError as exc:
+            raise StateCorruptionError(
+                "AOIA state snapshot is not valid UTF-8.",
+                target_path=target,
+            ) from exc
+    finally:
+        os.close(descriptor)
+
+
+def _atomic_replace_bytes_unlocked(target: Path, payload: bytes, *, mode: int) -> None:
+    directory_descriptor: int | None = None
+    try:
+        directory_descriptor, opened_parent = _open_pinned_parent(target)
+        _atomic_replace_bytes_at(
+            target,
+            payload,
+            mode=mode,
+            directory_descriptor=directory_descriptor,
+            opened_parent=opened_parent,
+        )
     except PersistenceError:
         raise
     except Exception as exc:
@@ -537,11 +715,60 @@ def _atomic_replace_bytes_unlocked(target: Path, payload: bytes, *, mode: int) -
             target_path=target,
         ) from exc
     finally:
+        if directory_descriptor is not None:
+            os.close(directory_descriptor)
+
+
+def _atomic_replace_bytes_at(
+    target: Path,
+    payload: bytes,
+    *,
+    mode: int,
+    directory_descriptor: int,
+    opened_parent: os.stat_result,
+    directory_identity_validator: Callable[[], None] | None = None,
+) -> None:
+    """Replace relative to one pinned directory inode, rejecting path swaps."""
+
+    temporary_name: str | None = None
+    descriptor: int | None = None
+    try:
+        _run_directory_identity_validator(directory_identity_validator)
+        temporary_name = f".{target.name}.{uuid.uuid4().hex}.tmp"
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        flags |= getattr(os, "O_CLOEXEC", 0)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(
+            temporary_name,
+            flags,
+            mode,
+            dir_fd=directory_descriptor,
+        )
+        with os.fdopen(descriptor, "wb") as handle:
+            descriptor = None
+            written = handle.write(payload)
+            if written != len(payload):
+                raise OSError("short atomic state write")
+            handle.flush()
+            os.fsync(handle.fileno())
+        _run_directory_identity_validator(directory_identity_validator)
+        _validate_pinned_parent(target, opened_parent)
+        os.replace(
+            temporary_name,
+            target.name,
+            src_dir_fd=directory_descriptor,
+            dst_dir_fd=directory_descriptor,
+        )
+        temporary_name = None
+        os.fsync(directory_descriptor)
+        _run_directory_identity_validator(directory_identity_validator)
+        _validate_pinned_parent(target, opened_parent)
+    finally:
         if descriptor is not None:
             os.close(descriptor)
-        if temporary_path is not None:
+        if temporary_name is not None and directory_descriptor is not None:
             try:
-                temporary_path.unlink()
+                os.unlink(temporary_name, dir_fd=directory_descriptor)
             except FileNotFoundError:
                 pass
             except OSError:

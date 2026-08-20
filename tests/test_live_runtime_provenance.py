@@ -58,6 +58,8 @@ EXPECTED_EVENT_TYPES = {
     "ACTION_DISPATCH_BLOCKED", "ACTION_DISPATCH_CANCELLED",
     "UNKNOWN_OUTCOME_DETECTED", "PERSISTENCE_FAILURE",
     "PROVENANCE_RECOVERY",
+    "TASK_CHECKPOINT_PREPARED", "TASK_CHECKPOINTED",
+    "TASK_CHECKPOINT_ABORTED",
 }
 
 
@@ -609,20 +611,65 @@ class ExecutorProvenanceIntegrationTests(unittest.TestCase):
 
     def test_handler_observes_both_idempotency_and_provenance_start(self) -> None:
         operation = OperationContext.new_operation()
+        action_context = TraceContext.new_request().new_action()
+        expected_task_id = operation.runtime_task_id()
+        observed: dict[str, int] = {}
 
         def handler(_action):
             record = self.engine.idempotency_store.load(operation)
             self.assertEqual(IdempotencyState.DISPATCH_STARTED, record.state)
             events = self.engine.provenance_store.read_runtime_all()
-            self.assertEqual("ACTION_DISPATCH_STARTED", events[-1]["event_type"])
+            starts = [
+                (index, event)
+                for index, event in enumerate(events)
+                if event["event_type"] == "ACTION_DISPATCH_STARTED"
+                and event["task_id"] == expected_task_id
+                and event["action_id"] == action_context.action_id
+                and event["operation_key"] == operation.operation_key
+            ]
+            dispatch_checkpoints = [
+                (index, event)
+                for index, event in enumerate(events)
+                if event["event_type"] == "TASK_CHECKPOINTED"
+                and event["task_id"] == expected_task_id
+                and event["request_id"] == action_context.request_id
+                and event["trace_id"] == action_context.trace_id
+                and event["task_phase"] == "PROVENANCE_DISPATCH_RECORDED"
+            ]
+            self.assertEqual(1, len(starts))
+            self.assertEqual(1, len(dispatch_checkpoints))
+            start_index, _start = starts[0]
+            checkpoint_index, checkpoint_event = dispatch_checkpoints[0]
+            self.assertLess(start_index, checkpoint_index)
+
+            checkpoint = self.engine.task_checkpoint_store.load(expected_task_id)
+            self.assertIsNotNone(checkpoint)
+            self.assertEqual(action_context.action_id, checkpoint.current_action_id)
+            self.assertEqual(operation.operation_key, checkpoint.current_idempotency_key)
+            matching_transition = next(
+                transition
+                for transition in checkpoint.transitions
+                if transition.sequence == checkpoint_event["checkpoint_version"]
+            )
+            self.assertEqual(
+                "PROVENANCE_DISPATCH_RECORDED",
+                matching_transition.to_phase,
+            )
+            self.assertEqual(
+                checkpoint_event["event_id"],
+                matching_transition.provenance_event_id,
+            )
+            observed["start"] = start_index
+            observed["checkpoint"] = checkpoint_index
             return {"success": True}
 
         self.install_handler(handler)
         self.engine.execute(
             {"action": "respond", "message": "safe"},
-            action_context=TraceContext.new_request().new_action(),
+            action_context=action_context,
             operation_context=operation,
         )
+        self.assertLess(observed["start"], observed["checkpoint"])
 
     def test_corrupt_chain_and_start_failure_block_handler(self) -> None:
         handler = Mock(return_value={"success": True})
@@ -779,15 +826,33 @@ class RuntimeLifecycleIntegrationTests(unittest.TestCase):
         runtime = main.AgentRuntime(provider, "test prompt", self.project)
         runtime.run_text_request("/status", ingress="WEB")
         records = runtime.provenance_store.read_runtime_all()
-        self.assertEqual("REQUEST_STARTED", records[0]["event_type"])
-        self.assertEqual("WEB", records[0]["ingress"])
-        self.assertEqual("REQUEST_COMPLETED", records[-1]["event_type"])
+        request_lifecycle = [
+            record
+            for record in records
+            if record["event_type"] in {"REQUEST_STARTED", "REQUEST_COMPLETED"}
+        ]
+        self.assertEqual(
+            ["REQUEST_STARTED", "REQUEST_COMPLETED"],
+            [record["event_type"] for record in request_lifecycle],
+        )
+        self.assertEqual("WEB", request_lifecycle[0]["ingress"])
+        self.assertEqual(
+            request_lifecycle[0]["task_id"],
+            request_lifecycle[1]["task_id"],
+        )
 
         trace = TraceContext.new_request()
+        original_append_terminal = runtime.provenance_store.append_terminal
+
+        def fail_model_terminal(event):
+            if event.event_type == "MODEL_CALL_COMPLETED":
+                raise ProvenanceAppendError("forced terminal persistence")
+            return original_append_terminal(event)
+
         with patch.object(
             runtime.provenance_store,
             "append_terminal",
-            side_effect=ProvenanceAppendError("forced terminal persistence"),
+            side_effect=fail_model_terminal,
         ):
             with self.assertRaises(RuntimeError):
                 runtime.ask_model("synthetic prompt secret", trace)
@@ -899,10 +964,31 @@ class RuntimeLifecycleIntegrationTests(unittest.TestCase):
             )
             runtime.run_text_request(secret, ingress="TUI")
         records = runtime.provenance_store.read_runtime_all()
-        kinds = [item["event_type"] for item in records]
-        self.assertIn("MODEL_CALL_STARTED", kinds)
-        self.assertIn("MODEL_CALL_COMPLETED", kinds)
-        self.assertEqual("TUI", records[0]["ingress"])
+        lifecycle = [
+            item
+            for item in records
+            if item["event_type"]
+            in {
+                "REQUEST_STARTED",
+                "MODEL_CALL_STARTED",
+                "MODEL_CALL_COMPLETED",
+                "REQUEST_COMPLETED",
+            }
+        ]
+        self.assertEqual(
+            [
+                "REQUEST_STARTED",
+                "MODEL_CALL_STARTED",
+                "MODEL_CALL_COMPLETED",
+                "REQUEST_COMPLETED",
+            ],
+            [item["event_type"] for item in lifecycle],
+        )
+        self.assertEqual("TUI", lifecycle[0]["ingress"])
+        self.assertEqual(
+            {lifecycle[0]["task_id"]},
+            {item["task_id"] for item in lifecycle},
+        )
         ledger = runtime.provenance_store.runtime_log_path.read_text(encoding="utf-8")
         self.assertNotIn(secret, ledger)
         session = runtime.session_log.read_text(encoding="utf-8").splitlines()
@@ -936,13 +1022,30 @@ class RuntimeLifecycleIntegrationTests(unittest.TestCase):
             runtime_state_dir(webapp.PROJECT_DIR) / "state"
         )
         operator_records = operator_store.read_runtime_all()
-        self.assertEqual("OPERATOR_API", operator_records[0]["ingress"])
+        operator_request = next(
+            item
+            for item in operator_records
+            if item["event_type"] == "REQUEST_STARTED"
+            and item["ingress"] == "OPERATOR_API"
+        )
+        operator_lifecycle = [
+            item
+            for item in operator_records
+            if item["task_id"] == operator_request["task_id"]
+            and item["event_type"]
+            in {
+                "REQUEST_STARTED",
+                "MODEL_CALL_STARTED",
+                "MODEL_CALL_COMPLETED",
+                "REQUEST_COMPLETED",
+            }
+        ]
         self.assertEqual(
             [
                 "REQUEST_STARTED", "MODEL_CALL_STARTED",
                 "MODEL_CALL_COMPLETED", "REQUEST_COMPLETED",
             ],
-            [item["event_type"] for item in operator_records],
+            [item["event_type"] for item in operator_lifecycle],
         )
 
         cli_result = dataclasses.replace(result, model_id="cli-test")
@@ -967,12 +1070,30 @@ class RuntimeLifecycleIntegrationTests(unittest.TestCase):
             / "state"
         )
         cli_records = cli_store.read_runtime_all()
-        cli_request_records = [
-            item for item in cli_records if item.get("ingress") == "CLI"
+        cli_request = next(
+            item
+            for item in cli_records
+            if item["event_type"] == "REQUEST_STARTED"
+            and item["ingress"] == "CLI"
+        )
+        cli_lifecycle = [
+            item
+            for item in cli_records
+            if item["task_id"] == cli_request["task_id"]
+            and item["event_type"]
+            in {
+                "REQUEST_STARTED",
+                "MODEL_CALL_STARTED",
+                "MODEL_CALL_COMPLETED",
+                "REQUEST_COMPLETED",
+            }
         ]
         self.assertEqual(
-            ["REQUEST_STARTED", "REQUEST_COMPLETED"],
-            [item["event_type"] for item in cli_request_records],
+            [
+                "REQUEST_STARTED", "MODEL_CALL_STARTED",
+                "MODEL_CALL_COMPLETED", "REQUEST_COMPLETED",
+            ],
+            [item["event_type"] for item in cli_lifecycle],
         )
 
 

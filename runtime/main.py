@@ -35,6 +35,20 @@ from runtime.safety.atomic_persistence import (
     atomic_write_text,
     state_resource_lock_path,
 )
+from runtime.task_checkpoints import (
+    ApprovalState,
+    DurableTaskCheckpointStore,
+    ModelContinuation,
+    SafeResumeClassification,
+    StepReservation,
+    TaskCheckpoint,
+    TaskCheckpointError,
+    TaskPhase,
+    TaskStepReservationError,
+    TaskState,
+    TERMINAL_TASK_STATES,
+    safe_context_metadata,
+)
 from tools.executor import ExecutionEngine
 from tools.provenance import (
     AppendOnlyProvenanceStore,
@@ -192,10 +206,17 @@ class AgentRuntime:
             self.memory_store.paths.state_dir,
             lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
         )
+        self.task_checkpoint_store = DurableTaskCheckpointStore(
+            self.memory_store.paths.state_dir,
+            project_dir=project_dir,
+            provenance_store=self.provenance_store,
+            lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+        )
         self.executor = ExecutionEngine(
             project_dir,
             self.memory_store,
             provenance_store=self.provenance_store,
+            task_checkpoint_store=self.task_checkpoint_store,
         )
         self.desktop_dir = detect_desktop_dir(Path.home())
         self.local_router = LocalRouter(self.desktop_dir)
@@ -335,14 +356,173 @@ class AgentRuntime:
             return method()
         return []
 
+    def _task_step_budget(self) -> int:
+        """Bound the whole request, including local bootstrap and planned actions."""
+
+        return max(1, self.max_steps + 8)
+
+    def _task_retry_budget(self) -> int:
+        provider_count = max(1, len(self._provider_fallback_chain()))
+        return self._task_step_budget() * len(MODEL_RETRY_DELAYS) * provider_count
+
+    def _ensure_task_checkpoint(
+        self,
+        trace_context: TraceContext,
+        request_text: str = "",
+    ) -> TaskCheckpoint:
+        checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+        if checkpoint is not None:
+            return checkpoint
+        return self.task_checkpoint_store.create_task(
+            trace_context,
+            max_steps=self._task_step_budget(),
+            retry_budget=self._task_retry_budget(),
+            safe_context=safe_context_metadata(request_text),
+        )
+
+    def _reserve_task_step(
+        self,
+        trace_context: TraceContext,
+        request_text: str = "",
+    ) -> StepReservation:
+        self._ensure_task_checkpoint(trace_context, request_text)
+        return self.task_checkpoint_store.reserve_step(trace_context.task_id)
+
+    def _start_task(
+        self,
+        trace_context: TraceContext,
+        request_text: str = "",
+    ) -> TaskCheckpoint:
+        checkpoint = self._ensure_task_checkpoint(trace_context, request_text)
+        if checkpoint.state is not TaskState.CREATED:
+            return checkpoint
+        return self.task_checkpoint_store.transition(
+            checkpoint.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.BETWEEN_STEPS,
+            reason_code="TASK_STARTED",
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
+            safe_resume_classification=SafeResumeClassification.SAFE_TO_RESUME,
+        )
+
+    def _close_task_step(self, reservation: StepReservation) -> None:
+        """Release only the in-process capability; durable budget stays consumed."""
+
+        try:
+            self.task_checkpoint_store.close_step_reservation(reservation)
+        except TaskStepReservationError:
+            # The executor consumes a successful action token. Cleanup callers
+            # may therefore observe that the capability is already gone.
+            return
+
+    def _finish_task(
+        self,
+        trace_context: TraceContext,
+        state: TaskState,
+    ) -> TaskCheckpoint:
+        checkpoint = self._ensure_task_checkpoint(trace_context)
+        if checkpoint.state in TERMINAL_TASK_STATES:
+            return checkpoint
+        # Unknown action outcome is durable truth and must never be flattened
+        # into a normal request completion or a retryable failure.
+        if checkpoint.state is TaskState.RECOVERY_REQUIRED:
+            return checkpoint
+        reasons = {
+            TaskState.COMPLETED: "TASK_COMPLETED",
+            TaskState.PARTIAL: "TASK_PARTIAL",
+            TaskState.BLOCKED: "TASK_BLOCKED",
+            TaskState.CANCELLED: "TASK_CANCELLED",
+            TaskState.FAILED: "TASK_FAILED",
+        }
+        try:
+            reason_code = reasons[state]
+        except KeyError as exc:
+            raise ValueError("Unsupported terminal task state.") from exc
+        return self.task_checkpoint_store.transition(
+            checkpoint.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=state,
+            phase=TaskPhase.TERMINAL,
+            reason_code=reason_code,
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            approval_state=(
+                ApprovalState.DENIED
+                if state is TaskState.CANCELLED
+                else ApprovalState.NOT_APPLICABLE
+            ),
+        )
+
+    def _mark_task_between_steps(
+        self,
+        trace_context: TraceContext,
+    ) -> TaskCheckpoint:
+        checkpoint = self._ensure_task_checkpoint(trace_context)
+        if checkpoint.state in TERMINAL_TASK_STATES or checkpoint.state is TaskState.RECOVERY_REQUIRED:
+            return checkpoint
+        if checkpoint.phase is TaskPhase.BETWEEN_STEPS:
+            return checkpoint
+        if checkpoint.phase is not TaskPhase.AFTER_ACTION:
+            raise TaskCheckpointError(
+                "Task cannot advance between steps from its current durable phase."
+            )
+        return self.task_checkpoint_store.transition(
+            checkpoint.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.BETWEEN_STEPS,
+            reason_code="TASK_BETWEEN_STEPS",
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
+            safe_resume_classification=SafeResumeClassification.SAFE_TO_RESUME,
+        )
+
     def ask_model(
         self,
         prompt: str,
         trace_context: TraceContext,
+        *,
+        step_reservation: StepReservation | None = None,
+        model_continuation: ModelContinuation | None = None,
     ) -> TracedModelOutput:
         """Request model output while identifying every actual provider attempt."""
         if self.safeguards.disable_model:
             raise RuntimeError("Model planning is disabled by EPISTEMIC_DISABLE_MODEL.")
+        owns_step_reservation = step_reservation is None
+        if step_reservation is None:
+            step_reservation = self._reserve_task_step(trace_context, prompt)
+        pending_continuation = model_continuation
+
+        def log_attempt(
+            status: str,
+            model_call: ModelCallContext,
+            provider: str,
+            model: str,
+            retry_attempt: int,
+            provider_attempt: int,
+        ) -> None:
+            nonlocal pending_continuation
+            continuation = pending_continuation if status == "started" else None
+            self._log_model_attempt(
+                status=status,
+                model_call=model_call,
+                provider=provider,
+                model=model,
+                retry_attempt=retry_attempt,
+                provider_attempt=provider_attempt,
+                step_reservation=step_reservation,
+                model_continuation=continuation,
+            )
+            # A continuation is an unforgeable one-shot capability.  Later
+            # provider retries remain part of this step, but start from the
+            # durable BEFORE_MODEL_CALL phase and must not reuse the proof.
+            if status == "started":
+                pending_continuation = None
+
         last_error: Exception | None = None
         for retry_attempt, delay_seconds in enumerate(MODEL_RETRY_DELAYS, start=1):
             try:
@@ -351,46 +531,46 @@ class AgentRuntime:
                     raw_result = traced_generate(
                         prompt,
                         trace_context,
-                        on_attempt=lambda status, call, provider, model, provider_attempt: self._log_model_attempt(
-                            status=status,
-                            model_call=call,
-                            provider=provider,
-                            model=model,
-                            retry_attempt=retry_attempt,
-                            provider_attempt=provider_attempt,
+                        on_attempt=lambda status, call, provider, model, provider_attempt: log_attempt(
+                            status,
+                            call,
+                            provider,
+                            model,
+                            retry_attempt,
+                            provider_attempt,
                         ),
                     )
                 else:
                     model_call = trace_context.new_model_call()
                     model_name = str(self.provider_manager.describe())
                     provider_name = model_name.split("/", 1)[0]
-                    self._log_model_attempt(
-                        status="started",
-                        model_call=model_call,
-                        provider=provider_name,
-                        model=model_name,
-                        retry_attempt=retry_attempt,
-                        provider_attempt=1,
+                    log_attempt(
+                        "started",
+                        model_call,
+                        provider_name,
+                        model_name,
+                        retry_attempt,
+                        1,
                     )
                     try:
                         raw_text = self.provider_manager.generate(prompt)
                     except Exception:
-                        self._log_model_attempt(
-                            status="failed",
-                            model_call=model_call,
-                            provider=provider_name,
-                            model=model_name,
-                            retry_attempt=retry_attempt,
-                            provider_attempt=1,
+                        log_attempt(
+                            "failed",
+                            model_call,
+                            provider_name,
+                            model_name,
+                            retry_attempt,
+                            1,
                         )
                         raise
-                    self._log_model_attempt(
-                        status="succeeded",
-                        model_call=model_call,
-                        provider=provider_name,
-                        model=model_name,
-                        retry_attempt=retry_attempt,
-                        provider_attempt=1,
+                    log_attempt(
+                        "succeeded",
+                        model_call,
+                        provider_name,
+                        model_name,
+                        retry_attempt,
+                        1,
                     )
                     raw_result = TracedModelOutput(
                         text=raw_text,
@@ -401,8 +581,25 @@ class AgentRuntime:
                 if self.debug_raw:
                     print("\n[DEBUG] RAW MODEL OUTPUT:")
                     print(raw_result.text)
+                if owns_step_reservation:
+                    self._close_task_step(step_reservation)
+                    self._finish_task(trace_context, TaskState.COMPLETED)
                 return raw_result
-            except PersistenceError:
+            except PersistenceError as persistence_error:
+                if pending_continuation is not None:
+                    try:
+                        self.task_checkpoint_store.close_model_continuation(
+                            pending_continuation
+                        )
+                        pending_continuation = None
+                    except Exception as close_error:
+                        try:
+                            persistence_error.add_note(
+                                "Unused model-continuation cleanup failed; "
+                                f"secondary failure type: {type(close_error).__name__}."
+                            )
+                        except AttributeError:  # pragma: no cover
+                            pass
                 raise
             except Exception as error:
                 last_error = error
@@ -417,6 +614,23 @@ class AgentRuntime:
                 time.sleep(delay_seconds)
 
         assert last_error is not None
+        if pending_continuation is not None:
+            try:
+                self.task_checkpoint_store.close_model_continuation(
+                    pending_continuation
+                )
+                pending_continuation = None
+            except Exception as close_error:
+                try:
+                    last_error.add_note(
+                        "Unused model-continuation cleanup failed; "
+                        f"secondary failure type: {type(close_error).__name__}."
+                    )
+                except AttributeError:  # pragma: no cover
+                    pass
+        if owns_step_reservation:
+            self._close_task_step(step_reservation)
+            self._finish_task(trace_context, TaskState.FAILED)
         if isinstance(last_error, PersistenceError):
             raise last_error
         raise RuntimeError(f"Model request failed after retries: {last_error}")
@@ -430,6 +644,8 @@ class AgentRuntime:
         model: str,
         retry_attempt: int,
         provider_attempt: int,
+        step_reservation: StepReservation,
+        model_continuation: ModelContinuation | None = None,
     ) -> None:
         event_types = {
             "started": RuntimeProvenanceEventType.MODEL_CALL_STARTED,
@@ -439,6 +655,12 @@ class AgentRuntime:
         event_type = event_types.get(status)
         if event_type is None:
             raise ValueError("Unsupported runtime model-call lifecycle status.")
+        if status == "started":
+            self.task_checkpoint_store.consume_provider_attempt(
+                model_call,
+                step_reservation=step_reservation,
+                model_continuation=model_continuation,
+            )
         event = new_runtime_provenance_event(
             event_type,
             model_call=model_call,
@@ -457,6 +679,30 @@ class AgentRuntime:
             self.provenance_store.append_runtime_event(event)
         else:
             self.provenance_store.append_terminal(event)
+            checkpoint = self.task_checkpoint_store.load(model_call.task_id)
+            if checkpoint is None:
+                raise TaskCheckpointError(
+                    "Model-call lifecycle has no durable task checkpoint."
+                )
+            self.task_checkpoint_store.transition(
+                checkpoint.task_id,
+                expected_version=checkpoint.checkpoint_version,
+                state=TaskState.RUNNING,
+                phase=(
+                    TaskPhase.AFTER_MODEL_CALL
+                    if status == "succeeded"
+                    else TaskPhase.BEFORE_MODEL_CALL
+                ),
+                reason_code=(
+                    "TASK_MODEL_CALL_COMPLETED"
+                    if status == "succeeded"
+                    else "TASK_MODEL_CALL_FAILED"
+                ),
+                latest_request_id=model_call.request_id,
+                latest_trace_id=model_call.trace_id,
+                current_model_call_id=model_call.model_call_id,
+                approval_state=ApprovalState.NOT_APPLICABLE,
+            )
         self.log_session_event(
             "model_call_attempt",
             {
@@ -469,6 +715,7 @@ class AgentRuntime:
             trace_context=TraceContext(
                 request_id=model_call.request_id,
                 trace_id=model_call.trace_id,
+                task_id=model_call.task_id,
             ),
             model_call=model_call,
         )
@@ -480,26 +727,32 @@ class AgentRuntime:
     ) -> None:
         """Run the bounded action loop for one user request."""
         trace_context = trace_context or TraceContext.new_request()
+        self._start_task(trace_context, user_input)
         self.memory_store.set_current_task(user_input)
         if user_input.strip().lower() in {"help", "?"}:
             result = self.command_registry.execute("/help", self, trace_context)
             if result.handled and result.message:
                 print(f"\nAgent> {result.message}")
+            self._finish_task(trace_context, TaskState.COMPLETED)
             return
         if self.safeguards.kill_switch:
             self.emit_epistemic_unknown(
                 "Epistemic kill switch is enabled.",
                 trace_context,
             )
+            self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
         if self.handle_external_review_route(user_input, trace_context):
+            self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
         if self.handle_local_route(user_input, trace_context):
+            self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
         if self.handle_knowledge_route(user_input, trace_context):
+            self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
         if self.use_orchestrator:
@@ -507,11 +760,17 @@ class AgentRuntime:
             return
 
         request_trace = self.bootstrap_local_context(user_input, trace_context)
-
+        checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+        if checkpoint is None:
+            raise TaskCheckpointError("Request lost its task checkpoint.")
+        if checkpoint.state in TERMINAL_TASK_STATES or checkpoint.state is TaskState.RECOVERY_REQUIRED:
+            return
+        planner_reservation = self._reserve_task_step(trace_context, user_input)
         planned_actions, planner_call = self.create_plan(
             user_input,
             request_trace,
             trace_context,
+            step_reservation=planner_reservation,
         )
         if planned_actions:
             self.execute_planned_actions(
@@ -519,10 +778,57 @@ class AgentRuntime:
                 request_trace,
                 trace_context,
                 planner_call,
+                first_step_reservation=planner_reservation,
             )
             return
+        self._run_reactive_fallback(
+            user_input,
+            request_trace,
+            trace_context,
+            initial_step_reservation=planner_reservation,
+            planner_call=planner_call,
+        )
+
+    def _run_reactive_fallback(
+        self,
+        user_input: str,
+        request_trace: list[dict[str, Any]],
+        trace_context: TraceContext,
+        *,
+        initial_step_reservation: StepReservation,
+        planner_call: ModelCallContext | None,
+    ) -> None:
+        """Preserve the bounded reactive route with durable step capabilities."""
+
+        checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+        if checkpoint is None:
+            raise TaskCheckpointError("Reactive fallback lost its task checkpoint.")
+        initial_continuation: ModelContinuation | None = None
+        if checkpoint.phase is TaskPhase.AFTER_MODEL_CALL:
+            if planner_call is None:
+                self._close_task_step(initial_step_reservation)
+                raise TaskCheckpointError(
+                    "Reactive fallback lacks the completed planner identity."
+                )
+            initial_continuation = (
+                self.task_checkpoint_store.authorize_model_continuation(
+                    initial_step_reservation,
+                    completed_model_call=planner_call,
+                )
+            )
+        elif checkpoint.phase is not TaskPhase.BEFORE_MODEL_CALL:
+            self._close_task_step(initial_step_reservation)
+            raise TaskCheckpointError(
+                "Reactive fallback cannot start from its durable task phase."
+            )
 
         for step in range(1, self.max_steps + 1):
+            step_reservation = (
+                initial_step_reservation
+                if step == 1
+                else self._reserve_task_step(trace_context)
+            )
+            continuation = initial_continuation if step == 1 else None
             prompt = self.build_model_request(user_input, request_trace)
             self.log_reasoning_trace(
                 "model_request",
@@ -534,11 +840,17 @@ class AgentRuntime:
                 trace_context=trace_context,
             )
             try:
-                model_output = self.ask_model(prompt, trace_context)
+                model_output = self.ask_model(
+                    prompt,
+                    trace_context,
+                    step_reservation=step_reservation,
+                    model_continuation=continuation,
+                )
                 raw_output = model_output.text
             except PersistenceError:
                 raise
             except Exception as error:
+                self._close_task_step(step_reservation)
                 self.log_error(
                     {
                         "step": step,
@@ -549,6 +861,10 @@ class AgentRuntime:
                     trace_context=trace_context,
                 )
                 self.handle_model_unavailable(request_trace, error)
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if request_trace else TaskState.FAILED,
+                )
                 return
 
             self.log_session_event(
@@ -569,6 +885,7 @@ class AgentRuntime:
             except PersistenceError:
                 raise
             except Exception as error:
+                self._close_task_step(step_reservation)
                 self.log_error(
                     {
                         "step": step,
@@ -587,19 +904,24 @@ class AgentRuntime:
                         trace_context,
                         model_output.model_call,
                     )
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if request_trace else TaskState.FAILED,
+                )
                 return
 
             self.print_action(action, step)
-
             action_context = trace_context.new_action(model_output.model_call)
             try:
                 result = self.executor.execute(
                     action,
                     action_context=action_context,
+                    step_reservation=step_reservation,
                 )
             except PersistenceError:
                 raise
             except Exception as error:
+                self._close_task_step(step_reservation)
                 self.log_error(
                     {
                         "step": step,
@@ -613,6 +935,10 @@ class AgentRuntime:
                 )
                 print("\n[ERROR] Action execution failed.")
                 print(str(error))
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if request_trace else TaskState.FAILED,
+                )
                 return
 
             self.print_result(result)
@@ -628,11 +954,16 @@ class AgentRuntime:
                 action_context=action_context,
             )
 
-            if action["action"] == "respond" or result.get("stop_loop"):
+            checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+            if checkpoint is None:
+                raise TaskCheckpointError(
+                    "Reactive action lost its task checkpoint."
+                )
+            if (
+                checkpoint.state in TERMINAL_TASK_STATES
+                or checkpoint.state is TaskState.RECOVERY_REQUIRED
+            ):
                 return
-            if result.get("cancelled"):
-                return
-
             request_trace.append(
                 {
                     "step": step,
@@ -640,8 +971,22 @@ class AgentRuntime:
                     "result": self.result_for_model(result),
                 }
             )
+            if not result.get("success"):
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if request_trace[:-1] else TaskState.FAILED,
+                )
+                return
+            if action["action"] == "respond" or result.get("stop_loop"):
+                self._finish_task(trace_context, TaskState.COMPLETED)
+                return
+            if result.get("cancelled"):
+                self._finish_task(trace_context, TaskState.CANCELLED)
+                return
+            self._mark_task_between_steps(trace_context)
 
         print("\nAgent> Agent stopped after reaching the maximum step limit.")
+        self._finish_task(trace_context, TaskState.PARTIAL)
 
     def handle_external_review_route(
         self,
@@ -656,23 +1001,31 @@ class AgentRuntime:
         raw_url = extract_first_url(user_input)
         if raw_url:
             normalized_url = normalize_external_url(raw_url)
+            open_result: dict[str, Any] | None = None
             try:
                 open_context = trace_context.new_action()
                 open_result = self.executor.execute(
                     {"action": "browser_open", "url": normalized_url},
                     require_approval=True,
                     action_context=open_context,
+                    step_reservation=self._reserve_task_step(trace_context),
                 )
                 self.print_result(open_result)
                 visible_context: ActionContext | None = None
                 if open_result.get("success"):
+                    self._mark_task_between_steps(trace_context)
                     visible_context = trace_context.new_action()
                     visible_text = self.executor.execute(
                         {"action": "browser_get_visible_text"},
                         require_approval=True,
                         action_context=visible_context,
+                        step_reservation=self._reserve_task_step(trace_context),
                     )
                     self.print_result(visible_text)
+                    if not visible_text.get("success"):
+                        self._finish_task(trace_context, TaskState.PARTIAL)
+                else:
+                    self._finish_task(trace_context, TaskState.FAILED)
                 self.log_session_event(
                     route,
                     {
@@ -713,6 +1066,12 @@ class AgentRuntime:
                     trace_context=trace_context,
                 )
                 print("\nAgent> External URL detected. Browser inspection path available but browser handoff failed.")
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL
+                    if open_result and open_result.get("success")
+                    else TaskState.FAILED,
+                )
                 return True
 
         message = (
@@ -752,7 +1111,7 @@ class AgentRuntime:
         """Run Gemini brain -> Gemma worker -> approval -> executor flow."""
         self.enable_orchestrator(True)
         assert self.orchestrator is not None
-
+        planner_reservation = self._reserve_task_step(trace_context, user_input)
         try:
             plan, planner_call = self.orchestrator.create_traced_plan(
                 user_input,
@@ -765,11 +1124,14 @@ class AgentRuntime:
                     model=model,
                     retry_attempt=1,
                     provider_attempt=provider_attempt,
+                    step_reservation=planner_reservation,
                 ),
             )
         except PersistenceError:
+            self._close_task_step(planner_reservation)
             raise
         except Exception as error:
+            self._close_task_step(planner_reservation)
             self.log_error(
                 {
                     "kind": "orchestrator_planner_error",
@@ -779,6 +1141,7 @@ class AgentRuntime:
             )
             print("\n[ERROR] Gemini planner failed.")
             print(str(error))
+            self._finish_task(trace_context, TaskState.FAILED)
             return
 
         strategy = plan.get("strategy", "")
@@ -797,9 +1160,65 @@ class AgentRuntime:
             trace_context=trace_context,
             model_call=planner_call,
         )
-
+        if not steps:
+            self._close_task_step(planner_reservation)
+            self._finish_task(trace_context, TaskState.COMPLETED)
+            return
+        model_continuation = self.task_checkpoint_store.authorize_model_continuation(
+            planner_reservation,
+            completed_model_call=planner_call,
+        )
         previous_results: list[dict[str, Any]] = []
         for index, step in enumerate(steps[: self.max_steps], start=1):
+            step_reservation = (
+                planner_reservation
+                if index == 1
+                else self._reserve_task_step(trace_context)
+            )
+            pending_continuation = model_continuation if index == 1 else None
+
+            def worker_attempt_observer(
+                status: str,
+                call: ModelCallContext,
+                provider: str,
+                model: str,
+                provider_attempt: int,
+            ) -> None:
+                nonlocal pending_continuation
+                continuation = (
+                    pending_continuation if status == "started" else None
+                )
+                self._log_model_attempt(
+                    status=status,
+                    model_call=call,
+                    provider=provider,
+                    model=model,
+                    retry_attempt=1,
+                    provider_attempt=provider_attempt,
+                    step_reservation=step_reservation,
+                    model_continuation=continuation,
+                )
+                if status == "started":
+                    pending_continuation = None
+
+            def close_unused_worker_continuation(error: Exception) -> None:
+                nonlocal pending_continuation
+                if pending_continuation is None:
+                    return
+                try:
+                    self.task_checkpoint_store.close_model_continuation(
+                        pending_continuation
+                    )
+                    pending_continuation = None
+                except Exception as close_error:
+                    try:
+                        error.add_note(
+                            "Unused worker-continuation cleanup failed; "
+                            f"secondary failure type: {type(close_error).__name__}."
+                        )
+                    except AttributeError:  # pragma: no cover
+                        pass
+
             try:
                 action, worker_call = self.orchestrator.action_for_step_traced(
                     user_request=user_input,
@@ -807,19 +1226,22 @@ class AgentRuntime:
                     runtime_status=self.snapshot_status(),
                     previous_results=previous_results,
                     trace_context=trace_context,
-                    on_attempt=lambda status, call, provider, model, provider_attempt: self._log_model_attempt(
-                        status=status,
-                        model_call=call,
-                        provider=provider,
-                        model=model,
-                        retry_attempt=1,
-                        provider_attempt=provider_attempt,
-                    ),
+                    on_attempt=worker_attempt_observer,
                 )
+                if pending_continuation is not None:
+                    missing_attempt = TaskCheckpointError(
+                        "Worker returned without a durable provider attempt."
+                    )
+                    close_unused_worker_continuation(missing_attempt)
+                    raise missing_attempt
                 action = strip_untrusted_identity_fields(action)
-            except PersistenceError:
+            except PersistenceError as persistence_error:
+                close_unused_worker_continuation(persistence_error)
+                self._close_task_step(step_reservation)
                 raise
             except Exception as error:
+                close_unused_worker_continuation(error)
+                self._close_task_step(step_reservation)
                 self.log_error(
                     {
                         "kind": "gemma_worker_error",
@@ -831,6 +1253,10 @@ class AgentRuntime:
                 print("\n[ERROR] Gemma worker failed to produce a valid action.")
                 print(str(error))
                 print("Agent> Worker model is not available or did not return valid JSON. Use /worker status and /setup.")
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if previous_results else TaskState.FAILED,
+                )
                 return
 
             self.print_action(action, index)
@@ -839,10 +1265,12 @@ class AgentRuntime:
                 result = self.executor.execute(
                     action,
                     action_context=action_context,
+                    step_reservation=step_reservation,
                 )
             except PersistenceError:
                 raise
             except Exception as error:
+                self._close_task_step(step_reservation)
                 self.log_error(
                     {
                         "kind": "orchestrated_execution_error",
@@ -857,6 +1285,10 @@ class AgentRuntime:
                 )
                 print("\n[ERROR] Orchestrated action execution failed.")
                 print(str(error))
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if previous_results else TaskState.FAILED,
+                )
                 return
 
             self.print_result(result)
@@ -875,14 +1307,32 @@ class AgentRuntime:
                 model_call=worker_call,
                 action_context=action_context,
             )
-            if action["action"] == "respond" or result.get("stop_loop") or result.get("cancelled"):
+            checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+            if checkpoint is None:
+                raise TaskCheckpointError(
+                    "Orchestrated action lost its task checkpoint."
+                )
+            if checkpoint.state in TERMINAL_TASK_STATES or checkpoint.state is TaskState.RECOVERY_REQUIRED:
                 return
+            if not result.get("success"):
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if previous_results[:-1] else TaskState.FAILED,
+                )
+                return
+            if action["action"] == "respond" or result.get("stop_loop"):
+                self._finish_task(trace_context, TaskState.COMPLETED)
+                return
+            self._mark_task_between_steps(trace_context)
+        self._finish_task(trace_context, TaskState.PARTIAL)
 
     def create_plan(
         self,
         user_input: str,
         request_trace: list[dict[str, Any]],
         trace_context: TraceContext,
+        *,
+        step_reservation: StepReservation,
     ) -> tuple[list[dict[str, Any]], ModelCallContext | None]:
         """Ask the model for a short action plan before the reactive loop."""
         prompt = self.build_plan_request(user_input, request_trace)
@@ -894,8 +1344,13 @@ class AgentRuntime:
             },
             trace_context=trace_context,
         )
+        model_output: TracedModelOutput | None = None
         try:
-            model_output = self.ask_model(prompt, trace_context)
+            model_output = self.ask_model(
+                prompt,
+                trace_context,
+                step_reservation=step_reservation,
+            )
             raw_output = model_output.text
             payload = extract_json_object(raw_output)
         except PersistenceError:
@@ -910,7 +1365,9 @@ class AgentRuntime:
                 },
                 trace_context=trace_context,
             )
-            return [], None
+            return [], (
+                model_output.model_call if model_output is not None else None
+            )
 
         raw_plan = payload.get("plan", [])
         if "plan" not in payload and "action" in payload:
@@ -918,9 +1375,27 @@ class AgentRuntime:
                 return [
                     strip_untrusted_identity_fields(validate_action(payload))
                 ], model_output.model_call
-            except Exception:
+            except PersistenceError:
+                raise
+            except Exception as error:
+                self.log_error(
+                    {
+                        "kind": "planner_action_error",
+                        "error": str(error),
+                    },
+                    trace_context=trace_context,
+                    model_call=model_output.model_call,
+                )
                 return [], model_output.model_call
         if not isinstance(raw_plan, list):
+            self.log_error(
+                {
+                    "kind": "planner_action_error",
+                    "error": "Planner output did not contain a plan list.",
+                },
+                trace_context=trace_context,
+                model_call=model_output.model_call,
+            )
             return [], model_output.model_call
 
         planned_actions: list[dict[str, Any]] = []
@@ -1000,20 +1475,29 @@ class AgentRuntime:
         request_trace: list[dict[str, Any]],
         trace_context: TraceContext,
         planner_call: ModelCallContext | None,
+        *,
+        first_step_reservation: StepReservation,
     ) -> None:
         print(f"\n[PLAN] {len(planned_actions)} proposed step(s).")
         last_result: dict[str, Any] | None = None
         for step, action in enumerate(planned_actions, start=1):
+            step_reservation = (
+                first_step_reservation
+                if step == 1
+                else self._reserve_task_step(trace_context)
+            )
             self.print_action(action, step)
             action_context = trace_context.new_action(planner_call)
             try:
                 result = self.executor.execute(
                     action,
                     action_context=action_context,
+                    step_reservation=step_reservation,
                 )
             except PersistenceError:
                 raise
             except Exception as error:
+                self._close_task_step(step_reservation)
                 self.log_error(
                     {
                         "step": step,
@@ -1027,6 +1511,10 @@ class AgentRuntime:
                 )
                 print("\n[ERROR] Planned action execution failed.")
                 print(str(error))
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if request_trace else TaskState.FAILED,
+                )
                 return
 
             self.print_result(result)
@@ -1049,10 +1537,24 @@ class AgentRuntime:
                     "result": self.result_for_model(result),
                 }
             )
-            if action["action"] == "respond" or result.get("stop_loop") or result.get("cancelled"):
+            checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+            if checkpoint is None:
+                raise TaskCheckpointError("Planned action lost its task checkpoint.")
+            if checkpoint.state in TERMINAL_TASK_STATES or checkpoint.state is TaskState.RECOVERY_REQUIRED:
                 return
+            if not result.get("success"):
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if request_trace[:-1] else TaskState.FAILED,
+                )
+                return
+            if action["action"] == "respond" or result.get("stop_loop"):
+                self._finish_task(trace_context, TaskState.COMPLETED)
+                return
+            self._mark_task_between_steps(trace_context)
         if last_result and last_result.get("success"):
             print("Agent> Część operacji została już wykonana poprawnie.")
+            self._finish_task(trace_context, TaskState.PARTIAL)
 
     def execute_action(
         self,
@@ -1061,15 +1563,27 @@ class AgentRuntime:
         model_call: ModelCallContext | None = None,
         *,
         require_approval: bool = True,
+        step_reservation: StepReservation | None = None,
     ) -> dict[str, Any]:
         """Assign an action identity before crossing the executor boundary."""
 
+        reservation = step_reservation or self._reserve_task_step(trace_context)
         action_context = trace_context.new_action(model_call)
-        return self.executor.execute(
+        result = self.executor.execute(
             strip_untrusted_identity_fields(action),
             require_approval=require_approval,
             action_context=action_context,
+            step_reservation=reservation,
         )
+        checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+        if (
+            checkpoint is not None
+            and checkpoint.state not in TERMINAL_TASK_STATES
+            and checkpoint.state is not TaskState.RECOVERY_REQUIRED
+            and checkpoint.phase is TaskPhase.AFTER_ACTION
+        ):
+            self._mark_task_between_steps(trace_context)
+        return result
 
     def dispatch_text_request(
         self,
@@ -1080,6 +1594,9 @@ class AgentRuntime:
     ) -> None:
         """Dispatch one already-identified CLI, TUI, or web request."""
 
+        # The checkpoint preparation/snapshot/checkpointed triplet is durable
+        # before the request lifecycle can claim that work started.
+        self._start_task(trace_context, user_input)
         self.provenance_store.append_runtime_event(
             new_runtime_provenance_event(
                 RuntimeProvenanceEventType.REQUEST_STARTED,
@@ -1110,6 +1627,16 @@ class AgentRuntime:
                 self.handle_user_request(user_input, trace_context)
         except Exception as request_error:
             try:
+                self._finish_task(trace_context, TaskState.FAILED)
+            except Exception as checkpoint_error:
+                try:
+                    request_error.add_note(
+                        "Request task terminalization is pending or degraded; "
+                        f"secondary failure type: {type(checkpoint_error).__name__}."
+                    )
+                except AttributeError:  # pragma: no cover
+                    pass
+            try:
                 self.provenance_store.append_terminal(
                     new_runtime_provenance_event(
                         RuntimeProvenanceEventType.REQUEST_COMPLETED,
@@ -1133,17 +1660,40 @@ class AgentRuntime:
                 trace_context=trace_context,
             )
             raise
+        checkpoint = self._finish_task(trace_context, TaskState.COMPLETED)
+        request_succeeded = checkpoint.state is TaskState.COMPLETED
+        if checkpoint.state is TaskState.RECOVERY_REQUIRED:
+            self.provenance_store.append_terminal(
+                new_runtime_provenance_event(
+                    RuntimeProvenanceEventType.REQUEST_COMPLETED,
+                    trace_context=trace_context,
+                    ingress=ingress,
+                    success=False,
+                    reason_code="REQUEST_FAILED",
+                )
+            )
+            self.log_session_event(
+                "request_completed",
+                {"status": "failed"},
+                trace_context=trace_context,
+            )
+            raise TaskCheckpointError(
+                "Request ended with a durable unknown action outcome."
+            ).attach_correlation(trace_context.identity_fields())
         self.provenance_store.append_terminal(
             new_runtime_provenance_event(
                 RuntimeProvenanceEventType.REQUEST_COMPLETED,
                 trace_context=trace_context,
                 ingress=ingress,
-                success=True,
+                success=request_succeeded,
+                reason_code=(
+                    "REQUEST_COMPLETED" if request_succeeded else "REQUEST_FAILED"
+                ),
             )
         )
         self.log_session_event(
             "request_completed",
-            {"status": "completed"},
+            {"status": "completed" if request_succeeded else "failed"},
             trace_context=trace_context,
         )
 
@@ -1193,6 +1743,7 @@ class AgentRuntime:
             result = self.executor.execute(
                 action,
                 action_context=action_context,
+                step_reservation=self._reserve_task_step(trace_context),
             )
             last_result = result
             self.print_result(result)
@@ -1206,6 +1757,18 @@ class AgentRuntime:
                 trace_context=trace_context,
                 action_context=action_context,
             )
+            checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+            if checkpoint is None:
+                raise TaskCheckpointError("Local action lost its task checkpoint.")
+            if checkpoint.state in TERMINAL_TASK_STATES or checkpoint.state is TaskState.RECOVERY_REQUIRED:
+                return True
+            if not result.get("success"):
+                self._finish_task(
+                    trace_context,
+                    TaskState.PARTIAL if index > 1 else TaskState.FAILED,
+                )
+                return True
+            self._mark_task_between_steps(trace_context)
 
         if route.final_message:
             print(f"\nAgent> {route.final_message}")
@@ -1371,6 +1934,7 @@ class AgentRuntime:
             start_action,
             require_approval=True,
             action_context=start_context,
+            step_reservation=self._reserve_task_step(trace_context),
         )
         self.print_result(start_result)
         request_trace.append(
@@ -1380,6 +1944,10 @@ class AgentRuntime:
                 "result": self.result_for_model(start_result),
             }
         )
+        if not start_result.get("success"):
+            self._finish_task(trace_context, TaskState.FAILED)
+            return request_trace
+        self._mark_task_between_steps(trace_context)
 
         open_action = {
             "action": "browser_open",
@@ -1391,6 +1959,7 @@ class AgentRuntime:
             open_action,
             require_approval=True,
             action_context=open_context,
+            step_reservation=self._reserve_task_step(trace_context),
         )
         self.print_result(open_result)
         request_trace.append(
@@ -1400,6 +1969,10 @@ class AgentRuntime:
                 "result": self.result_for_model(open_result),
             }
         )
+        if not open_result.get("success"):
+            self._finish_task(trace_context, TaskState.PARTIAL)
+            return request_trace
+        self._mark_task_between_steps(trace_context)
 
         lowered = user_input.lower()
         if any(token in lowered for token in ("analiz", "analy", "paper", "praca", "read", "przeczy")):
@@ -1412,6 +1985,7 @@ class AgentRuntime:
                 text_action,
                 require_approval=True,
                 action_context=text_context,
+                step_reservation=self._reserve_task_step(trace_context),
             )
             self.print_result(text_result)
             snapshot_path = self.save_page_text_snapshot(normalized_url, text_result)
@@ -1425,6 +1999,10 @@ class AgentRuntime:
                     "result": self.result_for_model(text_result),
                 }
             )
+            if not text_result.get("success"):
+                self._finish_task(trace_context, TaskState.PARTIAL)
+                return request_trace
+            self._mark_task_between_steps(trace_context)
 
         return request_trace
 
@@ -1451,7 +2029,7 @@ class AgentRuntime:
 
     def result_for_model(self, result: dict[str, Any]) -> dict[str, Any]:
         payload = dict(result)
-        for field in ("request_id", "trace_id", "model_call_id", "action_id"):
+        for field in ("request_id", "trace_id", "task_id", "model_call_id", "action_id"):
             payload.pop(field, None)
         if "stdout" in payload:
             payload["stdout"] = summarize_text(str(payload["stdout"]), 2500)
@@ -1480,6 +2058,7 @@ class AgentRuntime:
             if fields and (
                 fields.get("request_id") != model_call.request_id
                 or fields.get("trace_id") != model_call.trace_id
+                or fields.get("task_id") != model_call.task_id
             ):
                 raise ValueError("Model-call identity does not match the event trace.")
             fields.update(model_call.identity_fields())
@@ -1487,6 +2066,7 @@ class AgentRuntime:
             if fields and (
                 fields.get("request_id") != action_context.request_id
                 or fields.get("trace_id") != action_context.trace_id
+                or fields.get("task_id") != action_context.task_id
             ):
                 raise ValueError("Action identity does not match the event trace.")
             if (

@@ -17,6 +17,16 @@ from runtime.safety.atomic_persistence import (
     atomic_write_json,
     state_resource_lock_path,
 )
+from runtime.task_checkpoints import (
+    ApprovalState,
+    DurableTaskCheckpointStore,
+    SafeResumeClassification,
+    StepReservation,
+    TaskCheckpoint,
+    TaskPhase,
+    TaskState,
+    TERMINAL_TASK_STATES,
+)
 
 from .browser_tools import (
     browser_click,
@@ -95,6 +105,7 @@ class ExecutionEngine:
         memory_store: MemoryStore,
         *,
         provenance_store: AppendOnlyProvenanceStore | None = None,
+        task_checkpoint_store: DurableTaskCheckpointStore | None = None,
     ) -> None:
         self.project_dir = canonical_project_root(project_dir)
         self.memory_store = memory_store
@@ -119,6 +130,12 @@ class ExecutionEngine:
             memory_store.paths.state_dir,
             lock_timeout_seconds=memory_store.state_lock_timeout_seconds,
         )
+        self.task_checkpoint_store = task_checkpoint_store or DurableTaskCheckpointStore(
+            memory_store.paths.state_dir,
+            project_dir=self.project_dir,
+            provenance_store=self.provenance_store,
+            lock_timeout_seconds=memory_store.state_lock_timeout_seconds,
+        )
 
     def tool_names(self) -> list[str]:
         return sorted(self.tools)
@@ -130,6 +147,34 @@ class ExecutionEngine:
         *,
         action_context: ActionContext | None = None,
         operation_context: OperationContext | None = None,
+        step_reservation: StepReservation | None = None,
+    ) -> dict[str, Any]:
+        """Execute with complete persistence-error correlation."""
+
+        authoritative_context = (
+            action_context or TraceContext.new_request().new_action()
+        )
+        try:
+            return self._execute(
+                action,
+                require_approval=require_approval,
+                action_context=authoritative_context,
+                operation_context=operation_context,
+                step_reservation=step_reservation,
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(
+                authoritative_context.identity_fields()
+            )
+
+    def _execute(
+        self,
+        action: dict[str, Any],
+        require_approval: bool = True,
+        *,
+        action_context: ActionContext,
+        operation_context: OperationContext | None = None,
+        step_reservation: StepReservation | None = None,
     ) -> dict[str, Any]:
         """Evaluate runtime policy, obtain approval when required, then dispatch.
 
@@ -139,21 +184,249 @@ class ExecutionEngine:
         runtime retry identity; model fields with the same name are stripped.
         """
         _ = require_approval
-        authoritative_context = action_context or TraceContext.new_request().new_action()
+        authoritative_context = action_context
         authoritative_action = strip_untrusted_identity_fields(action)
-        decision = evaluate_action_policy(authoritative_action, authoritative_context)
-        name = decision.action_name
         operation = operation_context or OperationContext.new_operation()
-        self._record_capability_decision(
-            authoritative_action,
-            decision,
-            authoritative_context,
-            operation,
+        direct_operation_compatibility = (
+            operation_context is not None and step_reservation is None
         )
+        preflight_decision: ActionPolicyDecision | None = None
+        preflight_fingerprint: str | None = None
+        preflight_reservation: IdempotencyResolution | None = None
+        preflight_resolution_event_id: str | None = None
+        preflight_approval_granted = False
+        initial_task_checkpoint: TaskCheckpoint | None = None
+
+        # The legacy/direct API has no caller-owned StepReservation.  Resolve its
+        # trusted operation key atomically before minting task-step budget.  The
+        # deterministic binding is runtime-derived from the trusted key, never
+        # accepted from model JSON.  Thus two processes racing the same first
+        # request contend on one P0.7 owner and only the dispatch winner debits a
+        # step.  A model call from another task cannot be re-parented this way.
+        if direct_operation_compatibility:
+            existing_operation = self.idempotency_store.load(operation)
+            if existing_operation is not None and existing_operation.task_id is None:
+                raise RuntimeError(
+                    "Legacy operation is not bound to an authoritative task."
+                )
+            bound_task_id = (
+                existing_operation.task_id
+                if existing_operation is not None
+                else operation.runtime_task_id()
+            )
+            if (
+                authoritative_context.model_call_id is not None
+                and authoritative_context.task_id != bound_task_id
+            ):
+                raise TraceIdentityError(
+                    "A model-derived action cannot be rebound to another task."
+                )
+            authoritative_context = ActionContext(
+                request_id=authoritative_context.request_id,
+                trace_id=authoritative_context.trace_id,
+                task_id=bound_task_id,
+                action_id=authoritative_context.action_id,
+                model_call_id=authoritative_context.model_call_id,
+            )
+            try:
+                # Anchor the stable task before P0.7 can persist RESERVED.  It
+                # remains CREATED and consumes no step until this process wins
+                # the atomic dispatch reservation.
+                initial_task_checkpoint = (
+                    self.task_checkpoint_store.ensure_for_action(
+                        authoritative_context
+                    )
+                )
+            except PersistenceError as exc:
+                raise exc.attach_correlation(
+                    authoritative_context.identity_fields()
+                )
+            preflight_decision = evaluate_action_policy(
+                authoritative_action, authoritative_context
+            )
+            self._record_capability_decision(
+                authoritative_action,
+                preflight_decision,
+                authoritative_context,
+                operation,
+            )
+            if not preflight_decision.allowed:
+                blocked_result = self._blocked_policy_result(preflight_decision)
+                if initial_task_checkpoint.state not in TERMINAL_TASK_STATES:
+                    self._checkpoint_task(
+                        initial_task_checkpoint,
+                        state=TaskState.BLOCKED,
+                        phase=TaskPhase.TERMINAL,
+                        reason_code="TASK_BLOCKED",
+                        action_context=authoritative_context,
+                        operation_context=operation,
+                        action_name="unknown_action",
+                        policy_reason_code=preflight_decision.reason_code,
+                        approval_state=ApprovalState.NOT_APPLICABLE,
+                    )
+                return blocked_result
+            preflight_tool = self.tools.get(preflight_decision.action_name)
+            if preflight_tool is None:
+                if initial_task_checkpoint.state not in TERMINAL_TASK_STATES:
+                    self._checkpoint_task(
+                        initial_task_checkpoint,
+                        state=TaskState.BLOCKED,
+                        phase=TaskPhase.TERMINAL,
+                        reason_code="TASK_BLOCKED",
+                        action_context=authoritative_context,
+                        operation_context=operation,
+                        action_name=(
+                            preflight_decision.action_name or "unknown_action"
+                        ),
+                        policy_reason_code="ACTION_HANDLER_MISSING",
+                        approval_state=ApprovalState.NOT_APPLICABLE,
+                    )
+                return {
+                    **self._decision_fields(preflight_decision),
+                    "success": False,
+                    "allowed": False,
+                    "blocked": True,
+                    "cancelled": False,
+                    "policy_allowed": preflight_decision.allowed,
+                    "policy_reason_code": "ACTION_HANDLER_MISSING",
+                    "message": "Runtime capability policy blocked an action without a handler.",
+                }
+            preflight_fingerprint = canonical_action_fingerprint(
+                authoritative_action,
+                project_dir=self.project_dir,
+                capability_class=preflight_decision.capability_class,
+            )
+            if preflight_decision.requires_confirmation:
+                preflight_approval_granted = self._request_approval(
+                    authoritative_action,
+                    preflight_decision,
+                    authoritative_context,
+                )
+                self._record_approval_decision(
+                    preflight_approval_granted,
+                    authoritative_action,
+                    preflight_decision,
+                    authoritative_context,
+                    operation,
+                )
+                if not preflight_approval_granted:
+                    cancelled_result = {
+                        **self._decision_fields(preflight_decision),
+                        "success": False,
+                        "allowed": False,
+                        "blocked": True,
+                        "cancelled": True,
+                        "dispatched": False,
+                        "result_reason_code": "HUMAN_APPROVAL_DECLINED",
+                    }
+                    return self._record_without_dispatch(
+                        authoritative_action,
+                        preflight_decision,
+                        authoritative_context,
+                        operation,
+                        IdempotencyState.CANCELLED,
+                        cancelled_result,
+                        task_checkpoint=initial_task_checkpoint,
+                    )
+            preflight_reservation = self._reserve_operation(
+                operation,
+                authoritative_context,
+                preflight_decision,
+                preflight_fingerprint,
+            )
+            preflight_resolution_event_id = self._after_idempotency_resolution(
+                preflight_reservation,
+                authoritative_action,
+                preflight_decision,
+                authoritative_context,
+                operation,
+            )
+            if not preflight_reservation.dispatch_allowed:
+                result = self._resolution_result(
+                    preflight_reservation,
+                    authoritative_context,
+                    operation,
+                )
+                self._record_execution(
+                    authoritative_action,
+                    result,
+                    authoritative_context,
+                    operation_context=operation,
+                )
+                return result
+        if initial_task_checkpoint is None:
+            try:
+                initial_task_checkpoint = (
+                    self.task_checkpoint_store.ensure_for_action(
+                        authoritative_context
+                    )
+                )
+            except PersistenceError as exc:
+                raise exc.attach_correlation(
+                    authoritative_context.identity_fields()
+                )
+        standalone_task = (
+            initial_task_checkpoint.reason_code
+            == "STANDALONE_ACTION_TASK_CREATED"
+        )
+        if step_reservation is None:
+            try:
+                step_reservation = self.task_checkpoint_store.reserve_step(
+                    authoritative_context.task_id
+                )
+            except PersistenceError as exc:
+                raise exc.attach_correlation(
+                    authoritative_context.identity_fields()
+                )
+        try:
+            task_checkpoint = self.task_checkpoint_store.consume_step_reservation(
+                step_reservation,
+                task_id=authoritative_context.task_id,
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(authoritative_context.identity_fields())
+        task_checkpoint = self._checkpoint_task(
+            task_checkpoint,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.BEFORE_ACTION_POLICY,
+            reason_code="TASK_BEFORE_ACTION_POLICY",
+            action_context=authoritative_context,
+            operation_context=operation,
+            action_name=(
+                authoritative_action["action"]
+                if isinstance(authoritative_action.get("action"), str)
+                and authoritative_action["action"] in ACTION_SEMANTIC_FIELDS
+                else "unknown_action"
+            ),
+            approval_state=ApprovalState.NOT_APPLICABLE,
+            safe_resume_classification=SafeResumeClassification.MANUAL_REVIEW_REQUIRED,
+        )
+        decision = preflight_decision or evaluate_action_policy(
+            authoritative_action, authoritative_context
+        )
+        name = decision.action_name
+        if preflight_decision is None:
+            self._record_capability_decision(
+                authoritative_action,
+                decision,
+                authoritative_context,
+                operation,
+            )
 
         if not decision.allowed:
             blocked_result = self._blocked_policy_result(decision)
             if name not in ACTION_SEMANTIC_FIELDS:
+                self._checkpoint_task(
+                    task_checkpoint,
+                    state=TaskState.BLOCKED,
+                    phase=TaskPhase.TERMINAL,
+                    reason_code="TASK_BLOCKED",
+                    action_context=authoritative_context,
+                    operation_context=operation,
+                    action_name="unknown_action",
+                    policy_reason_code=decision.reason_code,
+                    approval_state=ApprovalState.NOT_APPLICABLE,
+                )
                 return blocked_result
             return self._record_without_dispatch(
                 authoritative_action,
@@ -162,10 +435,22 @@ class ExecutionEngine:
                 operation,
                 IdempotencyState.BLOCKED,
                 blocked_result,
+                task_checkpoint=task_checkpoint,
             )
 
         tool = self.tools.get(name)
         if tool is None:
+            self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.BLOCKED,
+                phase=TaskPhase.TERMINAL,
+                reason_code="TASK_BLOCKED",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name or "unknown_action",
+                policy_reason_code="ACTION_HANDLER_MISSING",
+                approval_state=ApprovalState.NOT_APPLICABLE,
+            )
             return {
                 **self._decision_fields(decision),
                 "success": False,
@@ -177,7 +462,26 @@ class ExecutionEngine:
                 "message": "Runtime capability policy blocked an action without a handler.",
             }
 
-        if decision.requires_confirmation:
+        fingerprint = preflight_fingerprint or canonical_action_fingerprint(
+            authoritative_action,
+            project_dir=self.project_dir,
+            capability_class=decision.capability_class,
+        )
+        if decision.requires_confirmation and not preflight_approval_granted:
+            task_checkpoint = self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.WAITING_FOR_APPROVAL,
+                phase=TaskPhase.WAITING_FOR_APPROVAL,
+                reason_code="TASK_WAITING_FOR_APPROVAL",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                approval_state=ApprovalState.WAITING,
+                safe_resume_classification=SafeResumeClassification.WAITING_FOR_FRESH_APPROVAL,
+            )
             approved = self._request_approval(
                 authoritative_action,
                 decision,
@@ -208,26 +512,67 @@ class ExecutionEngine:
                     operation,
                     IdempotencyState.CANCELLED,
                     cancelled_result,
+                    task_checkpoint=task_checkpoint,
                 )
-
-        fingerprint = canonical_action_fingerprint(
-            authoritative_action,
-            project_dir=self.project_dir,
-            capability_class=decision.capability_class,
-        )
-        reservation = self._reserve_operation(
+            task_checkpoint = self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.RUNNING,
+                phase=TaskPhase.BEFORE_DISPATCH,
+                reason_code="TASK_APPROVAL_GRANTED_IN_PROCESS",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                approval_state=ApprovalState.GRANTED_IN_PROCESS,
+                safe_resume_classification=SafeResumeClassification.WAITING_FOR_FRESH_APPROVAL,
+            )
+        elif decision.requires_confirmation:
+            task_checkpoint = self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.RUNNING,
+                phase=TaskPhase.BEFORE_DISPATCH,
+                reason_code="TASK_APPROVAL_GRANTED_IN_PROCESS",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                approval_state=ApprovalState.GRANTED_IN_PROCESS,
+                safe_resume_classification=SafeResumeClassification.WAITING_FOR_FRESH_APPROVAL,
+            )
+        else:
+            task_checkpoint = self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.RUNNING,
+                phase=TaskPhase.BEFORE_DISPATCH,
+                reason_code="TASK_BEFORE_DISPATCH",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                approval_state=ApprovalState.NOT_REQUIRED,
+                safe_resume_classification=SafeResumeClassification.SAFE_TO_RESUME,
+            )
+        reservation = preflight_reservation or self._reserve_operation(
             operation,
             authoritative_context,
             decision,
             fingerprint,
         )
-        self._after_idempotency_resolution(
-            reservation,
-            authoritative_action,
-            decision,
-            authoritative_context,
-            operation,
-        )
+        resolution_event_id = preflight_resolution_event_id
+        if resolution_event_id is None:
+            resolution_event_id = self._after_idempotency_resolution(
+                reservation,
+                authoritative_action,
+                decision,
+                authoritative_context,
+                operation,
+            )
         if not reservation.dispatch_allowed:
             result = self._resolution_result(
                 reservation,
@@ -240,18 +585,92 @@ class ExecutionEngine:
                 authoritative_context,
                 operation_context=operation,
             )
+            resolved_state, resolved_reason = self._task_truth_for_resolution(
+                reservation
+            )
+            self._checkpoint_task(
+                task_checkpoint,
+                state=resolved_state,
+                phase=(
+                    TaskPhase.IDEMPOTENCY_RESERVED
+                    if resolved_state is TaskState.RECOVERY_REQUIRED
+                    else TaskPhase.TERMINAL
+                ),
+                reason_code=resolved_reason,
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                idempotency_state=(
+                    IdempotencyState.CONFLICT.value
+                    if getattr(reservation.kind, "value", reservation.kind)
+                    == IdempotencyResolutionKind.CONFLICT.value
+                    else reservation.record.state.value
+                ),
+                latest_provenance_event_id=resolution_event_id,
+                approval_state=(
+                    ApprovalState.FRESH_APPROVAL_REQUIRED
+                    if resolved_state is TaskState.RECOVERY_REQUIRED
+                    and decision.requires_confirmation
+                    else ApprovalState.NOT_REQUIRED
+                    if resolved_state is TaskState.RECOVERY_REQUIRED
+                    else ApprovalState.NOT_APPLICABLE
+                ),
+            )
             return result
+
+        task_checkpoint = self._checkpoint_task(
+            task_checkpoint,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.IDEMPOTENCY_RESERVED,
+            reason_code="TASK_IDEMPOTENCY_RESERVED",
+            action_context=authoritative_context,
+            operation_context=operation,
+            action_name=name,
+            action_fingerprint=fingerprint,
+            capability_class=decision.capability_class.value,
+            policy_reason_code=decision.reason_code,
+            idempotency_state=reservation.record.state.value,
+            latest_provenance_event_id=resolution_event_id,
+            approval_state=(
+                ApprovalState.FRESH_APPROVAL_REQUIRED
+                if decision.requires_confirmation
+                else ApprovalState.NOT_REQUIRED
+            ),
+        )
 
         # The synchronous, fsynced provenance start is the final dispatch gate.
         # Never put this event in the outbox: recovery must not later claim a
         # dispatch started when the handler was actually blocked.
         try:
-            self._before_tool_dispatch(
+            dispatch_start_event_id = self._before_tool_dispatch(
                 authoritative_action,
                 decision,
                 authoritative_context,
                 operation,
                 reservation.record,
+            )
+            task_checkpoint = self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.RUNNING,
+                phase=TaskPhase.PROVENANCE_DISPATCH_RECORDED,
+                reason_code="TASK_PROVENANCE_DISPATCH_RECORDED",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                idempotency_state=reservation.record.state.value,
+                latest_provenance_event_id=dispatch_start_event_id,
+                approval_state=(
+                    ApprovalState.FRESH_APPROVAL_REQUIRED
+                    if decision.requires_confirmation
+                    else ApprovalState.NOT_REQUIRED
+                ),
+                safe_resume_classification=SafeResumeClassification.MANUAL_REVIEW_REQUIRED,
             )
         except Exception as start_error:
             try:
@@ -268,7 +687,7 @@ class ExecutionEngine:
                         "success": False,
                     },
                 )
-                self._after_idempotency_transition(
+                terminal_event_id = self._after_idempotency_transition(
                     failed_record,
                     authoritative_action,
                     decision,
@@ -317,6 +736,25 @@ class ExecutionEngine:
             authoritative_context,
             operation,
         )
+        task_checkpoint = self._checkpoint_task(
+            task_checkpoint,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.DISPATCH_IN_FLIGHT,
+            reason_code="TASK_DISPATCH_IN_FLIGHT",
+            action_context=authoritative_context,
+            operation_context=operation,
+            action_name=name,
+            action_fingerprint=fingerprint,
+            capability_class=decision.capability_class.value,
+            policy_reason_code=decision.reason_code,
+            idempotency_state=dispatch_record.state.value,
+            approval_state=(
+                ApprovalState.FRESH_APPROVAL_REQUIRED
+                if decision.requires_confirmation
+                else ApprovalState.NOT_REQUIRED
+            ),
+            safe_resume_classification=SafeResumeClassification.UNKNOWN_OUTCOME,
+        )
         try:
             result = self._correlate_result(
                 tool.handler(authoritative_action),
@@ -338,12 +776,32 @@ class ExecutionEngine:
                         "unknown_outcome": True,
                     },
                 )
-                self._after_idempotency_transition(
+                terminal_event_id = self._after_idempotency_transition(
                     unknown_record,
                     authoritative_action,
                     decision,
                     authoritative_context,
                     operation,
+                )
+                self._checkpoint_task(
+                    task_checkpoint,
+                    state=TaskState.RECOVERY_REQUIRED,
+                    phase=TaskPhase.DISPATCH_IN_FLIGHT,
+                    reason_code="TASK_ACTION_UNKNOWN_OUTCOME",
+                    action_context=authoritative_context,
+                    operation_context=operation,
+                    action_name=name,
+                    action_fingerprint=fingerprint,
+                    capability_class=decision.capability_class.value,
+                    policy_reason_code=decision.reason_code,
+                    idempotency_state=unknown_record.state.value,
+                    latest_provenance_event_id=terminal_event_id,
+                    approval_state=(
+                        ApprovalState.FRESH_APPROVAL_REQUIRED
+                        if decision.requires_confirmation
+                        else ApprovalState.NOT_REQUIRED
+                    ),
+                    safe_resume_classification=SafeResumeClassification.UNKNOWN_OUTCOME,
                 )
             except Exception as transition_error:
                 self._attach_secondary_failure(
@@ -382,13 +840,79 @@ class ExecutionEngine:
                     "Terminal idempotency transition and persistence-failure provenance both failed.",
                 )
             raise
-        self._after_idempotency_transition(
+        terminal_event_id = self._after_idempotency_transition(
             terminal_record,
             authoritative_action,
             decision,
             authoritative_context,
             operation,
         )
+        if terminal_state in {
+            IdempotencyState.TIMED_OUT_OR_UNKNOWN,
+            IdempotencyState.UNKNOWN_OUTCOME,
+        }:
+            task_checkpoint = self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.RECOVERY_REQUIRED,
+                phase=TaskPhase.DISPATCH_IN_FLIGHT,
+                reason_code="TASK_ACTION_UNKNOWN_OUTCOME",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                idempotency_state=terminal_record.state.value,
+                latest_provenance_event_id=terminal_event_id,
+                approval_state=(
+                    ApprovalState.FRESH_APPROVAL_REQUIRED
+                    if decision.requires_confirmation
+                    else ApprovalState.NOT_REQUIRED
+                ),
+                safe_resume_classification=SafeResumeClassification.UNKNOWN_OUTCOME,
+            )
+        else:
+            task_checkpoint = self._checkpoint_task(
+                task_checkpoint,
+                state=TaskState.RUNNING,
+                phase=TaskPhase.AFTER_ACTION,
+                reason_code="TASK_ACTION_COMPLETED",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                idempotency_state=terminal_record.state.value,
+                latest_provenance_event_id=terminal_event_id,
+                approval_state=ApprovalState.NOT_APPLICABLE,
+                safe_resume_classification=SafeResumeClassification.SAFE_TO_RESUME,
+            )
+            if standalone_task:
+                standalone_state = (
+                    TaskState.COMPLETED
+                    if terminal_state is IdempotencyState.SUCCEEDED
+                    else TaskState.FAILED
+                )
+                task_checkpoint = self._checkpoint_task(
+                    task_checkpoint,
+                    state=standalone_state,
+                    phase=TaskPhase.TERMINAL,
+                    reason_code=(
+                        "TASK_COMPLETED"
+                        if standalone_state is TaskState.COMPLETED
+                        else "TASK_FAILED"
+                    ),
+                    action_context=authoritative_context,
+                    operation_context=operation,
+                    action_name=name,
+                    action_fingerprint=fingerprint,
+                    capability_class=decision.capability_class.value,
+                    policy_reason_code=decision.reason_code,
+                    idempotency_state=terminal_record.state.value,
+                    latest_provenance_event_id=terminal_event_id,
+                    approval_state=ApprovalState.NOT_APPLICABLE,
+                )
         result = self._with_idempotency_fields(
             result,
             operation,
@@ -432,6 +956,8 @@ class ExecutionEngine:
         operation: OperationContext,
         terminal_state: IdempotencyState,
         result: dict[str, Any],
+        *,
+        task_checkpoint: TaskCheckpoint,
     ) -> dict[str, Any]:
         """Persist BLOCKED/CANCELLED truth without entering DISPATCH_STARTED."""
 
@@ -446,7 +972,7 @@ class ExecutionEngine:
             decision,
             fingerprint,
         )
-        self._after_idempotency_resolution(
+        resolution_event_id = self._after_idempotency_resolution(
             reservation,
             action,
             decision,
@@ -456,6 +982,35 @@ class ExecutionEngine:
         if not reservation.dispatch_allowed:
             # Current denial still wins over a previous record: never replay an
             # operation after the human/policy denied this attempt.
+            if task_checkpoint.state not in TERMINAL_TASK_STATES:
+                self._checkpoint_task(
+                    task_checkpoint,
+                    state=(
+                        TaskState.CANCELLED
+                        if terminal_state is IdempotencyState.CANCELLED
+                        else TaskState.BLOCKED
+                    ),
+                    phase=TaskPhase.TERMINAL,
+                    reason_code=(
+                        "TASK_CANCELLED"
+                        if terminal_state is IdempotencyState.CANCELLED
+                        else "TASK_BLOCKED"
+                    ),
+                    action_context=action_context,
+                    operation_context=operation,
+                    action_name=decision.action_name,
+                    action_fingerprint=fingerprint,
+                    capability_class=decision.capability_class.value,
+                    policy_reason_code=decision.reason_code,
+                    idempotency_state=reservation.record.state.value,
+                    latest_provenance_event_id=resolution_event_id,
+                    approval_state=(
+                        ApprovalState.DENIED
+                        if terminal_state is IdempotencyState.CANCELLED
+                        else ApprovalState.NOT_APPLICABLE
+                    ),
+                    safe_resume_classification=SafeResumeClassification.TERMINAL_NO_RESUME,
+                )
             return {
                 **result,
                 **action_context.identity_fields(),
@@ -473,13 +1028,42 @@ class ExecutionEngine:
             IDEMPOTENCY_STATE_REASON_CODES[terminal_state],
             terminal_receipt=build_safe_result_receipt(result),
         )
-        self._after_idempotency_transition(
+        terminal_event_id = self._after_idempotency_transition(
             terminal_record,
             action,
             decision,
             action_context,
             operation,
         )
+        if task_checkpoint.state not in TERMINAL_TASK_STATES:
+            self._checkpoint_task(
+                task_checkpoint,
+                state=(
+                    TaskState.CANCELLED
+                    if terminal_state is IdempotencyState.CANCELLED
+                    else TaskState.BLOCKED
+                ),
+                phase=TaskPhase.TERMINAL,
+                reason_code=(
+                    "TASK_CANCELLED"
+                    if terminal_state is IdempotencyState.CANCELLED
+                    else "TASK_BLOCKED"
+                ),
+                action_context=action_context,
+                operation_context=operation,
+                action_name=decision.action_name,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class.value,
+                policy_reason_code=decision.reason_code,
+                idempotency_state=terminal_record.state.value,
+                latest_provenance_event_id=terminal_event_id,
+                approval_state=(
+                    ApprovalState.DENIED
+                    if terminal_state is IdempotencyState.CANCELLED
+                    else ApprovalState.NOT_APPLICABLE
+                ),
+                safe_resume_classification=SafeResumeClassification.TERMINAL_NO_RESUME,
+            )
         return self._with_idempotency_fields(
             {**result, **action_context.identity_fields()},
             operation,
@@ -631,6 +1215,88 @@ class ExecutionEngine:
             "message": message,
         }
 
+    @staticmethod
+    def _task_truth_for_resolution(
+        resolution: IdempotencyResolution,
+    ) -> tuple[TaskState, str]:
+        """Map every non-dispatch P0.7 outcome to explicit task truth."""
+
+        if resolution.kind in {
+            IdempotencyResolutionKind.IN_PROGRESS,
+            IdempotencyResolutionKind.UNKNOWN_OUTCOME,
+        }:
+            return TaskState.RECOVERY_REQUIRED, "TASK_RECOVERY_REQUIRED"
+        if resolution.kind is IdempotencyResolutionKind.CONFLICT:
+            return TaskState.BLOCKED, "TASK_IDEMPOTENCY_CONFLICT"
+        if resolution.kind is not IdempotencyResolutionKind.REPLAYED:
+            raise RuntimeError("Unsupported non-dispatch idempotency resolution.")
+        fixed = {
+            IdempotencyState.SUCCEEDED: (TaskState.COMPLETED, "TASK_COMPLETED"),
+            IdempotencyState.BLOCKED: (TaskState.BLOCKED, "TASK_ACTION_BLOCKED"),
+            IdempotencyState.CANCELLED: (
+                TaskState.CANCELLED,
+                "TASK_ACTION_CANCELLED",
+            ),
+            IdempotencyState.FAILED_BEFORE_DISPATCH: (
+                TaskState.FAILED,
+                "TASK_FAILED",
+            ),
+            IdempotencyState.FAILED_REPORTED: (
+                TaskState.FAILED,
+                "TASK_FAILED",
+            ),
+        }
+        try:
+            return fixed[resolution.record.state]
+        except KeyError as exc:
+            raise RuntimeError(
+                "Unsupported replayed idempotency terminal state."
+            ) from exc
+
+    def _checkpoint_task(
+        self,
+        checkpoint: TaskCheckpoint,
+        *,
+        state: TaskState,
+        phase: TaskPhase,
+        reason_code: str,
+        action_context: ActionContext,
+        operation_context: OperationContext,
+        action_name: str,
+        action_fingerprint: str | None = None,
+        capability_class: str | None = None,
+        policy_reason_code: str | None = None,
+        idempotency_state: str | None = None,
+        latest_provenance_event_id: str | None = None,
+        approval_state: ApprovalState = ApprovalState.NOT_APPLICABLE,
+        safe_resume_classification: SafeResumeClassification = SafeResumeClassification.MANUAL_REVIEW_REQUIRED,
+    ) -> TaskCheckpoint:
+        """Advance one task checkpoint using only runtime-owned action metadata."""
+
+        try:
+            return self.task_checkpoint_store.transition(
+                checkpoint.task_id,
+                expected_version=checkpoint.checkpoint_version,
+                state=state,
+                phase=phase,
+                reason_code=reason_code,
+                latest_request_id=action_context.request_id,
+                latest_trace_id=action_context.trace_id,
+                current_model_call_id=action_context.model_call_id,
+                current_action_id=action_context.action_id,
+                current_idempotency_key=operation_context.operation_key,
+                current_action_fingerprint=action_fingerprint,
+                current_idempotency_state=idempotency_state,
+                causal_provenance_event_id=latest_provenance_event_id,
+                current_action_name=action_name,
+                current_capability_class=capability_class,
+                current_policy_reason_code=policy_reason_code,
+                approval_state=approval_state,
+                safe_resume_classification=safe_resume_classification,
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(action_context.identity_fields())
+
     def _before_tool_dispatch(
         self,
         action: dict[str, Any],
@@ -638,11 +1304,10 @@ class ExecutionEngine:
         action_context: ActionContext,
         operation_context: OperationContext,
         idempotency_record: IdempotencyRecord,
-    ) -> None:
+    ) -> str:
         """Commit dispatch-start truth before idempotency dispatch and handler."""
 
-        self.provenance_store.append_runtime_event(
-            new_runtime_provenance_event(
+        event = new_runtime_provenance_event(
                 RuntimeProvenanceEventType.ACTION_DISPATCH_STARTED,
                 action_context=action_context,
                 operation_context=operation_context,
@@ -653,8 +1318,9 @@ class ExecutionEngine:
                 replayed=False,
                 dispatched=True,
                 reason_code=RuntimeProvenanceEventType.ACTION_DISPATCH_STARTED.value,
-            )
         )
+        self.provenance_store.append_runtime_event(event)
+        return event.event_id
 
     def _after_idempotency_resolution(
         self,
@@ -714,6 +1380,7 @@ class ExecutionEngine:
             self.provenance_store.append_terminal(event)
         else:
             self.provenance_store.append_runtime_event(event)
+        return event.event_id
 
     def _after_idempotency_transition(
         self,
@@ -722,7 +1389,7 @@ class ExecutionEngine:
         decision: ActionPolicyDecision,
         action_context: ActionContext,
         operation_context: OperationContext,
-    ) -> None:
+    ) -> str | None:
         """Append terminal action truth only after P0.7 made it durable."""
 
         _ = action
@@ -768,10 +1435,9 @@ class ExecutionEngine:
         if terminal is None:
             # DISPATCH_STARTED has already been recorded at the synchronous
             # provenance gate. RESERVED is represented by its resolution event.
-            return
+            return None
         event_type, success, dispatched = terminal
-        self.provenance_store.append_terminal(
-            new_runtime_provenance_event(
+        event = new_runtime_provenance_event(
                 event_type,
                 action_context=action_context,
                 operation_context=operation_context,
@@ -784,7 +1450,8 @@ class ExecutionEngine:
                 success=success,
                 reason_code=record.reason_code,
             )
-        )
+        self.provenance_store.append_terminal(event)
+        return event.event_id
 
     def _record_capability_decision(
         self,
@@ -799,7 +1466,11 @@ class ExecutionEngine:
                 RuntimeProvenanceEventType.CAPABILITY_DECISION,
                 action_context=action_context,
                 operation_context=operation_context,
-                action_name=decision.action_name or "unknown_action",
+                action_name=(
+                    decision.action_name
+                    if decision.action_name in ACTION_SEMANTIC_FIELDS
+                    else "unknown_action"
+                ),
                 capability_class=decision.capability_class,
                 policy_allowed=decision.allowed,
                 approval_required=decision.requires_confirmation,
@@ -886,7 +1557,13 @@ class ExecutionEngine:
             "model_requests_confirmation": decision.model_requests_confirmation,
             "policy_reason_code": decision.reason_code,
         }
-        for field in ("request_id", "trace_id", "action_id", "model_call_id"):
+        for field in (
+            "task_id",
+            "request_id",
+            "trace_id",
+            "action_id",
+            "model_call_id",
+        ):
             value = getattr(decision, field)
             if value is not None:
                 fields[field] = value
@@ -1102,7 +1779,7 @@ class ExecutionEngine:
         operation_context: OperationContext | None = None,
     ) -> None:
         identity = action_context.identity_fields()
-        for field in ("request_id", "trace_id", "action_id"):
+        for field in ("task_id", "request_id", "trace_id", "action_id"):
             if not identity.get(field) or result.get(field) != identity[field]:
                 raise TraceIdentityError(
                     "Operational execution records require authoritative request, trace, and action identity."
