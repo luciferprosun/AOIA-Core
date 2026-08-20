@@ -10,6 +10,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from runtime.safety.subprocess_env import build_subprocess_env
+
 
 CONTROLLED_TEST_EXECUTION_SCHEMA_VERSION = "AOIA_CONTROLLED_TEST_EXECUTION_1A"
 _DEFAULT_TIMEOUT_SECONDS = 30
@@ -348,11 +350,14 @@ def _build_controlled_child_environment(*, repo_root: str, pycache_root: str) ->
         raise ValueError("controlled child pycache root must be a directory")
     if resolved_cache == repository or repository in resolved_cache.parents:
         raise ValueError("controlled child pycache root must be outside the repository")
-    return {
-        **_MINIMAL_ENV,
-        "PYTHONDONTWRITEBYTECODE": "1",
-        "PYTHONPYCACHEPREFIX": str(resolved_cache),
-    }
+    return build_subprocess_env(
+        inherit_names=(),
+        fixed={
+            **_MINIMAL_ENV,
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONPYCACHEPREFIX": str(resolved_cache),
+        },
+    )
 
 
 def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> ControlledTestExecutionResult:

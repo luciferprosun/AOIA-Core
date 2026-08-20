@@ -14,6 +14,14 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+try:
+    from runtime.safety.subprocess_env import build_subprocess_env
+except ModuleNotFoundError:
+    repository_root = Path(__file__).resolve().parents[2]
+    if str(repository_root) not in sys.path:
+        sys.path.insert(0, str(repository_root))
+    from runtime.safety.subprocess_env import build_subprocess_env
+
 
 PRODUCTION_REPO = Path("/home/l/Desktop/AOIA-Core")
 LAB_ROOT = Path("/home/l/Desktop/IOA-LAB")
@@ -37,6 +45,7 @@ def run_git(args: list[str], cwd: Path, *, check: bool = True) -> subprocess.Com
         ["git", *args],
         cwd=cwd,
         check=check,
+        env=build_subprocess_env(),
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

@@ -17,6 +17,7 @@ from retrieval.facade import (
 )
 from tools.shell_tools import _legacy_shell_execution_enabled
 from tools.validator import validate_action
+from runtime.safety.subprocess_env import build_subprocess_env
 
 SCEMDA_ZIP = Path.home() / ".local" / "share" / "aoia" / "kimi agetn..zip"
 
@@ -446,6 +447,7 @@ def cmd_scemda(args: str, runtime) -> CommandResult:
     result = subprocess.run(
         command,
         cwd=str(runtime.project_dir),
+        env=build_subprocess_env(),
         text=True,
         capture_output=True,
         check=False,

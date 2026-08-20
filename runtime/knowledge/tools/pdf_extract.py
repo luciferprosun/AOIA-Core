@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from runtime.safety.subprocess_env import build_subprocess_env
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INPUT = PROJECT_ROOT / "knowledge" / "source" / "RHCSA_Command_Library.pdf"
 DEFAULT_OUTPUT = PROJECT_ROOT / "knowledge" / "raw" / "rhcsa_raw.txt"
@@ -60,6 +62,7 @@ def extract_pdf(input_path: Path, output_path: Path) -> int:
     result = subprocess.run(
         [pdftotext, "-layout", "-enc", "UTF-8", str(input_path), str(output_path)],
         check=False,
+        env=build_subprocess_env(),
         text=True,
         capture_output=True,
     )
@@ -79,6 +82,7 @@ def read_page_count(pdfinfo: str, input_path: Path) -> int:
     result = subprocess.run(
         [pdfinfo, str(input_path)],
         check=False,
+        env=build_subprocess_env(),
         text=True,
         capture_output=True,
     )

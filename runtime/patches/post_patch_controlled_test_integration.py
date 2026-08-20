@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
+from runtime.safety.subprocess_env import build_subprocess_env
+
 from runtime.patches.post_patch_verification_plan import (
     CHECK_KIND_COMPILE,
     CHECK_KIND_STATIC,
@@ -302,7 +304,7 @@ def run_controlled_post_patch_verification(
             completed = subprocess.run(
                 allowed.args,
                 cwd=request.workspace_root,
-                env=dict(_MINIMAL_ENV),
+                env=build_subprocess_env(inherit_names=(), fixed=_MINIMAL_ENV),
                 timeout=timeout_seconds,
                 capture_output=True,
                 text=True,

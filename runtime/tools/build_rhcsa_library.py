@@ -10,6 +10,8 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any
 
+from runtime.safety.subprocess_env import build_subprocess_env
+
 
 CATEGORIES = [
     "commands",
@@ -892,6 +894,7 @@ def export_single_manpage(command: str) -> str:
             text=True,
             capture_output=True,
             check=False,
+            env=build_subprocess_env(),
             timeout=20,
         )
         if result.stdout.strip():
@@ -903,6 +906,7 @@ def export_single_manpage(command: str) -> str:
             text=True,
             capture_output=True,
             check=False,
+            env=build_subprocess_env(),
             timeout=15,
         )
         return (result.stdout or result.stderr).strip()

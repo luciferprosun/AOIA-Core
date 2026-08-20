@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from runtime.safety.subprocess_env import build_subprocess_env
+
 from runtime.package_ops.package_install_proposal import (
     PACKAGE_INSTALL_PROPOSAL_READY_METADATA_ONLY,
     PACKAGE_INSTALL_PROPOSAL_SCHEMA_VERSION,
@@ -331,7 +333,7 @@ class _SubprocessPackageRunner:
             completed = subprocess.run(
                 list(argv),
                 cwd=str(cwd),
-                env=dict(env),
+                env=build_subprocess_env(inherit_names=(), fixed=env),
                 timeout=timeout_seconds,
                 capture_output=True,
                 text=True,
