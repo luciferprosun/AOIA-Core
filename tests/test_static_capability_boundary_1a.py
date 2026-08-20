@@ -309,7 +309,11 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertTrue(POST_PATCH_CONTROLLED_TEST_INTEGRATION.exists())
         step_26_scan = scan_module(POST_PATCH_CONTROLLED_TEST_INTEGRATION)
         self.assertIn("subprocess", step_26_scan.imports)
-        self.assertIn("subprocess.run", step_26_scan.calls)
+        self.assertNotIn("subprocess.run", step_26_scan.calls)
+        self.assertIn(
+            "runtime.safety.bounded_subprocess.run_bounded_subprocess",
+            step_26_scan.calls,
+        )
         self.assertNotIn("subprocess.Popen", step_26_scan.calls)
         source = POST_PATCH_CONTROLLED_TEST_INTEGRATION.read_text(encoding="utf-8").casefold()
         self.assertNotIn("shell=true", source)
@@ -317,7 +321,11 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertTrue(GIT_READ_ADAPTER.exists())
         git_scan = scan_module(GIT_READ_ADAPTER)
         self.assertIn("subprocess", git_scan.imports)
-        self.assertIn("subprocess.run", git_scan.calls)
+        self.assertNotIn("subprocess.run", git_scan.calls)
+        self.assertIn(
+            "runtime.safety.bounded_subprocess.run_bounded_subprocess",
+            git_scan.calls,
+        )
         self.assertNotIn("subprocess.Popen", git_scan.calls)
         git_source = GIT_READ_ADAPTER.read_text(encoding="utf-8").casefold()
         self.assertNotIn("shell=true", git_source)
@@ -387,7 +395,11 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertTrue(CONTROLLED_GIT_COMMIT.exists())
         controlled_commit_scan = scan_module(CONTROLLED_GIT_COMMIT)
         self.assertIn("subprocess", controlled_commit_scan.imports)
-        self.assertIn("subprocess.run", controlled_commit_scan.calls)
+        self.assertNotIn("subprocess.run", controlled_commit_scan.calls)
+        self.assertIn(
+            "runtime.safety.bounded_subprocess.run_bounded_subprocess",
+            controlled_commit_scan.calls,
+        )
         self.assertNotIn("subprocess.Popen", controlled_commit_scan.calls)
         controlled_commit_source = CONTROLLED_GIT_COMMIT.read_text(encoding="utf-8").casefold()
         for forbidden in (
@@ -410,7 +422,11 @@ class StaticCapabilityBoundary1ATests(unittest.TestCase):
         self.assertTrue(CONTROLLED_GIT_PUSH.exists())
         controlled_push_scan = scan_module(CONTROLLED_GIT_PUSH)
         self.assertIn("subprocess", controlled_push_scan.imports)
-        self.assertIn("subprocess.run", controlled_push_scan.calls)
+        self.assertNotIn("subprocess.run", controlled_push_scan.calls)
+        self.assertIn(
+            "runtime.safety.bounded_subprocess.run_bounded_subprocess",
+            controlled_push_scan.calls,
+        )
         self.assertNotIn("subprocess.Popen", controlled_push_scan.calls)
         controlled_push_source = CONTROLLED_GIT_PUSH.read_text(encoding="utf-8").casefold()
         for forbidden in (

@@ -9,6 +9,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 from runtime.safety.subprocess_env import build_subprocess_env
+from runtime.safety.bounded_subprocess import run_bounded_subprocess
 
 from runtime.patches.post_patch_verification_plan import (
     CHECK_KIND_COMPILE,
@@ -301,7 +302,7 @@ def run_controlled_post_patch_verification(
                 check_results=tuple(check_results),
             )
         try:
-            completed = subprocess.run(
+            completed = run_bounded_subprocess(
                 allowed.args,
                 cwd=request.workspace_root,
                 env=build_subprocess_env(inherit_names=(), fixed=_MINIMAL_ENV),

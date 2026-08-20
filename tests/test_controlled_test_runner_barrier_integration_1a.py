@@ -214,7 +214,8 @@ class ControlledTestRunnerBarrierIntegration1ATests(unittest.TestCase):
                 imports.append(node.module)
 
         self.assertIn("subprocess", imports)
-        self.assertEqual(1, source.casefold().count("subprocess.run("))
+        self.assertEqual(0, source.casefold().count("subprocess.run("))
+        self.assertEqual(1, source.casefold().count("run_bounded_subprocess("))
         self.assertIn("shell=False", source)
         forbidden_modules = {
             "os",

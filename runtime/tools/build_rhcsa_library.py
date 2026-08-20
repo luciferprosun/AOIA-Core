@@ -11,6 +11,10 @@ from textwrap import dedent
 from typing import Any
 
 from runtime.safety.subprocess_env import build_subprocess_env
+from runtime.safety.bounded_subprocess import (
+    SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    run_bounded_subprocess,
+)
 
 
 CATEGORIES = [
@@ -41,6 +45,22 @@ CATEGORIES = [
     "examples",
     "sources",
 ]
+
+RHCSA_MANPAGE_HARD_TIMEOUT_SECONDS = 20
+RHCSA_HELP_HARD_TIMEOUT_SECONDS = 15
+
+
+class RhcsaUtilityHardTimeoutError(RuntimeError):
+    """An RHCSA documentation utility exceeded its hard process deadline."""
+
+    reason_code = SUBPROCESS_HARD_TIMEOUT_REASON_CODE
+
+    def __init__(self, operation: str) -> None:
+        self.operation = operation
+        super().__init__(
+            f"{self.reason_code}: RHCSA utility timed out during {operation} "
+            "and was terminated"
+        )
 
 MANPAGE_COMMANDS = [
     "awk",
@@ -889,26 +909,34 @@ def export_manpages(root: Path) -> int:
 
 def export_single_manpage(command: str) -> str:
     if shutil.which("man") and shutil.which("col"):
-        result = subprocess.run(
-            ["bash", "-lc", f"man {command} | col -b"],
-            text=True,
-            capture_output=True,
-            check=False,
-            env=build_subprocess_env(),
-            timeout=20,
-        )
+        try:
+            result = run_bounded_subprocess(
+                ["bash", "-lc", f"man {command} | col -b"],
+                text=True,
+                capture_output=True,
+                check=False,
+                env=build_subprocess_env(),
+                timeout=RHCSA_MANPAGE_HARD_TIMEOUT_SECONDS,
+                shell=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RhcsaUtilityHardTimeoutError("manpage export") from exc
         if result.stdout.strip():
             return result.stdout.strip()
     executable = command.split(".", 1)[0]
     if shutil.which(executable):
-        result = subprocess.run(
-            [executable, "--help"],
-            text=True,
-            capture_output=True,
-            check=False,
-            env=build_subprocess_env(),
-            timeout=15,
-        )
+        try:
+            result = run_bounded_subprocess(
+                [executable, "--help"],
+                text=True,
+                capture_output=True,
+                check=False,
+                env=build_subprocess_env(),
+                timeout=RHCSA_HELP_HARD_TIMEOUT_SECONDS,
+                shell=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RhcsaUtilityHardTimeoutError("help export") from exc
         return (result.stdout or result.stderr).strip()
     return ""
 

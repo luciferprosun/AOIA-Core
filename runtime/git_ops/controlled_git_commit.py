@@ -22,6 +22,7 @@ from runtime.git_ops.git_commit_preview import (
     compute_git_commit_preview_hash,
 )
 from runtime.git_ops.git_env import build_hardened_git_env
+from runtime.safety.bounded_subprocess import run_bounded_subprocess
 from runtime.git_ops.git_write_preview import GitWriteIntent
 
 
@@ -48,6 +49,7 @@ CONTROLLED_GIT_COMMIT_BLOCKED_UNSTAGED_CHANGES = "CONTROLLED_GIT_COMMIT_BLOCKED_
 CONTROLLED_GIT_COMMIT_BLOCKED_UNTRACKED_CHANGES = "CONTROLLED_GIT_COMMIT_BLOCKED_UNTRACKED_CHANGES"
 CONTROLLED_GIT_COMMIT_BLOCKED_MESSAGE_MISMATCH = "CONTROLLED_GIT_COMMIT_BLOCKED_MESSAGE_MISMATCH"
 CONTROLLED_GIT_COMMIT_BLOCKED_GIT_COMMIT_FAILED = "CONTROLLED_GIT_COMMIT_BLOCKED_GIT_COMMIT_FAILED"
+CONTROLLED_GIT_COMMIT_BLOCKED_TIMEOUT = "CONTROLLED_GIT_COMMIT_BLOCKED_TIMEOUT"
 CONTROLLED_GIT_COMMIT_BLOCKED_FAIL_CLOSED = "CONTROLLED_GIT_COMMIT_BLOCKED_FAIL_CLOSED"
 
 _RESULT_SCHEMA_VERSION = "AOIA_CONTROLLED_GIT_COMMIT_1A"
@@ -158,6 +160,12 @@ class _GitRunnerResult:
         return self.exit_code == 0 and not self.timeout_expired
 
 
+class _ControlledGitCommitTimeout(RuntimeError):
+    def __init__(self, command_id: str) -> None:
+        self.command_id = command_id
+        super().__init__(command_id)
+
+
 class _ControlledGitCommitRunner:
     def run(self, command_id: _GitCommitCommand, repo_path: Path, message: str | None = None) -> _GitRunnerResult:
         if command_id is _GitCommitCommand.COMMIT:
@@ -177,7 +185,7 @@ class _ControlledGitCommitRunner:
         else:
             argv = _ALLOWLIST[command_id]
         try:
-            completed = subprocess.run(
+            completed = run_bounded_subprocess(
                 list(argv),
                 cwd=str(repo_path),
                 env=build_hardened_git_env(),
@@ -329,6 +337,11 @@ def controlled_git_commit(
             staged_diff_hash=staged_diff_hash,
             message_hash=compute_commit_message_hash(message),
         )
+    except _ControlledGitCommitTimeout as exc:
+        return _blocked(
+            CONTROLLED_GIT_COMMIT_BLOCKED_TIMEOUT,
+            f"controlled Git process timed out during {exc.command_id}",
+        )
     except Exception:
         return _blocked(CONTROLLED_GIT_COMMIT_BLOCKED_FAIL_CLOSED, "controlled git commit failed closed")
 
@@ -394,14 +407,18 @@ def _repo_root_error(preview: Mapping[str, Any], repo: Path) -> str | None:
 def _run(runner: Any, command_id: _GitCommitCommand, repo: Path, message: str | None = None) -> _GitRunnerResult:
     result = runner.run(command_id, repo, message=message)
     if isinstance(result, _GitRunnerResult):
-        return result
-    return _GitRunnerResult(
-        command_id.value,
-        getattr(result, "exit_code", 1),
-        _bytes(getattr(result, "stdout", b"")),
-        _bytes(getattr(result, "stderr", b"")),
-        bool(getattr(result, "timeout_expired", False)),
-    )
+        normalized = result
+    else:
+        normalized = _GitRunnerResult(
+            command_id.value,
+            getattr(result, "exit_code", 1),
+            _bytes(getattr(result, "stdout", b"")),
+            _bytes(getattr(result, "stderr", b"")),
+            bool(getattr(result, "timeout_expired", False)),
+        )
+    if normalized.timeout_expired:
+        raise _ControlledGitCommitTimeout(command_id.value)
+    return normalized
 
 
 def _target_paths(value: Any) -> tuple[tuple[str, ...], str | None]:

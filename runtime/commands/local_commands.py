@@ -18,8 +18,13 @@ from retrieval.facade import (
 from tools.shell_tools import _legacy_shell_execution_enabled
 from tools.validator import validate_action
 from runtime.safety.subprocess_env import build_subprocess_env
+from runtime.safety.bounded_subprocess import (
+    SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    run_bounded_subprocess,
+)
 
 SCEMDA_ZIP = Path.home() / ".local" / "share" / "aoia" / "kimi agetn..zip"
+SCEMDA_HARD_TIMEOUT_SECONDS = 300
 
 
 def build_command_registry() -> CommandRegistry:
@@ -444,14 +449,25 @@ def cmd_scemda(args: str, runtime) -> CommandResult:
             "SCEMDA run is a frozen legacy shell/subprocess surface. "
             "It is not approved by default in AOIA production flow.",
         )
-    result = subprocess.run(
-        command,
-        cwd=str(runtime.project_dir),
-        env=build_subprocess_env(),
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = run_bounded_subprocess(
+            command,
+            cwd=str(runtime.project_dir),
+            env=build_subprocess_env(),
+            timeout=SCEMDA_HARD_TIMEOUT_SECONDS,
+            text=True,
+            capture_output=True,
+            check=False,
+            shell=False,
+        )
+    except subprocess.TimeoutExpired:
+        return CommandResult(
+            True,
+            (
+                f"{SUBPROCESS_HARD_TIMEOUT_REASON_CODE}: "
+                "SCEMDA exceeded its hard execution timeout and was terminated."
+            ),
+        )
     output = "\n".join(
         [
             f"Exit code: {result.returncode}",

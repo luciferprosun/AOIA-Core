@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from runtime.git_ops.git_env import build_hardened_git_env
+from runtime.safety.bounded_subprocess import run_bounded_subprocess
 from runtime.git_ops.git_push_barrier import (
     GIT_PUSH_BARRIER_ELIGIBLE,
     GitPushBarrierRequest,
@@ -46,6 +47,7 @@ CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_NOT_LOCAL = "CONTROLLED_GIT_PUSH_BLOCKED_REMO
 CONTROLLED_GIT_PUSH_BLOCKED_NON_FAST_FORWARD = "CONTROLLED_GIT_PUSH_BLOCKED_NON_FAST_FORWARD"
 CONTROLLED_GIT_PUSH_BLOCKED_AHEAD_BEHIND_CHANGED = "CONTROLLED_GIT_PUSH_BLOCKED_AHEAD_BEHIND_CHANGED"
 CONTROLLED_GIT_PUSH_BLOCKED_PUSH_FAILED = "CONTROLLED_GIT_PUSH_BLOCKED_PUSH_FAILED"
+CONTROLLED_GIT_PUSH_BLOCKED_TIMEOUT = "CONTROLLED_GIT_PUSH_BLOCKED_TIMEOUT"
 CONTROLLED_GIT_PUSH_BLOCKED_FAIL_CLOSED = "CONTROLLED_GIT_PUSH_BLOCKED_FAIL_CLOSED"
 
 _RESULT_SCHEMA_VERSION = "AOIA_CONTROLLED_GIT_PUSH_1A"
@@ -160,6 +162,12 @@ class _GitRunnerResult:
         return self.exit_code == 0 and not self.timeout_expired
 
 
+class _ControlledGitPushTimeout(RuntimeError):
+    def __init__(self, command_id: str) -> None:
+        self.command_id = command_id
+        super().__init__(command_id)
+
+
 class _ControlledGitPushRunner:
     def run(
         self,
@@ -203,7 +211,7 @@ class _ControlledGitPushRunner:
             return _GitRunnerResult(command_id.value, 2, b"", b"unsupported command")
 
         try:
-            completed = subprocess.run(
+            completed = run_bounded_subprocess(
                 list(argv),
                 cwd=str(repo_path),
                 env=build_hardened_git_env(),
@@ -351,6 +359,11 @@ def controlled_git_push(
             preview_hash=preview_hash,
             barrier=barrier,
         )
+    except _ControlledGitPushTimeout as exc:
+        return _blocked(
+            CONTROLLED_GIT_PUSH_BLOCKED_TIMEOUT,
+            f"controlled Git process timed out during {exc.command_id}",
+        )
     except Exception:
         return _blocked(CONTROLLED_GIT_PUSH_BLOCKED_FAIL_CLOSED, "controlled push failed closed")
 
@@ -461,14 +474,18 @@ def _run(
 ) -> _GitRunnerResult:
     result = runner.run(command_id, repo, remote_name=remote_name, remote_ref=remote_ref, local_head=local_head, remote_head=remote_head)
     if isinstance(result, _GitRunnerResult):
-        return result
-    return _GitRunnerResult(
-        command_id.value,
-        getattr(result, "exit_code", 1),
-        _bytes(getattr(result, "stdout", b"")),
-        _bytes(getattr(result, "stderr", b"")),
-        bool(getattr(result, "timeout_expired", False)),
-    )
+        normalized = result
+    else:
+        normalized = _GitRunnerResult(
+            command_id.value,
+            getattr(result, "exit_code", 1),
+            _bytes(getattr(result, "stdout", b"")),
+            _bytes(getattr(result, "stderr", b"")),
+            bool(getattr(result, "timeout_expired", False)),
+        )
+    if normalized.timeout_expired:
+        raise _ControlledGitPushTimeout(command_id.value)
+    return normalized
 
 
 def _remote_head_from_output(value: bytes, remote_ref: str | None) -> str | None:

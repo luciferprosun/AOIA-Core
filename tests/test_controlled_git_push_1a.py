@@ -30,6 +30,7 @@ from runtime.git_ops.git_controlled_push import (
     CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_HEAD_MISSING,
     CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_NOT_LOCAL,
     CONTROLLED_GIT_PUSH_BLOCKED_REMOTE_REF_MISMATCH,
+    CONTROLLED_GIT_PUSH_BLOCKED_TIMEOUT,
     CONTROLLED_GIT_PUSH_PUSHED,
     ControlledGitPushResult,
     _ControlledGitPushRunner,
@@ -244,6 +245,24 @@ class ControlledGitPush1ATests(unittest.TestCase):
             self.assert_remote_unchanged(remote, approved_branch, remote_head)
             self.assert_metadata_cannot_override_failure(repo, remote, approved_branch, remote_head, preview, barrier, workspace)
 
+    def test_git_timeout_is_distinct_and_remote_remains_unchanged(self):
+        with TemporaryDirectory() as workspace:
+            repo, remote, remote_head = self.repo_ahead_of_local_bare_remote(workspace)
+            approved_branch = self.branch(repo)
+            preview, barrier = self.reviewed_evidence(repo, remote_head)
+
+            result = controlled_git_push(
+                repo,
+                preview,
+                barrier,
+                workspace_root=workspace,
+                runner=TimeoutRunner(),
+            )
+
+            self.assert_blocked(result, CONTROLLED_GIT_PUSH_BLOCKED_TIMEOUT)
+            self.assert_no_push_report(result)
+            self.assert_remote_unchanged(remote, approved_branch, remote_head)
+
     def test_inert_metadata_objects_cannot_authorize_push(self):
         with TemporaryDirectory() as workspace:
             repo, _remote, remote_head = self.repo_ahead_of_local_bare_remote(workspace)
@@ -278,7 +297,8 @@ class ControlledGitPush1ATests(unittest.TestCase):
         scan = scan_module(CONTROLLED_MODULE)
 
         self.assertIn("subprocess", scan.imports)
-        self.assertIn("subprocess.run", scan.calls)
+        self.assertNotIn("subprocess.run", scan.calls)
+        self.assertIn("runtime.safety.bounded_subprocess.run_bounded_subprocess", scan.calls)
         self.assertNotIn("subprocess.Popen", scan.calls)
         self.assertNotIn("os.system", scan.calls)
         self.assertNotIn("Popen", scan.calls)
@@ -502,6 +522,18 @@ class NonFastForwardRunner:
             self.push_attempted = True
             return _GitRunnerResult(command_id.value, 1, b"", b"unexpected push attempt")
         return self.delegate.run(command_id, repo_path, **kwargs)
+
+
+class TimeoutRunner:
+    def run(self, command_id, repo_path: Path, **kwargs):
+        del repo_path, kwargs
+        return _GitRunnerResult(
+            command_id.value,
+            None,
+            b"",
+            b"",
+            timeout_expired=True,
+        )
 
 
 def scan_module(path: Path):

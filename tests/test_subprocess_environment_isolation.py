@@ -21,17 +21,18 @@ from runtime.safety.subprocess_env import (
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_ROOT = REPO_ROOT / "runtime"
-EXPECTED_RUNTIME_SUBPROCESS_SITES = {
+EXPECTED_RUNTIME_BOUNDED_PROCESS_SITES = {
     "commands/local_commands.py": 1,
     "execution/controlled_test_runner.py": 1,
     "git_ops/controlled_git_commit.py": 1,
     "git_ops/git_controlled_push.py": 1,
     "git_ops/git_read.py": 1,
     "knowledge/tools/pdf_extract.py": 2,
-    "package_ops/controlled_package_install.py": 1,
+    "package_ops/controlled_package_install.py": 2,
     "patches/post_patch_controlled_test_integration.py": 1,
     "tools/build_rhcsa_library.py": 2,
 }
+EXPECTED_RAW_PROCESS_BOUNDARY = {"safety/bounded_subprocess.py": 1}
 
 
 class SubprocessEnvironmentIsolationTests(unittest.TestCase):
@@ -44,6 +45,7 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
             "TERM": "xterm-256color",
             "AOIA_UNRELATED": "must-not-be-inherited",
             "PYTHONPATH": "/tmp/untrusted-python-path",
+            "VIRTUAL_ENV": "/tmp/untrusted-parent-venv",
         }
 
         child = build_subprocess_env(ambient)
@@ -55,6 +57,7 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
         self.assertEqual("xterm-256color", child["TERM"])
         self.assertNotIn("AOIA_UNRELATED", child)
         self.assertNotIn("PYTHONPATH", child)
+        self.assertNotIn("VIRTUAL_ENV", child)
 
     def test_provider_generic_and_aws_secrets_are_absent_from_policy_output(self) -> None:
         ambient = {
@@ -189,8 +192,10 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
         self.assertNotIn("OPENAI_API_KEY", child)
 
     def test_every_active_runtime_process_site_passes_explicit_environment(self) -> None:
-        discovered: dict[str, int] = {}
+        discovered_bounded: dict[str, int] = {}
+        discovered_raw: dict[str, int] = {}
         missing_environment: list[str] = []
+        missing_timeout: list[str] = []
         forbidden_os_process_calls: list[str] = []
 
         for path in sorted(RUNTIME_ROOT.rglob("*.py")):
@@ -199,7 +204,16 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
             relative = path.relative_to(RUNTIME_ROOT).as_posix()
             for node in ast.walk(tree):
-                if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+                if not isinstance(node, ast.Call):
+                    continue
+                if isinstance(node.func, ast.Name) and node.func.id == "run_bounded_subprocess":
+                    discovered_bounded[relative] = discovered_bounded.get(relative, 0) + 1
+                    if not any(keyword.arg == "env" for keyword in node.keywords):
+                        missing_environment.append(f"{relative}:{node.lineno}")
+                    if not any(keyword.arg == "timeout" for keyword in node.keywords):
+                        missing_timeout.append(f"{relative}:{node.lineno}")
+                    continue
+                if not isinstance(node.func, ast.Attribute):
                     continue
                 owner = node.func.value
                 if isinstance(owner, ast.Name) and owner.id == "subprocess" and node.func.attr in {
@@ -209,9 +223,11 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
                     "check_call",
                     "check_output",
                 }:
-                    discovered[relative] = discovered.get(relative, 0) + 1
+                    discovered_raw[relative] = discovered_raw.get(relative, 0) + 1
                     if not any(keyword.arg == "env" for keyword in node.keywords):
                         missing_environment.append(f"{relative}:{node.lineno}")
+                    if not any(keyword.arg == "timeout" for keyword in node.keywords):
+                        missing_timeout.append(f"{relative}:{node.lineno}")
                 if (
                     isinstance(owner, ast.Name)
                     and owner.id == "os"
@@ -219,8 +235,10 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
                 ):
                     forbidden_os_process_calls.append(f"{relative}:{node.lineno}")
 
-        self.assertEqual(EXPECTED_RUNTIME_SUBPROCESS_SITES, discovered)
+        self.assertEqual(EXPECTED_RUNTIME_BOUNDED_PROCESS_SITES, discovered_bounded)
+        self.assertEqual(EXPECTED_RAW_PROCESS_BOUNDARY, discovered_raw)
         self.assertEqual([], missing_environment)
+        self.assertEqual([], missing_timeout)
         self.assertEqual([], forbidden_os_process_calls)
 
     def test_development_only_clone_utility_also_passes_explicit_environment(self) -> None:
@@ -230,14 +248,13 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
             node
             for node in ast.walk(tree)
             if isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == "subprocess"
-            and node.func.attr == "run"
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "run_bounded_subprocess"
         ]
 
         self.assertEqual(1, len(calls))
         self.assertTrue(any(keyword.arg == "env" for keyword in calls[0].keywords))
+        self.assertTrue(any(keyword.arg == "timeout" for keyword in calls[0].keywords))
 
 
 if __name__ == "__main__":

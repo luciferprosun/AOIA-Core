@@ -315,7 +315,11 @@ class GitReadOnlyGovernance1ATests(unittest.TestCase):
         for path in (STEP26_MODULE, GIT_READ_MODULE, GIT_GOVERNANCE_MODULE):
             scan = scan_module(path)
             if path in allowed:
-                self.assertIn("subprocess.run", scan.calls)
+                self.assertNotIn("subprocess.run", scan.calls)
+                self.assertIn(
+                    "runtime.safety.bounded_subprocess.run_bounded_subprocess",
+                    scan.calls,
+                )
             else:
                 self.assertNotIn("subprocess", scan.imports)
                 self.assertNotIn("subprocess.run", scan.calls)

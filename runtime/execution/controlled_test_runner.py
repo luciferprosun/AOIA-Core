@@ -11,10 +11,12 @@ from pathlib import Path
 from typing import Any
 
 from runtime.safety.subprocess_env import build_subprocess_env
+from runtime.safety.bounded_subprocess import run_bounded_subprocess
 
 
 CONTROLLED_TEST_EXECUTION_SCHEMA_VERSION = "AOIA_CONTROLLED_TEST_EXECUTION_1A"
 _DEFAULT_TIMEOUT_SECONDS = 30
+_MAX_TIMEOUT_SECONDS = 300
 _DEFAULT_MAX_OUTPUT_BYTES = 20000
 _MINIMAL_ENV = {
     "PYTHONPATH": "runtime:.",
@@ -200,7 +202,7 @@ class ControlledTestExecutionResult:
         object.__setattr__(self, "normalized_command", _text("normalized_command", self.normalized_command))
         object.__setattr__(self, "executed_args_preview", _text_tuple("executed_args_preview", self.executed_args_preview))
         object.__setattr__(self, "repo_root", _text("repo_root", self.repo_root))
-        object.__setattr__(self, "timeout_seconds", _positive_int("timeout_seconds", self.timeout_seconds))
+        object.__setattr__(self, "timeout_seconds", _hard_timeout_seconds(self.timeout_seconds))
         object.__setattr__(self, "timeout_expired", bool(self.timeout_expired))
         object.__setattr__(self, "stdout_preview", _text("stdout_preview", self.stdout_preview))
         object.__setattr__(self, "stderr_preview", _text("stderr_preview", self.stderr_preview))
@@ -467,7 +469,7 @@ def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> Cont
     try:
         temp_parent = _validated_external_temp_parent(request_data["repo_root"])
         with tempfile.TemporaryDirectory(prefix=_CONTROLLED_PYCACHE_PREFIX, dir=temp_parent) as pycache_root:
-            completed = subprocess.run(
+            completed = run_bounded_subprocess(
                 args,
                 cwd=request_data["repo_root"],
                 env=_build_controlled_child_environment(
@@ -701,7 +703,7 @@ def _request_data(request: ControlledTestExecutionRequest) -> dict[str, Any]:
         "command_hash": _hash_text(_normalize_command(request.requested_command)),
         "command_kind": _normalize_command_kind(request.command_kind).value,
         "repo_root": _safe_repo_root_text(request.repo_root),
-        "timeout_seconds": _positive_int("timeout_seconds", request.timeout_seconds),
+        "timeout_seconds": _hard_timeout_seconds(request.timeout_seconds),
         "max_output_bytes": _positive_int("max_output_bytes", request.max_output_bytes),
         "source_trust": _normalize_source_trust(request.source_trust).value,
         "explicit_operator_execution_confirmed": bool(request.explicit_operator_execution_confirmed),
@@ -1045,6 +1047,13 @@ def _positive_int(field_name: str, value: int) -> int:
     if value <= 0:
         raise ValueError(f"{field_name} must be positive")
     return value
+
+
+def _hard_timeout_seconds(value: int) -> int:
+    timeout = _positive_int("timeout_seconds", value)
+    if timeout > _MAX_TIMEOUT_SECONDS:
+        raise ValueError("timeout_seconds exceeds the hard process limit")
+    return timeout
 
 
 def _text(field_name: str, value: str) -> str:

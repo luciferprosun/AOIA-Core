@@ -8,10 +8,29 @@ import sys
 from pathlib import Path
 
 from runtime.safety.subprocess_env import build_subprocess_env
+from runtime.safety.bounded_subprocess import (
+    SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    run_bounded_subprocess,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INPUT = PROJECT_ROOT / "knowledge" / "source" / "RHCSA_Command_Library.pdf"
 DEFAULT_OUTPUT = PROJECT_ROOT / "knowledge" / "raw" / "rhcsa_raw.txt"
+PDF_TOOL_HARD_TIMEOUT_SECONDS = 120
+
+
+class PdfToolHardTimeoutError(RuntimeError):
+    """A PDF utility exceeded its hard child-process deadline."""
+
+    reason_code = SUBPROCESS_HARD_TIMEOUT_REASON_CODE
+
+    def __init__(self, tool_name: str, timeout_seconds: int) -> None:
+        self.tool_name = tool_name
+        self.timeout_seconds = timeout_seconds
+        super().__init__(
+            f"{self.reason_code}: {tool_name} exceeded its hard execution timeout "
+            "and was terminated"
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -59,13 +78,18 @@ def extract_pdf(input_path: Path, output_path: Path) -> int:
     print(f"output_path={output_path}")
     print("extractor=pdftotext")
 
-    result = subprocess.run(
-        [pdftotext, "-layout", "-enc", "UTF-8", str(input_path), str(output_path)],
-        check=False,
-        env=build_subprocess_env(),
-        text=True,
-        capture_output=True,
-    )
+    try:
+        result = run_bounded_subprocess(
+            [pdftotext, "-layout", "-enc", "UTF-8", str(input_path), str(output_path)],
+            check=False,
+            env=build_subprocess_env(),
+            timeout=PDF_TOOL_HARD_TIMEOUT_SECONDS,
+            text=True,
+            capture_output=True,
+            shell=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise PdfToolHardTimeoutError("pdftotext", PDF_TOOL_HARD_TIMEOUT_SECONDS) from exc
     if result.returncode != 0:
         message = result.stderr.strip() or result.stdout.strip() or "pdftotext failed"
         raise RuntimeError(message)
@@ -79,13 +103,18 @@ def extract_pdf(input_path: Path, output_path: Path) -> int:
 
 
 def read_page_count(pdfinfo: str, input_path: Path) -> int:
-    result = subprocess.run(
-        [pdfinfo, str(input_path)],
-        check=False,
-        env=build_subprocess_env(),
-        text=True,
-        capture_output=True,
-    )
+    try:
+        result = run_bounded_subprocess(
+            [pdfinfo, str(input_path)],
+            check=False,
+            env=build_subprocess_env(),
+            timeout=PDF_TOOL_HARD_TIMEOUT_SECONDS,
+            text=True,
+            capture_output=True,
+            shell=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise PdfToolHardTimeoutError("pdfinfo", PDF_TOOL_HARD_TIMEOUT_SECONDS) from exc
     if result.returncode != 0:
         message = result.stderr.strip() or result.stdout.strip() or "pdfinfo failed"
         raise RuntimeError(message)

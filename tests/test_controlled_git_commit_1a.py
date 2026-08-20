@@ -25,6 +25,7 @@ from runtime.git_ops.controlled_git_commit import (
     CONTROLLED_GIT_COMMIT_BLOCKED_MISSING_BARRIER,
     CONTROLLED_GIT_COMMIT_BLOCKED_PREVIEW_HASH_MISMATCH,
     CONTROLLED_GIT_COMMIT_BLOCKED_STAGED_DIFF_CHANGED,
+    CONTROLLED_GIT_COMMIT_BLOCKED_TIMEOUT,
     CONTROLLED_GIT_COMMIT_BLOCKED_UNSTAGED_CHANGES,
     CONTROLLED_GIT_COMMIT_BLOCKED_UNTRACKED_CHANGES,
     CONTROLLED_GIT_COMMIT_BLOCKED_WORKSPACE_PATH,
@@ -236,12 +237,30 @@ class ControlledGitCommit1ATests(unittest.TestCase):
             self.assertEqual(CONTROLLED_GIT_COMMIT_COMMITTED, result.status)
             self.assertEqual(message, self.git(repo, "log", "-1", "--pretty=%B").strip())
 
+    def test_git_timeout_is_distinct_and_creates_no_commit(self):
+        with TemporaryDirectory() as workspace:
+            repo = self.repo_with_staged_change(workspace)
+            preview, barrier = self.reviewed_evidence(repo)
+            old_head = self.git(repo, "rev-parse", "HEAD")
+
+            result = controlled_git_commit(
+                repo,
+                preview,
+                barrier,
+                workspace_root=workspace,
+                runner=TimeoutRunner(),
+            )
+
+            self.assert_blocked(result, CONTROLLED_GIT_COMMIT_BLOCKED_TIMEOUT)
+            self.assertEqual(old_head, self.git(repo, "rev-parse", "HEAD"))
+
     def test_runner_surface_has_no_push_shell_true_or_broad_execution(self):
         source = CONTROLLED_MODULE.read_text(encoding="utf-8").casefold()
         scan = scan_module(CONTROLLED_MODULE)
 
         self.assertIn("subprocess", scan.imports)
-        self.assertIn("subprocess.run", scan.calls)
+        self.assertNotIn("subprocess.run", scan.calls)
+        self.assertIn("runtime.safety.bounded_subprocess.run_bounded_subprocess", scan.calls)
         self.assertNotIn("subprocess.Popen", scan.calls)
         self.assertNotIn("os.system", scan.calls)
         self.assertNotIn("Popen", scan.calls)
@@ -405,6 +424,21 @@ class ControlledGitCommit1ATests(unittest.TestCase):
         data = result.to_dict()
         for field in AUTHORITY_RESULT_FIELDS:
             self.assertNotIn(field, data)
+
+
+class TimeoutRunner:
+    def run(self, command_id, repo_path: Path, **kwargs):
+        del repo_path, kwargs
+        return type(
+            "TimeoutResult",
+            (),
+            {
+                "exit_code": None,
+                "stdout": b"",
+                "stderr": b"",
+                "timeout_expired": True,
+            },
+        )()
 
 
 def scan_module(path: Path):

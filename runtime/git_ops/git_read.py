@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime.git_ops.git_env import build_hardened_git_env
+from runtime.safety.bounded_subprocess import run_bounded_subprocess
 from runtime.git_ops.git_sanitize import sanitize_git_output
 from runtime.safety.workspace_guard import validate_workspace_root
 
@@ -286,7 +287,7 @@ def run_allowlisted_git_read(
     argv = _ALLOWLIST[command_id]
     command_hash = compute_git_read_hash({"command_id": command_id.value, "argv": argv})
     try:
-        completed = subprocess.run(
+        completed = run_bounded_subprocess(
             argv,
             cwd=workspace.repo_root,
             env=build_hardened_git_env(),

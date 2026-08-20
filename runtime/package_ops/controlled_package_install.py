@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from runtime.safety.subprocess_env import build_subprocess_env
+from runtime.safety.bounded_subprocess import run_bounded_subprocess
 
 from runtime.package_ops.package_install_proposal import (
     PACKAGE_INSTALL_PROPOSAL_READY_METADATA_ONLY,
@@ -27,6 +28,7 @@ CONTROLLED_PACKAGE_INSTALL_BLOCKED = "CONTROLLED_PACKAGE_INSTALL_BLOCKED"
 CONTROLLED_PACKAGE_INSTALL_FAILED = "CONTROLLED_PACKAGE_INSTALL_FAILED"
 
 CONTROLLED_PACKAGE_INSTALL_REASON_COMPLETED_OFFLINE_SANDBOX = "CONTROLLED_PACKAGE_INSTALL_REASON_COMPLETED_OFFLINE_SANDBOX"
+CONTROLLED_PACKAGE_INSTALL_REASON_TIMEOUT = "CONTROLLED_PACKAGE_INSTALL_REASON_TIMEOUT"
 CONTROLLED_PACKAGE_INSTALL_BLOCKED_MALFORMED_EVIDENCE = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_MALFORMED_EVIDENCE"
 CONTROLLED_PACKAGE_INSTALL_BLOCKED_VALIDATION_NOT_READY = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_VALIDATION_NOT_READY"
 CONTROLLED_PACKAGE_INSTALL_BLOCKED_HASH_MISMATCH = "CONTROLLED_PACKAGE_INSTALL_BLOCKED_HASH_MISMATCH"
@@ -48,6 +50,7 @@ CONTROLLED_PACKAGE_INSTALL_BLOCKED_SANDBOX_INTERPRETER_UNSAFE = "CONTROLLED_PACK
 _HEX = frozenset("0123456789abcdef")
 _MAX_OUTPUT_CHARS = 4000
 _DEFAULT_TIMEOUT_SECONDS = 60
+_MAX_TIMEOUT_SECONDS = 300
 _AUTHORITY_FIELD_NAMES = frozenset(
     {
         "approved",
@@ -201,6 +204,7 @@ class ControlledPackageInstallResult:
     exit_code: int | None
     stdout_preview: str
     stderr_preview: str
+    timeout_expired: bool
     result_hash: str
     sandbox_install_attempted: bool = False
     sandbox_install_completed: bool = False
@@ -230,6 +234,7 @@ class ControlledPackageInstallResult:
         object.__setattr__(self, "schema_version", CONTROLLED_PACKAGE_INSTALL_SCHEMA_VERSION)
         object.__setattr__(self, "reason_codes", tuple(sorted(set(self.reason_codes))))
         object.__setattr__(self, "executed_args_preview", tuple(self.executed_args_preview))
+        object.__setattr__(self, "timeout_expired", bool(self.timeout_expired))
         if self.status not in {
             CONTROLLED_PACKAGE_INSTALL_COMPLETED,
             CONTROLLED_PACKAGE_INSTALL_BLOCKED,
@@ -285,6 +290,7 @@ class ControlledPackageInstallResult:
             "exit_code": self.exit_code,
             "stdout_preview": self.stdout_preview,
             "stderr_preview": self.stderr_preview,
+            "timeout_expired": self.timeout_expired,
             "result_hash": self.result_hash,
             "sandbox_install_attempted": self.sandbox_install_attempted,
             "sandbox_install_completed": self.sandbox_install_completed,
@@ -330,7 +336,7 @@ class _SubprocessPackageRunner:
         timeout_seconds: int,
     ) -> _RunnerResult:
         try:
-            completed = subprocess.run(
+            completed = run_bounded_subprocess(
                 list(argv),
                 cwd=str(cwd),
                 env=build_subprocess_env(inherit_names=(), fixed=env),
@@ -346,9 +352,36 @@ class _SubprocessPackageRunner:
         return _RunnerResult(completed.returncode, _text_output(completed.stdout), _text_output(completed.stderr))
 
 
-class _VenvEnvironmentBuilder:
+class _VenvEnvironmentBuilder(venv.EnvBuilder):
+    """Create the sandbox venv without stdlib's ambient, unbounded child call."""
+
+    def __init__(self, timeout_seconds: int) -> None:
+        super().__init__(with_pip=True, clear=False)
+        self._timeout_seconds = _hard_timeout_seconds(timeout_seconds)
+
     def create(self, target_path: Path) -> None:
-        venv.EnvBuilder(with_pip=True, clear=False).create(str(target_path))
+        super().create(str(target_path))
+
+    def _call_new_python(self, context: Any, *py_args: str, **kwargs: Any) -> None:
+        if any(name in kwargs for name in ("env", "timeout", "shell", "stdout", "check")):
+            raise ValueError("venv child process options are runtime-owned")
+        run_bounded_subprocess(
+            [context.env_exec_cmd, *py_args],
+            cwd=context.env_dir,
+            executable=context.env_exec_cmd,
+            env=build_subprocess_env(
+                inherit_names=(),
+                fixed={
+                    **_MINIMAL_INSTALL_ENV,
+                    "VIRTUAL_ENV": str(context.env_dir),
+                },
+            ),
+            timeout=self._timeout_seconds,
+            stdout=subprocess.PIPE,
+            check=True,
+            shell=False,
+            **kwargs,
+        )
 
 
 class _SandboxInterpreterBlocked(Exception):
@@ -410,7 +443,7 @@ def execute_controlled_package_install(
     try:
         state = _coerce_current_state(current_state)
         tick = state.current_tick
-        timeout = _positive_int("timeout_seconds", timeout_seconds)
+        timeout = _hard_timeout_seconds(timeout_seconds)
         proposal_hash = compute_package_install_request_hash(proposal)
         validation = _coerce_validation_result(validation_result)
         barrier = _coerce_barrier(human_barrier)
@@ -489,7 +522,7 @@ def execute_controlled_package_install(
             argv, cwd = _prepare_pip_install(
                 source_path=source_path,
                 target_path=target,
-                environment_builder=environment_builder or _VenvEnvironmentBuilder(),
+                environment_builder=environment_builder or _VenvEnvironmentBuilder(timeout),
             )
         else:
             argv, cwd = _prepare_npm_install(source_path=source_path, target_path=target)
@@ -498,6 +531,24 @@ def execute_controlled_package_install(
             cwd=cwd,
             env=_MINIMAL_INSTALL_ENV,
             timeout_seconds=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return _result(
+            status=CONTROLLED_PACKAGE_INSTALL_FAILED,
+            reason_codes=(CONTROLLED_PACKAGE_INSTALL_REASON_TIMEOUT,),
+            ecosystem=validation.ecosystem,
+            package_name=validation.package_name,
+            package_version=validation.version,
+            proposal_hash=proposal_hash,
+            validation_hash=validation.proposal_hash,
+            barrier_hash=barrier.barrier_hash,
+            source_artifact_hash=source_hash,
+            target_path_hash=target_hash,
+            dependency_context_hash=state.dependency_context_hash,
+            target_environment_hash=state.target_environment_hash,
+            stdout_preview=_bound_text(_text_output(exc.stdout)),
+            stderr_preview=_bound_text(_text_output(exc.stderr)),
+            timeout_expired=True,
         )
     except (OSError, ValueError) as exc:
         return _result(
@@ -532,11 +583,12 @@ def execute_controlled_package_install(
         )
 
     status = CONTROLLED_PACKAGE_INSTALL_COMPLETED if completed.exit_code == 0 and not completed.timeout_expired else CONTROLLED_PACKAGE_INSTALL_FAILED
-    reason = (
-        CONTROLLED_PACKAGE_INSTALL_REASON_COMPLETED_OFFLINE_SANDBOX
-        if status == CONTROLLED_PACKAGE_INSTALL_COMPLETED
-        else CONTROLLED_PACKAGE_INSTALL_BLOCKED_EXECUTION_FAILED
-    )
+    if completed.timeout_expired:
+        reason = CONTROLLED_PACKAGE_INSTALL_REASON_TIMEOUT
+    elif status == CONTROLLED_PACKAGE_INSTALL_COMPLETED:
+        reason = CONTROLLED_PACKAGE_INSTALL_REASON_COMPLETED_OFFLINE_SANDBOX
+    else:
+        reason = CONTROLLED_PACKAGE_INSTALL_BLOCKED_EXECUTION_FAILED
     return _result(
         status=status,
         reason_codes=(reason,),
@@ -554,6 +606,7 @@ def execute_controlled_package_install(
         exit_code=completed.exit_code,
         stdout_preview=_bound_text(completed.stdout),
         stderr_preview=_bound_text(completed.stderr),
+        timeout_expired=completed.timeout_expired,
     )
 
 
@@ -781,6 +834,7 @@ def _result(
     exit_code: int | None = None,
     stdout_preview: str = "",
     stderr_preview: str = "",
+    timeout_expired: bool = False,
 ) -> ControlledPackageInstallResult:
     material = {
         "schema_version": CONTROLLED_PACKAGE_INSTALL_SCHEMA_VERSION,
@@ -800,6 +854,7 @@ def _result(
         "exit_code": exit_code,
         "stdout_preview": stdout_preview,
         "stderr_preview": stderr_preview,
+        "timeout_expired": bool(timeout_expired),
     }
     return ControlledPackageInstallResult(
         schema_version=CONTROLLED_PACKAGE_INSTALL_SCHEMA_VERSION,
@@ -819,6 +874,7 @@ def _result(
         exit_code=exit_code,
         stdout_preview=stdout_preview,
         stderr_preview=stderr_preview,
+        timeout_expired=timeout_expired,
         result_hash=_stable_hash(material),
     )
 
@@ -865,6 +921,13 @@ def _positive_int(name: str, value: object) -> int:
     if value <= 0:
         raise ValueError(f"{name} must be positive")
     return value
+
+
+def _hard_timeout_seconds(value: object) -> int:
+    timeout = _positive_int("timeout_seconds", value)
+    if timeout > _MAX_TIMEOUT_SECONDS:
+        raise ValueError("timeout_seconds exceeds the hard process limit")
+    return timeout
 
 
 def _sha256_like(value: object) -> bool:

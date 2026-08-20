@@ -62,6 +62,7 @@ SAFE_FIXED_ENVIRONMENT_VARIABLES = frozenset(
         "PYTHONPATH",
         "PYTHONPYCACHEPREFIX",
         "SSH_ASKPASS",
+        "VIRTUAL_ENV",
         "VISUAL",
         "XDG_CONFIG_HOME",
     }

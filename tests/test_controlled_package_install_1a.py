@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import ast
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from dataclasses import dataclass, replace
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from runtime.package_ops.controlled_package_install import (
     CONTROLLED_PACKAGE_INSTALL_BLOCKED,
@@ -25,8 +30,10 @@ from runtime.package_ops.controlled_package_install import (
     CONTROLLED_PACKAGE_INSTALL_COMPLETED,
     CONTROLLED_PACKAGE_INSTALL_FAILED,
     CONTROLLED_PACKAGE_INSTALL_REASON_COMPLETED_OFFLINE_SANDBOX,
+    CONTROLLED_PACKAGE_INSTALL_REASON_TIMEOUT,
     PackageInstallCurrentState,
     PackageInstallHumanBarrier,
+    _VenvEnvironmentBuilder,
     compute_package_install_barrier_hash,
     create_package_install_human_barrier,
     execute_controlled_package_install,
@@ -320,6 +327,97 @@ class ControlledPackageInstall1ATests(unittest.TestCase):
             self.assertIn(CONTROLLED_PACKAGE_INSTALL_BLOCKED_EXECUTION_FAILED, result.reason_codes)
             self.assert_metadata_only(result.to_dict(), attempted=True, completed=False)
 
+    def test_runner_timeout_is_distinct_from_normal_execution_failure(self):
+        with self.evidence() as evidence:
+            result = execute_controlled_package_install(
+                proposal=evidence.proposal_request,
+                validation_result=evidence.validation_result,
+                human_barrier=evidence.barrier,
+                current_state=evidence.current_state,
+                source_artifact_path=str(evidence.source),
+                target_path=str(evidence.target),
+                runner=FakeRunner(timeout_expired=True),
+                environment_builder=FakeVenvBuilder(),
+            )
+
+            self.assertEqual(CONTROLLED_PACKAGE_INSTALL_FAILED, result.status)
+            self.assertEqual((CONTROLLED_PACKAGE_INSTALL_REASON_TIMEOUT,), result.reason_codes)
+            self.assertNotIn(CONTROLLED_PACKAGE_INSTALL_BLOCKED_EXECUTION_FAILED, result.reason_codes)
+            self.assertTrue(result.timeout_expired)
+            self.assert_metadata_only(result.to_dict(), attempted=True, completed=False)
+
+    def test_timeout_above_runtime_hard_limit_is_blocked_before_runner(self):
+        with self.evidence() as evidence:
+            runner = FakeRunner()
+            result = execute_controlled_package_install(
+                proposal=evidence.proposal_request,
+                validation_result=evidence.validation_result,
+                human_barrier=evidence.barrier,
+                current_state=evidence.current_state,
+                source_artifact_path=str(evidence.source),
+                target_path=str(evidence.target),
+                timeout_seconds=301,
+                runner=runner,
+                environment_builder=FakeVenvBuilder(),
+            )
+
+            self.assertEqual(CONTROLLED_PACKAGE_INSTALL_BLOCKED, result.status)
+            self.assertEqual((CONTROLLED_PACKAGE_INSTALL_BLOCKED_MALFORMED_EVIDENCE,), result.reason_codes)
+            self.assertEqual([], runner.calls)
+
+    def test_venv_ensurepip_child_uses_bounded_sanitized_process_boundary(self):
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            context = SimpleNamespace(
+                env_exec_cmd=sys.executable,
+                env_dir=str(Path(raw_tmp) / "sandbox-venv"),
+            )
+            completed = subprocess.CompletedProcess(
+                args=(sys.executable,),
+                returncode=0,
+                stdout=b"",
+                stderr=b"",
+            )
+            with patch.dict(
+                os.environ,
+                {"OPENAI_API_KEY": "NZ_VENV_SECRET_MUST_NOT_LEAK"},
+                clear=False,
+            ), patch(
+                "runtime.package_ops.controlled_package_install.subprocess.run",
+                return_value=completed,
+            ) as run_mock:
+                _VenvEnvironmentBuilder(7)._call_new_python(
+                    context,
+                    "-m",
+                    "ensurepip",
+                    stderr=subprocess.STDOUT,
+                )
+
+        kwargs = run_mock.call_args.kwargs
+        self.assertEqual(7, kwargs["timeout"])
+        self.assertFalse(kwargs["shell"])
+        self.assertTrue(kwargs["check"])
+        self.assertEqual(context.env_dir, kwargs["env"]["VIRTUAL_ENV"])
+        self.assertNotIn("OPENAI_API_KEY", kwargs["env"])
+
+    def test_venv_setup_timeout_is_returned_as_timeout_not_normal_failure(self):
+        with self.evidence() as evidence, patch.object(
+            _VenvEnvironmentBuilder,
+            "create",
+            side_effect=subprocess.TimeoutExpired(cmd=(sys.executable,), timeout=60),
+        ):
+            result = execute_controlled_package_install(
+                proposal=evidence.proposal_request,
+                validation_result=evidence.validation_result,
+                human_barrier=evidence.barrier,
+                current_state=evidence.current_state,
+                source_artifact_path=str(evidence.source),
+                target_path=str(evidence.target),
+            )
+
+        self.assertEqual(CONTROLLED_PACKAGE_INSTALL_FAILED, result.status)
+        self.assertEqual((CONTROLLED_PACKAGE_INSTALL_REASON_TIMEOUT,), result.reason_codes)
+        self.assertTrue(result.timeout_expired)
+
     def test_result_hash_is_deterministic_and_changes_with_execution_evidence(self):
         with self.evidence() as evidence:
             first = execute_controlled_package_install(
@@ -361,7 +459,8 @@ class ControlledPackageInstall1ATests(unittest.TestCase):
         scan = scan_module(RUNTIME_FILE)
 
         self.assertIn("subprocess", scan.imports)
-        self.assertIn("subprocess.run", scan.calls)
+        self.assertNotIn("subprocess.run", scan.calls)
+        self.assertIn("runtime.safety.bounded_subprocess.run_bounded_subprocess", scan.calls)
         self.assertIn("venv", scan.imports)
         self.assertNotIn("subprocess.Popen", scan.calls)
         for forbidden_import in (
@@ -517,10 +616,18 @@ class EvidenceContext:
 
 
 class FakeRunner:
-    def __init__(self, *, exit_code: int = 0, stdout: str = "", stderr: str = "") -> None:
+    def __init__(
+        self,
+        *,
+        exit_code: int = 0,
+        stdout: str = "",
+        stderr: str = "",
+        timeout_expired: bool = False,
+    ) -> None:
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
+        self.timeout_expired = timeout_expired
         self.calls: list[dict] = []
 
     def run(self, argv, *, cwd, env, timeout_seconds):
@@ -539,7 +646,7 @@ class FakeRunner:
                 "exit_code": self.exit_code,
                 "stdout": self.stdout,
                 "stderr": self.stderr,
-                "timeout_expired": False,
+                "timeout_expired": self.timeout_expired,
             },
         )()
 

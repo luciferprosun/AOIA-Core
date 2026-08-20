@@ -306,7 +306,11 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
     def test_subprocess_import_is_allowed_only_in_step26_patch_execution_module(self):
         step26_scan = scan_module(STEP26_MODULE)
         self.assertIn("subprocess", step26_scan["imports"])
-        self.assertIn("subprocess.run", step26_scan["calls"])
+        self.assertNotIn("subprocess.run", step26_scan["calls"])
+        self.assertIn(
+            "runtime.safety.bounded_subprocess.run_bounded_subprocess",
+            step26_scan["calls"],
+        )
         self.assertNotIn("subprocess.Popen", step26_scan["calls"])
         forbidden = ("subprocess", "runtime.execution", "runtime.providers.gateway", "requests", "httpx", "webbrowser", "playwright", "selenium", "git")
         for path in PATCH_METADATA_MODULES:

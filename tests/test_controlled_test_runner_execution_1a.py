@@ -212,6 +212,17 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
         self.assertFalse(result.shell_invoked)
         self.assert_authority_false(result)
 
+    def test_timeout_above_runtime_hard_limit_is_rejected_before_process_creation(self):
+        with patch("runtime.execution.controlled_test_runner.subprocess.run") as run_mock:
+            result = self.execute(
+                "python -m unittest tests.test_action_proposal_1a -v",
+                timeout_seconds=301,
+            )
+
+        self.assertEqual(ControlledTestExecutionStatus.MALFORMED_REQUEST, result.status)
+        self.assertFalse(run_mock.called)
+        self.assertFalse(result.subprocess_started)
+
     def test_unconfirmed_execution_is_blocked(self):
         result = self.execute("python -m unittest tests.test_action_proposal_1a -v", explicit_operator_execution_confirmed=False)
 
@@ -512,7 +523,8 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
             with self.subTest(term=term):
                 self.assertNotIn(term, lowered)
 
-        self.assertEqual(1, lowered.count("subprocess.run("))
+        self.assertEqual(0, lowered.count("subprocess.run("))
+        self.assertEqual(1, lowered.count("run_bounded_subprocess("))
         self.assertIn("shell=false", lowered)
 
     def request(self, command="python -m unittest tests.test_action_proposal_1a -v", **overrides):
