@@ -13,8 +13,8 @@ class ExecutorContainmentTests(unittest.TestCase):
     def test_action_results_are_replay_only_not_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
-            desktop_dir = Path(tmp) / "Desktop"
             project_dir.mkdir()
+            desktop_dir = project_dir / "Desktop"
             desktop_dir.mkdir()
 
             memory = MemoryStore(project_dir, project_dir)

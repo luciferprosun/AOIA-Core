@@ -85,11 +85,11 @@ class RuntimeArchitectureTests(unittest.TestCase):
         self.assertTrue(decision.requires_confirmation)
         self.assertTrue(decision.interactive)
 
-    def test_executor_creates_folder_on_desktop(self) -> None:
+    def test_executor_creates_folder_inside_project(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
-            desktop_dir = Path(tmp) / "Desktop"
             project_dir.mkdir()
+            desktop_dir = project_dir / "Desktop"
             desktop_dir.mkdir()
             memory = MemoryStore(project_dir, project_dir)
             engine = ExecutionEngine(project_dir, memory)
@@ -147,7 +147,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             (project_dir / "README.md").write_text("# test\n", encoding="utf-8")
 
             with patch.dict(os.environ, {"AOIA_HOME": str(aoia_home)}):
-                result = scan_project(str(project_dir), project_dir)
+                result = scan_project(str(project_dir), project_dir, project_dir)
 
             report_path = Path(result["scan_report_path"])
             self.assertTrue(result["success"])
@@ -158,8 +158,8 @@ class RuntimeArchitectureTests(unittest.TestCase):
     def test_executor_creates_and_writes_text_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
-            desktop_dir = Path(tmp) / "Desktop"
             project_dir.mkdir()
+            desktop_dir = project_dir / "Desktop"
             desktop_dir.mkdir()
             target_file = desktop_dir / "AI_TEST" / "note.txt"
             memory = MemoryStore(project_dir, project_dir)
@@ -209,8 +209,8 @@ class RuntimeArchitectureTests(unittest.TestCase):
     def test_runtime_handles_model_503_after_successful_first_step(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
-            desktop_dir = Path(tmp) / "Desktop"
             project_dir.mkdir()
+            desktop_dir = project_dir / "Desktop"
             desktop_dir.mkdir()
             provider = FakeProvider(
                 [
@@ -239,12 +239,12 @@ class RuntimeArchitectureTests(unittest.TestCase):
     def test_bootstrap_local_context_opens_url_before_model(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            self._write_local_site(root)
             project_dir = root / "project"
             project_dir.mkdir()
+            self._write_local_site(project_dir)
             provider = FakeProvider([])
             runtime = main.AgentRuntime(provider, PROMPT_TEMPLATE, project_dir)
-            local_url = (root / "index.html").as_uri()
+            local_url = (project_dir / "index.html").as_uri()
 
             with patch("sys.stdout", new_callable=StringIO):
                 trace = runtime.bootstrap_local_context(f"przeanalizuj te prace {local_url}")
@@ -269,8 +269,8 @@ class RuntimeArchitectureTests(unittest.TestCase):
     def test_local_desktop_folder_route_uses_no_model(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp) / "project"
-            desktop_dir = Path(tmp) / "Desktop"
             project_dir.mkdir()
+            desktop_dir = project_dir / "Desktop"
             desktop_dir.mkdir()
             provider = FakeProvider([])
             runtime = main.AgentRuntime(provider, PROMPT_TEMPLATE, project_dir)

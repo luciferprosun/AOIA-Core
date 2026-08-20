@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import unquote, urlparse
 
 from .browser_tools import (
     browser_click,
@@ -20,7 +21,9 @@ from .browser_tools import (
     configure_browser_bridge,
 )
 from .filesystem_tools import (
+    FilesystemContainmentError,
     append_file,
+    canonical_project_root,
     create_file,
     create_folder,
     delete_file,
@@ -56,9 +59,14 @@ class ExecutionEngine:
     """Dispatch structured legacy tool actions; execution surfaces are frozen by default."""
 
     def __init__(self, project_dir: Path, memory_store: MemoryStore) -> None:
-        self.project_dir = project_dir
+        self.project_dir = canonical_project_root(project_dir)
         self.memory_store = memory_store
-        self.cwd = Path(memory_store.memory.cwd)
+        self.cwd = resolve_path(
+            memory_store.memory.cwd,
+            self.project_dir,
+            self.project_dir,
+            operation="runtime working-directory initialization",
+        )
         self.command_log_dir = memory_store.paths.command_logs_dir
         configure_browser_bridge(
             user_data_dir=memory_store.paths.state_dir / "browser_profile",
@@ -101,26 +109,80 @@ class ExecutionEngine:
         return {
             "respond": ToolSpec("respond", self._respond, "Return a final answer."),
             "shell_execute": ToolSpec("shell_execute", self._execute_shell_action, "Frozen legacy shell/executor surface."),
-            "write_file": ToolSpec("write_file", lambda action: write_file(action["path"], action["content"], self.cwd), "Frozen legacy filesystem surface."),
-            "append_file": ToolSpec("append_file", lambda action: append_file(action["path"], action["content"], self.cwd), "Frozen legacy filesystem surface."),
-            "read_file": ToolSpec("read_file", lambda action: read_file(action["path"], self.cwd), "Read a text file."),
-            "create_file": ToolSpec("create_file", lambda action: create_file(action["path"], self.cwd, action["content"]), "Frozen legacy filesystem surface."),
-            "create_folder": ToolSpec("create_folder", lambda action: create_folder(action["path"], self.cwd), "Frozen legacy filesystem surface."),
-            "move_file": ToolSpec("move_file", lambda action: move_file(action["src"], action["dst"], self.cwd), "Frozen legacy filesystem surface."),
-            "delete_file": ToolSpec("delete_file", lambda action: delete_file(action["path"], self.cwd), "Frozen legacy filesystem surface."),
-            "search_in_project": ToolSpec("search_in_project", lambda action: search_in_project(action["pattern"], action["path"], self.cwd), "Search text in project files."),
+            "write_file": ToolSpec(
+                "write_file",
+                lambda action: write_file(
+                    action["path"], action["content"], self.cwd, self.project_dir
+                ),
+                "Frozen legacy filesystem surface.",
+            ),
+            "append_file": ToolSpec(
+                "append_file",
+                lambda action: append_file(
+                    action["path"], action["content"], self.cwd, self.project_dir
+                ),
+                "Frozen legacy filesystem surface.",
+            ),
+            "read_file": ToolSpec(
+                "read_file",
+                lambda action: read_file(action["path"], self.cwd, self.project_dir),
+                "Read a text file.",
+            ),
+            "create_file": ToolSpec(
+                "create_file",
+                lambda action: create_file(
+                    action["path"], self.cwd, action["content"], self.project_dir
+                ),
+                "Frozen legacy filesystem surface.",
+            ),
+            "create_folder": ToolSpec(
+                "create_folder",
+                lambda action: create_folder(action["path"], self.cwd, self.project_dir),
+                "Frozen legacy filesystem surface.",
+            ),
+            "move_file": ToolSpec(
+                "move_file",
+                lambda action: move_file(
+                    action["src"], action["dst"], self.cwd, self.project_dir
+                ),
+                "Frozen legacy filesystem surface.",
+            ),
+            "delete_file": ToolSpec(
+                "delete_file",
+                lambda action: delete_file(action["path"], self.cwd, self.project_dir),
+                "Frozen legacy filesystem surface.",
+            ),
+            "search_in_project": ToolSpec(
+                "search_in_project",
+                lambda action: search_in_project(
+                    action["pattern"], action["path"], self.cwd, self.project_dir
+                ),
+                "Search text in project files.",
+            ),
             "change_directory": ToolSpec("change_directory", lambda action: self._change_directory(action["path"]), "Change runtime directory."),
             "browser_start": ToolSpec("browser_start", lambda action: browser_start(), "Frozen legacy browser surface."),
-            "browser_open": ToolSpec("browser_open", lambda action: browser_open(action["url"]), "Frozen legacy browser surface."),
+            "browser_open": ToolSpec(
+                "browser_open",
+                lambda action: self._browser_open(action["url"]),
+                "Frozen legacy browser surface.",
+            ),
             "browser_click": ToolSpec("browser_click", lambda action: browser_click(action["selector"]), "Frozen legacy browser surface."),
             "browser_type": ToolSpec("browser_type", lambda action: browser_type(action["selector"], action["text"]), "Frozen legacy browser surface."),
             "browser_press": ToolSpec("browser_press", lambda action: browser_press(action["key"]), "Frozen legacy browser surface."),
             "browser_read_html": ToolSpec("browser_read_html", lambda action: browser_read_html(), "Frozen legacy browser surface."),
             "browser_get_visible_text": ToolSpec("browser_get_visible_text", lambda action: browser_get_visible_text(), "Frozen legacy browser surface."),
-            "browser_screenshot": ToolSpec("browser_screenshot", lambda action: browser_screenshot(action.get("path") or None), "Frozen legacy browser surface."),
+            "browser_screenshot": ToolSpec(
+                "browser_screenshot",
+                lambda action: self._browser_screenshot(action.get("path") or None),
+                "Frozen legacy browser surface.",
+            ),
             "browser_close": ToolSpec("browser_close", lambda action: browser_close(), "Frozen legacy browser surface."),
             "browser_current_url": ToolSpec("browser_current_url", lambda action: browser_current_url(), "Frozen legacy browser surface."),
-            "scan_project": ToolSpec("scan_project", lambda action: scan_project(action["path"], self.cwd), "Scan a repository or project tree."),
+            "scan_project": ToolSpec(
+                "scan_project",
+                lambda action: scan_project(action["path"], self.cwd, self.project_dir),
+                "Scan a repository or project tree.",
+            ),
         }
 
     @staticmethod
@@ -168,7 +230,12 @@ class ExecutionEngine:
         return answer not in {"n", "no", "cancel", "reject", "stop"}
 
     def _change_directory(self, path_text: str) -> dict:
-        target = resolve_path(path_text, self.cwd)
+        target = resolve_path(
+            path_text,
+            self.cwd,
+            self.project_dir,
+            operation="change_directory",
+        )
         if not target.exists() or not target.is_dir():
             return {
                 "success": False,
@@ -182,6 +249,33 @@ class ExecutionEngine:
             "path": str(target),
             "message": f"Current directory changed to {target}",
         }
+
+    def _browser_open(self, url: str) -> dict:
+        parsed = urlparse(url)
+        if parsed.scheme.lower() != "file":
+            return browser_open(url)
+        if parsed.netloc not in {"", "localhost"}:
+            raise FilesystemContainmentError(
+                "Filesystem containment blocked browser_open: unsupported file URL."
+            )
+        local_path = resolve_path(
+            unquote(parsed.path),
+            self.cwd,
+            self.project_dir,
+            operation="browser_open local file",
+        )
+        return browser_open(local_path.as_uri())
+
+    def _browser_screenshot(self, path_text: str | None) -> dict:
+        if path_text is None:
+            return browser_screenshot()
+        target = resolve_path(
+            path_text,
+            self.cwd,
+            self.project_dir,
+            operation="browser_screenshot",
+        )
+        return browser_screenshot(str(target))
 
     def _record_execution(self, action: dict[str, Any], result: dict[str, Any]) -> None:
         payload = {

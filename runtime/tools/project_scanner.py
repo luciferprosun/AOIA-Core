@@ -6,7 +6,7 @@ from pathlib import Path
 
 from runtime_paths import runtime_state_dir
 
-from .filesystem_tools import resolve_path
+from .filesystem_tools import canonical_project_root, resolve_path
 
 
 IGNORED_DIRS = {
@@ -35,9 +35,15 @@ ENTRYPOINT_NAMES = {
 }
 
 
-def scan_project(path_text: str, cwd: Path, max_files: int = 400) -> dict:
+def scan_project(
+    path_text: str,
+    cwd: Path,
+    project_root: Path | None = None,
+    max_files: int = 400,
+) -> dict:
     """Map a project tree and identify likely entrypoints."""
-    root = resolve_path(path_text, cwd)
+    boundary_root = canonical_project_root(project_root)
+    root = resolve_path(path_text, cwd, boundary_root, operation="scan_project")
     if not root.exists() or not root.is_dir():
         return {
             "success": False,
@@ -51,14 +57,33 @@ def scan_project(path_text: str, cwd: Path, max_files: int = 400) -> dict:
     extension_counts: dict[str, int] = {}
 
     for current_root, dirnames, filenames in os.walk(root):
-        dirnames[:] = sorted(name for name in dirnames if name not in IGNORED_DIRS)
-        current_path = Path(current_root)
+        current_path = resolve_path(
+            current_root,
+            root,
+            boundary_root,
+            operation="scan_project",
+        )
+        safe_dirnames = []
+        for dirname in sorted(name for name in dirnames if name not in IGNORED_DIRS):
+            resolve_path(
+                current_path / dirname,
+                root,
+                boundary_root,
+                operation="scan_project",
+            )
+            safe_dirnames.append(dirname)
+        dirnames[:] = safe_dirnames
         rel_dir = current_path.relative_to(root)
         if rel_dir.parts and len(rel_dir.parts) <= 2:
             directories.add(str(rel_dir))
 
         for filename in sorted(filenames):
-            file_path = current_path / filename
+            file_path = resolve_path(
+                current_path / filename,
+                root,
+                boundary_root,
+                operation="scan_project",
+            )
             if not file_path.is_file():
                 continue
             rel = str(file_path.relative_to(root))
@@ -73,7 +98,12 @@ def scan_project(path_text: str, cwd: Path, max_files: int = 400) -> dict:
         if total_seen >= max_files * 3:
             break
 
-    architecture = _summarize_architecture(root, entrypoints, extension_counts)
+    architecture = _summarize_architecture(
+        root,
+        boundary_root,
+        entrypoints,
+        extension_counts,
+    )
     report = {
         "root": str(root),
         "directories": sorted(directories)[:80],
@@ -83,10 +113,13 @@ def scan_project(path_text: str, cwd: Path, max_files: int = 400) -> dict:
         "architecture_summary": architecture,
     }
 
-    report_path = runtime_state_dir(root) / "state" / "project_scan.json"
+    report_path = runtime_state_dir(boundary_root) / "state" / "project_scan.json"
     try:
         report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        report_path.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
     except OSError:
         report_path = None
 
@@ -99,15 +132,35 @@ def scan_project(path_text: str, cwd: Path, max_files: int = 400) -> dict:
     }
 
 
-def _summarize_architecture(root: Path, entrypoints: list[str], extension_counts: dict[str, int]) -> str:
+def _summarize_architecture(
+    root: Path,
+    project_root: Path | None,
+    entrypoints: list[str],
+    extension_counts: dict[str, int],
+) -> str:
     markers = []
-    if (root / "package.json").exists():
+    package_json = resolve_path(
+        root / "package.json", root, project_root, operation="scan_project"
+    )
+    pyproject = resolve_path(
+        root / "pyproject.toml", root, project_root, operation="scan_project"
+    )
+    requirements = resolve_path(
+        root / "requirements.txt", root, project_root, operation="scan_project"
+    )
+    index_html = resolve_path(
+        root / "index.html", root, project_root, operation="scan_project"
+    )
+    readme = resolve_path(
+        root / "README.md", root, project_root, operation="scan_project"
+    )
+    if package_json.exists():
         markers.append("JavaScript/Node project")
-    if (root / "pyproject.toml").exists() or (root / "requirements.txt").exists():
+    if pyproject.exists() or requirements.exists():
         markers.append("Python project")
-    if (root / "index.html").exists():
+    if index_html.exists():
         markers.append("static/web frontend")
-    if (root / "README.md").exists():
+    if readme.exists():
         markers.append("README present")
     if not markers:
         markers.append("generic file tree")
