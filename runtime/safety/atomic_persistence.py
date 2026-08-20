@@ -11,7 +11,7 @@ import time
 from collections.abc import Callable, Mapping
 from numbers import Real
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
 
 STATE_LOCK_TIMEOUT_REASON_CODE = "STATE_LOCK_TIMEOUT"
@@ -24,6 +24,9 @@ STATE_CORRUPT_REASON_CODE = "STATE_CORRUPT"
 DEFAULT_STATE_LOCK_TIMEOUT_SECONDS = 5.0
 MAX_STATE_LOCK_TIMEOUT_SECONDS = 300.0
 LOCK_POLL_INTERVAL_SECONDS = 0.01
+
+
+_UpdateResult = TypeVar("_UpdateResult")
 
 
 class PersistenceError(RuntimeError):
@@ -352,6 +355,86 @@ def locked_update_text(
     except Exception as exc:
         raise AtomicWriteError(
             "AOIA locked text state update failed.",
+            target_path=target,
+        ) from exc
+
+
+def locked_update_json(
+    target_path: Path,
+    update: Callable[[Any | None], tuple[Any, _UpdateResult]],
+    *,
+    lock_path: Path,
+    lock_timeout_seconds: object = DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
+    indent: int | None = 2,
+    ensure_ascii: bool = False,
+    sort_keys: bool = False,
+    trailing_newline: bool = False,
+    mode: int = 0o600,
+) -> _UpdateResult:
+    """Atomically read, transform, and replace one JSON resource under one lock.
+
+    The callback receives ``None`` when the target does not exist and returns
+    ``(replacement_payload, result)``. The result is returned only after the
+    replacement is durable. Higher-level stores can therefore implement a
+    compare-and-transition boundary without nesting a second ``flock`` or
+    importing private atomic-write internals.
+    """
+
+    target = Path(target_path)
+    try:
+        with InterProcessFileLock(lock_path, timeout_seconds=lock_timeout_seconds):
+            current: Any | None = None
+            if target.exists():
+                try:
+                    raw = target.read_text(encoding="utf-8", errors="strict")
+                except UnicodeError as exc:
+                    raise StateCorruptionError(
+                        "AOIA state snapshot is not valid UTF-8.",
+                        target_path=target,
+                    ) from exc
+                except OSError as exc:
+                    raise PersistenceReadError(
+                        "AOIA state snapshot could not be read for update.",
+                        target_path=target,
+                    ) from exc
+                try:
+                    current = json.loads(raw)
+                except json.JSONDecodeError as exc:
+                    raise StateCorruptionError(
+                        "AOIA state snapshot is corrupt JSON.",
+                        target_path=target,
+                    ) from exc
+
+            replacement, result = update(current)
+            try:
+                text = json.dumps(
+                    replacement,
+                    indent=indent,
+                    ensure_ascii=ensure_ascii,
+                    sort_keys=sort_keys,
+                    allow_nan=False,
+                )
+            except (TypeError, ValueError) as exc:
+                raise StateSerializationError(
+                    "AOIA state JSON serialization failed.",
+                    target_path=target,
+                ) from exc
+            if trailing_newline:
+                text += "\n"
+            try:
+                payload = text.encode("utf-8", errors="strict")
+            except UnicodeError as exc:
+                raise StateSerializationError(
+                    "AOIA state text serialization failed.",
+                    target_path=target,
+                ) from exc
+            _atomic_replace_bytes_unlocked(target, payload, mode=mode)
+            return result
+    except PersistenceError:
+        raise
+    except OSError as exc:
+        raise AtomicWriteError(
+            "AOIA locked JSON state update failed.",
             target_path=target,
         ) from exc
 

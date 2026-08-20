@@ -45,6 +45,20 @@ from .filesystem_tools import (
     search_in_project,
     write_file,
 )
+from .idempotency import (
+    ACTION_SEMANTIC_FIELDS,
+    IDEMPOTENCY_UNKNOWN_OUTCOME_REASON_CODE,
+    DurableIdempotencyStore,
+    IdempotencyRecord,
+    IdempotencyResolution,
+    IdempotencyResolutionKind,
+    IdempotencyState,
+    IDEMPOTENCY_STATE_REASON_CODES,
+    OperationContext,
+    build_safe_result_receipt,
+    canonical_action_fingerprint,
+    project_scope_fingerprint,
+)
 from .memory import MemoryStore
 from .project_scanner import scan_project
 from .shell_tools import (
@@ -86,6 +100,10 @@ class ExecutionEngine:
             headless=True,
         )
         self.tools = self._build_tool_registry()
+        self.idempotency_store = DurableIdempotencyStore(
+            memory_store.paths.state_dir,
+            lock_timeout_seconds=memory_store.state_lock_timeout_seconds,
+        )
 
     def tool_names(self) -> list[str]:
         return sorted(self.tools)
@@ -96,20 +114,34 @@ class ExecutionEngine:
         require_approval: bool = True,
         *,
         action_context: ActionContext | None = None,
+        operation_context: OperationContext | None = None,
     ) -> dict[str, Any]:
         """Evaluate runtime policy, obtain approval when required, then dispatch.
 
         ``require_approval`` remains for call-site compatibility but cannot disable
         the runtime-owned capability policy. A caller or model may only make the
-        final decision more restrictive.
+        final decision more restrictive. ``operation_context`` is a trusted
+        runtime retry identity; model fields with the same name are stripped.
         """
         _ = require_approval
         authoritative_context = action_context or TraceContext.new_request().new_action()
         authoritative_action = strip_untrusted_identity_fields(action)
         decision = evaluate_action_policy(authoritative_action, authoritative_context)
         name = decision.action_name
+        operation = operation_context or OperationContext.new_operation()
+
         if not decision.allowed:
-            return self._blocked_policy_result(decision)
+            blocked_result = self._blocked_policy_result(decision)
+            if name not in ACTION_SEMANTIC_FIELDS:
+                return blocked_result
+            return self._record_without_dispatch(
+                authoritative_action,
+                decision,
+                authoritative_context,
+                operation,
+                IdempotencyState.BLOCKED,
+                blocked_result,
+            )
 
         tool = self.tools.get(name)
         if tool is None:
@@ -131,7 +163,7 @@ class ExecutionEngine:
                 authoritative_context,
             )
             if not approved:
-                return {
+                cancelled_result = {
                     **self._decision_fields(decision),
                     "success": False,
                     "allowed": False,
@@ -141,17 +173,383 @@ class ExecutionEngine:
                     "result_reason_code": "HUMAN_APPROVAL_DECLINED",
                     "message": "Action rejected by user before tool dispatch.",
                 }
+                return self._record_without_dispatch(
+                    authoritative_action,
+                    decision,
+                    authoritative_context,
+                    operation,
+                    IdempotencyState.CANCELLED,
+                    cancelled_result,
+                )
 
-        result = self._correlate_result(
-            tool.handler(authoritative_action),
+        fingerprint = canonical_action_fingerprint(
+            authoritative_action,
+            project_dir=self.project_dir,
+            capability_class=decision.capability_class,
+        )
+        reservation = self._reserve_operation(
+            operation,
             authoritative_context,
+            decision,
+            fingerprint,
+        )
+        self._after_idempotency_resolution(
+            reservation,
+            authoritative_action,
+            decision,
+            authoritative_context,
+            operation,
+        )
+        if not reservation.dispatch_allowed:
+            result = self._resolution_result(
+                reservation,
+                authoritative_context,
+                operation,
+            )
+            self._record_execution(
+                authoritative_action,
+                result,
+                authoritative_context,
+                operation_context=operation,
+            )
+            return result
+
+        dispatch_record = self._transition_operation(
+            operation,
+            authoritative_context,
+            fingerprint,
+            IdempotencyState.DISPATCH_STARTED,
+            "IDEMPOTENCY_DISPATCH_STARTED",
+        )
+        self._after_idempotency_transition(
+            dispatch_record,
+            authoritative_action,
+            decision,
+            authoritative_context,
+            operation,
+        )
+        try:
+            # P0.8 inserts its durable provenance dispatch gate at this seam.
+            # It is deliberately after DISPATCH_STARTED persistence and before
+            # the first handler instruction can create a side effect.
+            self._before_tool_dispatch(
+                authoritative_action,
+                decision,
+                authoritative_context,
+                operation,
+                dispatch_record,
+            )
+            result = self._correlate_result(
+                tool.handler(authoritative_action),
+                authoritative_context,
+            )
+        except Exception:
+            # Once DISPATCH_STARTED is durable, an exception cannot prove that
+            # no effect occurred. Never make the key retryable automatically.
+            try:
+                unknown_record = self._transition_operation(
+                    operation,
+                    authoritative_context,
+                    fingerprint,
+                    IdempotencyState.UNKNOWN_OUTCOME,
+                    IDEMPOTENCY_UNKNOWN_OUTCOME_REASON_CODE,
+                    terminal_receipt={
+                        "receipt_schema_version": "AOIA_IDEMPOTENCY_RECEIPT_1A",
+                        "success": False,
+                        "unknown_outcome": True,
+                    },
+                )
+                self._after_idempotency_transition(
+                    unknown_record,
+                    authoritative_action,
+                    decision,
+                    authoritative_context,
+                    operation,
+                )
+            except Exception as transition_error:
+                # Preserve both failures for diagnosis while leaving the
+                # durable DISPATCH_STARTED record as the conservative truth.
+                try:
+                    transition_error.add_note(
+                        "Handler/pre-dispatch failure left the operation in DISPATCH_STARTED."
+                    )
+                except AttributeError:  # pragma: no cover - Python 3.12 has add_note
+                    pass
+            raise
+
+        terminal_state, terminal_reason = self._terminal_state_for_result(result)
+        terminal_record = self._transition_operation(
+            operation,
+            authoritative_context,
+            fingerprint,
+            terminal_state,
+            terminal_reason,
+            terminal_receipt=build_safe_result_receipt(result),
+        )
+        self._after_idempotency_transition(
+            terminal_record,
+            authoritative_action,
+            decision,
+            authoritative_context,
+            operation,
+        )
+        result = self._with_idempotency_fields(
+            result,
+            operation,
+            terminal_record,
+            replayed=False,
+            dispatched=True,
         )
         self._record_execution(
             authoritative_action,
             result,
             authoritative_context,
+            operation_context=operation,
         )
         return result
+
+    def _record_without_dispatch(
+        self,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation: OperationContext,
+        terminal_state: IdempotencyState,
+        result: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Persist BLOCKED/CANCELLED truth without entering DISPATCH_STARTED."""
+
+        fingerprint = canonical_action_fingerprint(
+            action,
+            project_dir=self.project_dir,
+            capability_class=decision.capability_class,
+        )
+        reservation = self._reserve_operation(
+            operation,
+            action_context,
+            decision,
+            fingerprint,
+        )
+        self._after_idempotency_resolution(
+            reservation,
+            action,
+            decision,
+            action_context,
+            operation,
+        )
+        if not reservation.dispatch_allowed:
+            # Current denial still wins over a previous record: never replay an
+            # operation after the human/policy denied this attempt.
+            return {
+                **result,
+                **action_context.identity_fields(),
+                "operation_key": operation.operation_key,
+                "idempotency_state": reservation.record.state.value,
+                "idempotency_reason_code": reservation.reason_code,
+                "replayed": False,
+                "dispatched": False,
+            }
+        terminal_record = self._transition_operation(
+            operation,
+            action_context,
+            fingerprint,
+            terminal_state,
+            IDEMPOTENCY_STATE_REASON_CODES[terminal_state],
+            terminal_receipt=build_safe_result_receipt(result),
+        )
+        self._after_idempotency_transition(
+            terminal_record,
+            action,
+            decision,
+            action_context,
+            operation,
+        )
+        return self._with_idempotency_fields(
+            {**result, **action_context.identity_fields()},
+            operation,
+            terminal_record,
+            replayed=False,
+            dispatched=False,
+        )
+
+    def _reserve_operation(
+        self,
+        operation: OperationContext,
+        action_context: ActionContext,
+        decision: ActionPolicyDecision,
+        fingerprint: str,
+    ) -> IdempotencyResolution:
+        try:
+            return self.idempotency_store.reserve(
+                operation,
+                action_context=action_context,
+                action_fingerprint=fingerprint,
+                capability_class=decision.capability_class,
+                project_scope=project_scope_fingerprint(self.project_dir),
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(action_context.identity_fields())
+
+    def _transition_operation(
+        self,
+        operation: OperationContext,
+        action_context: ActionContext,
+        fingerprint: str,
+        state: IdempotencyState,
+        reason_code: str,
+        *,
+        terminal_receipt: dict[str, Any] | None = None,
+    ) -> IdempotencyRecord:
+        try:
+            return self.idempotency_store.transition(
+                operation,
+                owner_action_id=action_context.action_id,
+                action_fingerprint=fingerprint,
+                to_state=state,
+                reason_code=reason_code,
+                terminal_receipt=terminal_receipt,
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(action_context.identity_fields())
+
+    @staticmethod
+    def _terminal_state_for_result(
+        result: dict[str, Any],
+    ) -> tuple[IdempotencyState, str]:
+        if result.get("timed_out") is True or result.get("unknown_outcome") is True:
+            return (
+                IdempotencyState.TIMED_OUT_OR_UNKNOWN,
+                IDEMPOTENCY_STATE_REASON_CODES[
+                    IdempotencyState.TIMED_OUT_OR_UNKNOWN
+                ],
+            )
+        if result.get("success") is True:
+            return (
+                IdempotencyState.SUCCEEDED,
+                IDEMPOTENCY_STATE_REASON_CODES[IdempotencyState.SUCCEEDED],
+            )
+        return (
+            IdempotencyState.FAILED_REPORTED,
+            IDEMPOTENCY_STATE_REASON_CODES[IdempotencyState.FAILED_REPORTED],
+        )
+
+    @staticmethod
+    def _with_idempotency_fields(
+        result: dict[str, Any],
+        operation: OperationContext,
+        record: IdempotencyRecord,
+        *,
+        replayed: bool,
+        dispatched: bool,
+    ) -> dict[str, Any]:
+        return {
+            **result,
+            "operation_key": operation.operation_key,
+            "action_fingerprint": record.action_fingerprint,
+            "idempotency_state": record.state.value,
+            "idempotency_reason_code": record.reason_code,
+            "replayed": replayed,
+            "dispatched": dispatched,
+        }
+
+    @staticmethod
+    def _resolution_result(
+        resolution: IdempotencyResolution,
+        action_context: ActionContext,
+        operation: OperationContext,
+    ) -> dict[str, Any]:
+        record = resolution.record
+        receipt = dict(record.terminal_receipt or {})
+        if resolution.kind is IdempotencyResolutionKind.CONFLICT:
+            state = IdempotencyState.CONFLICT.value
+            success = False
+            blocked = True
+            message = "Operation key conflicts with different semantic action input."
+        elif resolution.kind is IdempotencyResolutionKind.IN_PROGRESS:
+            state = record.state.value
+            success = False
+            blocked = True
+            message = "Operation is already reserved; automatic duplicate dispatch was blocked."
+        elif resolution.kind is IdempotencyResolutionKind.UNKNOWN_OUTCOME:
+            state = IdempotencyState.UNKNOWN_OUTCOME.value
+            success = False
+            blocked = True
+            message = "Prior dispatch outcome is uncertain; manual review is required."
+        else:
+            state = record.state.value
+            success = bool(receipt.get("success", False))
+            blocked = record.state in {
+                IdempotencyState.BLOCKED,
+                IdempotencyState.CANCELLED,
+                IdempotencyState.FAILED_BEFORE_DISPATCH,
+                IdempotencyState.FAILED_REPORTED,
+            }
+            message = "Stored terminal operation receipt replayed without tool dispatch."
+
+        return {
+            **receipt,
+            **action_context.identity_fields(),
+            "success": success,
+            "blocked": blocked,
+            "cancelled": record.state is IdempotencyState.CANCELLED,
+            "unknown_outcome": resolution.kind
+            is IdempotencyResolutionKind.UNKNOWN_OUTCOME,
+            "manual_review_required": resolution.kind
+            in {
+                IdempotencyResolutionKind.IN_PROGRESS,
+                IdempotencyResolutionKind.UNKNOWN_OUTCOME,
+            },
+            "idempotency_conflict": resolution.kind
+            is IdempotencyResolutionKind.CONFLICT,
+            "result_reason_code": resolution.reason_code,
+            "operation_key": operation.operation_key,
+            "action_fingerprint": record.action_fingerprint,
+            "idempotency_state": state,
+            "idempotency_reason_code": resolution.reason_code,
+            "replayed": resolution.replayed,
+            "dispatched": False,
+            "original_request_id": record.request_id,
+            "original_trace_id": record.trace_id,
+            "original_action_id": record.action_id,
+            "original_model_call_id": record.model_call_id,
+            "message": message,
+        }
+
+    def _before_tool_dispatch(
+        self,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation_context: OperationContext,
+        idempotency_record: IdempotencyRecord,
+    ) -> None:
+        """Extension seam for the P0.8 durable provenance dispatch gate."""
+
+        _ = (action, decision, action_context, operation_context, idempotency_record)
+
+    def _after_idempotency_resolution(
+        self,
+        resolution: IdempotencyResolution,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation_context: OperationContext,
+    ) -> None:
+        """P0.8 hook for reservation, replay, conflict, and unknown outcomes."""
+
+        _ = (resolution, action, decision, action_context, operation_context)
+
+    def _after_idempotency_transition(
+        self,
+        record: IdempotencyRecord,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation_context: OperationContext,
+    ) -> None:
+        """P0.8 hook invoked only after an idempotency transition is durable."""
+
+        _ = (record, action, decision, action_context, operation_context)
 
     @staticmethod
     def _decision_fields(decision: ActionPolicyDecision) -> dict[str, Any]:
@@ -376,6 +774,8 @@ class ExecutionEngine:
         action: dict[str, Any],
         result: dict[str, Any],
         action_context: ActionContext,
+        *,
+        operation_context: OperationContext | None = None,
     ) -> None:
         identity = action_context.identity_fields()
         for field in ("request_id", "trace_id", "action_id"):
@@ -388,6 +788,12 @@ class ExecutionEngine:
         ):
             raise TraceIdentityError(
                 "Operational execution model-call identity does not match its action context."
+            )
+        if operation_context is not None and (
+            result.get("operation_key") != operation_context.operation_key
+        ):
+            raise TraceIdentityError(
+                "Operational execution operation key does not match its runtime context."
             )
         payload = {
             "timestamp": dt.datetime.now().isoformat(),
@@ -402,6 +808,8 @@ class ExecutionEngine:
             "result": result,
             "cwd": str(self.cwd),
         }
+        if operation_context is not None:
+            payload["operation_key"] = operation_context.operation_key
         filename = (
             dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
             + f"_{action_context.action_id}.json"
