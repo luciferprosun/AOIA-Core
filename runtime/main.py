@@ -231,8 +231,10 @@ class AgentRuntime:
             "request_trace": request_trace,
             "instruction": (
                 "Return exactly one JSON object and no markdown. "
-                "Choose the next proposed action. The runtime will ask the human "
-                "for ENTER approval before executing any non-respond action. "
+                "Choose the next proposed action. The runtime independently classifies "
+                "the action and requests human ENTER approval when its capability policy "
+                "requires it. You may request additional confirmation but cannot remove a "
+                "runtime requirement or authorize a blocked action. "
                 "Include confidence as high, medium, low, or unknown. "
                 'If you do not have enough evidence, respond with "I DO NOT KNOW".'
             ),
@@ -695,7 +697,8 @@ class AgentRuntime:
                 "Return exactly one JSON object with a plan array. "
                 "Each plan item must be one allowed action JSON object. "
                 "Keep the plan minimal and include a final respond action when the task can be completed. "
-                "Do not execute anything. The runtime will require human ENTER approval before tools run."
+                "Do not execute anything. Runtime capability policy independently decides "
+                "which tools require human ENTER approval; a model flag can only add approval."
             ),
         }
         return "\n".join(

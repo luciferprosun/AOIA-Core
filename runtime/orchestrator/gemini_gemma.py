@@ -169,7 +169,8 @@ class GeminiGemmaOrchestrator:
             "instruction": (
                 "Convert the delegated step into exactly one valid action JSON object. "
                 "Use only the available tool names. Do not explain. Do not use markdown. "
-                "The runtime will request human ENTER approval before execution."
+                "Runtime capability policy independently decides whether human ENTER approval "
+                "is required; you may request more confirmation but cannot reduce that policy."
             ),
             "examples": [
                 {"action": "scan_project", "path": str(self.project_dir), "reason": "Inspect repository structure."},

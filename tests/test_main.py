@@ -93,7 +93,10 @@ class RuntimeArchitectureTests(unittest.TestCase):
             desktop_dir.mkdir()
             memory = MemoryStore(project_dir, project_dir)
             engine = ExecutionEngine(project_dir, memory)
-            with patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}):
+            with (
+                patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}),
+                patch.object(engine, "_request_approval", return_value=True),
+            ):
                 result = engine.execute(
                     {
                         "action": "create_folder",
@@ -164,7 +167,10 @@ class RuntimeArchitectureTests(unittest.TestCase):
             target_file = desktop_dir / "AI_TEST" / "note.txt"
             memory = MemoryStore(project_dir, project_dir)
             engine = ExecutionEngine(project_dir, memory)
-            with patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}):
+            with (
+                patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}),
+                patch.object(engine, "_request_approval", return_value=True),
+            ):
                 engine.execute(
                     {
                         "action": "create_folder",
@@ -203,8 +209,8 @@ class RuntimeArchitectureTests(unittest.TestCase):
             with patch("builtins.input", return_value="n"):
                 runtime.handle_user_request("zainstaluj curl")
             self.assertEqual(provider.calls, 1)
-            self.assertTrue(runtime.memory_store.memory.recent_outputs)
-            self.assertFalse(runtime.memory_store.memory.recent_outputs[-1]["success"])
+            self.assertFalse(runtime.memory_store.memory.recent_outputs)
+            self.assertFalse(list(runtime.memory_store.paths.command_logs_dir.glob("*.json")))
 
     def test_runtime_handles_model_503_after_successful_first_step(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -230,6 +236,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             with (
                 patch("sys.stdout", new_callable=StringIO) as fake_stdout,
                 patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}),
+                patch("builtins.input", return_value=""),
             ):
                 runtime.handle_user_request("zrob folder i plik")
             self.assertTrue((desktop_dir / "xxxxxxxxxxxx").is_dir())
@@ -246,7 +253,10 @@ class RuntimeArchitectureTests(unittest.TestCase):
             runtime = main.AgentRuntime(provider, PROMPT_TEMPLATE, project_dir)
             local_url = (project_dir / "index.html").as_uri()
 
-            with patch("sys.stdout", new_callable=StringIO):
+            with (
+                patch("sys.stdout", new_callable=StringIO),
+                patch("builtins.input", return_value=""),
+            ):
                 trace = runtime.bootstrap_local_context(f"przeanalizuj te prace {local_url}")
 
             self.assertEqual(provider.calls, 0)
@@ -279,6 +289,7 @@ class RuntimeArchitectureTests(unittest.TestCase):
             with (
                 patch("sys.stdout", new_callable=StringIO),
                 patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}),
+                patch("builtins.input", return_value=""),
             ):
                 runtime.handle_user_request("stworz folder AI_TEST na pulpicie")
             self.assertTrue((desktop_dir / "AI_TEST").is_dir())

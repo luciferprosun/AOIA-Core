@@ -31,8 +31,15 @@ class FilesystemContainmentTests(unittest.TestCase):
         self.environment.start()
         self.memory = MemoryStore(self.project_root, self.project_root)
         self.engine = ExecutionEngine(self.project_root, self.memory)
+        self.approval = patch.object(
+            self.engine,
+            "_request_approval",
+            return_value=True,
+        )
+        self.approval.start()
 
     def tearDown(self) -> None:
+        self.approval.stop()
         self.environment.stop()
         self.temporary_directory.cleanup()
 

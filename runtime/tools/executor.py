@@ -20,6 +20,7 @@ from .browser_tools import (
     browser_type,
     configure_browser_bridge,
 )
+from .capability_policy import ActionPolicyDecision, evaluate_action_policy
 from .filesystem_tools import (
     FilesystemContainmentError,
     append_file,
@@ -79,31 +80,69 @@ class ExecutionEngine:
         return sorted(self.tools)
 
     def execute(self, action: dict[str, Any], require_approval: bool = True) -> dict[str, Any]:
-        """Execute one validated JSON action."""
-        name = action["action"]
+        """Evaluate runtime policy, obtain approval when required, then dispatch.
+
+        ``require_approval`` remains for call-site compatibility but cannot disable
+        the runtime-owned capability policy. A caller or model may only make the
+        final decision more restrictive.
+        """
+        _ = require_approval
+        decision = evaluate_action_policy(action)
+        name = decision.action_name
+        if not decision.allowed:
+            return self._blocked_policy_result(decision)
+
         tool = self.tools.get(name)
         if tool is None:
-            raise ValueError(f"Unhandled action: {name}")
+            return {
+                **self._decision_fields(decision),
+                "success": False,
+                "allowed": False,
+                "blocked": True,
+                "cancelled": False,
+                "policy_allowed": decision.allowed,
+                "policy_reason_code": "ACTION_HANDLER_MISSING",
+                "message": "Runtime capability policy blocked an action without a handler.",
+            }
 
-        needs_approval = bool(action.get("requires_confirmation", False))
-        if name == "shell_execute":
-            needs_approval = needs_approval or classify_shell_command(action.get("command", "")).requires_confirmation
-
-        if require_approval and name != "respond" and needs_approval:
-            approved = self._request_approval(action)
+        if decision.requires_confirmation:
+            approved = self._request_approval(action, decision)
             if not approved:
-                result = {
+                return {
+                    **self._decision_fields(decision),
                     "success": False,
+                    "allowed": False,
+                    "blocked": True,
                     "cancelled": True,
-                    "message": "Action rejected by user.",
-                    "action": name,
+                    "policy_allowed": decision.allowed,
+                    "result_reason_code": "HUMAN_APPROVAL_DECLINED",
+                    "message": "Action rejected by user before tool dispatch.",
                 }
-                self._record_execution(action, result)
-                return result
 
         result = tool.handler(action)
         self._record_execution(action, result)
         return result
+
+    @staticmethod
+    def _decision_fields(decision: ActionPolicyDecision) -> dict[str, Any]:
+        return {
+            "action": decision.action_name,
+            "capability_class": decision.capability_class.value,
+            "allowed": decision.allowed,
+            "requires_confirmation": decision.requires_confirmation,
+            "runtime_requires_confirmation": decision.runtime_requires_confirmation,
+            "model_requests_confirmation": decision.model_requests_confirmation,
+            "policy_reason_code": decision.reason_code,
+        }
+
+    def _blocked_policy_result(self, decision: ActionPolicyDecision) -> dict[str, Any]:
+        return {
+            **self._decision_fields(decision),
+            "success": False,
+            "blocked": True,
+            "cancelled": False,
+            "message": decision.reason,
+        }
 
     def _build_tool_registry(self) -> dict[str, ToolSpec]:
         return {
@@ -218,9 +257,15 @@ class ExecutionEngine:
             "permission_reason": permission.reason,
         }
 
-    def _request_approval(self, action: dict[str, Any]) -> bool:
+    def _request_approval(
+        self,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+    ) -> bool:
         print("\nPROPOSED ACTION")
         print(f"Action: {action['action']}")
+        print(f"Capability: {decision.capability_class.value}")
+        print(f"Runtime policy: {decision.reason_code}")
         if action.get("reason"):
             print(f"Reason: {action['reason']}")
         for field in ("command", "path", "src", "dst", "url", "selector", "key"):
@@ -299,5 +344,5 @@ class ExecutionEngine:
         self.memory_store.append_history("action_result", payload)
         # AOIA Phase 2A containment boundary
         # Runtime operational outputs must NEVER become canonical evidence.
-        if action["action"].startswith("browser_"):
+        if str(action.get("action", "")).startswith("browser_"):
             self.memory_store.append_browser_event(payload)

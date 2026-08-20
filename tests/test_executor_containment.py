@@ -19,7 +19,10 @@ class ExecutorContainmentTests(unittest.TestCase):
 
             memory = MemoryStore(project_dir, project_dir)
             engine = ExecutionEngine(project_dir, memory)
-            with patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}):
+            with (
+                patch.dict(os.environ, {"AOIA_LEGACY_FILESYSTEM_ENABLED": "1"}),
+                patch.object(engine, "_request_approval", return_value=True),
+            ):
                 result = engine.execute(
                     {
                         "action": "create_folder",
