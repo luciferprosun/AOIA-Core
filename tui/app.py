@@ -14,6 +14,7 @@ from textual.widgets import Input, Label
 
 from tui.widgets.approval_panel import ApprovalPanel
 from main import DEBUG_RAW_RESPONSE, PROMPT_FILE, AgentRuntime, ProviderManager, load_prompt_template
+from trace_context import ActionContext, TraceContext
 from tui.views.dashboard import DashboardView
 from tui.widgets.log_panel import LogPanel
 from tui.widgets.status_panel import StatusPanel
@@ -51,6 +52,7 @@ class AOIATerminalApp(App):
         self.pending_approval: dict[str, Any] | None = None
         self._approval_event: threading.Event | None = None
         self._approval_decision = False
+        self._pending_action_context: ActionContext | None = None
 
     def compose(self):
         yield DashboardView()
@@ -126,11 +128,16 @@ class AOIATerminalApp(App):
 
     def _run_request_thread(self, raw: str) -> None:
         try:
+            trace_context = TraceContext.new_request()
             self.runtime.log_session_event(
                 "tui_operator_request",
                 {"length": len(raw), "slash_command": raw.startswith("/")},
+                trace_context=trace_context,
             )
-            result = self.runtime.run_text_request(raw)
+            result = self.runtime.run_text_request(
+                raw,
+                trace_context=trace_context,
+            )
             transcript = result.get("transcript", "")
             self.call_from_thread(self._complete_request, transcript, None)
         except Exception as error:
@@ -146,12 +153,21 @@ class AOIATerminalApp(App):
             self._notice("Request completed.")
         self.refresh_status()
 
-    def _request_approval_from_tui(self, action: dict[str, Any]) -> bool:
+    def _request_approval_from_tui(
+        self,
+        action: dict[str, Any],
+        _decision: Any = None,
+        action_context: ActionContext | None = None,
+    ) -> bool:
         event = threading.Event()
         self._approval_event = event
         self._approval_decision = False
-        self.pending_approval = dict(action)
-        self.call_from_thread(self._show_pending_approval, dict(action))
+        self._pending_action_context = action_context
+        self.pending_approval = {
+            **action,
+            **(action_context.identity_fields() if action_context else {}),
+        }
+        self.call_from_thread(self._show_pending_approval, dict(self.pending_approval))
         approved = event.wait(self.APPROVAL_TIMEOUT_SECONDS) and self._approval_decision
         self.call_from_thread(self._clear_pending_approval, approved)
         return approved
@@ -169,6 +185,7 @@ class AOIATerminalApp(App):
         self.runtime.log_session_event(
             "tui_approval_decision",
             {"action": action_name, "approved": approved},
+            action_context=self._pending_action_context,
         )
         self.query_one(ApprovalPanel).set_idle()
         self.query_one(TranscriptPanel).append_entry(
@@ -176,6 +193,7 @@ class AOIATerminalApp(App):
             f"{action_name} {'approved' if approved else 'rejected or timed out'}.",
         )
         self.pending_approval = None
+        self._pending_action_context = None
         self._approval_event = None
         self._notice("Approval completed." if approved else "Approval rejected or timed out.")
 

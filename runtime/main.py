@@ -34,6 +34,13 @@ from tools.memory_hats import MemoryHatStore
 from tools.memory import MemoryStore
 from tools.system_info import detect_desktop_dir
 from tools.validator import extract_json_object, inspect_respond_shell_safety, validate_action
+from trace_context import (
+    ActionContext,
+    ModelCallContext,
+    TraceContext,
+    TracedModelOutput,
+    strip_untrusted_identity_fields,
+)
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -302,26 +309,81 @@ class AgentRuntime:
             return method()
         return []
 
-    def ask_model(self, prompt: str) -> str:
-        """Request one structured action from the active model provider."""
+    def ask_model(
+        self,
+        prompt: str,
+        trace_context: TraceContext,
+    ) -> TracedModelOutput:
+        """Request model output while identifying every actual provider attempt."""
         if self.safeguards.disable_model:
             raise RuntimeError("Model planning is disabled by EPISTEMIC_DISABLE_MODEL.")
         last_error: Exception | None = None
-        for attempt, delay_seconds in enumerate(MODEL_RETRY_DELAYS, start=1):
+        for retry_attempt, delay_seconds in enumerate(MODEL_RETRY_DELAYS, start=1):
             try:
-                raw_text = self.provider_manager.generate(prompt)
+                traced_generate = getattr(self.provider_manager, "generate_traced", None)
+                if callable(traced_generate):
+                    raw_result = traced_generate(
+                        prompt,
+                        trace_context,
+                        on_attempt=lambda status, call, provider, model, provider_attempt: self._log_model_attempt(
+                            status=status,
+                            model_call=call,
+                            provider=provider,
+                            model=model,
+                            retry_attempt=retry_attempt,
+                            provider_attempt=provider_attempt,
+                        ),
+                    )
+                else:
+                    model_call = trace_context.new_model_call()
+                    model_name = str(self.provider_manager.describe())
+                    provider_name = model_name.split("/", 1)[0]
+                    self._log_model_attempt(
+                        status="started",
+                        model_call=model_call,
+                        provider=provider_name,
+                        model=model_name,
+                        retry_attempt=retry_attempt,
+                        provider_attempt=1,
+                    )
+                    try:
+                        raw_text = self.provider_manager.generate(prompt)
+                    except Exception:
+                        self._log_model_attempt(
+                            status="failed",
+                            model_call=model_call,
+                            provider=provider_name,
+                            model=model_name,
+                            retry_attempt=retry_attempt,
+                            provider_attempt=1,
+                        )
+                        raise
+                    self._log_model_attempt(
+                        status="succeeded",
+                        model_call=model_call,
+                        provider=provider_name,
+                        model=model_name,
+                        retry_attempt=retry_attempt,
+                        provider_attempt=1,
+                    )
+                    raw_result = TracedModelOutput(
+                        text=raw_text,
+                        model_call=model_call,
+                        provider=provider_name,
+                        model=model_name,
+                    )
                 if self.debug_raw:
                     print("\n[DEBUG] RAW MODEL OUTPUT:")
-                    print(raw_text)
-                return raw_text
+                    print(raw_result.text)
+                return raw_result
             except Exception as error:
                 last_error = error
                 if is_daily_quota_error(error):
                     break
-                if attempt == len(MODEL_RETRY_DELAYS):
+                if retry_attempt == len(MODEL_RETRY_DELAYS):
                     break
                 print(
-                    f"\n[WARN] Model request failed (attempt {attempt}/{len(MODEL_RETRY_DELAYS)}): {error}"
+                    f"\n[WARN] Model request failed (attempt {retry_attempt}/{len(MODEL_RETRY_DELAYS)}): {error}"
                 )
                 print(f"[WARN] Retrying in {delay_seconds:.0f}s...")
                 time.sleep(delay_seconds)
@@ -329,36 +391,79 @@ class AgentRuntime:
         assert last_error is not None
         raise RuntimeError(f"Model request failed after retries: {last_error}")
 
-    def handle_user_request(self, user_input: str) -> None:
+    def _log_model_attempt(
+        self,
+        *,
+        status: str,
+        model_call: ModelCallContext,
+        provider: str,
+        model: str,
+        retry_attempt: int,
+        provider_attempt: int,
+    ) -> None:
+        self.log_session_event(
+            "model_call_attempt",
+            {
+                "provider": provider,
+                "model": model,
+                "retry_attempt": retry_attempt,
+                "provider_attempt": provider_attempt,
+                "status": status,
+            },
+            trace_context=TraceContext(
+                request_id=model_call.request_id,
+                trace_id=model_call.trace_id,
+            ),
+            model_call=model_call,
+        )
+
+    def handle_user_request(
+        self,
+        user_input: str,
+        trace_context: TraceContext | None = None,
+    ) -> None:
         """Run the bounded action loop for one user request."""
+        trace_context = trace_context or TraceContext.new_request()
         self.memory_store.set_current_task(user_input)
         if user_input.strip().lower() in {"help", "?"}:
-            result = self.command_registry.execute("/help", self)
+            result = self.command_registry.execute("/help", self, trace_context)
             if result.handled and result.message:
                 print(f"\nAgent> {result.message}")
             return
         if self.safeguards.kill_switch:
-            self.emit_epistemic_unknown("Epistemic kill switch is enabled.")
+            self.emit_epistemic_unknown(
+                "Epistemic kill switch is enabled.",
+                trace_context,
+            )
             return
 
-        if self.handle_external_review_route(user_input):
+        if self.handle_external_review_route(user_input, trace_context):
             return
 
-        if self.handle_local_route(user_input):
+        if self.handle_local_route(user_input, trace_context):
             return
 
-        if self.handle_knowledge_route(user_input):
+        if self.handle_knowledge_route(user_input, trace_context):
             return
 
         if self.use_orchestrator:
-            self.handle_orchestrated_request(user_input)
+            self.handle_orchestrated_request(user_input, trace_context)
             return
 
-        request_trace = self.bootstrap_local_context(user_input)
+        request_trace = self.bootstrap_local_context(user_input, trace_context)
 
-        planned_actions = self.create_plan(user_input, request_trace)
+        planned_actions, planner_call = self.create_plan(
+            user_input,
+            request_trace,
+            trace_context,
+        )
         if planned_actions:
-            self.execute_planned_actions(planned_actions, request_trace)
+            self.execute_planned_actions(
+                planned_actions,
+                request_trace,
+                trace_context,
+                planner_call,
+            )
             return
 
         for step in range(1, self.max_steps + 1):
@@ -370,9 +475,11 @@ class AgentRuntime:
                     "user_request": user_input,
                     "prompt_preview": summarize_text(prompt, 1200),
                 },
+                trace_context=trace_context,
             )
             try:
-                raw_output = self.ask_model(prompt)
+                model_output = self.ask_model(prompt, trace_context)
+                raw_output = model_output.text
             except Exception as error:
                 self.log_error(
                     {
@@ -380,7 +487,8 @@ class AgentRuntime:
                         "error": str(error),
                         "traceback": traceback.format_exc(),
                         "prompt_preview": summarize_text(prompt, 1200),
-                    }
+                    },
+                    trace_context=trace_context,
                 )
                 self.handle_model_unavailable(request_trace, error)
                 return
@@ -392,10 +500,14 @@ class AgentRuntime:
                     "prompt_preview": summarize_text(prompt, 1200),
                     "raw_output": raw_output,
                 },
+                trace_context=trace_context,
+                model_call=model_output.model_call,
             )
 
             try:
-                action = validate_action(extract_json_object(raw_output))
+                action = strip_untrusted_identity_fields(
+                    validate_action(extract_json_object(raw_output))
+                )
             except Exception as error:
                 self.log_error(
                     {
@@ -403,18 +515,28 @@ class AgentRuntime:
                         "raw_output": raw_output,
                         "error": str(error),
                         "traceback": traceback.format_exc(),
-                    }
+                    },
+                    trace_context=trace_context,
+                    model_call=model_output.model_call,
                 )
                 print("\n[ERROR] Invalid action JSON from model.")
                 print(str(error))
                 if self.safeguards.prefer_unknown:
-                    self.emit_epistemic_unknown("The model returned invalid structured output.")
+                    self.emit_epistemic_unknown(
+                        "The model returned invalid structured output.",
+                        trace_context,
+                        model_output.model_call,
+                    )
                 return
 
             self.print_action(action, step)
 
+            action_context = trace_context.new_action(model_output.model_call)
             try:
-                result = self.executor.execute(action)
+                result = self.executor.execute(
+                    action,
+                    action_context=action_context,
+                )
             except Exception as error:
                 self.log_error(
                     {
@@ -422,7 +544,10 @@ class AgentRuntime:
                         "action": action,
                         "error": str(error),
                         "traceback": traceback.format_exc(),
-                    }
+                    },
+                    trace_context=trace_context,
+                    model_call=model_output.model_call,
+                    action_context=action_context,
                 )
                 print("\n[ERROR] Action execution failed.")
                 print(str(error))
@@ -436,6 +561,9 @@ class AgentRuntime:
                     "action": action,
                     "result": self.result_for_model(result),
                 },
+                trace_context=trace_context,
+                model_call=model_output.model_call,
+                action_context=action_context,
             )
 
             if action["action"] == "respond" or result.get("stop_loop"):
@@ -453,7 +581,11 @@ class AgentRuntime:
 
         print("\nAgent> Agent stopped after reaching the maximum step limit.")
 
-    def handle_external_review_route(self, user_input: str) -> bool:
+    def handle_external_review_route(
+        self,
+        user_input: str,
+        trace_context: TraceContext,
+    ) -> bool:
         """Keep external URLs and repository requests out of RHCSA retrieval."""
         route = classify_external_review_request(user_input)
         if route is None:
@@ -463,15 +595,20 @@ class AgentRuntime:
         if raw_url:
             normalized_url = normalize_external_url(raw_url)
             try:
+                open_context = trace_context.new_action()
                 open_result = self.executor.execute(
                     {"action": "browser_open", "url": normalized_url},
                     require_approval=True,
+                    action_context=open_context,
                 )
                 self.print_result(open_result)
+                visible_context: ActionContext | None = None
                 if open_result.get("success"):
+                    visible_context = trace_context.new_action()
                     visible_text = self.executor.execute(
                         {"action": "browser_get_visible_text"},
                         require_approval=True,
+                        action_context=visible_context,
                     )
                     self.print_result(visible_text)
                 self.log_session_event(
@@ -481,7 +618,13 @@ class AgentRuntime:
                         "routing_boundary": "no_rhcsa_local_knowledge",
                         "browser_handled": True,
                         "opened_url": normalized_url,
+                        "action_ids": [
+                            context.action_id
+                            for context in (open_context, visible_context)
+                            if context is not None
+                        ],
                     },
+                    trace_context=trace_context,
                 )
                 return True
             except Exception as error:
@@ -491,7 +634,8 @@ class AgentRuntime:
                         "route": route,
                         "error": str(error),
                         "traceback": traceback.format_exc(),
-                    }
+                    },
+                    trace_context=trace_context,
                 )
                 self.log_session_event(
                     route,
@@ -502,6 +646,7 @@ class AgentRuntime:
                         "opened_url": normalized_url,
                         "error": str(error),
                     },
+                    trace_context=trace_context,
                 )
                 print("\nAgent> External URL detected. Browser inspection path available but browser handoff failed.")
                 return True
@@ -518,6 +663,7 @@ class AgentRuntime:
                 "routing_boundary": "no_rhcsa_local_knowledge",
                 "browser_handled": False,
             },
+            trace_context=trace_context,
         )
         print(f"\nAgent> {message}")
         return True
@@ -534,19 +680,36 @@ class AgentRuntime:
                 max_steps=self.max_steps,
             )
 
-    def handle_orchestrated_request(self, user_input: str) -> None:
+    def handle_orchestrated_request(
+        self,
+        user_input: str,
+        trace_context: TraceContext,
+    ) -> None:
         """Run Gemini brain -> Gemma worker -> approval -> executor flow."""
         self.enable_orchestrator(True)
         assert self.orchestrator is not None
 
         try:
-            plan = self.orchestrator.create_plan(user_input, self.snapshot_status())
+            plan, planner_call = self.orchestrator.create_traced_plan(
+                user_input,
+                self.snapshot_status(),
+                trace_context,
+                on_attempt=lambda status, call, provider, model, provider_attempt: self._log_model_attempt(
+                    status=status,
+                    model_call=call,
+                    provider=provider,
+                    model=model,
+                    retry_attempt=1,
+                    provider_attempt=provider_attempt,
+                ),
+            )
         except Exception as error:
             self.log_error(
                 {
                     "kind": "orchestrator_planner_error",
                     **self.orchestrator.error_payload(error),
-                }
+                },
+                trace_context=trace_context,
             )
             print("\n[ERROR] Gemini planner failed.")
             print(str(error))
@@ -559,23 +722,43 @@ class AgentRuntime:
             print(strategy)
         for index, step in enumerate(steps, start=1):
             print(f"{index}. {step}")
+        self.log_session_event(
+            "orchestrator_plan",
+            {
+                "strategy": strategy,
+                "step_count": len(steps),
+            },
+            trace_context=trace_context,
+            model_call=planner_call,
+        )
 
         previous_results: list[dict[str, Any]] = []
         for index, step in enumerate(steps[: self.max_steps], start=1):
             try:
-                action = self.orchestrator.action_for_step(
+                action, worker_call = self.orchestrator.action_for_step_traced(
                     user_request=user_input,
                     step=step,
                     runtime_status=self.snapshot_status(),
                     previous_results=previous_results,
+                    trace_context=trace_context,
+                    on_attempt=lambda status, call, provider, model, provider_attempt: self._log_model_attempt(
+                        status=status,
+                        model_call=call,
+                        provider=provider,
+                        model=model,
+                        retry_attempt=1,
+                        provider_attempt=provider_attempt,
+                    ),
                 )
+                action = strip_untrusted_identity_fields(action)
             except Exception as error:
                 self.log_error(
                     {
                         "kind": "gemma_worker_error",
                         "step": step,
                         **self.orchestrator.error_payload(error),
-                    }
+                    },
+                    trace_context=trace_context,
                 )
                 print("\n[ERROR] Gemma worker failed to produce a valid action.")
                 print(str(error))
@@ -583,8 +766,12 @@ class AgentRuntime:
                 return
 
             self.print_action(action, index)
+            action_context = trace_context.new_action(worker_call)
             try:
-                result = self.executor.execute(action)
+                result = self.executor.execute(
+                    action,
+                    action_context=action_context,
+                )
             except Exception as error:
                 self.log_error(
                     {
@@ -593,7 +780,10 @@ class AgentRuntime:
                         "action": action,
                         "error": str(error),
                         "traceback": traceback.format_exc(),
-                    }
+                    },
+                    trace_context=trace_context,
+                    model_call=worker_call,
+                    action_context=action_context,
                 )
                 print("\n[ERROR] Orchestrated action execution failed.")
                 print(str(error))
@@ -611,6 +801,9 @@ class AgentRuntime:
             self.log_session_event(
                 "orchestrated_step_result",
                 previous_results[-1],
+                trace_context=trace_context,
+                model_call=worker_call,
+                action_context=action_context,
             )
             if action["action"] == "respond" or result.get("stop_loop") or result.get("cancelled"):
                 return
@@ -619,7 +812,8 @@ class AgentRuntime:
         self,
         user_input: str,
         request_trace: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
+        trace_context: TraceContext,
+    ) -> tuple[list[dict[str, Any]], ModelCallContext | None]:
         """Ask the model for a short action plan before the reactive loop."""
         prompt = self.build_plan_request(user_input, request_trace)
         self.log_reasoning_trace(
@@ -628,9 +822,11 @@ class AgentRuntime:
                 "user_request": user_input,
                 "prompt_preview": summarize_text(prompt, 1200),
             },
+            trace_context=trace_context,
         )
         try:
-            raw_output = self.ask_model(prompt)
+            model_output = self.ask_model(prompt, trace_context)
+            raw_output = model_output.text
             payload = extract_json_object(raw_output)
         except Exception as error:
             self.log_error(
@@ -639,32 +835,39 @@ class AgentRuntime:
                     "error": str(error),
                     "traceback": traceback.format_exc(),
                     "prompt_preview": summarize_text(prompt, 1200),
-                }
+                },
+                trace_context=trace_context,
             )
-            return []
+            return [], None
 
         raw_plan = payload.get("plan", [])
         if "plan" not in payload and "action" in payload:
             try:
-                return [validate_action(payload)]
+                return [
+                    strip_untrusted_identity_fields(validate_action(payload))
+                ], model_output.model_call
             except Exception:
-                return []
+                return [], model_output.model_call
         if not isinstance(raw_plan, list):
-            return []
+            return [], model_output.model_call
 
         planned_actions: list[dict[str, Any]] = []
         for raw_action in raw_plan[: self.max_steps]:
             try:
-                planned_actions.append(validate_action(raw_action))
+                planned_actions.append(
+                    strip_untrusted_identity_fields(validate_action(raw_action))
+                )
             except Exception as error:
                 self.log_error(
                     {
                         "kind": "planner_action_error",
                         "raw_action": raw_action,
                         "error": str(error),
-                    }
+                    },
+                    trace_context=trace_context,
+                    model_call=model_output.model_call,
                 )
-                return []
+                return [], model_output.model_call
 
         if planned_actions:
             self.log_reasoning_trace(
@@ -673,6 +876,8 @@ class AgentRuntime:
                     "user_request": user_input,
                     "planned_actions": planned_actions,
                 },
+                trace_context=trace_context,
+                model_call=model_output.model_call,
             )
             self.log_session_event(
                 "planner_output",
@@ -680,8 +885,10 @@ class AgentRuntime:
                     "raw_output": raw_output,
                     "planned_actions": planned_actions,
                 },
+                trace_context=trace_context,
+                model_call=model_output.model_call,
             )
-        return planned_actions
+        return planned_actions, model_output.model_call
 
     def build_plan_request(
         self,
@@ -717,13 +924,19 @@ class AgentRuntime:
         self,
         planned_actions: list[dict[str, Any]],
         request_trace: list[dict[str, Any]],
+        trace_context: TraceContext,
+        planner_call: ModelCallContext | None,
     ) -> None:
         print(f"\n[PLAN] {len(planned_actions)} proposed step(s).")
         last_result: dict[str, Any] | None = None
         for step, action in enumerate(planned_actions, start=1):
             self.print_action(action, step)
+            action_context = trace_context.new_action(planner_call)
             try:
-                result = self.executor.execute(action)
+                result = self.executor.execute(
+                    action,
+                    action_context=action_context,
+                )
             except Exception as error:
                 self.log_error(
                     {
@@ -731,7 +944,10 @@ class AgentRuntime:
                         "action": action,
                         "error": str(error),
                         "traceback": traceback.format_exc(),
-                    }
+                    },
+                    trace_context=trace_context,
+                    model_call=planner_call,
+                    action_context=action_context,
                 )
                 print("\n[ERROR] Planned action execution failed.")
                 print(str(error))
@@ -746,6 +962,9 @@ class AgentRuntime:
                     "action": action,
                     "result": self.result_for_model(result),
                 },
+                trace_context=trace_context,
+                model_call=planner_call,
+                action_context=action_context,
             )
             request_trace.append(
                 {
@@ -759,23 +978,84 @@ class AgentRuntime:
         if last_result and last_result.get("success"):
             print("Agent> Część operacji została już wykonana poprawnie.")
 
-    def run_text_request(self, user_input: str) -> dict[str, Any]:
-        """Execute one text request and capture the textual transcript."""
-        transcript_buffer = io.StringIO()
-        with redirect_stdout(transcript_buffer):
-            command_result = self.command_registry.execute(user_input, self)
+    def execute_action(
+        self,
+        action: dict[str, Any],
+        trace_context: TraceContext,
+        model_call: ModelCallContext | None = None,
+        *,
+        require_approval: bool = True,
+    ) -> dict[str, Any]:
+        """Assign an action identity before crossing the executor boundary."""
+
+        action_context = trace_context.new_action(model_call)
+        return self.executor.execute(
+            strip_untrusted_identity_fields(action),
+            require_approval=require_approval,
+            action_context=action_context,
+        )
+
+    def dispatch_text_request(
+        self,
+        user_input: str,
+        trace_context: TraceContext,
+    ) -> None:
+        """Dispatch one already-identified CLI, TUI, or web request."""
+
+        self.log_session_event(
+            "request_started",
+            {
+                "input_length": len(user_input),
+                "slash_command": user_input.strip().startswith("/"),
+            },
+            trace_context=trace_context,
+        )
+        try:
+            command_result = self.command_registry.execute(
+                user_input,
+                self,
+                trace_context,
+            )
             if command_result.handled:
                 if command_result.message:
                     print(f"\nAgent> {command_result.message}")
             else:
-                self.handle_user_request(user_input)
+                self.handle_user_request(user_input, trace_context)
+        except Exception:
+            self.log_session_event(
+                "request_completed",
+                {"status": "failed"},
+                trace_context=trace_context,
+            )
+            raise
+        self.log_session_event(
+            "request_completed",
+            {"status": "completed"},
+            trace_context=trace_context,
+        )
+
+    def run_text_request(
+        self,
+        user_input: str,
+        trace_context: TraceContext | None = None,
+    ) -> dict[str, Any]:
+        """Execute one text request and capture the textual transcript."""
+        trace_context = trace_context or TraceContext.new_request()
+        transcript_buffer = io.StringIO()
+        with redirect_stdout(transcript_buffer):
+            self.dispatch_text_request(user_input, trace_context)
         transcript = transcript_buffer.getvalue().strip()
         return {
             "transcript": transcript,
             "status": self.snapshot_status(),
+            **trace_context.identity_fields(),
         }
 
-    def handle_local_route(self, user_input: str) -> bool:
+    def handle_local_route(
+        self,
+        user_input: str,
+        trace_context: TraceContext,
+    ) -> bool:
         """Execute obvious local tasks before calling the model."""
         route = self.local_router.route(user_input)
         if route is None:
@@ -790,7 +1070,11 @@ class AgentRuntime:
         for index, raw_action in enumerate(route.actions, start=1):
             action = validate_action(raw_action)
             self.print_action(action, index)
-            result = self.executor.execute(action)
+            action_context = trace_context.new_action()
+            result = self.executor.execute(
+                action,
+                action_context=action_context,
+            )
             last_result = result
             self.print_result(result)
             self.log_session_event(
@@ -800,6 +1084,8 @@ class AgentRuntime:
                     "action": action,
                     "result": self.result_for_model(result),
                 },
+                trace_context=trace_context,
+                action_context=action_context,
             )
 
         if route.final_message:
@@ -808,18 +1094,27 @@ class AgentRuntime:
             print(f"\nAgent> {last_result['message']}")
         return True
 
-    def handle_knowledge_route(self, user_input: str) -> bool:
+    def handle_knowledge_route(
+        self,
+        user_input: str,
+        trace_context: TraceContext,
+    ) -> bool:
         """Answer Linux/RHCSA operational requests from local memory first."""
         if self.safeguards.disable_knowledge:
             self.log_reasoning_trace(
                 "knowledge_route_disabled",
                 {"user_request": user_input},
+                trace_context=trace_context,
             )
             return False
         kernel_decision = self.aoia_kernel.evaluate(user_input)
-        self.log_reasoning_trace("aoia_kernel_decision", kernel_decision.reasoning)
+        self.log_reasoning_trace(
+            "aoia_kernel_decision",
+            kernel_decision.reasoning,
+            trace_context=trace_context,
+        )
         if kernel_decision.evidence:
-            self.memory_store.append_reasoning(
+            self.log_reasoning_trace(
                 "aoia_kernel_evidence_reference",
                 {
                     "query": user_input,
@@ -828,6 +1123,7 @@ class AgentRuntime:
                     "manual_review_required": kernel_decision.manual_review_required,
                     "artifacts": [item.get("file_location") for item in kernel_decision.evidence],
                 },
+                trace_context=trace_context,
             )
         if kernel_decision.should_respond_locally:
             result = {
@@ -848,6 +1144,7 @@ class AgentRuntime:
                     "manual_review_required": kernel_decision.manual_review_required,
                     "evidence_count": len(kernel_decision.evidence),
                 },
+                trace_context=trace_context,
             )
             return True
         decision = self.knowledge_router.route(user_input, self.hat_store.prompt_block())
@@ -858,6 +1155,7 @@ class AgentRuntime:
                     "confidence": decision.confidence,
                     "reason": decision.reason,
                 },
+                trace_context=trace_context,
             )
             return False
 
@@ -869,10 +1167,16 @@ class AgentRuntime:
                 "reason": decision.reason,
                 "score": getattr(decision.hit, "confidence_score", getattr(decision.hit, "score", 0)) if decision.hit else 0,
             },
+            trace_context=trace_context,
         )
         return True
 
-    def emit_epistemic_unknown(self, reason: str) -> None:
+    def emit_epistemic_unknown(
+        self,
+        reason: str,
+        trace_context: TraceContext,
+        model_call: ModelCallContext | None = None,
+    ) -> None:
         result = {
             "success": True,
             "message": "I DO NOT KNOW",
@@ -886,10 +1190,8 @@ class AgentRuntime:
                 "reason": reason,
                 "message": result["message"],
             },
-        )
-        self.memory_store.append_reasoning(
-            "unknown_response",
-            {"reason": reason, "message": result["message"]},
+            trace_context=trace_context,
+            model_call=model_call,
         )
         self.print_result(result)
 
@@ -918,7 +1220,11 @@ class AgentRuntime:
         print(str(error))
         print("Agent> Configure a working free cloud API with /setup, or switch provider with /model.")
 
-    def bootstrap_local_context(self, user_input: str) -> list[dict[str, Any]]:
+    def bootstrap_local_context(
+        self,
+        user_input: str,
+        trace_context: TraceContext | None = None,
+    ) -> list[dict[str, Any]]:
         """Perform obvious local setup without spending model quota.
 
         This is intentionally narrow:
@@ -930,6 +1236,7 @@ class AgentRuntime:
         The goal is to save model requests for interpretation rather than for
         trivial browser setup.
         """
+        trace_context = trace_context or TraceContext.new_request()
         request_trace: list[dict[str, Any]] = []
         raw_url = extract_first_url(user_input)
         if not raw_url:
@@ -940,7 +1247,12 @@ class AgentRuntime:
             print(f"\n[INFO] Redirect URL unwrapped to: {normalized_url}")
 
         start_action = {"action": "browser_start", "reason": "Local URL bootstrap."}
-        start_result = self.executor.execute(start_action, require_approval=True)
+        start_context = trace_context.new_action()
+        start_result = self.executor.execute(
+            start_action,
+            require_approval=True,
+            action_context=start_context,
+        )
         self.print_result(start_result)
         request_trace.append(
             {
@@ -955,7 +1267,12 @@ class AgentRuntime:
             "url": normalized_url,
             "reason": "Local URL bootstrap.",
         }
-        open_result = self.executor.execute(open_action, require_approval=True)
+        open_context = trace_context.new_action()
+        open_result = self.executor.execute(
+            open_action,
+            require_approval=True,
+            action_context=open_context,
+        )
         self.print_result(open_result)
         request_trace.append(
             {
@@ -971,7 +1288,12 @@ class AgentRuntime:
                 "action": "browser_get_visible_text",
                 "reason": "Capture visible page text before analysis.",
             }
-            text_result = self.executor.execute(text_action, require_approval=True)
+            text_context = trace_context.new_action()
+            text_result = self.executor.execute(
+                text_action,
+                require_approval=True,
+                action_context=text_context,
+            )
             self.print_result(text_result)
             snapshot_path = self.save_page_text_snapshot(normalized_url, text_result)
             if snapshot_path is not None:
@@ -1002,6 +1324,8 @@ class AgentRuntime:
 
     def result_for_model(self, result: dict[str, Any]) -> dict[str, Any]:
         payload = dict(result)
+        for field in ("request_id", "trace_id", "model_call_id", "action_id"):
+            payload.pop(field, None)
         if "stdout" in payload:
             payload["stdout"] = summarize_text(str(payload["stdout"]), 2500)
         if "stderr" in payload:
@@ -1016,26 +1340,111 @@ class AgentRuntime:
             payload["matches"] = payload["matches"][:20]
         return payload
 
-    def log_session_event(self, kind: str, payload: dict[str, Any]) -> None:
+    @staticmethod
+    def _event_identity_fields(
+        trace_context: TraceContext | None = None,
+        model_call: ModelCallContext | None = None,
+        action_context: ActionContext | None = None,
+    ) -> dict[str, str]:
+        fields: dict[str, str] = {}
+        if trace_context is not None:
+            fields.update(trace_context.identity_fields())
+        if model_call is not None:
+            if fields and (
+                fields.get("request_id") != model_call.request_id
+                or fields.get("trace_id") != model_call.trace_id
+            ):
+                raise ValueError("Model-call identity does not match the event trace.")
+            fields.update(model_call.identity_fields())
+        if action_context is not None:
+            if fields and (
+                fields.get("request_id") != action_context.request_id
+                or fields.get("trace_id") != action_context.trace_id
+            ):
+                raise ValueError("Action identity does not match the event trace.")
+            if (
+                model_call is not None
+                and action_context.model_call_id != model_call.model_call_id
+            ):
+                raise ValueError("Action identity does not match the event model call.")
+            fields.update(action_context.identity_fields())
+        return fields
+
+    def log_session_event(
+        self,
+        kind: str,
+        payload: dict[str, Any],
+        *,
+        trace_context: TraceContext | None = None,
+        model_call: ModelCallContext | None = None,
+        action_context: ActionContext | None = None,
+    ) -> None:
+        identity = self._event_identity_fields(
+            trace_context,
+            model_call,
+            action_context,
+        )
         record = {
             "timestamp": dt.datetime.now().isoformat(),
             "kind": kind,
+            **identity,
             "payload": payload,
         }
         with self.session_log.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
-    def log_reasoning_trace(self, kind: str, payload: dict[str, Any]) -> None:
+    def log_reasoning_trace(
+        self,
+        kind: str,
+        payload: dict[str, Any],
+        *,
+        trace_context: TraceContext | None = None,
+        model_call: ModelCallContext | None = None,
+        action_context: ActionContext | None = None,
+    ) -> None:
         if not self.safeguards.reasoning_trace_enabled:
             return
-        self.memory_store.append_reasoning(kind, payload)
+        identity = self._event_identity_fields(
+            trace_context,
+            model_call,
+            action_context,
+        )
+        self.memory_store.append_reasoning(
+            kind,
+            {
+                **identity,
+                **payload,
+            },
+        )
 
-    def log_error(self, payload: dict[str, Any]) -> None:
+    def log_error(
+        self,
+        payload: dict[str, Any],
+        *,
+        trace_context: TraceContext | None = None,
+        model_call: ModelCallContext | None = None,
+        action_context: ActionContext | None = None,
+    ) -> None:
+        identity = self._event_identity_fields(
+            trace_context,
+            model_call,
+            action_context,
+        )
         error_file = (
             self.memory_store.paths.error_logs_dir
             / f"error_{dt.datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
         )
-        error_file.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        error_file.write_text(
+            json.dumps(
+                {
+                    **identity,
+                    **payload,
+                },
+                indent=2,
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
 
     def print_action(self, action: dict[str, Any], step: int) -> None:
         print(f"\n[STEP {step}] action={action['action']}")
@@ -1113,6 +1522,7 @@ def main() -> None:
     print_banner(runtime)
 
     while True:
+        trace_context: TraceContext | None = None
         try:
             user_input = input("\nYou> ").strip()
 
@@ -1123,13 +1533,8 @@ def main() -> None:
                 print("Exiting agent...")
                 break
 
-            command_result = runtime.command_registry.execute(user_input, runtime)
-            if command_result.handled:
-                if command_result.message:
-                    print(f"\nAgent> {command_result.message}")
-                continue
-
-            runtime.handle_user_request(user_input)
+            trace_context = TraceContext.new_request()
+            runtime.dispatch_text_request(user_input, trace_context)
         except KeyboardInterrupt:
             print("\nInterrupted by user.")
             break
@@ -1138,7 +1543,8 @@ def main() -> None:
                 {
                     "error": str(error),
                     "traceback": traceback.format_exc(),
-                }
+                },
+                trace_context=trace_context,
             )
             print(f"\n[FATAL ERROR] {error}")
             break

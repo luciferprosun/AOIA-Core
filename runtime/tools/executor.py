@@ -7,6 +7,13 @@ from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import unquote, urlparse
 
+from trace_context import (
+    ActionContext,
+    TraceContext,
+    TraceIdentityError,
+    strip_untrusted_identity_fields,
+)
+
 from .browser_tools import (
     browser_click,
     browser_close,
@@ -79,7 +86,13 @@ class ExecutionEngine:
     def tool_names(self) -> list[str]:
         return sorted(self.tools)
 
-    def execute(self, action: dict[str, Any], require_approval: bool = True) -> dict[str, Any]:
+    def execute(
+        self,
+        action: dict[str, Any],
+        require_approval: bool = True,
+        *,
+        action_context: ActionContext | None = None,
+    ) -> dict[str, Any]:
         """Evaluate runtime policy, obtain approval when required, then dispatch.
 
         ``require_approval`` remains for call-site compatibility but cannot disable
@@ -87,7 +100,9 @@ class ExecutionEngine:
         final decision more restrictive.
         """
         _ = require_approval
-        decision = evaluate_action_policy(action)
+        authoritative_context = action_context or TraceContext.new_request().new_action()
+        authoritative_action = strip_untrusted_identity_fields(action)
+        decision = evaluate_action_policy(authoritative_action, authoritative_context)
         name = decision.action_name
         if not decision.allowed:
             return self._blocked_policy_result(decision)
@@ -106,7 +121,11 @@ class ExecutionEngine:
             }
 
         if decision.requires_confirmation:
-            approved = self._request_approval(action, decision)
+            approved = self._request_approval(
+                authoritative_action,
+                decision,
+                authoritative_context,
+            )
             if not approved:
                 return {
                     **self._decision_fields(decision),
@@ -119,13 +138,20 @@ class ExecutionEngine:
                     "message": "Action rejected by user before tool dispatch.",
                 }
 
-        result = tool.handler(action)
-        self._record_execution(action, result)
+        result = self._correlate_result(
+            tool.handler(authoritative_action),
+            authoritative_context,
+        )
+        self._record_execution(
+            authoritative_action,
+            result,
+            authoritative_context,
+        )
         return result
 
     @staticmethod
     def _decision_fields(decision: ActionPolicyDecision) -> dict[str, Any]:
-        return {
+        fields: dict[str, Any] = {
             "action": decision.action_name,
             "capability_class": decision.capability_class.value,
             "allowed": decision.allowed,
@@ -134,6 +160,11 @@ class ExecutionEngine:
             "model_requests_confirmation": decision.model_requests_confirmation,
             "policy_reason_code": decision.reason_code,
         }
+        for field in ("request_id", "trace_id", "action_id", "model_call_id"):
+            value = getattr(decision, field)
+            if value is not None:
+                fields[field] = value
+        return fields
 
     def _blocked_policy_result(self, decision: ActionPolicyDecision) -> dict[str, Any]:
         return {
@@ -261,9 +292,11 @@ class ExecutionEngine:
         self,
         action: dict[str, Any],
         decision: ActionPolicyDecision,
+        action_context: ActionContext,
     ) -> bool:
         print("\nPROPOSED ACTION")
         print(f"Action: {action['action']}")
+        print(f"Action ID: {action_context.action_id}")
         print(f"Capability: {decision.capability_class.value}")
         print(f"Runtime policy: {decision.reason_code}")
         if action.get("reason"):
@@ -322,9 +355,39 @@ class ExecutionEngine:
         )
         return browser_screenshot(str(target))
 
-    def _record_execution(self, action: dict[str, Any], result: dict[str, Any]) -> None:
+    @staticmethod
+    def _correlate_result(
+        result: dict[str, Any],
+        action_context: ActionContext,
+    ) -> dict[str, Any]:
+        if not isinstance(result, dict):
+            raise TypeError("Tool handlers must return a dictionary result.")
+        return {
+            **result,
+            **action_context.identity_fields(),
+        }
+
+    def _record_execution(
+        self,
+        action: dict[str, Any],
+        result: dict[str, Any],
+        action_context: ActionContext,
+    ) -> None:
+        identity = action_context.identity_fields()
+        for field in ("request_id", "trace_id", "action_id"):
+            if not identity.get(field) or result.get(field) != identity[field]:
+                raise TraceIdentityError(
+                    "Operational execution records require authoritative request, trace, and action identity."
+                )
+        if action_context.model_call_id is not None and (
+            result.get("model_call_id") != action_context.model_call_id
+        ):
+            raise TraceIdentityError(
+                "Operational execution model-call identity does not match its action context."
+            )
         payload = {
             "timestamp": dt.datetime.now().isoformat(),
+            **identity,
             "authority": {
                 "classification": "operational_event",
                 "retention": "replay_only",

@@ -63,7 +63,7 @@ class RecordingExecutor:
     def __init__(self) -> None:
         self.actions: list[dict] = []
 
-    def execute(self, action: dict, require_approval: bool = True):
+    def execute(self, action: dict, require_approval: bool = True, **_identity):
         _ = require_approval
         self.actions.append(action)
         if action["action"] == "browser_open":

@@ -22,6 +22,7 @@ from runtime.safety.bounded_subprocess import (
     SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
     run_bounded_subprocess,
 )
+from trace_context import TraceContext
 
 SCEMDA_ZIP = Path.home() / ".local" / "share" / "aoia" / "kimi agetn..zip"
 SCEMDA_HARD_TIMEOUT_SECONDS = 300
@@ -45,7 +46,7 @@ def build_command_registry() -> CommandRegistry:
     return registry
 
 
-def cmd_help(_args: str, runtime) -> CommandResult:
+def cmd_help(_args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     _ = runtime
     return CommandResult(
         True,
@@ -72,7 +73,7 @@ def cmd_help(_args: str, runtime) -> CommandResult:
     )
 
 
-def cmd_status(_args: str, runtime) -> CommandResult:
+def cmd_status(_args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     memory = runtime.memory_store.memory
     return CommandResult(
         True,
@@ -93,7 +94,7 @@ def cmd_status(_args: str, runtime) -> CommandResult:
     )
 
 
-def cmd_model(args: str, runtime) -> CommandResult:
+def cmd_model(args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     text = args.strip()
     if not text or text.lower() in {"help", "list", "?"}:
         lines = [
@@ -126,17 +127,17 @@ def cmd_model(args: str, runtime) -> CommandResult:
     return CommandResult(True, f"Model switched to: {model_name}")
 
 
-def cmd_tools(_args: str, runtime) -> CommandResult:
+def cmd_tools(_args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     tools = runtime.executor.tool_names()
     return CommandResult(True, "Registered tools:\n  " + "\n  ".join(tools))
 
 
-def cmd_vault(_args: str, runtime) -> CommandResult:
+def cmd_vault(_args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     runtime.memory_store.ensure_obsidian_vault()
     return CommandResult(True, f"Obsidian vault: {runtime.memory_store.vault_dir}")
 
 
-def cmd_providers(_args: str, runtime) -> CommandResult:
+def cmd_providers(_args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     lines = ["Cloud provider fallback status:"]
     for row in runtime.provider_manager.provider_status():
         status = "ready" if row["available"] else "missing key/backend"
@@ -145,7 +146,7 @@ def cmd_providers(_args: str, runtime) -> CommandResult:
     return CommandResult(True, "\n".join(lines))
 
 
-def cmd_setup(_args: str, runtime) -> CommandResult:
+def cmd_setup(_args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     lines = [
         "Free API setup checklist:",
         "  Secrets must stay outside the repository and must not be committed or printed.",
@@ -167,7 +168,7 @@ def cmd_setup(_args: str, runtime) -> CommandResult:
     return CommandResult(True, "\n".join(lines))
 
 
-def cmd_hat(args: str, runtime) -> CommandResult:
+def cmd_hat(args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     parts = args.strip().split(maxsplit=2)
     if not parts or parts[0] in {"list", "ls"}:
         active = _active_hat_name(runtime)
@@ -223,7 +224,7 @@ def cmd_hat(args: str, runtime) -> CommandResult:
     )
 
 
-def cmd_scan(args: str, runtime) -> CommandResult:
+def cmd_scan(args: str, runtime, trace_context: TraceContext | None = None) -> CommandResult:
     path = args.strip() or runtime.memory_store.memory.cwd
     action = validate_action(
         {
@@ -232,7 +233,15 @@ def cmd_scan(args: str, runtime) -> CommandResult:
             "reason": "Operator requested project scan.",
         }
     )
-    result = runtime.executor.execute(action)
+    context = trace_context or TraceContext.new_request()
+    execute_action = getattr(runtime, "execute_action", None)
+    if callable(execute_action):
+        result = execute_action(action, context)
+    else:
+        result = runtime.executor.execute(
+            action,
+            action_context=context.new_action(),
+        )
     if result.get("cancelled"):
         return CommandResult(True, "Project scan cancelled.")
     report = result.get("project_scan", {})
@@ -247,7 +256,7 @@ def cmd_scan(args: str, runtime) -> CommandResult:
     return CommandResult(True, "\n".join(lines))
 
 
-def cmd_orchestrator(args: str, runtime) -> CommandResult:
+def cmd_orchestrator(args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     text = args.strip().lower()
     if text in {"on", "enable", "1", "true"}:
         runtime.enable_orchestrator(False)
@@ -269,7 +278,7 @@ def cmd_orchestrator(args: str, runtime) -> CommandResult:
     )
 
 
-def cmd_worker(args: str, runtime) -> CommandResult:
+def cmd_worker(args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     text = args.strip().lower() or "status"
     if text == "clear":
         runtime.worker_memory.clear_worker_memory()
@@ -292,7 +301,7 @@ def cmd_worker(args: str, runtime) -> CommandResult:
     return CommandResult(True, "Usage: /worker status | /worker memory | /worker clear")
 
 
-def cmd_rhcsa(args: str, runtime) -> CommandResult:
+def cmd_rhcsa(args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     parts = args.strip().split(maxsplit=1)
     command = parts[0].lower() if parts else "status"
     query = parts[1] if len(parts) > 1 else ""
@@ -411,7 +420,7 @@ def cmd_rhcsa(args: str, runtime) -> CommandResult:
     )
 
 
-def cmd_scemda(args: str, runtime) -> CommandResult:
+def cmd_scemda(args: str, runtime, _trace_context: TraceContext | None = None) -> CommandResult:
     addon_dir = runtime.project_dir / "addons" / "scemda"
     script_path = addon_dir / "scemda_agent_v2.py"
     extracted = ensure_scemda_addon(addon_dir)

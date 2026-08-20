@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 from model_catalog import get_static_model_catalog_payload
 from memory_hat_registry import get_memory_hat_payload
+from trace_context import TraceContext
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -67,6 +68,8 @@ class WebRuntimeService:
                 "ok": True,
                 "transcript": result["transcript"],
                 "status": result["status"],
+                "request_id": result["request_id"],
+                "trace_id": result["trace_id"],
             }
 
 
@@ -431,6 +434,8 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
     prompt = str(payload.get("prompt", "")).strip()
     if not prompt:
         raise ValueError("prompt is required")
+    trace_context = TraceContext.new_request()
+    model_call = trace_context.new_model_call()
     result = run_selected_provider(
         provider_id=provider_id,
         model_id=model_id,
@@ -459,6 +464,7 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
         "execution_triggered": False,
         "dispatch_triggered": False,
         "trust_status": result_payload["trust_status"],
+        **model_call.identity_fields(),
     }
 
 
@@ -497,6 +503,11 @@ def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
 
 
 def route_post_payload(path: str, payload: dict[str, object]) -> tuple[HTTPStatus, dict[str, object]]:
+    if path == "/api/chat":
+        prompt = str(payload.get("prompt", "")).strip()
+        if not prompt:
+            return HTTPStatus.BAD_REQUEST, {"ok": False, "error": "prompt is required"}
+        return HTTPStatus.OK, get_service().run_prompt(prompt)
     if path == "/api/operator/chat":
         try:
             response = build_operator_chat_payload(payload)
@@ -571,11 +582,8 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 return
 
             if parsed.path == "/api/chat":
-                prompt = str(payload.get("prompt", "")).strip()
-                if not prompt:
-                    self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "prompt is required"})
-                    return
-                self._write_json(HTTPStatus.OK, get_service().run_prompt(prompt))
+                status, response = route_post_payload(parsed.path, payload)
+                self._write_json(status, response)
                 return
 
             if parsed.path == "/api/model":

@@ -4,11 +4,13 @@ import json
 import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Callable
 
 from .base import ModelProvider, require_provider_calls_enabled
 from .gemini_provider import GeminiProvider
 from .openai_compatible import OpenAICompatibleProvider
 from runtime_paths import runtime_state_dir
+from trace_context import ModelCallContext, TraceContext, TracedModelOutput
 
 
 PROVIDER_NETWORK_SURFACE = True
@@ -47,6 +49,12 @@ API_FILE_CANDIDATES = [
 ]
 
 REMOVED_PROVIDERS = {"openai", "huggingface", "gemma-hf"}
+
+
+ModelAttemptObserver = Callable[
+    [str, ModelCallContext, str, str, int],
+    None,
+]
 
 
 @dataclass
@@ -97,6 +105,73 @@ class ProviderManager:
 
     def generate(self, prompt: str) -> str:
         return self.generate_with_fallback(prompt)
+
+    def generate_traced(
+        self,
+        prompt: str,
+        trace_context: TraceContext,
+        *,
+        on_attempt: ModelAttemptObserver | None = None,
+    ) -> TracedModelOutput:
+        """Invoke fallback providers while identifying every actual call attempt."""
+
+        errors: list[str] = []
+        tried: set[str] = set()
+        provider_attempt = 0
+        for full_model in self._fallback_candidates():
+            if full_model in tried:
+                continue
+            tried.add(full_model)
+            provider_attempt += 1
+            provider_id = full_model.split("/", 1)[0]
+            model_call = trace_context.new_model_call()
+            if on_attempt is not None:
+                on_attempt(
+                    "started",
+                    model_call,
+                    provider_id,
+                    full_model,
+                    provider_attempt,
+                )
+            try:
+                require_provider_calls_enabled(provider_id)
+                load_api_environment()
+                provider = self._build_provider(full_model)
+                response = provider.generate(prompt)
+                self.provider = provider
+                self.current_model = full_model
+                self.last_used_model = provider.full_name
+                if on_attempt is not None:
+                    on_attempt(
+                        "succeeded",
+                        model_call,
+                        provider_id,
+                        full_model,
+                        provider_attempt,
+                    )
+                return TracedModelOutput(
+                    text=response,
+                    model_call=model_call,
+                    provider=provider_id,
+                    model=full_model,
+                )
+            except Exception as error:
+                if on_attempt is not None:
+                    on_attempt(
+                        "failed",
+                        model_call,
+                        provider_id,
+                        full_model,
+                        provider_attempt,
+                    )
+                errors.append(f"{full_model}: {error}")
+
+        if not errors:
+            raise RuntimeError("No enabled cloud providers are configured.")
+
+        raise RuntimeError(
+            "No configured cloud provider succeeded. Checked:\n- " + "\n- ".join(errors)
+        )
 
     def generate_with_fallback(self, prompt: str) -> str:
         errors: list[str] = []

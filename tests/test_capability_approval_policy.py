@@ -49,7 +49,11 @@ class CapabilityApprovalPolicyTests(unittest.TestCase):
             "requires_confirmation": False,
         }
 
-        def approve(_action: dict, decision: ActionPolicyDecision) -> bool:
+        def approve(
+            _action: dict,
+            decision: ActionPolicyDecision,
+            _action_context,
+        ) -> bool:
             events.append("approval")
             self.assertTrue(decision.runtime_requires_confirmation)
             self.assertFalse(decision.model_requests_confirmation)

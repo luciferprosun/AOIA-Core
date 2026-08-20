@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from trace_context import TraceContext
+
 
 @dataclass
 class CommandResult:
@@ -10,7 +12,7 @@ class CommandResult:
     message: str = ""
 
 
-CommandHandler = Callable[[str, Any], CommandResult]
+CommandHandler = Callable[[str, Any, TraceContext | None], CommandResult]
 
 
 class CommandRegistry:
@@ -25,7 +27,12 @@ class CommandRegistry:
     def names(self) -> list[str]:
         return sorted(self._handlers)
 
-    def execute(self, raw_input: str, runtime: Any) -> CommandResult:
+    def execute(
+        self,
+        raw_input: str,
+        runtime: Any,
+        trace_context: TraceContext | None = None,
+    ) -> CommandResult:
         stripped = raw_input.strip()
         if not stripped.startswith("/"):
             return CommandResult(False)
@@ -35,4 +42,4 @@ class CommandRegistry:
         handler = self._handlers.get(name)
         if handler is None:
             return CommandResult(True, f"Unknown command: /{name}. Use /help.")
-        return handler(args.strip(), runtime)
+        return handler(args.strip(), runtime, trace_context)

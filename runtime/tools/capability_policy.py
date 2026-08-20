@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .validator import classify_shell_command, validate_shell_command
+
+if TYPE_CHECKING:
+    from trace_context import ActionContext
 
 
 class CapabilityClass(str, Enum):
@@ -41,6 +44,10 @@ class ActionPolicyDecision:
     reason: str
     runtime_requires_confirmation: bool
     model_requests_confirmation: bool
+    request_id: str | None = None
+    trace_id: str | None = None
+    action_id: str | None = None
+    model_call_id: str | None = None
 
 
 def _rule(
@@ -199,7 +206,7 @@ ACTION_POLICY_RULES: dict[str, ActionPolicyRule] = {
 POLICY_ACTIONS = frozenset(ACTION_POLICY_RULES)
 
 
-def evaluate_action_policy(action: Mapping[str, Any]) -> ActionPolicyDecision:
+def _evaluate_action_policy_semantics(action: Mapping[str, Any]) -> ActionPolicyDecision:
     """Evaluate an action without trusting the model to reduce restrictions."""
     action_name = str(action.get("action", "")).strip()
     model_requests_confirmation = bool(action.get("requires_confirmation", False))
@@ -288,4 +295,22 @@ def _evaluate_shell_policy(
         reason=reason,
         runtime_requires_confirmation=runtime_requires_confirmation,
         model_requests_confirmation=model_requests_confirmation,
+    )
+
+
+def evaluate_action_policy(
+    action: Mapping[str, Any],
+    action_context: "ActionContext | None" = None,
+) -> ActionPolicyDecision:
+    """Evaluate policy semantics and attach authoritative action correlation."""
+
+    decision = _evaluate_action_policy_semantics(action)
+    if action_context is None:
+        return decision
+    return replace(
+        decision,
+        request_id=action_context.request_id,
+        trace_id=action_context.trace_id,
+        action_id=action_context.action_id,
+        model_call_id=action_context.model_call_id,
     )

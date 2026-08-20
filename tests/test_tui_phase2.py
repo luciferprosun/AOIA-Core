@@ -107,10 +107,10 @@ class TUIPhase2Tests(unittest.TestCase):
             calls: list[str] = []
 
             class FakeRuntime:
-                def log_session_event(self, kind, payload):
+                def log_session_event(self, kind, payload, **_identity):
                     calls.append(kind)
 
-                def run_text_request(self, raw):
+                def run_text_request(self, raw, **_identity):
                     calls.append(raw)
                     return {"transcript": "Agent> fake response", "status": {}}
 

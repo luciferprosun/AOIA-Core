@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import traceback
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from memory.rhcsa_context import (
     inject_linux_context,
@@ -12,6 +12,13 @@ from memory.rhcsa_context import (
 )
 from tools.memory_hats import MemoryHatStore
 from tools.validator import extract_json_object, validate_action
+from trace_context import ModelCallContext, TraceContext
+
+
+ModelAttemptObserver = Callable[
+    [str, ModelCallContext, str, str, int],
+    None,
+]
 
 
 class GeminiGemmaOrchestrator:
@@ -38,6 +45,27 @@ class GeminiGemmaOrchestrator:
         self.worker_memory.record_gemini_call()
         prompt = self._build_gemini_planner_prompt(user_request, runtime_status)
         raw = self.provider_manager.generate_with_fallback(prompt)
+        return self._parse_plan(raw)
+
+    def create_traced_plan(
+        self,
+        user_request: str,
+        runtime_status: dict[str, Any],
+        trace_context: TraceContext,
+        on_attempt: ModelAttemptObserver | None = None,
+    ) -> tuple[dict[str, Any], ModelCallContext]:
+        """Create a plan and return the provider-call identity that produced it."""
+
+        self.worker_memory.record_gemini_call()
+        prompt = self._build_gemini_planner_prompt(user_request, runtime_status)
+        traced = self.provider_manager.generate_traced(
+            prompt,
+            trace_context,
+            on_attempt=on_attempt,
+        )
+        return self._parse_plan(traced.text), traced.model_call
+
+    def _parse_plan(self, raw: str) -> dict[str, Any]:
         payload = extract_json_object(raw)
         raw_steps = payload.get("steps", payload.get("plan", []))
         if not isinstance(raw_steps, list):
@@ -71,6 +99,47 @@ class GeminiGemmaOrchestrator:
             gemini_instruction=runtime_status.get("current_task", user_request),
         )
         return action
+
+    def action_for_step_traced(
+        self,
+        user_request: str,
+        step: str,
+        runtime_status: dict[str, Any],
+        previous_results: list[dict[str, Any]],
+        trace_context: TraceContext,
+        on_attempt: ModelAttemptObserver | None = None,
+    ) -> tuple[dict[str, Any], ModelCallContext]:
+        """Generate one worker action with an authoritative provider-call identity."""
+
+        if self.gemma_provider is None:
+            raise RuntimeError("Gemma/Ollama/HuggingFace worker is disabled in this terminal build.")
+        self.worker_memory.record_gemma_call()
+        prompt = self._build_gemma_worker_prompt(
+            user_request,
+            step,
+            runtime_status,
+            previous_results,
+        )
+        model_call = trace_context.new_model_call()
+        provider_name = str(getattr(self.gemma_provider, "full_name", "gemma"))
+        if on_attempt is not None:
+            on_attempt("started", model_call, "gemma", provider_name, 1)
+        try:
+            raw = self.gemma_provider.generate(prompt)
+        except Exception:
+            if on_attempt is not None:
+                on_attempt("failed", model_call, "gemma", provider_name, 1)
+            raise
+        if on_attempt is not None:
+            on_attempt("succeeded", model_call, "gemma", provider_name, 1)
+        action = validate_action(extract_json_object(raw))
+        self.worker_memory.remember_step(
+            delegated_step=step,
+            action=action,
+            result=None,
+            gemini_instruction=runtime_status.get("current_task", user_request),
+        )
+        return action, model_call
 
     def fallback_action_for_step(
         self,
