@@ -7,11 +7,18 @@ import json
 import os
 import re
 import stat
+import sys
 import uuid
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping
+
+
+if __name__ == "runtime.tools.provenance":
+    sys.modules.setdefault("tools.provenance", sys.modules[__name__])
+elif __name__ == "tools.provenance":
+    sys.modules.setdefault("runtime.tools.provenance", sys.modules[__name__])
 
 from runtime.safety.atomic_persistence import (
     DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
@@ -25,10 +32,15 @@ from runtime.safety.atomic_persistence import (
 
 
 GENESIS_PREV_HASH = "0" * 64
-RUNTIME_PROVENANCE_SCHEMA_VERSION = "AOIA_RUNTIME_PROVENANCE_1B"
+RUNTIME_PROVENANCE_SCHEMA_VERSION = "AOIA_RUNTIME_PROVENANCE_1C"
+CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION = "AOIA_RUNTIME_PROVENANCE_1B"
 LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION = "AOIA_RUNTIME_PROVENANCE_1A"
 RUNTIME_PROVENANCE_SCHEMA_VERSIONS = frozenset(
-    {LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION, RUNTIME_PROVENANCE_SCHEMA_VERSION}
+    {
+        LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION,
+        CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION,
+        RUNTIME_PROVENANCE_SCHEMA_VERSION,
+    }
 )
 RUNTIME_PROVENANCE_AUTHORITY = {
     "classification": "L1_SECURITY_RECEIPT",
@@ -55,6 +67,7 @@ _ID_PREFIXES = {
     "operation_key": "operation",
     "event_id": "provenance_event",
     "checkpoint_event_id": "provenance_event",
+    "recovery_attempt_id": "recovery_attempt",
 }
 
 
@@ -82,6 +95,14 @@ class RuntimeProvenanceEventType(str, Enum):
     TASK_CHECKPOINT_PREPARED = "TASK_CHECKPOINT_PREPARED"
     TASK_CHECKPOINT_ABORTED = "TASK_CHECKPOINT_ABORTED"
     TASK_CHECKPOINTED = "TASK_CHECKPOINTED"
+    RECOVERY_CLAIMED = "RECOVERY_CLAIMED"
+    RECOVERY_DECISION = "RECOVERY_DECISION"
+    RECOVERY_RESUME_STARTED = "RECOVERY_RESUME_STARTED"
+    RECOVERY_COMPLETED = "RECOVERY_COMPLETED"
+    RECOVERY_FAILED = "RECOVERY_FAILED"
+    RECOVERY_ACKNOWLEDGED = "RECOVERY_ACKNOWLEDGED"
+    RECOVERY_CANCELLED = "RECOVERY_CANCELLED"
+    RECOVERY_TERMINAL_RECONCILED = "RECOVERY_TERMINAL_RECONCILED"
 
 
 RUNTIME_PROVENANCE_EVENT_TYPES = frozenset(item.value for item in RuntimeProvenanceEventType)
@@ -99,7 +120,7 @@ LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
         "authority",
     }
 )
-RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
+CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
     {
         *LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS,
         "task_id",
@@ -111,6 +132,17 @@ RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
         "task_phase",
     }
 )
+RUNTIME_PROVENANCE_EVENT_FIELDS = frozenset(
+    {
+        *CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS,
+        "project_scope",
+        "recovery_attempt_id",
+        "recovery_generation",
+        "recovery_classification",
+        "recovery_directive",
+        "terminal_receipt_hash",
+    }
+)
 LEGACY_RUNTIME_PROVENANCE_RECORD_FIELDS = frozenset(
     {
         *LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS,
@@ -120,11 +152,17 @@ LEGACY_RUNTIME_PROVENANCE_RECORD_FIELDS = frozenset(
         "entry_hash",
     }
 )
+CHECKPOINT_RUNTIME_PROVENANCE_RECORD_FIELDS = frozenset(
+    {*CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS, "sequence", "prev_hash", "event_hash", "entry_hash"}
+)
 RUNTIME_PROVENANCE_RECORD_FIELDS = frozenset(
     {*RUNTIME_PROVENANCE_EVENT_FIELDS, "sequence", "prev_hash", "event_hash", "entry_hash"}
 )
 LEGACY_RUNTIME_PROVENANCE_OUTBOX_FIELDS = frozenset(
     {*LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS, "event_hash"}
+)
+CHECKPOINT_RUNTIME_PROVENANCE_OUTBOX_FIELDS = frozenset(
+    {*CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS, "event_hash"}
 )
 RUNTIME_PROVENANCE_OUTBOX_FIELDS = frozenset(
     {*RUNTIME_PROVENANCE_EVENT_FIELDS, "event_hash"}
@@ -137,6 +175,15 @@ _ACTION_FIELDS = frozenset(
     {
         "task_id", "request_id", "trace_id", "model_call_id", "action_id", "operation_key",
         "action_name", "action_fingerprint", "capability_class",
+    }
+)
+_RECOVERY_FIELDS = frozenset(
+    {
+        "task_id", "request_id", "trace_id", "project_scope",
+        "recovery_attempt_id", "recovery_generation",
+        "recovery_classification", "recovery_directive",
+        "checkpoint_version", "checkpoint_hash", "task_state", "task_phase",
+        "success", "reason_code",
     }
 )
 _EVENT_ALLOWED_FIELDS: dict[str, frozenset[str]] = {
@@ -227,6 +274,16 @@ _EVENT_ALLOWED_FIELDS: dict[str, frozenset[str]] = {
         "success",
         "reason_code",
     },
+    "RECOVERY_CLAIMED": _RECOVERY_FIELDS,
+    "RECOVERY_DECISION": _RECOVERY_FIELDS,
+    "RECOVERY_RESUME_STARTED": _RECOVERY_FIELDS,
+    "RECOVERY_COMPLETED": _RECOVERY_FIELDS,
+    "RECOVERY_FAILED": _RECOVERY_FIELDS,
+    "RECOVERY_ACKNOWLEDGED": _RECOVERY_FIELDS,
+    "RECOVERY_CANCELLED": _RECOVERY_FIELDS,
+    "RECOVERY_TERMINAL_RECONCILED": _RECOVERY_FIELDS
+    | _ACTION_FIELDS
+    | {"idempotency_state", "terminal_receipt_hash"},
 }
 _REQUIRED_ACTION = frozenset(
     {
@@ -321,6 +378,18 @@ _EVENT_REQUIRED_FIELDS: dict[str, frozenset[str]] = {
         "success",
         "reason_code",
     },
+    "RECOVERY_CLAIMED": _RECOVERY_FIELDS - {"success"},
+    "RECOVERY_DECISION": _RECOVERY_FIELDS - {"success"},
+    "RECOVERY_RESUME_STARTED": _RECOVERY_FIELDS - {"success"},
+    "RECOVERY_COMPLETED": _RECOVERY_FIELDS,
+    "RECOVERY_FAILED": _RECOVERY_FIELDS,
+    "RECOVERY_ACKNOWLEDGED": _RECOVERY_FIELDS,
+    "RECOVERY_CANCELLED": _RECOVERY_FIELDS,
+    "RECOVERY_TERMINAL_RECONCILED": _RECOVERY_FIELDS
+    | _REQUIRED_ACTION
+    | {
+        "action_fingerprint", "idempotency_state", "terminal_receipt_hash",
+    },
 }
 _EVENT_FIXED_VALUES: dict[str, dict[str, Any]] = {
     "MODEL_CALL_COMPLETED": {"success": True},
@@ -358,6 +427,11 @@ _EVENT_FIXED_VALUES: dict[str, dict[str, Any]] = {
     "PROVENANCE_RECOVERY": {"success": True},
     "TASK_CHECKPOINTED": {"success": True},
     "TASK_CHECKPOINT_ABORTED": {"success": False},
+    "RECOVERY_COMPLETED": {"success": True},
+    "RECOVERY_FAILED": {"success": False},
+    "RECOVERY_ACKNOWLEDGED": {"success": False},
+    "RECOVERY_CANCELLED": {"success": False},
+    "RECOVERY_TERMINAL_RECONCILED": {"success": True},
 }
 _CAPABILITY_REASON_CODES = frozenset(
     {
@@ -402,6 +476,16 @@ _EVENT_REASON_CODES: dict[str, frozenset[str]] = {
     "TASK_CHECKPOINTED": frozenset({"TASK_CHECKPOINTED"}),
     "TASK_CHECKPOINT_PREPARED": frozenset({"TASK_CHECKPOINT_PREPARED"}),
     "TASK_CHECKPOINT_ABORTED": frozenset({"TASK_CHECKPOINT_ABORTED"}),
+    "RECOVERY_CLAIMED": frozenset({"RECOVERY_CLAIM_ACQUIRED"}),
+    "RECOVERY_DECISION": frozenset({"RECOVERY_DECISION_RECORDED"}),
+    "RECOVERY_RESUME_STARTED": frozenset({"RECOVERY_RESUME_STARTED"}),
+    "RECOVERY_COMPLETED": frozenset({"RECOVERY_COMPLETED"}),
+    "RECOVERY_FAILED": frozenset({"RECOVERY_FAILED"}),
+    "RECOVERY_ACKNOWLEDGED": frozenset({"RECOVERY_MANUAL_ACKNOWLEDGED"}),
+    "RECOVERY_CANCELLED": frozenset({"RECOVERY_CANCELLED"}),
+    "RECOVERY_TERMINAL_RECONCILED": frozenset(
+        {"RECOVERY_TERMINAL_RECONCILED"}
+    ),
 }
 _SAFE_REASON_CODES = frozenset(
     RUNTIME_PROVENANCE_EVENT_TYPES
@@ -424,6 +508,14 @@ _SAFE_REASON_CODES = frozenset(
         "TASK_CHECKPOINTED",
         "TASK_CHECKPOINT_PREPARED",
         "TASK_CHECKPOINT_ABORTED",
+        "RECOVERY_CLAIM_ACQUIRED",
+        "RECOVERY_DECISION_RECORDED",
+        "RECOVERY_RESUME_STARTED",
+        "RECOVERY_COMPLETED",
+        "RECOVERY_FAILED",
+        "RECOVERY_MANUAL_ACKNOWLEDGED",
+        "RECOVERY_CANCELLED",
+        "RECOVERY_TERMINAL_RECONCILED",
     }
 )
 _INGRESS_VALUES = frozenset({"CLI", "TUI", "WEB", "OPERATOR_API", "RUNTIME"})
@@ -440,6 +532,46 @@ _IDEMPOTENCY_VALUES = frozenset(
         "UNKNOWN_OUTCOME", "CONFLICT",
     }
 )
+_RECOVERY_CLASSIFICATIONS = frozenset(
+    {
+        "SAFE_TO_RESUME", "WAITING_FOR_FRESH_APPROVAL", "ALREADY_COMPLETED",
+        "TERMINAL_NO_RESUME", "BLOCKED", "CONFLICT", "CORRUPT_CHECKPOINT",
+        "UNSUPPORTED_SCHEMA", "UNKNOWN_OUTCOME", "MANUAL_REVIEW_REQUIRED",
+        "RECOVERY_IN_PROGRESS",
+    }
+)
+_RECOVERY_DIRECTIVES = frozenset(
+    {
+        "NO_ACTION", "RESUME_MODEL", "REVALIDATE_ACTION",
+        "RECONCILE_CHECKPOINT", "RECONCILE_TERMINAL_PROVENANCE",
+        "REQUIRE_FRESH_APPROVAL", "REQUIRE_OPERATOR_ACK", "CANCEL_TASK",
+    }
+)
+_RECOVERY_CLASSIFICATION_DIRECTIVES = {
+    "SAFE_TO_RESUME": frozenset(
+        {
+            "RESUME_MODEL", "REVALIDATE_ACTION", "RECONCILE_CHECKPOINT",
+            "RECONCILE_TERMINAL_PROVENANCE", "CANCEL_TASK",
+        }
+    ),
+    "WAITING_FOR_FRESH_APPROVAL": frozenset(
+        {"REQUIRE_FRESH_APPROVAL", "CANCEL_TASK"}
+    ),
+    "ALREADY_COMPLETED": frozenset({"NO_ACTION"}),
+    "TERMINAL_NO_RESUME": frozenset({"NO_ACTION"}),
+    "BLOCKED": frozenset({"NO_ACTION"}),
+    "CONFLICT": frozenset({"NO_ACTION", "REQUIRE_OPERATOR_ACK"}),
+    "CORRUPT_CHECKPOINT": frozenset({"REQUIRE_OPERATOR_ACK"}),
+    "UNSUPPORTED_SCHEMA": frozenset({"REQUIRE_OPERATOR_ACK"}),
+    "UNKNOWN_OUTCOME": frozenset({"REQUIRE_OPERATOR_ACK", "CANCEL_TASK"}),
+    "MANUAL_REVIEW_REQUIRED": frozenset(
+        {
+            "REQUIRE_OPERATOR_ACK", "CANCEL_TASK",
+            "RECONCILE_TERMINAL_PROVENANCE", "RECONCILE_CHECKPOINT",
+        }
+    ),
+    "RECOVERY_IN_PROGRESS": frozenset({"NO_ACTION"}),
+}
 _TASK_STATE_PHASE_PAIRS = frozenset(
     {
         ("CREATED", "TASK_CREATED"),
@@ -473,6 +605,9 @@ _TERMINAL_EVENT_TYPES = frozenset(
         "ACTION_DISPATCH_CANCELLED", "UNKNOWN_OUTCOME_DETECTED",
         "PERSISTENCE_FAILURE",
         "TASK_CHECKPOINTED",
+        "RECOVERY_COMPLETED", "RECOVERY_FAILED",
+        "RECOVERY_ACKNOWLEDGED", "RECOVERY_CANCELLED",
+        "RECOVERY_TERMINAL_RECONCILED",
     }
 )
 
@@ -705,6 +840,14 @@ def _runtime_status_outcome(
         "TASK_CHECKPOINTED": ("CHECKPOINTED", "PERSISTED"),
         "TASK_CHECKPOINT_PREPARED": ("PREPARED", "PENDING"),
         "TASK_CHECKPOINT_ABORTED": ("ABORTED", "NOT_PERSISTED"),
+        "RECOVERY_CLAIMED": ("CLAIMED", "PENDING"),
+        "RECOVERY_DECISION": ("DECIDED", "PENDING"),
+        "RECOVERY_RESUME_STARTED": ("STARTED", "PENDING"),
+        "RECOVERY_COMPLETED": ("COMPLETED", "SUCCEEDED"),
+        "RECOVERY_FAILED": ("FAILED", "FAILED"),
+        "RECOVERY_ACKNOWLEDGED": ("ACKNOWLEDGED", "MANUAL"),
+        "RECOVERY_CANCELLED": ("CANCELLED", "CANCELLED"),
+        "RECOVERY_TERMINAL_RECONCILED": ("RECONCILED", "PERSISTED"),
     }
     if event_type == "REQUEST_COMPLETED":
         return ("COMPLETED", "SUCCEEDED") if success else ("FAILED", "FAILED")
@@ -750,6 +893,12 @@ class RuntimeProvenanceEvent:
     checkpoint_event_id: str | None = None
     task_state: str | None = None
     task_phase: str | None = None
+    project_scope: str | None = None
+    recovery_attempt_id: str | None = None
+    recovery_generation: int | None = None
+    recovery_classification: str | None = None
+    recovery_directive: str | None = None
+    terminal_receipt_hash: str | None = None
     schema_version: str = RUNTIME_PROVENANCE_SCHEMA_VERSION
 
     def __post_init__(self) -> None:
@@ -770,6 +919,7 @@ class RuntimeProvenanceEvent:
             ("request_length", 10_000_000), ("retry_attempt", 1_000),
             ("provider_attempt", 1_000), ("recovered_count", 1_000_000),
             ("checkpoint_version", 1_000_000),
+            ("recovery_generation", 1_000_000),
         ):
             value = getattr(self, field)
             if value is not None and (
@@ -801,6 +951,34 @@ class RuntimeProvenanceEvent:
                 or not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", value)
             ):
                 raise ProvenanceSchemaError(f"Runtime provenance {field} is invalid.")
+        if self.project_scope is not None and (
+            not isinstance(self.project_scope, str)
+            or not _HEX_DIGEST.fullmatch(self.project_scope)
+        ):
+            raise ProvenanceSchemaError("Runtime provenance project scope is invalid.")
+        for field in ("recovery_classification", "recovery_directive"):
+            value = getattr(self, field)
+            if value is not None and (
+                not isinstance(value, str)
+                or not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", value)
+            ):
+                raise ProvenanceSchemaError(
+                    f"Runtime provenance {field} is invalid."
+                )
+        if (
+            self.recovery_classification is not None
+            and self.recovery_classification not in _RECOVERY_CLASSIFICATIONS
+        ):
+            raise ProvenanceSchemaError(
+                "Runtime provenance recovery classification is not canonical."
+            )
+        if (
+            self.recovery_directive is not None
+            and self.recovery_directive not in _RECOVERY_DIRECTIVES
+        ):
+            raise ProvenanceSchemaError(
+                "Runtime provenance recovery directive is not canonical."
+            )
         if self.capability_class is not None and self.capability_class not in _CAPABILITY_VALUES:
             raise ProvenanceSchemaError("Runtime provenance capability class is invalid.")
         if self.idempotency_state is not None and self.idempotency_state not in _IDEMPOTENCY_VALUES:
@@ -811,6 +989,13 @@ class RuntimeProvenanceEvent:
                 not isinstance(value, str) or not _HEX_DIGEST.fullmatch(value)
             ):
                 raise ProvenanceSchemaError(f"Runtime provenance {field} is invalid.")
+        if self.terminal_receipt_hash is not None and (
+            not isinstance(self.terminal_receipt_hash, str)
+            or not _HEX_DIGEST.fullmatch(self.terminal_receipt_hash)
+        ):
+            raise ProvenanceSchemaError(
+                "Runtime provenance terminal receipt hash is invalid."
+            )
         if self.reason_code not in _SAFE_REASON_CODES:
             raise ProvenanceSchemaError("Runtime provenance reason code is not allowed.")
         if self.reason_code not in _EVENT_REASON_CODES[self.event_type]:
@@ -848,10 +1033,27 @@ class RuntimeProvenanceEvent:
                 raise ProvenanceSchemaError(
                     "Runtime provenance event contradicts its fixed semantics."
                 )
-        if self.schema_version == RUNTIME_PROVENANCE_SCHEMA_VERSION:
+        if self.schema_version in {
+            CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION,
+            RUNTIME_PROVENANCE_SCHEMA_VERSION,
+        }:
             _validate_id("task_id", self.task_id, required=self.event_type != "PROVENANCE_RECOVERY")
         elif self.task_id is not None:
             raise ProvenanceSchemaError("Legacy provenance cannot contain task identity.")
+        if self.schema_version != RUNTIME_PROVENANCE_SCHEMA_VERSION and any(
+            value is not None
+            for value in (
+                self.project_scope,
+                self.recovery_attempt_id,
+                self.recovery_generation,
+                self.recovery_classification,
+                self.recovery_directive,
+                self.terminal_receipt_hash,
+            )
+        ):
+            raise ProvenanceSchemaError(
+                "Pre-recovery provenance cannot contain recovery fields."
+            )
         if self.event_type.startswith("REQUEST_"):
             _validate_id("request_id", self.request_id, required=True)
             _validate_id("trace_id", self.trace_id, required=True)
@@ -866,6 +1068,11 @@ class RuntimeProvenanceEvent:
             "TASK_CHECKPOINTED",
         }:
             for field in ("task_id", "request_id", "trace_id"):
+                _validate_id(field, getattr(self, field), required=True)
+        elif self.event_type.startswith("RECOVERY_"):
+            for field in (
+                "task_id", "request_id", "trace_id", "recovery_attempt_id"
+            ):
                 _validate_id(field, getattr(self, field), required=True)
         elif self.event_type not in {"PERSISTENCE_FAILURE", "PROVENANCE_RECOVERY"}:
             for field in ("request_id", "trace_id", "action_id", "operation_key"):
@@ -895,6 +1102,98 @@ class RuntimeProvenanceEvent:
             self.checkpoint_parent_hash is None or self.checkpoint_event_id is None
         ):
             raise ProvenanceSchemaError("Task checkpoint preparation is incomplete.")
+        if self.event_type.startswith("RECOVERY_"):
+            if self.schema_version != RUNTIME_PROVENANCE_SCHEMA_VERSION:
+                raise ProvenanceSchemaError(
+                    "Recovery events require runtime provenance schema 1C."
+                )
+            if (
+                self.project_scope is None
+                or self.recovery_generation is None
+                or self.recovery_generation < 1
+                or self.recovery_classification is None
+                or self.recovery_directive is None
+                or self.checkpoint_version is None
+                or self.checkpoint_version < 1
+                or self.checkpoint_hash is None
+                or self.task_state is None
+                or self.task_phase is None
+            ):
+                raise ProvenanceSchemaError(
+                    "Recovery provenance lacks fixed recovery evidence."
+                )
+            if (self.task_state, self.task_phase) not in _TASK_STATE_PHASE_PAIRS:
+                raise ProvenanceSchemaError(
+                    "Recovery provenance task state and phase contradict each other."
+                )
+            if self.recovery_directive not in _RECOVERY_CLASSIFICATION_DIRECTIVES[
+                str(self.recovery_classification)
+            ]:
+                raise ProvenanceSchemaError(
+                    "Recovery provenance directive contradicts its classification."
+                )
+            if self.event_type == "RECOVERY_RESUME_STARTED" and (
+                self.recovery_classification,
+                self.recovery_directive,
+            ) not in {
+                ("SAFE_TO_RESUME", "RESUME_MODEL"),
+                ("SAFE_TO_RESUME", "REVALIDATE_ACTION"),
+                (
+                    "WAITING_FOR_FRESH_APPROVAL",
+                    "REQUIRE_FRESH_APPROVAL",
+                ),
+            }:
+                raise ProvenanceSchemaError(
+                    "Recovery resume start does not authorize executable work."
+                )
+            if self.event_type == "RECOVERY_COMPLETED" and (
+                self.recovery_classification,
+                self.recovery_directive,
+            ) not in {
+                ("SAFE_TO_RESUME", "RESUME_MODEL"),
+                ("SAFE_TO_RESUME", "REVALIDATE_ACTION"),
+                ("SAFE_TO_RESUME", "RECONCILE_CHECKPOINT"),
+                (
+                    "SAFE_TO_RESUME",
+                    "RECONCILE_TERMINAL_PROVENANCE",
+                ),
+                (
+                    "WAITING_FOR_FRESH_APPROVAL",
+                    "REQUIRE_FRESH_APPROVAL",
+                ),
+                ("ALREADY_COMPLETED", "NO_ACTION"),
+            }:
+                raise ProvenanceSchemaError(
+                    "Recovery completion contradicts its decision."
+                )
+            if self.event_type == "RECOVERY_ACKNOWLEDGED" and (
+                self.recovery_directive != "REQUIRE_OPERATOR_ACK"
+                or self.success is not False
+            ):
+                raise ProvenanceSchemaError(
+                    "Recovery acknowledgement cannot claim task success."
+                )
+            if self.event_type == "RECOVERY_CANCELLED" and (
+                self.recovery_directive != "CANCEL_TASK"
+                or self.success is not False
+            ):
+                raise ProvenanceSchemaError(
+                    "Recovery cancellation cannot claim task success."
+                )
+            if self.event_type == "RECOVERY_TERMINAL_RECONCILED" and (
+                self.recovery_classification != "MANUAL_REVIEW_REQUIRED"
+                or self.recovery_directive != "RECONCILE_TERMINAL_PROVENANCE"
+                or self.success is not True
+                or self.terminal_receipt_hash is None
+                or self.idempotency_state
+                not in {
+                    "SUCCEEDED", "BLOCKED", "CANCELLED",
+                    "FAILED_BEFORE_DISPATCH", "FAILED_REPORTED",
+                }
+            ):
+                raise ProvenanceSchemaError(
+                    "Terminal reconciliation provenance contradicts durable P0.7 truth."
+                )
         if self.event_type == "REQUEST_STARTED" and (
             self.request_length is None or self.slash_command is None
         ):
@@ -1007,7 +1306,12 @@ class RuntimeProvenanceEvent:
         fields = (
             LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
             if self.schema_version == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
-            else RUNTIME_PROVENANCE_EVENT_FIELDS
+            else (
+                CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS
+                if self.schema_version
+                == CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                else RUNTIME_PROVENANCE_EVENT_FIELDS
+            )
         )
         return {field: document[field] for field in fields}
 
@@ -1023,7 +1327,11 @@ class RuntimeProvenanceEvent:
         expected_fields = (
             LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
             if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
-            else RUNTIME_PROVENANCE_EVENT_FIELDS
+            else (
+                CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS
+                if schema == CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                else RUNTIME_PROVENANCE_EVENT_FIELDS
+            )
         )
         if frozenset(document) != expected_fields:
             raise ProvenanceSchemaError(
@@ -1087,6 +1395,12 @@ def new_runtime_provenance_event(
     checkpoint_hash: str | None = None,
     task_state: str | None = None,
     task_phase: str | None = None,
+    project_scope: str | None = None,
+    recovery_attempt_id: str | None = None,
+    recovery_generation: int | None = None,
+    recovery_classification: object | None = None,
+    recovery_directive: object | None = None,
+    terminal_receipt_hash: str | None = None,
     clock: Callable[[], dt.datetime] | None = None,
 ) -> RuntimeProvenanceEvent:
     """Build one runtime-owned event without accepting generic metadata."""
@@ -1137,6 +1451,14 @@ def new_runtime_provenance_event(
         checkpoint_hash=checkpoint_hash,
         task_state=task_state,
         task_phase=task_phase,
+        project_scope=project_scope,
+        recovery_attempt_id=recovery_attempt_id,
+        recovery_generation=recovery_generation,
+        recovery_classification=getattr(
+            recovery_classification, "value", recovery_classification
+        ),
+        recovery_directive=getattr(recovery_directive, "value", recovery_directive),
+        terminal_receipt_hash=terminal_receipt_hash,
     )
 
 
@@ -1199,7 +1521,12 @@ def _verify_entries(
     issues = list(parse_issues)
     previous_hash = GENESIS_PREV_HASH
     runtime_mode: bool | None = None
-    seen_runtime_1b = False
+    highest_runtime_schema_rank = 0
+    schema_ranks = {
+        LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION: 1,
+        CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION: 2,
+        RUNTIME_PROVENANCE_SCHEMA_VERSION: 3,
+    }
     seen_ids: dict[str, str] = {}
     for index, entry in enumerate(values):
         schema = entry.get("schema_version")
@@ -1209,19 +1536,29 @@ def _verify_entries(
         elif runtime_mode != runtime:
             issues.append(f"entry[{index}]: legacy and runtime schemas cannot be mixed")
         if runtime:
-            if schema == RUNTIME_PROVENANCE_SCHEMA_VERSION:
-                seen_runtime_1b = True
-            elif seen_runtime_1b:
-                issues.append(f"entry[{index}]: runtime schema downgrade from 1B to 1A")
+            schema_rank = schema_ranks[str(schema)]
+            if schema_rank < highest_runtime_schema_rank:
+                issues.append(
+                    f"entry[{index}]: runtime provenance schema downgrade"
+                )
+            highest_runtime_schema_rank = max(highest_runtime_schema_rank, schema_rank)
             event_fields = (
                 LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
                 if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
-                else RUNTIME_PROVENANCE_EVENT_FIELDS
+                else (
+                    CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS
+                    if schema == CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                    else RUNTIME_PROVENANCE_EVENT_FIELDS
+                )
             )
             record_fields = (
                 LEGACY_RUNTIME_PROVENANCE_RECORD_FIELDS
                 if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
-                else RUNTIME_PROVENANCE_RECORD_FIELDS
+                else (
+                    CHECKPOINT_RUNTIME_PROVENANCE_RECORD_FIELDS
+                    if schema == CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                    else RUNTIME_PROVENANCE_RECORD_FIELDS
+                )
             )
             if frozenset(entry) != record_fields:
                 issues.append(f"entry[{index}]: runtime record schema mismatch")
@@ -1694,15 +2031,18 @@ class AppendOnlyProvenanceStore:
                 raise ProvenanceSchemaError(
                     "Runtime events cannot be appended to a legacy provenance ledger."
                 )
-            if (
-                event.schema_version == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
-                and any(
-                    item.get("schema_version") == RUNTIME_PROVENANCE_SCHEMA_VERSION
-                    for item in entries
-                )
+            schema_ranks = {
+                LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION: 1,
+                CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION: 2,
+                RUNTIME_PROVENANCE_SCHEMA_VERSION: 3,
+            }
+            if any(
+                schema_ranks.get(str(item.get("schema_version")), 0)
+                > schema_ranks[event.schema_version]
+                for item in entries
             ):
                 raise ProvenanceSchemaError(
-                    "Runtime provenance schema cannot downgrade from 1B to 1A."
+                    "Runtime provenance schema cannot downgrade."
                 )
             for existing in entries:
                 if existing.get("event_id") != event.event_id:
@@ -1853,12 +2193,20 @@ class AppendOnlyProvenanceStore:
                 outbox_fields = (
                     LEGACY_RUNTIME_PROVENANCE_OUTBOX_FIELDS
                     if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
-                    else RUNTIME_PROVENANCE_OUTBOX_FIELDS
+                    else (
+                        CHECKPOINT_RUNTIME_PROVENANCE_OUTBOX_FIELDS
+                        if schema == CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                        else RUNTIME_PROVENANCE_OUTBOX_FIELDS
+                    )
                 )
                 event_fields = (
                     LEGACY_RUNTIME_PROVENANCE_EVENT_FIELDS
                     if schema == LEGACY_RUNTIME_PROVENANCE_SCHEMA_VERSION
-                    else RUNTIME_PROVENANCE_EVENT_FIELDS
+                    else (
+                        CHECKPOINT_RUNTIME_PROVENANCE_EVENT_FIELDS
+                        if schema == CHECKPOINT_RUNTIME_PROVENANCE_SCHEMA_VERSION
+                        else RUNTIME_PROVENANCE_EVENT_FIELDS
+                    )
                 )
                 if (
                     not isinstance(document, dict)

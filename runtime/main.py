@@ -9,16 +9,18 @@ USER -> LLM -> structured JSON action -> executor -> result -> LLM -> final resp
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import io
 import json
 import os
 import re
 import time
 import traceback
-from contextlib import redirect_stdout
+from contextlib import contextmanager, redirect_stdout
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator, Mapping
 from urllib.parse import parse_qs, unquote, urlparse
 
 from commands import build_command_registry
@@ -48,6 +50,16 @@ from runtime.task_checkpoints import (
     TaskState,
     TERMINAL_TASK_STATES,
     safe_context_metadata,
+)
+from runtime.task_recovery import (
+    MAX_RECOVERY_DISCOVERY_BATCH,
+    RecoveryDecision,
+    RecoveryDirective,
+    RecoveryExecutionToken,
+    RecoveryFencedError,
+    RecoveryOperationResult,
+    RecoveryPurpose,
+    TaskRecoveryService,
 )
 from tools.executor import ExecutionEngine
 from tools.provenance import (
@@ -218,6 +230,38 @@ class AgentRuntime:
             provenance_store=self.provenance_store,
             task_checkpoint_store=self.task_checkpoint_store,
         )
+        self.task_recovery_service = TaskRecoveryService(
+            self.memory_store.paths.state_dir,
+            project_dir=project_dir,
+            checkpoint_store=self.task_checkpoint_store,
+            idempotency_store=self.executor.idempotency_store,
+            provenance_store=self.provenance_store,
+            lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+            dispatcher=self,
+        )
+        self.executor.task_recovery_service = self.task_recovery_service
+        self._task_execution_token: ContextVar[
+            RecoveryExecutionToken | None
+        ] = ContextVar(
+            f"aoia_task_execution_token_{id(self)}",
+            default=None,
+        )
+        self._recovery_step_reservation: ContextVar[
+            StepReservation | None
+        ] = ContextVar(
+            f"aoia_recovery_step_reservation_{id(self)}",
+            default=None,
+        )
+        self._recovery_sensitive_persistence: ContextVar[bool] = ContextVar(
+            f"aoia_recovery_sensitive_persistence_{id(self)}",
+            default=False,
+        )
+        # Startup recovery discovery is deliberately bounded and read-only.
+        # Decisions are exposed to local operator surfaces; startup never
+        # reconciles or resumes a task automatically.
+        self.recovery_discovery = self.task_recovery_service.discover(
+            limit=MAX_RECOVERY_DISCOVERY_BATCH
+        )
         self.desktop_dir = detect_desktop_dir(Path.home())
         self.local_router = LocalRouter(self.desktop_dir)
         self.knowledge_router = KnowledgeRouter(project_dir)
@@ -229,6 +273,99 @@ class AgentRuntime:
             self.memory_store.paths.session_logs_dir
             / f"session_{self.memory_store.memory.session_id}.jsonl"
         )
+
+    @staticmethod
+    def _recovery_sensitive_summary(value: object) -> dict[str, object]:
+        """Produce bounded, non-reversible metadata for recovery-only logs."""
+
+        try:
+            serialized = json.dumps(
+                value,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                default=lambda item: f"<{type(item).__name__}>",
+            )
+        except (TypeError, ValueError, RecursionError):
+            serialized = f"<{type(value).__name__}>"
+        encoded = serialized.encode("utf-8", errors="replace")
+        return {
+            "recovery_sensitive": True,
+            "redacted": True,
+            "sha256": hashlib.sha256(encoded).hexdigest(),
+            "utf8_length": len(encoded),
+        }
+
+    def _recovery_persistence_payload(
+        self,
+        payload: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        if not self._recovery_sensitive_persistence.get():
+            return dict(payload)
+        return self._recovery_sensitive_summary(payload)
+
+    def _recovery_task_marker(self, request_text: str) -> str:
+        summary = self._recovery_sensitive_summary(request_text)
+        return (
+            "RECOVERY_SENSITIVE_REQUEST_REDACTED:"
+            f"sha256={summary['sha256']}:utf8_length={summary['utf8_length']}"
+        )
+
+    def list_recovery_tasks(
+        self,
+        *,
+        limit: int = MAX_RECOVERY_DISCOVERY_BATCH,
+    ) -> tuple[RecoveryDecision, ...]:
+        """List bounded, metadata-only recovery decisions for local operators."""
+
+        return self.task_recovery_service.list_incomplete_tasks(limit=limit)
+
+    def show_recovery_task(self, task_id: str) -> RecoveryDecision:
+        """Show one metadata-only recovery decision without changing it."""
+
+        return self.task_recovery_service.show(task_id)
+
+    def resume_recovery_task(
+        self,
+        task_id: str,
+        *,
+        request_text: str | None = None,
+        action: Mapping[str, Any] | None = None,
+    ) -> RecoveryOperationResult:
+        """Bind exact caller input, then resume through the trusted dispatcher."""
+
+        trusted_input = self.task_recovery_service.bind_trusted_input(
+            task_id,
+            request_text=request_text,
+            action=action,
+        )
+        return self.task_recovery_service.resume(task_id, trusted_input)
+
+    def request_fresh_recovery_approval(
+        self,
+        task_id: str,
+        *,
+        action: Mapping[str, Any],
+    ) -> RecoveryOperationResult:
+        """Revalidate an exact pending action and invoke the existing approval gate."""
+
+        return self.resume_recovery_task(task_id, action=action)
+
+    def cancel_recovery_task(
+        self,
+        task_id: str,
+    ) -> RecoveryOperationResult:
+        """Cancel only work the recovery service proves has not dispatched."""
+
+        return self.task_recovery_service.cancel(task_id)
+
+    def acknowledge_recovery_task(
+        self,
+        task_id: str,
+    ) -> RecoveryOperationResult:
+        """Acknowledge manual review without altering canonical task truth."""
+
+        return self.task_recovery_service.acknowledge_manual_review(task_id)
 
     def render_system_prompt(self) -> str:
         prompt = self.prompt_template
@@ -365,6 +502,110 @@ class AgentRuntime:
         provider_count = max(1, len(self._provider_fallback_chain()))
         return self._task_step_budget() * len(MODEL_RETRY_DELAYS) * provider_count
 
+    def _validate_task_execution_token(
+        self,
+        task_id: str,
+        token: RecoveryExecutionToken | None = None,
+    ) -> RecoveryExecutionToken:
+        active = token if token is not None else self._task_execution_token.get()
+        if active is None or active.task_id != task_id:
+            raise RecoveryFencedError(
+                "A matching live task execution token is required."
+            )
+        # Temporary strict adapter until the recovery service exposes a lighter
+        # public token-validation method.
+        self.task_recovery_service.classify_under_claim(task_id, active)
+        return active
+
+    def _current_task_execution_token(
+        self,
+        task_id: str,
+    ) -> RecoveryExecutionToken | None:
+        token = self._task_execution_token.get()
+        if token is None:
+            return None
+        return self._validate_task_execution_token(task_id, token)
+
+    def _validate_recovery_dispatch_identity(
+        self,
+        trace_context: TraceContext,
+        recovery_token: RecoveryExecutionToken,
+    ) -> None:
+        if (
+            trace_context.task_id != recovery_token.task_id
+            or trace_context.request_id != recovery_token.request_id
+            or trace_context.trace_id != recovery_token.trace_id
+        ):
+            raise RecoveryFencedError(
+                "Recovery dispatch trace does not match its execution token."
+            )
+        self._validate_task_execution_token(
+            trace_context.task_id,
+            recovery_token,
+        )
+
+    @contextmanager
+    def _recovery_dispatch_scope(
+        self,
+        trace_context: TraceContext,
+        recovery_token: RecoveryExecutionToken,
+        *,
+        allowed_directives: frozenset[RecoveryDirective],
+        step_reservation: StepReservation | None = None,
+    ) -> Iterator[None]:
+        self._validate_recovery_dispatch_identity(
+            trace_context,
+            recovery_token,
+        )
+        self.task_recovery_service.validate_dispatch_authorization(
+            recovery_token,
+            allowed_directives,
+        )
+        current = self._task_execution_token.get()
+        if current is not None and current is not recovery_token:
+            raise RecoveryFencedError(
+                "Another task execution token is already bound to this context."
+            )
+        token_binding = self._task_execution_token.set(recovery_token)
+        reservation_binding = self._recovery_step_reservation.set(
+            step_reservation
+        )
+        sensitive_binding = self._recovery_sensitive_persistence.set(True)
+        try:
+            with self.executor.recovery_sensitive_persistence():
+                yield
+        finally:
+            if step_reservation is not None:
+                self._close_task_step(step_reservation)
+            self._recovery_sensitive_persistence.reset(sensitive_binding)
+            self._recovery_step_reservation.reset(reservation_binding)
+            self._task_execution_token.reset(token_binding)
+
+    @contextmanager
+    def _live_task_execution_guard(
+        self,
+        trace_context: TraceContext,
+        request_text: str = "",
+    ) -> Iterator[RecoveryExecutionToken]:
+        nested = self._task_execution_token.get()
+        if nested is not None:
+            yield self._validate_task_execution_token(
+                trace_context.task_id,
+                nested,
+            )
+            return
+        checkpoint = self._ensure_task_checkpoint(trace_context, request_text)
+        with self.task_recovery_service.execution_guard(
+            trace_context.task_id,
+            purpose=RecoveryPurpose.LIVE,
+            expected_checkpoint_hash=checkpoint.checkpoint_hash,
+        ) as token:
+            reset_token = self._task_execution_token.set(token)
+            try:
+                yield token
+            finally:
+                self._task_execution_token.reset(reset_token)
+
     def _ensure_task_checkpoint(
         self,
         trace_context: TraceContext,
@@ -385,6 +626,14 @@ class AgentRuntime:
         trace_context: TraceContext,
         request_text: str = "",
     ) -> StepReservation:
+        recovery_reservation = self._recovery_step_reservation.get()
+        if recovery_reservation is not None:
+            self.task_checkpoint_store.validate_step_reservation(
+                recovery_reservation,
+                task_id=trace_context.task_id,
+            )
+            self._recovery_step_reservation.set(None)
+            return recovery_reservation
         self._ensure_task_checkpoint(trace_context, request_text)
         return self.task_checkpoint_store.reserve_step(trace_context.task_id)
 
@@ -488,8 +737,25 @@ class AgentRuntime:
         *,
         step_reservation: StepReservation | None = None,
         model_continuation: ModelContinuation | None = None,
+        recovery_token: RecoveryExecutionToken | None = None,
     ) -> TracedModelOutput:
         """Request model output while identifying every actual provider attempt."""
+        active_token = recovery_token or self._task_execution_token.get()
+        if active_token is None:
+            # Preserve direct-call compatibility while keeping the provider
+            # attempt inside a live execution claim.
+            with self._live_task_execution_guard(trace_context, prompt) as token:
+                return self.ask_model(
+                    prompt,
+                    trace_context,
+                    step_reservation=step_reservation,
+                    model_continuation=model_continuation,
+                    recovery_token=token,
+                )
+        recovery_token = self._validate_task_execution_token(
+            trace_context.task_id,
+            active_token,
+        )
         if self.safeguards.disable_model:
             raise RuntimeError("Model planning is disabled by EPISTEMIC_DISABLE_MODEL.")
         owns_step_reservation = step_reservation is None
@@ -516,6 +782,7 @@ class AgentRuntime:
                 provider_attempt=provider_attempt,
                 step_reservation=step_reservation,
                 model_continuation=continuation,
+                recovery_token=recovery_token,
             )
             # A continuation is an unforgeable one-shot capability.  Later
             # provider retries remain part of this step, but start from the
@@ -578,7 +845,7 @@ class AgentRuntime:
                         provider=provider_name,
                         model=model_name,
                     )
-                if self.debug_raw:
+                if self.debug_raw and not self._recovery_sensitive_persistence.get():
                     print("\n[DEBUG] RAW MODEL OUTPUT:")
                     print(raw_result.text)
                 if owns_step_reservation:
@@ -646,7 +913,13 @@ class AgentRuntime:
         provider_attempt: int,
         step_reservation: StepReservation,
         model_continuation: ModelContinuation | None = None,
+        recovery_token: RecoveryExecutionToken | None = None,
     ) -> None:
+        if status == "started":
+            self._validate_task_execution_token(
+                model_call.task_id,
+                recovery_token,
+            )
         event_types = {
             "started": RuntimeProvenanceEventType.MODEL_CALL_STARTED,
             "succeeded": RuntimeProvenanceEventType.MODEL_CALL_COMPLETED,
@@ -724,12 +997,21 @@ class AgentRuntime:
         self,
         user_input: str,
         trace_context: TraceContext | None = None,
+        *,
+        resume_before_model_call: bool = False,
     ) -> None:
         """Run the bounded action loop for one user request."""
         trace_context = trace_context or TraceContext.new_request()
         self._start_task(trace_context, user_input)
-        self.memory_store.set_current_task(user_input)
-        if user_input.strip().lower() in {"help", "?"}:
+        self.memory_store.set_current_task(
+            self._recovery_task_marker(user_input)
+            if self._recovery_sensitive_persistence.get()
+            else user_input
+        )
+        if (
+            not resume_before_model_call
+            and user_input.strip().lower() in {"help", "?"}
+        ):
             result = self.command_registry.execute("/help", self, trace_context)
             if result.handled and result.message:
                 print(f"\nAgent> {result.message}")
@@ -743,15 +1025,24 @@ class AgentRuntime:
             self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
-        if self.handle_external_review_route(user_input, trace_context):
+        if (
+            not resume_before_model_call
+            and self.handle_external_review_route(user_input, trace_context)
+        ):
             self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
-        if self.handle_local_route(user_input, trace_context):
+        if (
+            not resume_before_model_call
+            and self.handle_local_route(user_input, trace_context)
+        ):
             self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
-        if self.handle_knowledge_route(user_input, trace_context):
+        if (
+            not resume_before_model_call
+            and self.handle_knowledge_route(user_input, trace_context)
+        ):
             self._finish_task(trace_context, TaskState.COMPLETED)
             return
 
@@ -759,7 +1050,11 @@ class AgentRuntime:
             self.handle_orchestrated_request(user_input, trace_context)
             return
 
-        request_trace = self.bootstrap_local_context(user_input, trace_context)
+        request_trace = (
+            []
+            if resume_before_model_call
+            else self.bootstrap_local_context(user_input, trace_context)
+        )
         checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
         if checkpoint is None:
             raise TaskCheckpointError("Request lost its task checkpoint.")
@@ -917,6 +1212,9 @@ class AgentRuntime:
                     action,
                     action_context=action_context,
                     step_reservation=step_reservation,
+                    recovery_token=self._current_task_execution_token(
+                        trace_context.task_id
+                    ),
                 )
             except PersistenceError:
                 raise
@@ -1009,6 +1307,9 @@ class AgentRuntime:
                     require_approval=True,
                     action_context=open_context,
                     step_reservation=self._reserve_task_step(trace_context),
+                    recovery_token=self._current_task_execution_token(
+                        trace_context.task_id
+                    ),
                 )
                 self.print_result(open_result)
                 visible_context: ActionContext | None = None
@@ -1020,6 +1321,9 @@ class AgentRuntime:
                         require_approval=True,
                         action_context=visible_context,
                         step_reservation=self._reserve_task_step(trace_context),
+                        recovery_token=self._current_task_execution_token(
+                            trace_context.task_id
+                        ),
                     )
                     self.print_result(visible_text)
                     if not visible_text.get("success"):
@@ -1266,6 +1570,9 @@ class AgentRuntime:
                     action,
                     action_context=action_context,
                     step_reservation=step_reservation,
+                    recovery_token=self._current_task_execution_token(
+                        trace_context.task_id
+                    ),
                 )
             except PersistenceError:
                 raise
@@ -1493,6 +1800,9 @@ class AgentRuntime:
                     action,
                     action_context=action_context,
                     step_reservation=step_reservation,
+                    recovery_token=self._current_task_execution_token(
+                        trace_context.task_id
+                    ),
                 )
             except PersistenceError:
                 raise
@@ -1574,6 +1884,9 @@ class AgentRuntime:
             require_approval=require_approval,
             action_context=action_context,
             step_reservation=reservation,
+            recovery_token=self._current_task_execution_token(
+                trace_context.task_id
+            ),
         )
         checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
         if (
@@ -1585,6 +1898,193 @@ class AgentRuntime:
             self._mark_task_between_steps(trace_context)
         return result
 
+    def resume_model(
+        self,
+        request_text: str,
+        *,
+        trace_context: TraceContext,
+        step_reservation: StepReservation | None,
+        recovery_token: RecoveryExecutionToken,
+    ) -> Mapping[str, Any]:
+        """Continue one operator-authorized model recovery under its claim."""
+
+        reminted_attempt = (
+            None
+            if step_reservation is None
+            else step_reservation.recovery_attempt_id
+        )
+        if (
+            reminted_attempt is not None
+            and reminted_attempt != recovery_token.recovery_attempt_id
+        ):
+            raise RecoveryFencedError(
+                "Recovered step reservation does not match the recovery claim."
+            )
+        with self._recovery_dispatch_scope(
+            trace_context,
+            recovery_token,
+            allowed_directives=frozenset({RecoveryDirective.RESUME_MODEL}),
+            step_reservation=step_reservation,
+        ):
+            self._dispatch_text_request_guarded(
+                request_text,
+                trace_context,
+                ingress="OPERATOR_API",
+                resume_before_model_call=reminted_attempt is not None,
+            )
+        checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+        if checkpoint is None:
+            raise TaskCheckpointError(
+                "Recovered request lost its durable task checkpoint."
+            )
+        return {
+            **trace_context.identity_fields(),
+            "success": True,
+            "task_state": checkpoint.state.value,
+            "task_phase": checkpoint.phase.value,
+        }
+
+    def resume_reserved_action(
+        self,
+        action: Mapping[str, Any],
+        *,
+        trace_context: TraceContext,
+        recovery_token: RecoveryExecutionToken,
+    ) -> Mapping[str, Any]:
+        """Dispatch an exact recoverable action through the guarded executor."""
+
+        with self._recovery_dispatch_scope(
+            trace_context,
+            recovery_token,
+            allowed_directives=frozenset(
+                {
+                    RecoveryDirective.REVALIDATE_ACTION,
+                    RecoveryDirective.REQUIRE_FRESH_APPROVAL,
+                }
+            ),
+        ):
+            self.executor.resume_recoverable_action(
+                dict(action),
+                recovery_token=recovery_token,
+            )
+            checkpoint = self._terminalize_recovered_action(
+                action,
+                trace_context,
+            )
+        return {
+            **trace_context.identity_fields(),
+            "success": True,
+            "task_state": checkpoint.state.value,
+            "task_phase": checkpoint.phase.value,
+        }
+
+    def resume_waiting_action(
+        self,
+        action: Mapping[str, Any],
+        *,
+        trace_context: TraceContext,
+        recovery_token: RecoveryExecutionToken,
+    ) -> Mapping[str, Any]:
+        """Revalidate an approval-waiting action under the same guard."""
+
+        with self._recovery_dispatch_scope(
+            trace_context,
+            recovery_token,
+            allowed_directives=frozenset(
+                {
+                    RecoveryDirective.REVALIDATE_ACTION,
+                    RecoveryDirective.REQUIRE_FRESH_APPROVAL,
+                }
+            ),
+        ):
+            self.executor.resume_recoverable_action(
+                dict(action),
+                recovery_token=recovery_token,
+            )
+            checkpoint = self._terminalize_recovered_action(
+                action,
+                trace_context,
+            )
+        return {
+            **trace_context.identity_fields(),
+            "success": True,
+            "task_state": checkpoint.state.value,
+            "task_phase": checkpoint.phase.value,
+        }
+
+    def _terminalize_recovered_action(
+        self,
+        action: Mapping[str, Any],
+        trace_context: TraceContext,
+    ) -> TaskCheckpoint:
+        """Atomically close recovered work whose continuation was not durable."""
+
+        checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+        if checkpoint is None:
+            raise TaskCheckpointError(
+                "Recovered action lost its durable task checkpoint."
+            )
+        if checkpoint.state in TERMINAL_TASK_STATES:
+            return checkpoint
+        if checkpoint.state is TaskState.RECOVERY_REQUIRED:
+            raise TaskCheckpointError(
+                "Recovered action ended with an unknown durable outcome."
+            ).attach_correlation(trace_context.identity_fields())
+        if checkpoint.phase is not TaskPhase.AFTER_ACTION:
+            raise TaskCheckpointError(
+                "Recovered action did not reach a terminalizable durable phase."
+            ).attach_correlation(trace_context.identity_fields())
+        outcome = checkpoint.current_idempotency_state
+        if outcome == "SUCCEEDED":
+            terminal_state = (
+                TaskState.COMPLETED
+                if action.get("action") == "respond"
+                or checkpoint.max_steps <= 1
+                or checkpoint.remaining_steps <= 0
+                else TaskState.PARTIAL
+            )
+        else:
+            try:
+                terminal_state = {
+                    "BLOCKED": TaskState.BLOCKED,
+                    "CANCELLED": TaskState.CANCELLED,
+                    "FAILED_BEFORE_DISPATCH": TaskState.FAILED,
+                    "FAILED_REPORTED": TaskState.FAILED,
+                }[outcome or ""]
+            except KeyError as exc:
+                raise TaskCheckpointError(
+                    "Recovered action has no canonical terminal outcome."
+                ).attach_correlation(trace_context.identity_fields()) from exc
+        return self._finish_task(trace_context, terminal_state)
+
+    def cancel_recoverable_action(
+        self,
+        *,
+        trace_context: TraceContext,
+        recovery_token: RecoveryExecutionToken,
+    ) -> Mapping[str, Any]:
+        """Cancel only executor-proven work that has not crossed dispatch."""
+
+        with self._recovery_dispatch_scope(
+            trace_context,
+            recovery_token,
+            allowed_directives=frozenset({RecoveryDirective.CANCEL_TASK}),
+        ):
+            self.executor.cancel_recoverable_action(
+                recovery_token=recovery_token,
+            )
+        checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
+        if checkpoint is None:
+            raise TaskCheckpointError(
+                "Recovered cancellation lost its durable task checkpoint."
+            )
+        return {
+            **trace_context.identity_fields(),
+            "success": True,
+            "task_state": checkpoint.state.value,
+            "task_phase": checkpoint.phase.value,
+        }
+
     def dispatch_text_request(
         self,
         user_input: str,
@@ -1593,6 +2093,23 @@ class AgentRuntime:
         ingress: str = "RUNTIME",
     ) -> None:
         """Dispatch one already-identified CLI, TUI, or web request."""
+
+        with self._live_task_execution_guard(trace_context, user_input):
+            self._dispatch_text_request_guarded(
+                user_input,
+                trace_context,
+                ingress=ingress,
+            )
+
+    def _dispatch_text_request_guarded(
+        self,
+        user_input: str,
+        trace_context: TraceContext,
+        *,
+        ingress: str,
+        resume_before_model_call: bool = False,
+    ) -> None:
+        """Run a request while its one live execution claim remains held."""
 
         # The checkpoint preparation/snapshot/checkpointed triplet is durable
         # before the request lifecycle can claim that work started.
@@ -1615,16 +2132,23 @@ class AgentRuntime:
             trace_context=trace_context,
         )
         try:
-            command_result = self.command_registry.execute(
-                user_input,
-                self,
-                trace_context,
-            )
-            if command_result.handled:
-                if command_result.message:
-                    print(f"\nAgent> {command_result.message}")
+            if resume_before_model_call:
+                self.handle_user_request(
+                    user_input,
+                    trace_context,
+                    resume_before_model_call=True,
+                )
             else:
-                self.handle_user_request(user_input, trace_context)
+                command_result = self.command_registry.execute(
+                    user_input,
+                    self,
+                    trace_context,
+                )
+                if command_result.handled:
+                    if command_result.message:
+                        print(f"\nAgent> {command_result.message}")
+                else:
+                    self.handle_user_request(user_input, trace_context)
         except Exception as request_error:
             try:
                 self._finish_task(trace_context, TaskState.FAILED)
@@ -1744,6 +2268,9 @@ class AgentRuntime:
                 action,
                 action_context=action_context,
                 step_reservation=self._reserve_task_step(trace_context),
+                recovery_token=self._current_task_execution_token(
+                    trace_context.task_id
+                ),
             )
             last_result = result
             self.print_result(result)
@@ -1935,6 +2462,9 @@ class AgentRuntime:
             require_approval=True,
             action_context=start_context,
             step_reservation=self._reserve_task_step(trace_context),
+            recovery_token=self._current_task_execution_token(
+                trace_context.task_id
+            ),
         )
         self.print_result(start_result)
         request_trace.append(
@@ -1960,6 +2490,9 @@ class AgentRuntime:
             require_approval=True,
             action_context=open_context,
             step_reservation=self._reserve_task_step(trace_context),
+            recovery_token=self._current_task_execution_token(
+                trace_context.task_id
+            ),
         )
         self.print_result(open_result)
         request_trace.append(
@@ -1986,6 +2519,9 @@ class AgentRuntime:
                 require_approval=True,
                 action_context=text_context,
                 step_reservation=self._reserve_task_step(trace_context),
+                recovery_token=self._current_task_execution_token(
+                    trace_context.task_id
+                ),
             )
             self.print_result(text_result)
             snapshot_path = self.save_page_text_snapshot(normalized_url, text_result)
@@ -2008,6 +2544,8 @@ class AgentRuntime:
 
     def save_page_text_snapshot(self, url: str, result: dict[str, Any]) -> Path | None:
         """Persist locally captured page text so quota failures do not lose context."""
+        if self._recovery_sensitive_persistence.get():
+            return None
         text = result.get("text", "").strip()
         if not text:
             return None
@@ -2096,7 +2634,7 @@ class AgentRuntime:
             "kind": kind,
             **identity,
             "authority": dict(OPERATIONAL_LOG_AUTHORITY),
-            "payload": payload,
+            "payload": self._recovery_persistence_payload(payload),
         }
         try:
             append_json_line(
@@ -2132,7 +2670,7 @@ class AgentRuntime:
                 kind,
                 {
                     **identity,
-                    **payload,
+                    **self._recovery_persistence_payload(payload),
                 },
             )
         except PersistenceError as exc:
@@ -2160,7 +2698,7 @@ class AgentRuntime:
                 error_file,
                 {
                     **identity,
-                    **payload,
+                    **self._recovery_persistence_payload(payload),
                 },
                 lock_path=state_resource_lock_path(
                     self.memory_store.paths.state_dir,

@@ -142,6 +142,7 @@ class StepReservation:
     checkpoint_hash: str
     checkpoint_event_id: str
     _nonce: str
+    recovery_attempt_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -193,6 +194,7 @@ LEGAL_STATE_TRANSITIONS: dict[TaskState, frozenset[TaskState]] = {
     TaskState.WAITING_FOR_APPROVAL: frozenset(
         {
             TaskState.RUNNING,
+            TaskState.BLOCKED,
             TaskState.CANCELLED,
             TaskState.FAILED,
             TaskState.RECOVERY_REQUIRED,
@@ -247,6 +249,8 @@ TASK_REASON_CODES = frozenset(
         "TASK_MODEL_CONTINUATION_STARTED",
         "TASK_MODEL_CALL_COMPLETED",
         "TASK_MODEL_CALL_FAILED",
+        "TASK_RECOVERY_STEP_REMINTED",
+        "TASK_RECOVERY_RESUME_PREPARED",
         "TASK_AFTER_MODEL_RESULT",
         "TASK_BEFORE_ACTION_POLICY",
         "TASK_WAITING_FOR_APPROVAL",
@@ -279,7 +283,7 @@ TASK_STATE_PHASE_REASONS: dict[
         {"TASK_CREATED", "STANDALONE_ACTION_TASK_CREATED"}
     ),
     (TaskState.RUNNING, TaskPhase.BETWEEN_STEPS): frozenset(
-        {"TASK_STARTED", "TASK_BETWEEN_STEPS"}
+        {"TASK_STARTED", "TASK_BETWEEN_STEPS", "TASK_RECOVERY_RESUME_PREPARED"}
     ),
     (TaskState.RUNNING, TaskPhase.BEFORE_MODEL_CALL): frozenset(
         {
@@ -288,6 +292,7 @@ TASK_STATE_PHASE_REASONS: dict[
             "TASK_MODEL_ATTEMPT_STARTED",
             "TASK_MODEL_CONTINUATION_STARTED",
             "TASK_MODEL_CALL_FAILED",
+            "TASK_RECOVERY_STEP_REMINTED",
         }
     ),
     (TaskState.RUNNING, TaskPhase.AFTER_MODEL_CALL): frozenset(
@@ -376,8 +381,11 @@ def _validate_transition_edge(
         "TASK_MODEL_ATTEMPT_STARTED",
         "TASK_MODEL_CALL_FAILED",
         "TASK_BEFORE_MODEL_CALL",
+        "TASK_RECOVERY_STEP_REMINTED",
     }:
         legal = source == (TaskState.RUNNING, TaskPhase.BEFORE_MODEL_CALL) and target == source
+    elif current.reason_code == "TASK_RECOVERY_RESUME_PREPARED":
+        legal = source == (TaskState.RUNNING, TaskPhase.BETWEEN_STEPS) and target == source
     elif current.reason_code in {"TASK_MODEL_CALL_COMPLETED", "TASK_AFTER_MODEL_RESULT"}:
         legal = source in {
             (TaskState.RUNNING, TaskPhase.BEFORE_MODEL_CALL),
@@ -1395,7 +1403,9 @@ class DurableTaskCheckpointStore:
     def _open_task_resource(
         self,
         task_id: str,
-    ) -> Iterator[_OpenTaskResource]:
+        *,
+        create: bool = True,
+    ) -> Iterator[_OpenTaskResource | None]:
         """Pin the verified tasks root and one no-follow task directory.
 
         Both descriptors stay open for the caller's complete read or atomic
@@ -1419,6 +1429,9 @@ class DurableTaskCheckpointStore:
                         follow_symlinks=False,
                     )
                 except FileNotFoundError:
+                    if not create:
+                        yield None
+                        return
                     try:
                         os.mkdir(digest, mode=0o700, dir_fd=root_descriptor)
                         created_task_directory = True
@@ -1602,6 +1615,131 @@ class DurableTaskCheckpointStore:
                     }
                 )
             raise exc.attach_correlation(identity)
+
+    def load_snapshot_unanchored(self, task_id: str) -> TaskCheckpoint | None:
+        """Read one pinned, fully validated snapshot without provenance repair.
+
+        Recovery discovery uses this read-only boundary so inspecting a crash
+        gap cannot create a task directory or auto-append a missing checkpoint
+        event.  The returned snapshot is not, by itself, resume authority.
+        """
+
+        try:
+            with self._open_task_resource(task_id, create=False) as resource:
+                if resource is None:
+                    return None
+                path = resource.task_path / "checkpoint.json"
+                with InterProcessFileLock(
+                    self.checkpoint_lock_path(task_id),
+                    timeout_seconds=self.lock_timeout_seconds,
+                ):
+                    payload = read_json_snapshot(
+                        path,
+                        reject_duplicate_keys=True,
+                        maximum_bytes=MAX_TASK_CHECKPOINT_BYTES,
+                        expected_parent_identity=resource.task_identity,
+                        parent_directory_descriptor=resource.task_descriptor,
+                        directory_identity_validator=lambda: (
+                            self._validate_task_resource_identity(resource)
+                        ),
+                    )
+        except StateCorruptionError as exc:
+            raise TaskCheckpointCorruptionError(
+                "Task checkpoint JSON is corrupt."
+            ) from exc
+        if payload is None:
+            return None
+        checkpoint = TaskCheckpoint.from_payload(payload)
+        if (
+            checkpoint.task_id != task_id
+            or checkpoint.project_scope != self.project_scope
+        ):
+            raise TaskCheckpointCorruptionError(
+                "Task checkpoint resource identity is inconsistent."
+            )
+        return checkpoint
+
+    def load_snapshot_resource_unanchored(
+        self, resource_id: str
+    ) -> TaskCheckpoint | None:
+        """Read a discovered task resource through pinned directory FDs."""
+
+        if not isinstance(resource_id, str) or not _HEX_DIGEST.fullmatch(resource_id):
+            raise TaskCheckpointCorruptionError(
+                "Task checkpoint discovery resource identity is invalid."
+            )
+        root_descriptor = self._open_verified_root()
+        task_descriptor: int | None = None
+        try:
+            try:
+                metadata = os.stat(
+                    resource_id,
+                    dir_fd=root_descriptor,
+                    follow_symlinks=False,
+                )
+            except FileNotFoundError:
+                return None
+            if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
+                raise TaskCheckpointCorruptionError(
+                    "Task checkpoint discovery resource is unsafe."
+                )
+            flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+            flags |= getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+            task_descriptor = os.open(
+                resource_id, flags, dir_fd=root_descriptor
+            )
+            opened = os.fstat(task_descriptor)
+            if (
+                not stat.S_ISDIR(opened.st_mode)
+                or (opened.st_dev, opened.st_ino)
+                != (metadata.st_dev, metadata.st_ino)
+            ):
+                raise TaskCheckpointCorruptionError(
+                    "Task checkpoint discovery binding changed."
+                )
+            resource = _OpenTaskResource(
+                task_path=self.root_dir / resource_id,
+                task_name=resource_id,
+                root_descriptor=root_descriptor,
+                task_descriptor=task_descriptor,
+                task_identity=(opened.st_dev, opened.st_ino),
+            )
+            self._validate_task_resource_identity(resource)
+            path = resource.task_path / "checkpoint.json"
+            with InterProcessFileLock(
+                state_resource_lock_path(self.state_dir, path),
+                timeout_seconds=self.lock_timeout_seconds,
+            ):
+                payload = read_json_snapshot(
+                    path,
+                    reject_duplicate_keys=True,
+                    maximum_bytes=MAX_TASK_CHECKPOINT_BYTES,
+                    expected_parent_identity=resource.task_identity,
+                    parent_directory_descriptor=resource.task_descriptor,
+                    directory_identity_validator=lambda: (
+                        self._validate_task_resource_identity(resource)
+                    ),
+                )
+        except StateCorruptionError as exc:
+            raise TaskCheckpointCorruptionError(
+                "Task checkpoint JSON is corrupt."
+            ) from exc
+        finally:
+            if task_descriptor is not None:
+                os.close(task_descriptor)
+            os.close(root_descriptor)
+        if payload is None:
+            return None
+        checkpoint = TaskCheckpoint.from_payload(payload)
+        if (
+            hashlib.sha256(checkpoint.task_id.encode("utf-8")).hexdigest()
+            != resource_id
+            or checkpoint.project_scope != self.project_scope
+        ):
+            raise TaskCheckpointCorruptionError(
+                "Task checkpoint discovery identity is inconsistent."
+            )
+        return checkpoint
 
     def create_task(
         self,
@@ -2092,6 +2230,90 @@ class DurableTaskCheckpointStore:
             self._active_step_reservations[nonce] = token
         return token
 
+    def remint_step_reservation_for_recovery(
+        self,
+        task_id: str,
+        *,
+        recovery_token: object,
+    ) -> StepReservation:
+        """Recreate only the process-local proof for an already-debited step.
+
+        This edge never changes ``step_index`` or either remaining budget.  The
+        caller must first validate the exact active recovery token through
+        ``TaskRecoveryService.classify_under_claim``; the token is then bound
+        into the new durable checkpoint and into the one-shot reservation.
+        """
+
+        # Import lazily to avoid a module cycle during checkpoint bootstrap.
+        from runtime.task_recovery import RecoveryExecutionToken
+
+        if (
+            not isinstance(recovery_token, RecoveryExecutionToken)
+            or recovery_token.task_id != task_id
+            or recovery_token._owner_process_id != os.getpid()
+            or recovery_token._owner_thread_id != threading.get_ident()
+        ):
+            raise TaskStepReservationError(
+                "Recovery step remint requires its exact active owner token."
+            )
+        recovery_token._validate_active_owner(task_id)
+        checkpoint = self.load(task_id)
+        if checkpoint is None:
+            raise TaskCheckpointConflictError("Task checkpoint does not exist.")
+        failed_model_boundary = checkpoint.reason_code in {
+            "TASK_MODEL_ATTEMPT_STARTED",
+            "TASK_MODEL_CONTINUATION_STARTED",
+        }
+        if failed_model_boundary:
+            recovery_token._validate_failed_model_remint(checkpoint)
+        if (
+            checkpoint.state is not TaskState.RUNNING
+            or checkpoint.phase is not TaskPhase.BEFORE_MODEL_CALL
+            or checkpoint.reason_code
+            not in {
+                "TASK_STEP_RESERVED",
+                "TASK_BEFORE_MODEL_CALL",
+                "TASK_MODEL_CALL_FAILED",
+                "TASK_MODEL_ATTEMPT_STARTED",
+                "TASK_MODEL_CONTINUATION_STARTED",
+                "TASK_RECOVERY_STEP_REMINTED",
+            }
+            or checkpoint.checkpoint_hash != recovery_token.checkpoint_hash
+            or checkpoint.recovery_attempt_id
+            == recovery_token.recovery_attempt_id
+        ):
+            raise TaskStepReservationError(
+                "Task is not at an exact safe already-debited model boundary."
+            )
+        reminted = self.transition(
+            task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.BEFORE_MODEL_CALL,
+            reason_code="TASK_RECOVERY_STEP_REMINTED",
+            latest_request_id=recovery_token.request_id,
+            latest_trace_id=recovery_token.trace_id,
+            recovery_attempt_id=recovery_token.recovery_attempt_id,
+            step_index=checkpoint.step_index,
+            remaining_steps=checkpoint.remaining_steps,
+            provider_attempts_used=checkpoint.provider_attempts_used,
+            remaining_retry_budget=checkpoint.remaining_retry_budget,
+            approval_state=checkpoint.approval_state,
+        )
+        nonce = uuid.uuid4().hex
+        token = StepReservation(
+            task_id=reminted.task_id,
+            step_index=reminted.step_index,
+            checkpoint_version=reminted.checkpoint_version,
+            checkpoint_hash=reminted.checkpoint_hash,
+            checkpoint_event_id=reminted.latest_provenance_event_id,
+            _nonce=nonce,
+            recovery_attempt_id=recovery_token.recovery_attempt_id,
+        )
+        with self._reservation_lock:
+            self._active_step_reservations[nonce] = token
+        return token
+
     def validate_step_reservation(
         self,
         token: StepReservation,
@@ -2111,6 +2333,11 @@ class DurableTaskCheckpointStore:
             or checkpoint.checkpoint_version < token.checkpoint_version
             or token.checkpoint_hash == ""
             or token.checkpoint_event_id == ""
+            or (
+                token.recovery_attempt_id is not None
+                and checkpoint.recovery_attempt_id
+                != token.recovery_attempt_id
+            )
         ):
             raise TaskStepReservationError("Task step reservation no longer matches durable state.")
         return checkpoint
@@ -2475,22 +2702,27 @@ class DurableTaskCheckpointStore:
             "SUCCEEDED": {
                 "ACTION_DISPATCH_SUCCEEDED",
                 "IDEMPOTENCY_REPLAYED",
+                "RECOVERY_TERMINAL_RECONCILED",
             },
             "FAILED_BEFORE_DISPATCH": {
                 "ACTION_DISPATCH_FAILED",
                 "IDEMPOTENCY_REPLAYED",
+                "RECOVERY_TERMINAL_RECONCILED",
             },
             "FAILED_REPORTED": {
                 "ACTION_DISPATCH_FAILED",
                 "IDEMPOTENCY_REPLAYED",
+                "RECOVERY_TERMINAL_RECONCILED",
             },
             "BLOCKED": {
                 "ACTION_DISPATCH_BLOCKED",
                 "IDEMPOTENCY_REPLAYED",
+                "RECOVERY_TERMINAL_RECONCILED",
             },
             "CANCELLED": {
                 "ACTION_DISPATCH_CANCELLED",
                 "IDEMPOTENCY_REPLAYED",
+                "RECOVERY_TERMINAL_RECONCILED",
             },
             "CONFLICT": {"IDEMPOTENCY_CONFLICT"},
         }

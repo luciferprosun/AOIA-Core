@@ -23,6 +23,7 @@ from runtime.task_checkpoints import (
     TaskState,
     safe_context_metadata,
 )
+from runtime.task_recovery import RecoveryPurpose, TaskRecoveryService
 from runtime.provenance_lifecycle import (
     AppendOnlyProvenanceStore,
     RuntimeProvenanceEventType,
@@ -77,104 +78,94 @@ def main(argv: Sequence[str] | None = None) -> int:
         and args.acknowledge_live_provider_test
         and args.activate_manual_live_test
     )
-    provenance_store = None
-    task_checkpoint_store = None
-    step_reservation = None
-    trace_context = None
-    model_call = None
-    if live_attempt:
+    def invoke_provider():
+        return run_selected_provider(
+            provider_id=provider_id,
+            model_id=model_id,
+            prompt=prompt,
+            max_tokens=args.max_tokens,
+            live=args.live,
+            acknowledge_live_provider_test=args.acknowledge_live_provider_test,
+            activation_status=activation,
+            selected_by="manual",
+            created_at=args.created_at,
+        )
+
+    if not live_attempt:
         try:
-            # Complete deterministic input validation before claiming that a
-            # live model-call attempt started. These helpers perform no I/O.
-            selection = create_provider_selection(
-                provider_id=provider_id,
-                model_id=model_id,
-                max_tokens=args.max_tokens,
-                live=True,
-                selected_by="manual",
-                created_at=args.created_at,
-            )
-            build_provider_envelope(
-                provider_id=selection.provider_id,
-                model_id=selection.model_id,
-                prompt=prompt,
-                params=(
-                    {}
-                    if selection.max_tokens is None
-                    else {"max_tokens": selection.max_tokens}
-                ),
-                dry_run=False,
-                created_at=selection.created_at,
-            )
-            trace_context = TraceContext.new_request()
-            model_call = trace_context.new_model_call()
-            project_dir = Path(__file__).resolve().parents[1]
-            state_dir = runtime_state_dir(project_dir) / "state"
-            provenance_store = AppendOnlyProvenanceStore(state_dir)
-            task_checkpoint_store = DurableTaskCheckpointStore(
-                state_dir,
-                project_dir=project_dir,
-                provenance_store=provenance_store,
-            )
-            checkpoint = task_checkpoint_store.create_task(
-                trace_context,
-                max_steps=1,
-                retry_budget=1,
-                safe_context=safe_context_metadata(prompt),
-            )
-            task_checkpoint_store.transition(
-                trace_context.task_id,
-                expected_version=checkpoint.checkpoint_version,
-                state=TaskState.RUNNING,
-                phase=TaskPhase.BETWEEN_STEPS,
-                reason_code="TASK_STARTED",
-                latest_request_id=trace_context.request_id,
-                latest_trace_id=trace_context.trace_id,
-                approval_state=ApprovalState.NOT_APPLICABLE,
-            )
-            provenance_store.append_runtime_event(
-                new_runtime_provenance_event(
-                    RuntimeProvenanceEventType.REQUEST_STARTED,
-                    trace_context=trace_context,
-                    ingress="CLI",
-                    request_length=len(prompt),
-                    slash_command=False,
-                )
-            )
-            step_reservation = task_checkpoint_store.reserve_step(
-                trace_context.task_id
-            )
-            task_checkpoint_store.consume_provider_attempt(
-                model_call,
-                step_reservation=step_reservation,
-            )
-            provenance_store.append_runtime_event(
-                new_runtime_provenance_event(
-                    RuntimeProvenanceEventType.MODEL_CALL_STARTED,
-                    model_call=model_call,
-                    requested_provider=provider_id,
-                    requested_model=model_id,
-                    retry_attempt=1,
-                    provider_attempt=1,
-                )
-            )
+            result = invoke_provider()
         except ValueError as error:
             print(
                 json.dumps(
-                    {"status": "invalid", "error_message": str(error)},
+                    {
+                        "status": "invalid",
+                        "error_message": str(error),
+                    },
                     sort_keys=True,
                 )
             )
             return 2
+        print(json.dumps(result.to_dict(), sort_keys=True))
+        return 0 if result.status in {"dry_run_preview", "live_success"} else 2
+
+    try:
+        # Complete deterministic input validation before creating a durable
+        # live task. These helpers perform no provider I/O.
+        selection = create_provider_selection(
+            provider_id=provider_id,
+            model_id=model_id,
+            max_tokens=args.max_tokens,
+            live=True,
+            selected_by="manual",
+            created_at=args.created_at,
+        )
+        build_provider_envelope(
+            provider_id=selection.provider_id,
+            model_id=selection.model_id,
+            prompt=prompt,
+            params=(
+                {}
+                if selection.max_tokens is None
+                else {"max_tokens": selection.max_tokens}
+            ),
+            dry_run=False,
+            created_at=selection.created_at,
+        )
+    except ValueError as error:
+        print(
+            json.dumps(
+                {"status": "invalid", "error_message": str(error)},
+                sort_keys=True,
+            )
+        )
+        return 2
+
+    trace_context = TraceContext.new_request()
+    model_call = trace_context.new_model_call()
+    project_dir = Path(__file__).resolve().parents[1]
+    state_dir = runtime_state_dir(project_dir) / "state"
+    provenance_store = AppendOnlyProvenanceStore(state_dir)
+    task_checkpoint_store = DurableTaskCheckpointStore(
+        state_dir,
+        project_dir=project_dir,
+        provenance_store=provenance_store,
+    )
+    checkpoint = task_checkpoint_store.create_task(
+        trace_context,
+        max_steps=1,
+        retry_budget=1,
+        safe_context=safe_context_metadata(prompt),
+    )
+    recovery_service = TaskRecoveryService(
+        state_dir,
+        project_dir=project_dir,
+        checkpoint_store=task_checkpoint_store,
+        provenance_store=provenance_store,
+    )
+    step_reservation = None
 
     def terminalize_live_attempt(succeeded: bool) -> None:
-        if not live_attempt:
-            return
-        assert provenance_store is not None
-        assert task_checkpoint_store is not None
         assert step_reservation is not None
-        assert trace_context is not None
-        assert model_call is not None
         provenance_store.append_terminal(
             new_runtime_provenance_event(
                 (
@@ -236,37 +227,80 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         )
 
-    try:
-        result = run_selected_provider(
-            provider_id=provider_id,
-            model_id=model_id,
-            prompt=prompt,
-            max_tokens=args.max_tokens,
-            live=args.live,
-            acknowledge_live_provider_test=args.acknowledge_live_provider_test,
-            activation_status=activation,
-            selected_by="manual",
-            created_at=args.created_at,
+    with recovery_service.execution_guard(
+        trace_context.task_id,
+        purpose=RecoveryPurpose.LIVE,
+        expected_checkpoint_hash=checkpoint.checkpoint_hash,
+    ) as recovery_token:
+        task_checkpoint_store.transition(
+            trace_context.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.BETWEEN_STEPS,
+            reason_code="TASK_STARTED",
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
         )
-    except ValueError as error:
-        terminalize_live_attempt(False)
-        print(json.dumps({"status": "invalid", "error_message": str(error)}, sort_keys=True))
-        return 2
-    except Exception as provider_error:
+        provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.REQUEST_STARTED,
+                trace_context=trace_context,
+                ingress="CLI",
+                request_length=len(prompt),
+                slash_command=False,
+            )
+        )
+        step_reservation = task_checkpoint_store.reserve_step(trace_context.task_id)
+        task_checkpoint_store.consume_provider_attempt(
+            model_call,
+            step_reservation=step_reservation,
+        )
+        provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.MODEL_CALL_STARTED,
+                model_call=model_call,
+                requested_provider=provider_id,
+                requested_model=model_id,
+                retry_attempt=1,
+                provider_attempt=1,
+            )
+        )
         try:
+            recovery_service.classify_under_claim(
+                trace_context.task_id,
+                recovery_token,
+            )
+            result = invoke_provider()
+        except ValueError as error:
             terminalize_live_attempt(False)
-        except Exception as lifecycle_error:
-            try:
-                provider_error.add_note(
-                    "CLI provider failure lifecycle is pending or degraded; "
-                    f"secondary failure type: {type(lifecycle_error).__name__}."
+            print(
+                json.dumps(
+                    {"status": "invalid", "error_message": str(error)},
+                    sort_keys=True,
                 )
-            except AttributeError:  # pragma: no cover
-                pass
-        raise
-    terminalize_live_attempt(result.status == LIVE_SUCCESS)
-    print(json.dumps(result.to_dict(), sort_keys=True))
-    return 0 if result.status in {"dry_run_preview", "live_success"} else 2
+            )
+            return 2
+        except Exception as provider_error:
+            try:
+                terminalize_live_attempt(False)
+            except Exception as lifecycle_error:
+                try:
+                    provider_error.add_note(
+                        "CLI provider failure lifecycle is pending or degraded; "
+                        f"secondary failure type: {type(lifecycle_error).__name__}."
+                    )
+                except AttributeError:  # pragma: no cover
+                    pass
+            raise
+        terminalize_live_attempt(result.status == LIVE_SUCCESS)
+        print(
+            json.dumps(
+                {**result.to_dict(), **model_call.identity_fields()},
+                sort_keys=True,
+            )
+        )
+        return 0 if result.status in {"dry_run_preview", "live_success"} else 2
 
 
 if __name__ == "__main__":

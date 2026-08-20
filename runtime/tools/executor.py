@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
+import json
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Iterator
 from urllib.parse import unquote, urlparse
 
 from trace_context import (
@@ -27,6 +31,15 @@ from runtime.task_checkpoints import (
     TaskState,
     TERMINAL_TASK_STATES,
 )
+from runtime.task_recovery import (
+    RecoveryClassification,
+    RecoveryClaimConflictError,
+    RecoveryDirective,
+    RecoveryExecutionToken,
+    RecoveryFencedError,
+    RecoveryPurpose,
+    TaskRecoveryService,
+)
 
 from .browser_tools import (
     browser_click,
@@ -41,7 +54,11 @@ from .browser_tools import (
     browser_type,
     configure_browser_bridge,
 )
-from .capability_policy import ActionPolicyDecision, evaluate_action_policy
+from .capability_policy import (
+    ActionPolicyDecision,
+    CapabilityClass,
+    evaluate_action_policy,
+)
 from .filesystem_tools import (
     FilesystemContainmentError,
     append_file,
@@ -81,7 +98,7 @@ from .shell_tools import (
     shell_execute,
     shell_execution_blocked_result,
 )
-from .validator import classify_shell_command, validate_shell_command
+from .validator import classify_shell_command, validate_action, validate_shell_command
 
 
 ToolHandler = Callable[[dict[str, Any]], dict[str, Any]]
@@ -106,6 +123,7 @@ class ExecutionEngine:
         *,
         provenance_store: AppendOnlyProvenanceStore | None = None,
         task_checkpoint_store: DurableTaskCheckpointStore | None = None,
+        task_recovery_service: TaskRecoveryService | None = None,
     ) -> None:
         self.project_dir = canonical_project_root(project_dir)
         self.memory_store = memory_store
@@ -136,6 +154,42 @@ class ExecutionEngine:
             provenance_store=self.provenance_store,
             lock_timeout_seconds=memory_store.state_lock_timeout_seconds,
         )
+        self.task_recovery_service = task_recovery_service
+        self._recovery_sensitive_persistence: ContextVar[bool] = ContextVar(
+            f"aoia_executor_recovery_sensitive_{id(self)}",
+            default=False,
+        )
+
+    @contextmanager
+    def recovery_sensitive_persistence(self) -> Iterator[None]:
+        """Redact non-authoritative executor logs during trusted recovery."""
+
+        binding = self._recovery_sensitive_persistence.set(True)
+        try:
+            yield
+        finally:
+            self._recovery_sensitive_persistence.reset(binding)
+
+    @staticmethod
+    def _recovery_sensitive_summary(value: object) -> dict[str, object]:
+        """Return bounded metadata without retaining recoverable raw content."""
+
+        try:
+            serialized = json.dumps(
+                value,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                default=lambda item: f"<{type(item).__name__}>",
+            )
+        except (TypeError, ValueError, RecursionError):
+            serialized = f"<{type(value).__name__}>"
+        encoded = serialized.encode("utf-8", errors="replace")
+        return {
+            "redacted": True,
+            "sha256": hashlib.sha256(encoded).hexdigest(),
+            "utf8_length": len(encoded),
+        }
 
     def tool_names(self) -> list[str]:
         return sorted(self.tools)
@@ -148,6 +202,7 @@ class ExecutionEngine:
         action_context: ActionContext | None = None,
         operation_context: OperationContext | None = None,
         step_reservation: StepReservation | None = None,
+        recovery_token: RecoveryExecutionToken | None = None,
     ) -> dict[str, Any]:
         """Execute with complete persistence-error correlation."""
 
@@ -155,17 +210,732 @@ class ExecutionEngine:
             action_context or TraceContext.new_request().new_action()
         )
         try:
-            return self._execute(
-                action,
-                require_approval=require_approval,
-                action_context=authoritative_context,
+            guarded_context = self._execution_context_for_guard(
+                authoritative_context,
                 operation_context=operation_context,
                 step_reservation=step_reservation,
             )
+            service = self._get_task_recovery_service()
+            if recovery_token is not None:
+                self._validate_recovery_token(
+                    guarded_context.task_id,
+                    recovery_token,
+                )
+                if recovery_token.purpose is not RecoveryPurpose.LIVE:
+                    service.validate_dispatch_authorization(
+                        recovery_token,
+                        frozenset({RecoveryDirective.RESUME_MODEL}),
+                    )
+                return self._execute(
+                    action,
+                    require_approval=require_approval,
+                    action_context=authoritative_context,
+                    operation_context=operation_context,
+                    step_reservation=step_reservation,
+                    recovery_token=recovery_token,
+                )
+
+            existing_operation = (
+                self.idempotency_store.load(operation_context)
+                if operation_context is not None
+                else None
+            )
+            preexisting_checkpoint = self.task_checkpoint_store.load(
+                guarded_context.task_id
+            )
+            checkpoint = self.task_checkpoint_store.ensure_for_action(
+                guarded_context
+            )
+            entered_guard = False
+            try:
+                with service.execution_guard(
+                    guarded_context.task_id,
+                    purpose=RecoveryPurpose.LIVE,
+                    # A known P0.7 record may queue behind the current owner and
+                    # replay/conflict from the final canonical record. A genuinely
+                    # new operation is instead bound to the exact pre-guard task
+                    # checkpoint so recovery cannot terminalize the task in the
+                    # ensure-for-action -> execution-lock window and then let this
+                    # caller mint a late RESERVED record under a terminal task.
+                    expected_checkpoint_hash=(
+                        None
+                        if existing_operation is not None
+                        else checkpoint.checkpoint_hash
+                    ),
+                ) as live_token:
+                    entered_guard = True
+                    if existing_operation is None:
+                        current = self.task_checkpoint_store.load(
+                            guarded_context.task_id
+                        )
+                        if (
+                            current is None
+                            or current.checkpoint_hash != checkpoint.checkpoint_hash
+                            or current.state in TERMINAL_TASK_STATES
+                        ):
+                            raise RecoveryFencedError(
+                                "Task changed before a new operation could enter policy evaluation."
+                            )
+                        if preexisting_checkpoint is not None:
+                            if step_reservation is None:
+                                raise RecoveryFencedError(
+                                    "An existing task cannot be adopted by an unguarded live action."
+                                )
+                            reserved_checkpoint = (
+                                self.task_checkpoint_store.validate_step_reservation(
+                                    step_reservation,
+                                    task_id=guarded_context.task_id,
+                                )
+                            )
+                            if (
+                                reserved_checkpoint.state is not TaskState.RUNNING
+                                or not (
+                                    (
+                                        reserved_checkpoint.phase
+                                        is TaskPhase.BEFORE_MODEL_CALL
+                                        and reserved_checkpoint.safe_resume_classification
+                                        is SafeResumeClassification.SAFE_TO_RESUME
+                                    )
+                                    or (
+                                        reserved_checkpoint.phase
+                                        is TaskPhase.AFTER_MODEL_CALL
+                                        and reserved_checkpoint.safe_resume_classification
+                                        is SafeResumeClassification.MANUAL_REVIEW_REQUIRED
+                                        and guarded_context.model_call_id
+                                        == reserved_checkpoint.current_model_call_id
+                                    )
+                                )
+                            ):
+                                raise RecoveryFencedError(
+                                    "The live step reservation no longer proves a safe task phase."
+                                )
+                    return self._execute(
+                        action,
+                        require_approval=require_approval,
+                        action_context=authoritative_context,
+                        operation_context=operation_context,
+                        step_reservation=step_reservation,
+                        recovery_token=live_token,
+                    )
+            except RecoveryClaimConflictError:
+                if entered_guard or operation_context is None:
+                    raise
+                # The exact-checkpoint claim may lose a legitimate first-writer
+                # race. Queue without a checkpoint hash only after P0.7 now proves
+                # that this logical operation already exists; otherwise recovery
+                # changed the task and the new operation remains fenced.
+                raced_record = self.idempotency_store.load(operation_context)
+                if raced_record is None:
+                    raise
+                with service.execution_guard(
+                    guarded_context.task_id,
+                    purpose=RecoveryPurpose.LIVE,
+                    expected_checkpoint_hash=None,
+                ) as replay_token:
+                    return self._execute(
+                        action,
+                        require_approval=require_approval,
+                        action_context=authoritative_context,
+                        operation_context=operation_context,
+                        step_reservation=step_reservation,
+                        recovery_token=replay_token,
+                    )
         except PersistenceError as exc:
             raise exc.attach_correlation(
                 authoritative_context.identity_fields()
             )
+
+    def resume_reserved_action(
+        self,
+        action: dict[str, Any],
+        *,
+        recovery_token: RecoveryExecutionToken,
+    ) -> dict[str, Any]:
+        """Resume only a proven pre-dispatch P0.7 RESERVED operation.
+
+        The action payload is merely a candidate for revalidation. Durable
+        checkpoint/P0.7 identities remain authoritative, the original operation
+        key is retained, and no task step or new P0.7 reservation is minted.
+        """
+
+        task_id = recovery_token.task_id
+        decision_under_claim = self._get_task_recovery_service().classify_under_claim(
+            task_id, recovery_token
+        )
+        if decision_under_claim.classification not in {
+            RecoveryClassification.SAFE_TO_RESUME,
+            RecoveryClassification.WAITING_FOR_FRESH_APPROVAL,
+        }:
+            raise RecoveryFencedError(
+                "Recovery classification does not authorize reserved-action resume."
+            )
+        checkpoint = self.task_checkpoint_store.load(task_id)
+        if checkpoint is None:
+            raise RecoveryFencedError(
+                "Reserved-action recovery checkpoint is missing."
+            )
+        if (
+            recovery_token.checkpoint_hash is None
+            or recovery_token.checkpoint_hash != checkpoint.checkpoint_hash
+        ):
+            raise RecoveryFencedError(
+                "Reserved-action recovery token is stale."
+            )
+
+        self._require_reserved_checkpoint(checkpoint)
+
+        operation = OperationContext(checkpoint.current_idempotency_key or "")
+        record = self.idempotency_store.load(operation)
+        if record is None:
+            raise RecoveryFencedError(
+                "Reserved-action recovery lacks its P0.7 record."
+            )
+        authoritative_context = ActionContext(
+            request_id=record.request_id,
+            trace_id=record.trace_id,
+            task_id=record.task_id or "",
+            action_id=record.action_id,
+            model_call_id=record.model_call_id,
+        )
+        authoritative_action = validate_action(
+            strip_untrusted_identity_fields(action)
+        )
+        candidate_fingerprint = canonical_action_fingerprint(
+            authoritative_action,
+            project_dir=self.project_dir,
+            capability_class=record.capability_class,
+        )
+        self._require_reserved_record_binding(
+            checkpoint,
+            record,
+            authoritative_context,
+            operation,
+            action_name=str(authoritative_action.get("action", "")),
+            action_fingerprint=candidate_fingerprint,
+        )
+        self._require_pristine_reserved_provenance(checkpoint, record)
+
+        current_decision = evaluate_action_policy(
+            authoritative_action, authoritative_context
+        )
+        if (
+            current_decision.action_name != checkpoint.current_action_name
+            or current_decision.capability_class.value != record.capability_class
+            or current_decision.capability_class.value
+            != checkpoint.current_capability_class
+        ):
+            raise RecoveryFencedError(
+                "Current action policy no longer matches the reserved operation."
+            )
+        self._record_capability_decision(
+            authoritative_action,
+            current_decision,
+            authoritative_context,
+            operation,
+        )
+
+        if not current_decision.allowed:
+            return self._terminalize_existing_reservation(
+                authoritative_action,
+                current_decision,
+                authoritative_context,
+                operation,
+                checkpoint,
+                record,
+                IdempotencyState.BLOCKED,
+                self._blocked_policy_result(current_decision),
+                recovery_token=recovery_token,
+            )
+
+        tool = self.tools.get(current_decision.action_name)
+        if tool is None:
+            blocked_result = {
+                **self._decision_fields(current_decision),
+                "success": False,
+                "allowed": False,
+                "blocked": True,
+                "cancelled": False,
+                "policy_allowed": True,
+                "policy_reason_code": "ACTION_HANDLER_MISSING",
+                "message": "Runtime capability policy blocked an action without a handler.",
+            }
+            return self._terminalize_existing_reservation(
+                authoritative_action,
+                current_decision,
+                authoritative_context,
+                operation,
+                checkpoint,
+                record,
+                IdempotencyState.BLOCKED,
+                blocked_result,
+                recovery_token=recovery_token,
+            )
+
+        needs_fresh_approval = (
+            current_decision.requires_confirmation
+            or checkpoint.approval_state is not ApprovalState.NOT_REQUIRED
+        )
+        if needs_fresh_approval:
+            approved = self._request_approval(
+                authoritative_action,
+                current_decision,
+                authoritative_context,
+            )
+            self._record_approval_decision(
+                approved,
+                authoritative_action,
+                current_decision,
+                authoritative_context,
+                operation,
+            )
+            if not approved:
+                cancelled_result = {
+                    **self._decision_fields(current_decision),
+                    "success": False,
+                    "allowed": False,
+                    "blocked": True,
+                    "cancelled": True,
+                    "policy_allowed": current_decision.allowed,
+                    "dispatched": False,
+                    "result_reason_code": "HUMAN_APPROVAL_DECLINED",
+                    "message": "Action rejected by fresh approval before recovery dispatch.",
+                }
+                return self._terminalize_existing_reservation(
+                    authoritative_action,
+                    current_decision,
+                    authoritative_context,
+                    operation,
+                    checkpoint,
+                    record,
+                    IdempotencyState.CANCELLED,
+                    cancelled_result,
+                    recovery_token=recovery_token,
+                )
+
+        self._require_pristine_reserved_provenance(checkpoint, record)
+        standalone_task = bool(
+            checkpoint.transitions
+            and checkpoint.transitions[0].reason_code
+            == "STANDALONE_ACTION_TASK_CREATED"
+        )
+        return self._dispatch_reserved_operation(
+            authoritative_action,
+            current_decision,
+            authoritative_context,
+            operation,
+            record,
+            checkpoint,
+            tool,
+            recovery_token=recovery_token,
+            standalone_task=standalone_task,
+            require_pristine_reserved_provenance=True,
+            fresh_approval_required=needs_fresh_approval,
+            recovery_resume=True,
+        )
+
+    def resume_pre_dispatch_action(
+        self,
+        action: dict[str, Any],
+        *,
+        recovery_token: RecoveryExecutionToken,
+    ) -> dict[str, Any]:
+        """Resume an exact WAITING/BEFORE_DISPATCH action before P0.7 exists."""
+
+        task_id = recovery_token.task_id
+        classification = self._get_task_recovery_service().classify_under_claim(
+            task_id, recovery_token
+        ).classification
+        if classification not in {
+            RecoveryClassification.SAFE_TO_RESUME,
+            RecoveryClassification.WAITING_FOR_FRESH_APPROVAL,
+        }:
+            raise RecoveryFencedError(
+                "Recovery classification does not authorize pre-dispatch resume."
+            )
+        checkpoint = self.task_checkpoint_store.load(task_id)
+        if checkpoint is None:
+            raise RecoveryFencedError(
+                "Pre-dispatch recovery checkpoint is missing."
+            )
+        if (
+            recovery_token.checkpoint_hash is None
+            or recovery_token.checkpoint_hash != checkpoint.checkpoint_hash
+        ):
+            raise RecoveryFencedError(
+                "Pre-dispatch recovery token is stale."
+            )
+        self._require_pre_dispatch_checkpoint(checkpoint)
+        operation = OperationContext(checkpoint.current_idempotency_key or "")
+        if self.idempotency_store.load(operation) is not None:
+            raise RecoveryFencedError(
+                "Pre-dispatch recovery found an unexpected P0.7 record."
+            )
+        authoritative_context = self._checkpoint_action_context(checkpoint)
+        authoritative_action = validate_action(
+            strip_untrusted_identity_fields(action)
+        )
+        fingerprint = canonical_action_fingerprint(
+            authoritative_action,
+            project_dir=self.project_dir,
+            capability_class=checkpoint.current_capability_class or "",
+        )
+        if (
+            authoritative_action.get("action") != checkpoint.current_action_name
+            or fingerprint != checkpoint.current_action_fingerprint
+        ):
+            raise RecoveryFencedError(
+                "Recovery action does not match the pre-dispatch checkpoint."
+            )
+        self._require_pristine_pre_dispatch_provenance(
+            checkpoint, authoritative_context, operation
+        )
+
+        current_decision = evaluate_action_policy(
+            authoritative_action, authoritative_context
+        )
+        if (
+            current_decision.action_name != checkpoint.current_action_name
+            or current_decision.capability_class.value
+            != checkpoint.current_capability_class
+        ):
+            raise RecoveryFencedError(
+                "Current policy classification no longer matches the checkpoint."
+            )
+        self._record_capability_decision(
+            authoritative_action,
+            current_decision,
+            authoritative_context,
+            operation,
+        )
+        if not current_decision.allowed:
+            return self._terminalize_new_pre_dispatch_operation(
+                authoritative_action,
+                current_decision,
+                authoritative_context,
+                operation,
+                checkpoint,
+                IdempotencyState.BLOCKED,
+                self._blocked_policy_result(current_decision),
+                recovery_token=recovery_token,
+            )
+
+        tool = self.tools.get(current_decision.action_name)
+        if tool is None:
+            blocked_result = {
+                **self._decision_fields(current_decision),
+                "success": False,
+                "allowed": False,
+                "blocked": True,
+                "cancelled": False,
+                "policy_allowed": True,
+                "policy_reason_code": "ACTION_HANDLER_MISSING",
+                "message": "Runtime capability policy blocked an action without a handler.",
+            }
+            return self._terminalize_new_pre_dispatch_operation(
+                authoritative_action,
+                current_decision,
+                authoritative_context,
+                operation,
+                checkpoint,
+                IdempotencyState.BLOCKED,
+                blocked_result,
+                recovery_token=recovery_token,
+            )
+
+        # Recovery never reuses a pre-crash approval, including a durable
+        # GRANTED_IN_PROCESS marker. This callback is the existing P0.3 boundary.
+        approved = self._request_approval(
+            authoritative_action,
+            current_decision,
+            authoritative_context,
+        )
+        self._record_approval_decision(
+            approved,
+            authoritative_action,
+            current_decision,
+            authoritative_context,
+            operation,
+        )
+        if not approved:
+            cancelled_result = {
+                **self._decision_fields(current_decision),
+                "success": False,
+                "allowed": False,
+                "blocked": True,
+                "cancelled": True,
+                "policy_allowed": current_decision.allowed,
+                "dispatched": False,
+                "result_reason_code": "HUMAN_APPROVAL_DECLINED",
+                "message": "Action rejected by fresh approval before recovery dispatch.",
+            }
+            return self._terminalize_new_pre_dispatch_operation(
+                authoritative_action,
+                current_decision,
+                authoritative_context,
+                operation,
+                checkpoint,
+                IdempotencyState.CANCELLED,
+                cancelled_result,
+                recovery_token=recovery_token,
+            )
+
+        if checkpoint.phase is TaskPhase.WAITING_FOR_APPROVAL:
+            checkpoint = self._checkpoint_task(
+                checkpoint,
+                state=TaskState.RUNNING,
+                phase=TaskPhase.BEFORE_DISPATCH,
+                reason_code="TASK_APPROVAL_GRANTED_IN_PROCESS",
+                action_context=authoritative_context,
+                operation_context=operation,
+                action_name=current_decision.action_name,
+                action_fingerprint=fingerprint,
+                capability_class=current_decision.capability_class.value,
+                policy_reason_code=current_decision.reason_code,
+                approval_state=ApprovalState.GRANTED_IN_PROCESS,
+                safe_resume_classification=(
+                    SafeResumeClassification.WAITING_FOR_FRESH_APPROVAL
+                ),
+                checkpoint_recovery_token=recovery_token,
+            )
+
+        self._validate_recovery_token(task_id, recovery_token)
+        if self.idempotency_store.load(operation) is not None:
+            raise RecoveryFencedError(
+                "P0.7 state appeared before the recovered reservation."
+            )
+        reservation = self._reserve_operation(
+            operation,
+            authoritative_context,
+            current_decision,
+            fingerprint,
+        )
+        resolution_event_id = self._after_idempotency_resolution(
+            reservation,
+            authoritative_action,
+            current_decision,
+            authoritative_context,
+            operation,
+        )
+        if not reservation.dispatch_allowed:
+            raise RecoveryFencedError(
+                "Recovered pre-dispatch operation lost its P0.7 reservation race."
+            )
+        checkpoint = self._checkpoint_task(
+            checkpoint,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.IDEMPOTENCY_RESERVED,
+            reason_code="TASK_IDEMPOTENCY_RESERVED",
+            action_context=authoritative_context,
+            operation_context=operation,
+            action_name=current_decision.action_name,
+            action_fingerprint=fingerprint,
+            capability_class=current_decision.capability_class.value,
+            policy_reason_code=current_decision.reason_code,
+            idempotency_state=reservation.record.state.value,
+            latest_provenance_event_id=resolution_event_id,
+            approval_state=ApprovalState.FRESH_APPROVAL_REQUIRED,
+            checkpoint_recovery_token=recovery_token,
+        )
+        standalone_task = bool(
+            checkpoint.transitions
+            and checkpoint.transitions[0].reason_code
+            == "STANDALONE_ACTION_TASK_CREATED"
+        )
+        return self._dispatch_reserved_operation(
+            authoritative_action,
+            current_decision,
+            authoritative_context,
+            operation,
+            reservation.record,
+            checkpoint,
+            tool,
+            recovery_token=recovery_token,
+            standalone_task=standalone_task,
+            require_pristine_reserved_provenance=True,
+            fresh_approval_required=True,
+            recovery_resume=True,
+        )
+
+    def resume_recoverable_action(
+        self,
+        action: dict[str, Any],
+        *,
+        recovery_token: RecoveryExecutionToken,
+    ) -> dict[str, Any]:
+        """Route one explicitly classified action recovery without guessing."""
+
+        checkpoint = self.task_checkpoint_store.load(recovery_token.task_id)
+        if checkpoint is None:
+            raise RecoveryFencedError("Recoverable action checkpoint is missing.")
+        record: IdempotencyRecord | None = None
+        if checkpoint.current_idempotency_key is not None:
+            try:
+                operation = OperationContext(checkpoint.current_idempotency_key)
+            except ValueError as exc:
+                raise RecoveryFencedError(
+                    "Recoverable action operation identity is invalid."
+                ) from exc
+            record = self.idempotency_store.load(operation)
+        if record is not None:
+            if record.state is not IdempotencyState.RESERVED:
+                raise RecoveryFencedError(
+                    "Existing P0.7 state does not authorize action resume."
+                )
+            return self.resume_reserved_action(
+                action, recovery_token=recovery_token
+            )
+        if checkpoint.phase is TaskPhase.IDEMPOTENCY_RESERVED:
+            return self.resume_reserved_action(
+                action, recovery_token=recovery_token
+            )
+        if checkpoint.phase in {
+            TaskPhase.WAITING_FOR_APPROVAL,
+            TaskPhase.BEFORE_DISPATCH,
+        }:
+            return self.resume_pre_dispatch_action(
+                action, recovery_token=recovery_token
+            )
+        raise RecoveryFencedError(
+            "Task phase is not an explicitly recoverable action boundary."
+        )
+
+    def cancel_recoverable_action(
+        self,
+        *,
+        recovery_token: RecoveryExecutionToken,
+    ) -> dict[str, Any]:
+        """Cancel only proven pre-dispatch work; uncertainty remains immutable."""
+
+        task_id = recovery_token.task_id
+        self._validate_recovery_token(task_id, recovery_token)
+        checkpoint = self.task_checkpoint_store.load(task_id)
+        if checkpoint is None:
+            raise RecoveryFencedError("Recoverable action checkpoint is missing.")
+        if (
+            recovery_token.checkpoint_hash is None
+            or recovery_token.checkpoint_hash != checkpoint.checkpoint_hash
+        ):
+            raise RecoveryFencedError("Recovery cancellation token is stale.")
+        if checkpoint.phase not in {
+            TaskPhase.WAITING_FOR_APPROVAL,
+            TaskPhase.BEFORE_DISPATCH,
+            TaskPhase.IDEMPOTENCY_RESERVED,
+        }:
+            raise RecoveryFencedError(
+                "Task phase cannot be cancelled without fabricating certainty."
+            )
+        decision = self._checkpoint_policy_decision(checkpoint)
+        operation = OperationContext(checkpoint.current_idempotency_key or "")
+        result = {
+            **self._decision_fields(decision),
+            "success": False,
+            "allowed": False,
+            "blocked": True,
+            "cancelled": True,
+            "policy_allowed": decision.allowed,
+            "dispatched": False,
+            "result_reason_code": "OPERATOR_RECOVERY_CANCELLED",
+            "message": "Operator cancelled recoverable work before dispatch.",
+        }
+        if checkpoint.phase is TaskPhase.IDEMPOTENCY_RESERVED:
+            record = self.idempotency_store.load(operation)
+            if record is None:
+                raise RecoveryFencedError(
+                    "Reserved cancellation lacks its P0.7 record."
+                )
+            context = ActionContext(
+                request_id=record.request_id,
+                trace_id=record.trace_id,
+                task_id=record.task_id or "",
+                action_id=record.action_id,
+                model_call_id=record.model_call_id,
+            )
+            return self._terminalize_existing_reservation(
+                {},
+                decision,
+                context,
+                operation,
+                checkpoint,
+                record,
+                IdempotencyState.CANCELLED,
+                result,
+                recovery_token=recovery_token,
+            )
+        self._require_pre_dispatch_checkpoint(checkpoint)
+        context = self._checkpoint_action_context(checkpoint)
+        self._require_pristine_pre_dispatch_provenance(
+            checkpoint, context, operation
+        )
+        if self.idempotency_store.load(operation) is not None:
+            raise RecoveryFencedError(
+                "Pre-dispatch cancellation found unexpected P0.7 state."
+            )
+        return self._cancel_new_pre_dispatch_operation(
+            checkpoint,
+            context,
+            operation,
+            decision,
+            result,
+            recovery_token=recovery_token,
+        )
+
+    def _get_task_recovery_service(self) -> TaskRecoveryService:
+        service = self.task_recovery_service
+        if service is None:
+            service = TaskRecoveryService(
+                self.memory_store.paths.state_dir,
+                project_dir=self.project_dir,
+                checkpoint_store=self.task_checkpoint_store,
+                idempotency_store=self.idempotency_store,
+                provenance_store=self.provenance_store,
+                lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+            )
+            self.task_recovery_service = service
+        return service
+
+    def _execution_context_for_guard(
+        self,
+        action_context: ActionContext,
+        *,
+        operation_context: OperationContext | None,
+        step_reservation: StepReservation | None,
+    ) -> ActionContext:
+        if operation_context is None or step_reservation is not None:
+            return action_context
+        existing = self.idempotency_store.load(operation_context)
+        if existing is not None and existing.task_id is None:
+            raise RuntimeError(
+                "Legacy operation is not bound to an authoritative task."
+            )
+        task_id = (
+            existing.task_id
+            if existing is not None
+            else operation_context.runtime_task_id()
+        )
+        if action_context.model_call_id is not None and action_context.task_id != task_id:
+            raise TraceIdentityError(
+                "A model-derived action cannot be rebound to another task."
+            )
+        return ActionContext(
+            request_id=action_context.request_id,
+            trace_id=action_context.trace_id,
+            task_id=task_id,
+            action_id=action_context.action_id,
+            model_call_id=action_context.model_call_id,
+        )
+
+    def _validate_recovery_token(
+        self,
+        task_id: str,
+        token: RecoveryExecutionToken,
+    ) -> None:
+        if token.task_id != task_id:
+            raise RecoveryFencedError(
+                "Execution token does not match the action task."
+            )
+        # Temporary strict adapter until TaskRecoveryService exposes a lighter
+        # public token-validation method.
+        self._get_task_recovery_service().classify_under_claim(task_id, token)
 
     def _execute(
         self,
@@ -175,6 +945,7 @@ class ExecutionEngine:
         action_context: ActionContext,
         operation_context: OperationContext | None = None,
         step_reservation: StepReservation | None = None,
+        recovery_token: RecoveryExecutionToken,
     ) -> dict[str, Any]:
         """Evaluate runtime policy, obtain approval when required, then dispatch.
 
@@ -641,36 +1412,82 @@ class ExecutionEngine:
             ),
         )
 
+        return self._dispatch_reserved_operation(
+            authoritative_action,
+            decision,
+            authoritative_context,
+            operation,
+            reservation.record,
+            task_checkpoint,
+            tool,
+            recovery_token=recovery_token,
+            standalone_task=standalone_task,
+            require_pristine_reserved_provenance=False,
+            fresh_approval_required=decision.requires_confirmation,
+            recovery_resume=False,
+        )
+
+    def _dispatch_reserved_operation(
+        self,
+        authoritative_action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        authoritative_context: ActionContext,
+        operation: OperationContext,
+        idempotency_record: IdempotencyRecord,
+        task_checkpoint: TaskCheckpoint,
+        tool: ToolSpec,
+        *,
+        recovery_token: RecoveryExecutionToken,
+        standalone_task: bool,
+        require_pristine_reserved_provenance: bool,
+        fresh_approval_required: bool,
+        recovery_resume: bool,
+    ) -> dict[str, Any]:
+        """Run the sole post-RESERVED dispatch tail for live and recovery paths."""
+
+        fingerprint = idempotency_record.action_fingerprint
+        name = decision.action_name
+        checkpoint_recovery_token = recovery_token if recovery_resume else None
+        self._validate_recovery_token(
+            authoritative_context.task_id,
+            recovery_token,
+        )
+        current_record = self.idempotency_store.load(operation)
+        if current_record is None:
+            raise RecoveryFencedError(
+                "Reserved operation disappeared before dispatch."
+            )
+        self._require_reserved_record_binding(
+            task_checkpoint,
+            current_record,
+            authoritative_context,
+            operation,
+            action_name=name,
+            action_fingerprint=fingerprint,
+        )
+        if current_record != idempotency_record:
+            raise RecoveryFencedError(
+                "Reserved operation changed before dispatch."
+            )
+        if require_pristine_reserved_provenance:
+            self._require_pristine_reserved_provenance(
+                task_checkpoint, current_record
+            )
+
         # The synchronous, fsynced provenance start is the final dispatch gate.
         # Never put this event in the outbox: recovery must not later claim a
         # dispatch started when the handler was actually blocked.
+        self._validate_recovery_token(
+            authoritative_context.task_id,
+            recovery_token,
+        )
         try:
             dispatch_start_event_id = self._before_tool_dispatch(
                 authoritative_action,
                 decision,
                 authoritative_context,
                 operation,
-                reservation.record,
-            )
-            task_checkpoint = self._checkpoint_task(
-                task_checkpoint,
-                state=TaskState.RUNNING,
-                phase=TaskPhase.PROVENANCE_DISPATCH_RECORDED,
-                reason_code="TASK_PROVENANCE_DISPATCH_RECORDED",
-                action_context=authoritative_context,
-                operation_context=operation,
-                action_name=name,
-                action_fingerprint=fingerprint,
-                capability_class=decision.capability_class.value,
-                policy_reason_code=decision.reason_code,
-                idempotency_state=reservation.record.state.value,
-                latest_provenance_event_id=dispatch_start_event_id,
-                approval_state=(
-                    ApprovalState.FRESH_APPROVAL_REQUIRED
-                    if decision.requires_confirmation
-                    else ApprovalState.NOT_REQUIRED
-                ),
-                safe_resume_classification=SafeResumeClassification.MANUAL_REVIEW_REQUIRED,
+                idempotency_record,
             )
         except Exception as start_error:
             try:
@@ -701,6 +1518,32 @@ class ExecutionEngine:
                     "Pre-dispatch provenance failed and durable failure terminalization also failed.",
                 )
             raise
+
+        # Once P0.8 durably says dispatch started, any later persistence fault is
+        # an uncertain crash window. Do not rewrite P0.7 to
+        # FAILED_BEFORE_DISPATCH: recovery must observe the start evidence and
+        # refuse automatic redispatch even though the handler was not yet called.
+        task_checkpoint = self._checkpoint_task(
+            task_checkpoint,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.PROVENANCE_DISPATCH_RECORDED,
+            reason_code="TASK_PROVENANCE_DISPATCH_RECORDED",
+            action_context=authoritative_context,
+            operation_context=operation,
+            action_name=name,
+            action_fingerprint=fingerprint,
+            capability_class=decision.capability_class.value,
+            policy_reason_code=decision.reason_code,
+            idempotency_state=idempotency_record.state.value,
+            latest_provenance_event_id=dispatch_start_event_id,
+            approval_state=(
+                ApprovalState.FRESH_APPROVAL_REQUIRED
+                if fresh_approval_required
+                else ApprovalState.NOT_REQUIRED
+            ),
+            safe_resume_classification=SafeResumeClassification.MANUAL_REVIEW_REQUIRED,
+            checkpoint_recovery_token=checkpoint_recovery_token,
+        )
 
         try:
             dispatch_record = self._transition_operation(
@@ -750,12 +1593,17 @@ class ExecutionEngine:
             idempotency_state=dispatch_record.state.value,
             approval_state=(
                 ApprovalState.FRESH_APPROVAL_REQUIRED
-                if decision.requires_confirmation
+                if fresh_approval_required
                 else ApprovalState.NOT_REQUIRED
             ),
             safe_resume_classification=SafeResumeClassification.UNKNOWN_OUTCOME,
+            checkpoint_recovery_token=checkpoint_recovery_token,
         )
         try:
+            self._validate_recovery_token(
+                authoritative_context.task_id,
+                recovery_token,
+            )
             result = self._correlate_result(
                 tool.handler(authoritative_action),
                 authoritative_context,
@@ -798,10 +1646,11 @@ class ExecutionEngine:
                     latest_provenance_event_id=terminal_event_id,
                     approval_state=(
                         ApprovalState.FRESH_APPROVAL_REQUIRED
-                        if decision.requires_confirmation
+                        if fresh_approval_required
                         else ApprovalState.NOT_REQUIRED
                     ),
                     safe_resume_classification=SafeResumeClassification.UNKNOWN_OUTCOME,
+                    checkpoint_recovery_token=checkpoint_recovery_token,
                 )
             except Exception as transition_error:
                 self._attach_secondary_failure(
@@ -866,10 +1715,11 @@ class ExecutionEngine:
                 latest_provenance_event_id=terminal_event_id,
                 approval_state=(
                     ApprovalState.FRESH_APPROVAL_REQUIRED
-                    if decision.requires_confirmation
+                    if fresh_approval_required
                     else ApprovalState.NOT_REQUIRED
                 ),
                 safe_resume_classification=SafeResumeClassification.UNKNOWN_OUTCOME,
+                checkpoint_recovery_token=checkpoint_recovery_token,
             )
         else:
             task_checkpoint = self._checkpoint_task(
@@ -887,6 +1737,7 @@ class ExecutionEngine:
                 latest_provenance_event_id=terminal_event_id,
                 approval_state=ApprovalState.NOT_APPLICABLE,
                 safe_resume_classification=SafeResumeClassification.SAFE_TO_RESUME,
+                checkpoint_recovery_token=checkpoint_recovery_token,
             )
             if standalone_task:
                 standalone_state = (
@@ -912,6 +1763,7 @@ class ExecutionEngine:
                     idempotency_state=terminal_record.state.value,
                     latest_provenance_event_id=terminal_event_id,
                     approval_state=ApprovalState.NOT_APPLICABLE,
+                    checkpoint_recovery_token=checkpoint_recovery_token,
                 )
         result = self._with_idempotency_fields(
             result,
@@ -947,6 +1799,572 @@ class ExecutionEngine:
                 )
             raise
         return result
+
+    @staticmethod
+    def _require_pre_dispatch_checkpoint(checkpoint: TaskCheckpoint) -> None:
+        waiting = (
+            checkpoint.state is TaskState.WAITING_FOR_APPROVAL
+            and checkpoint.phase is TaskPhase.WAITING_FOR_APPROVAL
+            and checkpoint.reason_code == "TASK_WAITING_FOR_APPROVAL"
+            and checkpoint.approval_state is ApprovalState.WAITING
+        )
+        before_dispatch = (
+            checkpoint.state is TaskState.RUNNING
+            and checkpoint.phase is TaskPhase.BEFORE_DISPATCH
+            and checkpoint.reason_code
+            in {"TASK_BEFORE_DISPATCH", "TASK_APPROVAL_GRANTED_IN_PROCESS"}
+            and checkpoint.approval_state
+            in {
+                ApprovalState.NOT_REQUIRED,
+                ApprovalState.GRANTED_IN_PROCESS,
+                ApprovalState.FRESH_APPROVAL_REQUIRED,
+            }
+        )
+        if (
+            not (waiting or before_dispatch)
+            or checkpoint.current_action_id is None
+            or checkpoint.current_idempotency_key is None
+            or checkpoint.current_action_fingerprint is None
+            or checkpoint.current_action_name is None
+            or checkpoint.current_action_name == "unknown_action"
+            or checkpoint.current_capability_class is None
+            or checkpoint.current_policy_reason_code is None
+            or checkpoint.current_idempotency_state is not None
+        ):
+            raise RecoveryFencedError(
+                "Task is not at an exact recoverable pre-P0.7 action boundary."
+            )
+
+    @staticmethod
+    def _checkpoint_action_context(checkpoint: TaskCheckpoint) -> ActionContext:
+        if checkpoint.current_action_id is None:
+            raise RecoveryFencedError(
+                "Recoverable action checkpoint lacks its action identity."
+            )
+        return ActionContext(
+            request_id=checkpoint.latest_request_id,
+            trace_id=checkpoint.latest_trace_id,
+            task_id=checkpoint.task_id,
+            action_id=checkpoint.current_action_id,
+            model_call_id=checkpoint.current_model_call_id,
+        )
+
+    def _checkpoint_policy_decision(
+        self, checkpoint: TaskCheckpoint
+    ) -> ActionPolicyDecision:
+        if (
+            checkpoint.current_action_name is None
+            or checkpoint.current_capability_class is None
+            or checkpoint.current_policy_reason_code is None
+            or checkpoint.current_action_id is None
+        ):
+            raise RecoveryFencedError(
+                "Recoverable action lacks durable policy identity."
+            )
+        try:
+            capability = CapabilityClass(checkpoint.current_capability_class)
+        except ValueError as exc:
+            raise RecoveryFencedError(
+                "Recoverable action capability is not canonical."
+            ) from exc
+        approval_required = (
+            checkpoint.approval_state is not ApprovalState.NOT_REQUIRED
+        )
+        return ActionPolicyDecision(
+            action_name=checkpoint.current_action_name,
+            capability_class=capability,
+            allowed=True,
+            requires_confirmation=approval_required,
+            reason_code=checkpoint.current_policy_reason_code,
+            reason="Durable runtime policy bound to operator cancellation.",
+            runtime_requires_confirmation=approval_required,
+            model_requests_confirmation=False,
+            request_id=checkpoint.latest_request_id,
+            trace_id=checkpoint.latest_trace_id,
+            task_id=checkpoint.task_id,
+            action_id=checkpoint.current_action_id,
+            model_call_id=checkpoint.current_model_call_id,
+        )
+
+    def _require_pristine_pre_dispatch_provenance(
+        self,
+        checkpoint: TaskCheckpoint,
+        action_context: ActionContext,
+        operation: OperationContext,
+    ) -> None:
+        records = self.provenance_store.read_runtime_all()
+        matching = [
+            item
+            for item in records
+            if item.get("task_id") == checkpoint.task_id
+            and item.get("operation_key") == operation.operation_key
+            and item.get("action_id") == checkpoint.current_action_id
+        ]
+        capability_events = [
+            item
+            for item in matching
+            if item.get("event_type")
+            == RuntimeProvenanceEventType.CAPABILITY_DECISION.value
+            and item.get("request_id") == action_context.request_id
+            and item.get("trace_id") == action_context.trace_id
+            and item.get("model_call_id") == action_context.model_call_id
+            and item.get("action_name") == checkpoint.current_action_name
+            and item.get("capability_class")
+            == checkpoint.current_capability_class
+            and item.get("reason_code") == checkpoint.current_policy_reason_code
+        ]
+        if not capability_events:
+            raise RecoveryFencedError(
+                "Pre-dispatch checkpoint lacks its exact P0.8 policy evidence."
+            )
+        if checkpoint.reason_code == "TASK_APPROVAL_GRANTED_IN_PROCESS" and not any(
+            item.get("event_type")
+            == RuntimeProvenanceEventType.APPROVAL_GRANTED.value
+            and item.get("request_id") == action_context.request_id
+            and item.get("trace_id") == action_context.trace_id
+            and item.get("model_call_id") == action_context.model_call_id
+            and item.get("action_name") == checkpoint.current_action_name
+            and item.get("capability_class")
+            == checkpoint.current_capability_class
+            and item.get("success") is True
+            for item in matching
+        ):
+            raise RecoveryFencedError(
+                "Granted-in-process checkpoint lacks its original P0.8 approval evidence."
+            )
+        unsafe_types = {
+            RuntimeProvenanceEventType.IDEMPOTENCY_RESERVED.value,
+            RuntimeProvenanceEventType.IDEMPOTENCY_REPLAYED.value,
+            RuntimeProvenanceEventType.IDEMPOTENCY_CONFLICT.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_STARTED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_SUCCEEDED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_FAILED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_TIMED_OUT.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_BLOCKED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_CANCELLED.value,
+            RuntimeProvenanceEventType.UNKNOWN_OUTCOME_DETECTED.value,
+            RuntimeProvenanceEventType.PERSISTENCE_FAILURE.value,
+            RuntimeProvenanceEventType.RECOVERY_TERMINAL_RECONCILED.value,
+        }
+        if any(item.get("event_type") in unsafe_types for item in matching):
+            raise RecoveryFencedError(
+                "Pre-dispatch recovery found P0.7/P0.8 dispatch or terminal evidence."
+            )
+
+    def _terminalize_new_pre_dispatch_operation(
+        self,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation: OperationContext,
+        checkpoint: TaskCheckpoint,
+        terminal_state: IdempotencyState,
+        result: dict[str, Any],
+        *,
+        recovery_token: RecoveryExecutionToken,
+    ) -> dict[str, Any]:
+        if terminal_state not in {
+            IdempotencyState.BLOCKED,
+            IdempotencyState.CANCELLED,
+        }:
+            raise ValueError("Pre-dispatch terminal state is not safely supported.")
+        self._validate_recovery_token(checkpoint.task_id, recovery_token)
+        self._require_pre_dispatch_checkpoint(checkpoint)
+        self._require_pristine_pre_dispatch_provenance(
+            checkpoint, action_context, operation
+        )
+        if self.idempotency_store.load(operation) is not None:
+            raise RecoveryFencedError(
+                "P0.7 state appeared before safe pre-dispatch terminalization."
+            )
+        fingerprint = canonical_action_fingerprint(
+            action,
+            project_dir=self.project_dir,
+            capability_class=decision.capability_class,
+        )
+        if fingerprint != checkpoint.current_action_fingerprint:
+            raise RecoveryFencedError(
+                "Pre-dispatch terminalization action fingerprint changed."
+            )
+        reservation = self._reserve_operation(
+            operation,
+            action_context,
+            decision,
+            fingerprint,
+        )
+        self._after_idempotency_resolution(
+            reservation,
+            action,
+            decision,
+            action_context,
+            operation,
+        )
+        if not reservation.dispatch_allowed:
+            raise RecoveryFencedError(
+                "Pre-dispatch terminalization lost its P0.7 reservation race."
+            )
+        terminal_record = self._transition_operation(
+            operation,
+            action_context,
+            fingerprint,
+            terminal_state,
+            IDEMPOTENCY_STATE_REASON_CODES[terminal_state],
+            terminal_receipt=build_safe_result_receipt(result),
+        )
+        terminal_event_id = self._after_idempotency_transition(
+            terminal_record,
+            action,
+            decision,
+            action_context,
+            operation,
+        )
+        task_state = (
+            TaskState.CANCELLED
+            if terminal_state is IdempotencyState.CANCELLED
+            else TaskState.BLOCKED
+        )
+        self._checkpoint_task(
+            checkpoint,
+            state=task_state,
+            phase=TaskPhase.TERMINAL,
+            reason_code=(
+                "TASK_ACTION_CANCELLED"
+                if task_state is TaskState.CANCELLED
+                else "TASK_ACTION_BLOCKED"
+            ),
+            action_context=action_context,
+            operation_context=operation,
+            action_name=decision.action_name,
+            action_fingerprint=fingerprint,
+            capability_class=decision.capability_class.value,
+            policy_reason_code=decision.reason_code,
+            idempotency_state=terminal_record.state.value,
+            latest_provenance_event_id=terminal_event_id,
+            approval_state=(
+                ApprovalState.DENIED
+                if task_state is TaskState.CANCELLED
+                else ApprovalState.NOT_APPLICABLE
+            ),
+            safe_resume_classification=(
+                SafeResumeClassification.TERMINAL_NO_RESUME
+                if task_state is TaskState.CANCELLED
+                else SafeResumeClassification.BLOCKED
+            ),
+            checkpoint_recovery_token=recovery_token,
+        )
+        return self._with_idempotency_fields(
+            {**result, **action_context.identity_fields()},
+            operation,
+            terminal_record,
+            replayed=False,
+            dispatched=False,
+        )
+
+    def _after_checkpoint_idempotency_reservation(
+        self,
+        resolution: IdempotencyResolution,
+        checkpoint: TaskCheckpoint,
+        action_context: ActionContext,
+        operation: OperationContext,
+        decision: ActionPolicyDecision,
+    ) -> str:
+        if (
+            not resolution.dispatch_allowed
+            or resolution.kind is not IdempotencyResolutionKind.RESERVED
+            or resolution.record.state is not IdempotencyState.RESERVED
+        ):
+            raise RecoveryFencedError(
+                "Operator cancellation did not obtain the original P0.7 reservation."
+            )
+        event = new_runtime_provenance_event(
+            RuntimeProvenanceEventType.IDEMPOTENCY_RESERVED,
+            action_context=action_context,
+            operation_context=operation,
+            action_name=checkpoint.current_action_name,
+            action_fingerprint=checkpoint.current_action_fingerprint,
+            capability_class=decision.capability_class,
+            idempotency_state=IdempotencyState.RESERVED,
+            replayed=False,
+            dispatched=False,
+            reason_code=resolution.reason_code,
+        )
+        self.provenance_store.append_runtime_event(event)
+        return event.event_id
+
+    def _cancel_new_pre_dispatch_operation(
+        self,
+        checkpoint: TaskCheckpoint,
+        action_context: ActionContext,
+        operation: OperationContext,
+        decision: ActionPolicyDecision,
+        result: dict[str, Any],
+        *,
+        recovery_token: RecoveryExecutionToken,
+    ) -> dict[str, Any]:
+        self._validate_recovery_token(checkpoint.task_id, recovery_token)
+        if self.idempotency_store.load(operation) is not None:
+            raise RecoveryFencedError(
+                "P0.7 state appeared before operator cancellation."
+            )
+        fingerprint = checkpoint.current_action_fingerprint
+        if fingerprint is None:
+            raise RecoveryFencedError(
+                "Operator cancellation lacks an action fingerprint."
+            )
+        reservation = self._reserve_operation(
+            operation,
+            action_context,
+            decision,
+            fingerprint,
+        )
+        self._after_checkpoint_idempotency_reservation(
+            reservation,
+            checkpoint,
+            action_context,
+            operation,
+            decision,
+        )
+        terminal_record = self._transition_operation(
+            operation,
+            action_context,
+            fingerprint,
+            IdempotencyState.CANCELLED,
+            IDEMPOTENCY_STATE_REASON_CODES[IdempotencyState.CANCELLED],
+            terminal_receipt=build_safe_result_receipt(result),
+        )
+        terminal_event_id = self._after_idempotency_transition(
+            terminal_record,
+            {},
+            decision,
+            action_context,
+            operation,
+        )
+        self._checkpoint_task(
+            checkpoint,
+            state=TaskState.CANCELLED,
+            phase=TaskPhase.TERMINAL,
+            reason_code="TASK_ACTION_CANCELLED",
+            action_context=action_context,
+            operation_context=operation,
+            action_name=decision.action_name,
+            action_fingerprint=fingerprint,
+            capability_class=decision.capability_class.value,
+            policy_reason_code=decision.reason_code,
+            idempotency_state=terminal_record.state.value,
+            latest_provenance_event_id=terminal_event_id,
+            approval_state=ApprovalState.DENIED,
+            safe_resume_classification=(
+                SafeResumeClassification.TERMINAL_NO_RESUME
+            ),
+            checkpoint_recovery_token=recovery_token,
+        )
+        return self._with_idempotency_fields(
+            {**result, **action_context.identity_fields()},
+            operation,
+            terminal_record,
+            replayed=False,
+            dispatched=False,
+        )
+
+    @staticmethod
+    def _require_reserved_checkpoint(checkpoint: TaskCheckpoint) -> None:
+        if (
+            checkpoint.state is not TaskState.RUNNING
+            or checkpoint.phase is not TaskPhase.IDEMPOTENCY_RESERVED
+            or checkpoint.reason_code != "TASK_IDEMPOTENCY_RESERVED"
+            or checkpoint.current_idempotency_state
+            != IdempotencyState.RESERVED.value
+            or checkpoint.current_action_id is None
+            or checkpoint.current_idempotency_key is None
+            or checkpoint.current_action_fingerprint is None
+            or checkpoint.current_action_name is None
+            or checkpoint.current_capability_class is None
+            or checkpoint.current_policy_reason_code is None
+            or checkpoint.causal_provenance_event_id is None
+        ):
+            raise RecoveryFencedError(
+                "Task is not at an explicit pre-dispatch RESERVED checkpoint."
+            )
+
+    def _require_reserved_record_binding(
+        self,
+        checkpoint: TaskCheckpoint,
+        record: IdempotencyRecord,
+        action_context: ActionContext,
+        operation: OperationContext,
+        *,
+        action_name: str,
+        action_fingerprint: str,
+    ) -> None:
+        self._require_reserved_checkpoint(checkpoint)
+        expected_scope = project_scope_fingerprint(self.project_dir)
+        if (
+            record.state is not IdempotencyState.RESERVED
+            or record.operation_key != operation.operation_key
+            or record.project_scope != expected_scope
+            or checkpoint.project_scope != expected_scope
+            or record.task_id != checkpoint.task_id
+            or record.task_id != action_context.task_id
+            or record.request_id != action_context.request_id
+            or record.trace_id != action_context.trace_id
+            or record.action_id != action_context.action_id
+            or record.model_call_id != action_context.model_call_id
+            or checkpoint.current_action_id != record.action_id
+            or checkpoint.current_model_call_id != record.model_call_id
+            or checkpoint.current_idempotency_key != record.operation_key
+            or checkpoint.current_action_fingerprint != record.action_fingerprint
+            or record.action_fingerprint != action_fingerprint
+            or checkpoint.current_action_name != action_name
+            or checkpoint.current_capability_class != record.capability_class
+        ):
+            raise RecoveryFencedError(
+                "Reserved action does not exactly match checkpoint and P0.7 authority."
+            )
+
+    def _require_pristine_reserved_provenance(
+        self,
+        checkpoint: TaskCheckpoint,
+        record: IdempotencyRecord,
+    ) -> None:
+        records = self.provenance_store.read_runtime_all()
+        matching = [
+            item
+            for item in records
+            if item.get("task_id") == record.task_id
+            and item.get("operation_key") == record.operation_key
+            and item.get("action_id") == record.action_id
+            and item.get("action_fingerprint") == record.action_fingerprint
+        ]
+        reservations = [
+            item
+            for item in matching
+            if item.get("event_type")
+            == RuntimeProvenanceEventType.IDEMPOTENCY_RESERVED.value
+            and item.get("idempotency_state") == IdempotencyState.RESERVED.value
+            and item.get("replayed") is False
+            and item.get("dispatched") is False
+        ]
+        if (
+            len(reservations) != 1
+            or reservations[0].get("event_id")
+            != checkpoint.causal_provenance_event_id
+        ):
+            raise RecoveryFencedError(
+                "Reserved action lacks one exact causal P0.8 reservation event."
+            )
+        unsafe_event_types = {
+            RuntimeProvenanceEventType.IDEMPOTENCY_REPLAYED.value,
+            RuntimeProvenanceEventType.IDEMPOTENCY_CONFLICT.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_STARTED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_SUCCEEDED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_FAILED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_TIMED_OUT.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_BLOCKED.value,
+            RuntimeProvenanceEventType.ACTION_DISPATCH_CANCELLED.value,
+            RuntimeProvenanceEventType.UNKNOWN_OUTCOME_DETECTED.value,
+            RuntimeProvenanceEventType.PERSISTENCE_FAILURE.value,
+            RuntimeProvenanceEventType.RECOVERY_TERMINAL_RECONCILED.value,
+        }
+        if any(item.get("event_type") in unsafe_event_types for item in matching):
+            raise RecoveryFencedError(
+                "P0.8 evidence shows dispatch, terminal, conflict, or uncertainty."
+            )
+
+    def _terminalize_existing_reservation(
+        self,
+        action: dict[str, Any],
+        decision: ActionPolicyDecision,
+        action_context: ActionContext,
+        operation: OperationContext,
+        checkpoint: TaskCheckpoint,
+        expected_record: IdempotencyRecord,
+        terminal_state: IdempotencyState,
+        result: dict[str, Any],
+        *,
+        recovery_token: RecoveryExecutionToken,
+    ) -> dict[str, Any]:
+        """Finish the existing RESERVED record without reserving or dispatching."""
+
+        if terminal_state not in {
+            IdempotencyState.BLOCKED,
+            IdempotencyState.CANCELLED,
+        }:
+            raise ValueError("Reserved recovery terminal state is not pre-dispatch safe.")
+        self._validate_recovery_token(checkpoint.task_id, recovery_token)
+        current_record = self.idempotency_store.load(operation)
+        if current_record is None:
+            raise RecoveryFencedError(
+                "Reserved operation disappeared before safe terminalization."
+            )
+        self._require_reserved_record_binding(
+            checkpoint,
+            current_record,
+            action_context,
+            operation,
+            action_name=decision.action_name,
+            action_fingerprint=expected_record.action_fingerprint,
+        )
+        if current_record != expected_record:
+            raise RecoveryFencedError(
+                "Reserved operation changed before safe terminalization."
+            )
+        self._require_pristine_reserved_provenance(checkpoint, current_record)
+        terminal_record = self._transition_operation(
+            operation,
+            action_context,
+            current_record.action_fingerprint,
+            terminal_state,
+            IDEMPOTENCY_STATE_REASON_CODES[terminal_state],
+            terminal_receipt=build_safe_result_receipt(result),
+        )
+        terminal_event_id = self._after_idempotency_transition(
+            terminal_record,
+            action,
+            decision,
+            action_context,
+            operation,
+        )
+        task_state = (
+            TaskState.CANCELLED
+            if terminal_state is IdempotencyState.CANCELLED
+            else TaskState.BLOCKED
+        )
+        self._checkpoint_task(
+            checkpoint,
+            state=task_state,
+            phase=TaskPhase.TERMINAL,
+            reason_code=(
+                "TASK_ACTION_CANCELLED"
+                if task_state is TaskState.CANCELLED
+                else "TASK_ACTION_BLOCKED"
+            ),
+            action_context=action_context,
+            operation_context=operation,
+            action_name=decision.action_name,
+            action_fingerprint=terminal_record.action_fingerprint,
+            capability_class=decision.capability_class.value,
+            policy_reason_code=decision.reason_code,
+            idempotency_state=terminal_record.state.value,
+            latest_provenance_event_id=terminal_event_id,
+            approval_state=(
+                ApprovalState.DENIED
+                if task_state is TaskState.CANCELLED
+                else ApprovalState.NOT_APPLICABLE
+            ),
+            safe_resume_classification=(
+                SafeResumeClassification.TERMINAL_NO_RESUME
+                if task_state is TaskState.CANCELLED
+                else SafeResumeClassification.BLOCKED
+            ),
+            checkpoint_recovery_token=recovery_token,
+        )
+        return self._with_idempotency_fields(
+            {**result, **action_context.identity_fields()},
+            operation,
+            terminal_record,
+            replayed=False,
+            dispatched=False,
+        )
 
     def _record_without_dispatch(
         self,
@@ -1270,9 +2688,32 @@ class ExecutionEngine:
         latest_provenance_event_id: str | None = None,
         approval_state: ApprovalState = ApprovalState.NOT_APPLICABLE,
         safe_resume_classification: SafeResumeClassification = SafeResumeClassification.MANUAL_REVIEW_REQUIRED,
+        checkpoint_recovery_token: RecoveryExecutionToken | None = None,
     ) -> TaskCheckpoint:
         """Advance one task checkpoint using only runtime-owned action metadata."""
 
+        if (
+            checkpoint_recovery_token is not None
+            and checkpoint_recovery_token.task_id != checkpoint.task_id
+        ):
+            raise RecoveryFencedError(
+                "Checkpoint recovery identity does not match the action task."
+            )
+        if checkpoint_recovery_token is not None:
+            self._validate_recovery_token(
+                checkpoint.task_id,
+                checkpoint_recovery_token,
+            )
+        latest_request_id = (
+            checkpoint_recovery_token.request_id
+            if checkpoint_recovery_token is not None
+            else action_context.request_id
+        )
+        latest_trace_id = (
+            checkpoint_recovery_token.trace_id
+            if checkpoint_recovery_token is not None
+            else action_context.trace_id
+        )
         try:
             return self.task_checkpoint_store.transition(
                 checkpoint.task_id,
@@ -1280,8 +2721,13 @@ class ExecutionEngine:
                 state=state,
                 phase=phase,
                 reason_code=reason_code,
-                latest_request_id=action_context.request_id,
-                latest_trace_id=action_context.trace_id,
+                latest_request_id=latest_request_id,
+                latest_trace_id=latest_trace_id,
+                recovery_attempt_id=(
+                    checkpoint_recovery_token.recovery_attempt_id
+                    if checkpoint_recovery_token is not None
+                    else None
+                ),
                 current_model_call_id=action_context.model_call_id,
                 current_action_id=action_context.action_id,
                 current_idempotency_key=operation_context.operation_key,
@@ -1684,7 +3130,17 @@ class ExecutionEngine:
         if permission.interactive:
             print("[INFO] Interactive command may ask for password or package confirmation.")
 
-        self.memory_store.record_command(command)
+        self.memory_store.record_command(
+            command
+            if not self._recovery_sensitive_persistence.get()
+            else json.dumps(
+                {
+                    "recovery_sensitive": True,
+                    **self._recovery_sensitive_summary(command),
+                },
+                sort_keys=True,
+            )
+        )
         return {
             **shell_execute(command, self.cwd, interactive=permission.interactive),
             "permission_mode": permission.mode,
@@ -1796,6 +3252,29 @@ class ExecutionEngine:
             raise TraceIdentityError(
                 "Operational execution operation key does not match its runtime context."
             )
+        sensitive = self._recovery_sensitive_persistence.get()
+        logged_action: dict[str, Any]
+        logged_result: dict[str, Any]
+        if sensitive:
+            action_name = action.get("action")
+            logged_action = {
+                "action": (
+                    action_name
+                    if isinstance(action_name, str)
+                    and action_name in ACTION_SEMANTIC_FIELDS
+                    else "unknown_action"
+                ),
+                **self._recovery_sensitive_summary(action),
+            }
+            logged_result = {
+                "success": result.get("success") is True,
+                "dispatched": result.get("dispatched") is True,
+                "replayed": result.get("replayed") is True,
+                **self._recovery_sensitive_summary(result),
+            }
+        else:
+            logged_action = action
+            logged_result = result
         payload = {
             "timestamp": dt.datetime.now().isoformat(),
             **identity,
@@ -1805,8 +3284,8 @@ class ExecutionEngine:
                 "non_authoritative": True,
                 "canonical_evidence": False,
             },
-            "action": action,
-            "result": result,
+            "action": logged_action,
+            "result": logged_result,
             "cwd": str(self.cwd),
         }
         if operation_context is not None:
@@ -1826,7 +3305,7 @@ class ExecutionEngine:
                 ),
                 lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
             )
-            self.memory_store.record_result(result)
+            self.memory_store.record_result(logged_result)
             self.memory_store.append_history("action_result", payload)
             # AOIA Phase 2A containment boundary
             # Runtime operational outputs must NEVER become canonical evidence.

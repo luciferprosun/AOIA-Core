@@ -236,6 +236,11 @@ class TaskCheckpointLifecycleTests(unittest.TestCase):
         self.assertTrue(
             all(
                 records[index]["event_type"].startswith("TASK_CHECKPOINT")
+                or (
+                    records[index]["event_type"] == "RECOVERY_CLAIMED"
+                    and records[index]["task_id"] == trace.task_id
+                    and records[index]["recovery_generation"] == 1
+                )
                 for index in range(request_start)
             )
         )

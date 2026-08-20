@@ -116,30 +116,120 @@ class InterProcessFileLock:
         lock_path: Path,
         *,
         timeout_seconds: object = DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
+        parent_directory_descriptor: int | None = None,
+        directory_identity_validator: Callable[[], None] | None = None,
     ) -> None:
         self.lock_path = Path(lock_path)
         self.timeout_seconds = validate_lock_timeout_seconds(timeout_seconds)
+        self.parent_directory_descriptor = parent_directory_descriptor
+        self.directory_identity_validator = directory_identity_validator
         self._descriptor: int | None = None
+        self._binding_identity: tuple[int, int] | None = None
+
+    def _validate_descriptor_binding(
+        self, descriptor: int
+    ) -> tuple[int, int]:
+        try:
+            opened = os.fstat(descriptor)
+            if self.parent_directory_descriptor is None:
+                visible = self.lock_path.lstat()
+            else:
+                visible = os.stat(
+                    self.lock_path.name,
+                    dir_fd=self.parent_directory_descriptor,
+                    follow_symlinks=False,
+                )
+        except OSError as exc:
+            raise AtomicWriteError(
+                "AOIA state lock binding disappeared.",
+                target_path=self.lock_path,
+            ) from exc
+        identity = (opened.st_dev, opened.st_ino)
+        if (
+            not stat.S_ISREG(opened.st_mode)
+            or stat.S_ISLNK(visible.st_mode)
+            or not stat.S_ISREG(visible.st_mode)
+            or identity != (visible.st_dev, visible.st_ino)
+        ):
+            raise AtomicWriteError(
+                "AOIA state lock binding changed.",
+                target_path=self.lock_path,
+            )
+        return identity
+
+    @property
+    def binding_identity(self) -> tuple[int, int]:
+        if self._binding_identity is None:
+            raise AtomicWriteError(
+                "AOIA state lock is not held.", target_path=self.lock_path
+            )
+        return self._binding_identity
+
+    def validate_binding(self) -> tuple[int, int]:
+        descriptor = self._descriptor
+        if descriptor is None:
+            raise AtomicWriteError(
+                "AOIA state lock is not held.", target_path=self.lock_path
+            )
+        _run_directory_identity_validator(self.directory_identity_validator)
+        identity = self._validate_descriptor_binding(descriptor)
+        if identity != self.binding_identity:
+            raise AtomicWriteError(
+                "AOIA held state lock identity changed.",
+                target_path=self.lock_path,
+            )
+        _run_directory_identity_validator(self.directory_identity_validator)
+        return identity
 
     def __enter__(self) -> InterProcessFileLock:
         flags = os.O_RDWR | os.O_CREAT
         flags |= getattr(os, "O_CLOEXEC", 0)
         flags |= getattr(os, "O_NOFOLLOW", 0)
+        descriptor: int | None = None
         try:
-            self.lock_path.parent.mkdir(parents=True, exist_ok=True)
-            descriptor = os.open(self.lock_path, flags, 0o600)
+            if self.parent_directory_descriptor is None:
+                self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+                descriptor = os.open(self.lock_path, flags, 0o600)
+            else:
+                _run_directory_identity_validator(
+                    self.directory_identity_validator
+                )
+                descriptor = os.open(
+                    self.lock_path.name,
+                    flags,
+                    0o600,
+                    dir_fd=self.parent_directory_descriptor,
+                )
+                opened = os.fstat(descriptor)
+                if not stat.S_ISREG(opened.st_mode):
+                    raise OSError("state lock is not a regular file")
+                _run_directory_identity_validator(
+                    self.directory_identity_validator
+                )
+        except PersistenceError:
+            if descriptor is not None:
+                os.close(descriptor)
+            raise
         except OSError as exc:
+            if descriptor is not None:
+                os.close(descriptor)
             raise AtomicWriteError(
                 "AOIA state lock could not be opened.",
                 target_path=self.lock_path,
             ) from exc
 
+        assert descriptor is not None
         deadline = time.monotonic() + self.timeout_seconds
         try:
             while True:
                 try:
                     fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    _run_directory_identity_validator(
+                        self.directory_identity_validator
+                    )
+                    identity = self._validate_descriptor_binding(descriptor)
                     self._descriptor = descriptor
+                    self._binding_identity = identity
                     return self
                 except BlockingIOError as exc:
                     remaining = deadline - time.monotonic()
@@ -156,6 +246,7 @@ class InterProcessFileLock:
     def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
         descriptor = self._descriptor
         self._descriptor = None
+        self._binding_identity = None
         if descriptor is None:
             return
         try:
@@ -383,6 +474,8 @@ def locked_update_json(
     expected_parent_identity: tuple[int, int] | None = None,
     parent_directory_descriptor: int | None = None,
     directory_identity_validator: Callable[[], None] | None = None,
+    lock_parent_directory_descriptor: int | None = None,
+    lock_directory_identity_validator: Callable[[], None] | None = None,
 ) -> _UpdateResult:
     """Atomically read, transform, and replace one JSON resource under one lock.
 
@@ -397,7 +490,12 @@ def locked_update_json(
     maximum_bytes = _validate_maximum_bytes(maximum_bytes)
     directory_descriptor: int | None = None
     try:
-        with InterProcessFileLock(lock_path, timeout_seconds=lock_timeout_seconds):
+        with InterProcessFileLock(
+            lock_path,
+            timeout_seconds=lock_timeout_seconds,
+            parent_directory_descriptor=lock_parent_directory_descriptor,
+            directory_identity_validator=lock_directory_identity_validator,
+        ) as held_lock:
             directory_descriptor, opened_parent = _open_pinned_parent(
                 target,
                 expected_identity=expected_parent_identity,
@@ -427,6 +525,10 @@ def locked_update_json(
                     ) from exc
 
             replacement, result = update(current)
+            # The pathname must still identify the exact inode whose flock we
+            # hold.  A same-user unlink/recreate race must never let two
+            # writers commit under different lock inodes.
+            held_lock.validate_binding()
             _run_directory_identity_validator(directory_identity_validator)
             try:
                 text = json.dumps(
@@ -463,6 +565,7 @@ def locked_update_json(
                 opened_parent=opened_parent,
                 directory_identity_validator=directory_identity_validator,
             )
+            held_lock.validate_binding()
             return result
     except PersistenceError:
         raise

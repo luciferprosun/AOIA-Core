@@ -355,6 +355,7 @@ class TraceIdentityTests(unittest.TestCase):
 
         self.assertEqual(200, status)
         self.assertTrue(response["ok"])
+        self.assertTrue(str(response["task_id"]).startswith("task_"))
         self.assertNotEqual("CLIENT_CONTROLLED", response["request_id"])
         self.assertNotEqual("CLIENT_CONTROLLED", response["trace_id"])
         self.assertTrue(str(response["request_id"]).startswith("request_"))

@@ -68,6 +68,7 @@ class WebRuntimeService:
                 "ok": True,
                 "transcript": result["transcript"],
                 "status": result["status"],
+                "task_id": result["task_id"],
                 "request_id": result["request_id"],
                 "trace_id": result["trace_id"],
             }
@@ -433,6 +434,7 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
             TaskState,
             safe_context_metadata,
         )
+        from runtime.task_recovery import RecoveryPurpose, TaskRecoveryService
         from runtime.tools.provenance import (
             AppendOnlyProvenanceStore,
             RuntimeProvenanceEventType,
@@ -449,6 +451,7 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
             TaskState,
             safe_context_metadata,
         )
+        from task_recovery import RecoveryPurpose, TaskRecoveryService
         from tools.provenance import (
             AppendOnlyProvenanceStore,
             RuntimeProvenanceEventType,
@@ -476,42 +479,16 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
         retry_budget=1,
         safe_context=safe_context_metadata(prompt),
     )
-    task_checkpoint_store.transition(
-        trace_context.task_id,
-        expected_version=checkpoint.checkpoint_version,
-        state=TaskState.RUNNING,
-        phase=TaskPhase.BETWEEN_STEPS,
-        reason_code="TASK_STARTED",
-        latest_request_id=trace_context.request_id,
-        latest_trace_id=trace_context.trace_id,
-        approval_state=ApprovalState.NOT_APPLICABLE,
+    recovery_service = TaskRecoveryService(
+        runtime_state_dir(PROJECT_DIR) / "state",
+        project_dir=PROJECT_DIR,
+        checkpoint_store=task_checkpoint_store,
+        provenance_store=provenance_store,
     )
-    provenance_store.append_runtime_event(
-        new_runtime_provenance_event(
-            RuntimeProvenanceEventType.REQUEST_STARTED,
-            trace_context=trace_context,
-            ingress="OPERATOR_API",
-            request_length=len(prompt),
-            slash_command=False,
-        )
-    )
-    step_reservation = task_checkpoint_store.reserve_step(trace_context.task_id)
-    task_checkpoint_store.consume_provider_attempt(
-        model_call,
-        step_reservation=step_reservation,
-    )
-    provenance_store.append_runtime_event(
-        new_runtime_provenance_event(
-            RuntimeProvenanceEventType.MODEL_CALL_STARTED,
-            model_call=model_call,
-            requested_provider=provider_id,
-            requested_model=model_id,
-            retry_attempt=1,
-            provider_attempt=1,
-        )
-    )
+    step_reservation = None
 
     def terminalize_model_and_task(succeeded: bool) -> None:
+        assert step_reservation is not None
         provenance_store.append_terminal(
             new_runtime_provenance_event(
                 (
@@ -561,71 +538,114 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
             latest_trace_id=trace_context.trace_id,
             approval_state=ApprovalState.NOT_APPLICABLE,
         )
-    try:
-        result = run_selected_provider(
-            provider_id=provider_id,
-            model_id=model_id,
-            prompt=prompt,
-            max_tokens=512,
-            live=True,
-            acknowledge_live_provider_test=True,
-            activation_status=ProviderActivationStatus.LIVE_ALLOWED_FOR_MANUAL_TEST,
-            selected_by="operator",
-            created_at="operator-chat-manual",
+    with recovery_service.execution_guard(
+        trace_context.task_id,
+        purpose=RecoveryPurpose.LIVE,
+        expected_checkpoint_hash=checkpoint.checkpoint_hash,
+    ) as recovery_token:
+        task_checkpoint_store.transition(
+            trace_context.task_id,
+            expected_version=checkpoint.checkpoint_version,
+            state=TaskState.RUNNING,
+            phase=TaskPhase.BETWEEN_STEPS,
+            reason_code="TASK_STARTED",
+            latest_request_id=trace_context.request_id,
+            latest_trace_id=trace_context.trace_id,
+            approval_state=ApprovalState.NOT_APPLICABLE,
         )
-    except Exception as provider_error:
-        try:
-            terminalize_model_and_task(False)
-            provenance_store.append_terminal(
-                new_runtime_provenance_event(
-                    RuntimeProvenanceEventType.REQUEST_COMPLETED,
-                    trace_context=trace_context,
-                    ingress="OPERATOR_API",
-                    success=False,
-                    reason_code="REQUEST_FAILED",
-                )
+        provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.REQUEST_STARTED,
+                trace_context=trace_context,
+                ingress="OPERATOR_API",
+                request_length=len(prompt),
+                slash_command=False,
             )
-        except Exception as provenance_error:
-            try:
-                provider_error.add_note(
-                    "Operator provider failure provenance is pending or degraded; "
-                    f"secondary failure type: {type(provenance_error).__name__}."
-                )
-            except AttributeError:  # pragma: no cover
-                pass
-        raise
-    provider_succeeded = result.status == LIVE_SUCCESS
-    terminalize_model_and_task(provider_succeeded)
-    provenance_store.append_terminal(
-        new_runtime_provenance_event(
-            RuntimeProvenanceEventType.REQUEST_COMPLETED,
-            trace_context=trace_context,
-            ingress="OPERATOR_API",
-            success=provider_succeeded,
-            reason_code=(
-                "REQUEST_COMPLETED" if provider_succeeded else "REQUEST_FAILED"
-            ),
         )
-    )
-    result_payload = result.to_dict()
-    return {
-        "ok": result.status == LIVE_SUCCESS,
-        "schema_version": "AOIA_OPERATOR_CHAT_1A",
-        "provider_id": result.provider_id,
-        "model_id": result.model_id,
-        "call_made": result.status == LIVE_SUCCESS,
-        "status": result.status,
-        "response_text": result.response_text or "",
-        "error": result.error_message or "",
-        "output_trusted": False,
-        "automatic_fallback_used": False,
-        "streaming_used": False,
-        "tool_call_used": False,
-        "execution_triggered": False,
-        "dispatch_triggered": False,
-        "trust_status": result_payload["trust_status"],
-        **model_call.identity_fields(),
-    }
+        step_reservation = task_checkpoint_store.reserve_step(trace_context.task_id)
+        task_checkpoint_store.consume_provider_attempt(
+            model_call,
+            step_reservation=step_reservation,
+        )
+        provenance_store.append_runtime_event(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.MODEL_CALL_STARTED,
+                model_call=model_call,
+                requested_provider=provider_id,
+                requested_model=model_id,
+                retry_attempt=1,
+                provider_attempt=1,
+            )
+        )
+        try:
+            recovery_service.classify_under_claim(
+                trace_context.task_id,
+                recovery_token,
+            )
+            result = run_selected_provider(
+                provider_id=provider_id,
+                model_id=model_id,
+                prompt=prompt,
+                max_tokens=512,
+                live=True,
+                acknowledge_live_provider_test=True,
+                activation_status=ProviderActivationStatus.LIVE_ALLOWED_FOR_MANUAL_TEST,
+                selected_by="operator",
+                created_at="operator-chat-manual",
+            )
+        except Exception as provider_error:
+            try:
+                terminalize_model_and_task(False)
+                provenance_store.append_terminal(
+                    new_runtime_provenance_event(
+                        RuntimeProvenanceEventType.REQUEST_COMPLETED,
+                        trace_context=trace_context,
+                        ingress="OPERATOR_API",
+                        success=False,
+                        reason_code="REQUEST_FAILED",
+                    )
+                )
+            except Exception as provenance_error:
+                try:
+                    provider_error.add_note(
+                        "Operator provider failure provenance is pending or degraded; "
+                        f"secondary failure type: {type(provenance_error).__name__}."
+                    )
+                except AttributeError:  # pragma: no cover
+                    pass
+            raise
+        provider_succeeded = result.status == LIVE_SUCCESS
+        terminalize_model_and_task(provider_succeeded)
+        provenance_store.append_terminal(
+            new_runtime_provenance_event(
+                RuntimeProvenanceEventType.REQUEST_COMPLETED,
+                trace_context=trace_context,
+                ingress="OPERATOR_API",
+                success=provider_succeeded,
+                reason_code=(
+                    "REQUEST_COMPLETED" if provider_succeeded else "REQUEST_FAILED"
+                ),
+            )
+        )
+        result_payload = result.to_dict()
+        return {
+            "ok": result.status == LIVE_SUCCESS,
+            "schema_version": "AOIA_OPERATOR_CHAT_1A",
+            "provider_id": result.provider_id,
+            "model_id": result.model_id,
+            "call_made": result.status == LIVE_SUCCESS,
+            "status": result.status,
+            "response_text": result.response_text or "",
+            "error": result.error_message or "",
+            "output_trusted": False,
+            "automatic_fallback_used": False,
+            "streaming_used": False,
+            "tool_call_used": False,
+            "execution_triggered": False,
+            "dispatch_triggered": False,
+            "trust_status": result_payload["trust_status"],
+            **model_call.identity_fields(),
+        }
 
 
 def route_get_payload(path: str) -> tuple[HTTPStatus, dict[str, object]] | None:
