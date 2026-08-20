@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime as dt
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
@@ -12,6 +11,11 @@ from trace_context import (
     TraceContext,
     TraceIdentityError,
     strip_untrusted_identity_fields,
+)
+from runtime.safety.atomic_persistence import (
+    PersistenceError,
+    atomic_write_json,
+    state_resource_lock_path,
 )
 
 from .browser_tools import (
@@ -398,14 +402,26 @@ class ExecutionEngine:
             "result": result,
             "cwd": str(self.cwd),
         }
-        filename = dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f.json")
-        (self.command_log_dir / filename).write_text(
-            json.dumps(payload, indent=2, ensure_ascii=False),
-            encoding="utf-8",
+        filename = (
+            dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            + f"_{action_context.action_id}.json"
         )
-        self.memory_store.record_result(result)
-        self.memory_store.append_history("action_result", payload)
-        # AOIA Phase 2A containment boundary
-        # Runtime operational outputs must NEVER become canonical evidence.
-        if str(action.get("action", "")).startswith("browser_"):
-            self.memory_store.append_browser_event(payload)
+        command_log_path = self.command_log_dir / filename
+        try:
+            atomic_write_json(
+                command_log_path,
+                payload,
+                lock_path=state_resource_lock_path(
+                    self.memory_store.paths.state_dir,
+                    command_log_path,
+                ),
+                lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+            )
+            self.memory_store.record_result(result)
+            self.memory_store.append_history("action_result", payload)
+            # AOIA Phase 2A containment boundary
+            # Runtime operational outputs must NEVER become canonical evidence.
+            if str(action.get("action", "")).startswith("browser_"):
+                self.memory_store.append_browser_event(payload)
+        except PersistenceError as exc:
+            raise exc.attach_correlation(identity)

@@ -28,6 +28,13 @@ from orchestrator import GeminiGemmaOrchestrator
 from orchestrator.knowledge_router import KnowledgeRouter
 from providers import ProviderManager
 from router import LocalRouter
+from runtime.safety.atomic_persistence import (
+    PersistenceError,
+    append_json_line,
+    atomic_write_json,
+    atomic_write_text,
+    state_resource_lock_path,
+)
 from tools.executor import ExecutionEngine
 from memory.gemma_worker_memory import GemmaWorkerMemory
 from tools.memory_hats import MemoryHatStore
@@ -1319,7 +1326,15 @@ class AgentRuntime:
         slug = parsed.netloc.replace(".", "_") or "page"
         timestamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
         snapshot_path = self.memory_store.paths.memory_dir / f"{slug}_{timestamp}.txt"
-        snapshot_path.write_text(text, encoding="utf-8")
+        atomic_write_text(
+            snapshot_path,
+            text,
+            lock_path=state_resource_lock_path(
+                self.memory_store.paths.state_dir,
+                snapshot_path,
+            ),
+            lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+        )
         return snapshot_path
 
     def result_for_model(self, result: dict[str, Any]) -> dict[str, Any]:
@@ -1390,8 +1405,18 @@ class AgentRuntime:
             **identity,
             "payload": payload,
         }
-        with self.session_log.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        try:
+            append_json_line(
+                self.session_log,
+                record,
+                lock_path=state_resource_lock_path(
+                    self.memory_store.paths.state_dir,
+                    self.session_log,
+                ),
+                lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(identity)
 
     def log_reasoning_trace(
         self,
@@ -1409,13 +1434,16 @@ class AgentRuntime:
             model_call,
             action_context,
         )
-        self.memory_store.append_reasoning(
-            kind,
-            {
-                **identity,
-                **payload,
-            },
-        )
+        try:
+            self.memory_store.append_reasoning(
+                kind,
+                {
+                    **identity,
+                    **payload,
+                },
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(identity)
 
     def log_error(
         self,
@@ -1434,17 +1462,21 @@ class AgentRuntime:
             self.memory_store.paths.error_logs_dir
             / f"error_{dt.datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
         )
-        error_file.write_text(
-            json.dumps(
+        try:
+            atomic_write_json(
+                error_file,
                 {
                     **identity,
                     **payload,
                 },
-                indent=2,
-                ensure_ascii=False,
-            ),
-            encoding="utf-8",
-        )
+                lock_path=state_resource_lock_path(
+                    self.memory_store.paths.state_dir,
+                    error_file,
+                ),
+                lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
+            )
+        except PersistenceError as exc:
+            raise exc.attach_correlation(identity)
 
     def print_action(self, action: dict[str, Any], step: int) -> None:
         print(f"\n[STEP {step}] action={action['action']}")

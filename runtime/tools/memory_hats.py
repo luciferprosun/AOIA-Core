@@ -4,6 +4,13 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from runtime.safety.atomic_persistence import (
+    DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
+    atomic_write_json,
+    locked_unlink,
+    state_resource_lock_path,
+    validate_lock_timeout_seconds,
+)
 from runtime_paths import runtime_state_dir
 
 
@@ -47,10 +54,20 @@ DEFAULT_HATS = [
 class MemoryHatStore:
     """Persistent context overlays used by the planner prompt."""
 
-    def __init__(self, project_dir: Path, *, initialize_defaults: bool = True) -> None:
+    def __init__(
+        self,
+        project_dir: Path,
+        *,
+        initialize_defaults: bool = True,
+        state_lock_timeout_seconds: object = DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
+    ) -> None:
         state_root = runtime_state_dir(project_dir)
+        self.state_dir = state_root / "state"
+        self.state_lock_timeout_seconds = validate_lock_timeout_seconds(
+            state_lock_timeout_seconds
+        )
         self.hats_dir = state_root / "memory" / "hats"
-        self.active_file = state_root / "state" / "active_hat.json"
+        self.active_file = self.state_dir / "active_hat.json"
         if initialize_defaults:
             self.ensure_initialized()
 
@@ -97,12 +114,20 @@ class MemoryHatStore:
         hat = self.get_hat(name)
         if hat is None:
             raise ValueError(f"Unknown memory hat: {name}")
-        self.active_file.write_text(json.dumps({"name": hat.name}, indent=2), encoding="utf-8")
+        atomic_write_json(
+            self.active_file,
+            {"name": hat.name},
+            lock_path=self._lock_for(self.active_file),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
         return hat
 
     def clear_active(self) -> None:
-        if self.active_file.exists():
-            self.active_file.unlink()
+        locked_unlink(
+            self.active_file,
+            lock_path=self._lock_for(self.active_file),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
 
     def save_hat(
         self,
@@ -143,4 +168,12 @@ class MemoryHatStore:
 
     def _write_hat(self, hat: MemoryHat) -> None:
         path = self.hats_dir / f"{hat.name}.json"
-        path.write_text(json.dumps(asdict(hat), indent=2, ensure_ascii=False), encoding="utf-8")
+        atomic_write_json(
+            path,
+            asdict(hat),
+            lock_path=self._lock_for(path),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
+
+    def _lock_for(self, resource_path: Path) -> Path:
+        return state_resource_lock_path(self.state_dir, resource_path)

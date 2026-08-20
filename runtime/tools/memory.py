@@ -1,11 +1,21 @@
 from __future__ import annotations
 
 import datetime as dt
-import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from runtime.safety.atomic_persistence import (
+    DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
+    StateCorruptionError,
+    append_json_line,
+    atomic_write_json,
+    atomic_write_text,
+    locked_update_text,
+    read_json_snapshot,
+    state_resource_lock_path,
+    validate_lock_timeout_seconds,
+)
 from runtime_paths import runtime_state_dir
 
 
@@ -74,7 +84,9 @@ def build_runtime_paths(project_dir: Path) -> RuntimePaths:
 
 
 def build_obsidian_vault_paths(project_dir: Path) -> ObsidianVaultPaths:
-    vault_dir = runtime_state_dir(project_dir) / "obsidian_vault"
+    runtime_root = runtime_state_dir(project_dir)
+    state_dir = runtime_root / "state"
+    vault_dir = runtime_root / "obsidian_vault"
     paths = ObsidianVaultPaths(
         vault_dir=vault_dir,
         daily_dir=vault_dir / "Daily",
@@ -96,21 +108,19 @@ def build_obsidian_vault_paths(project_dir: Path) -> ObsidianVaultPaths:
     obsidian_config.mkdir(parents=True, exist_ok=True)
     app_json = obsidian_config / "app.json"
     if not app_json.exists():
-        app_json.write_text(
-            json.dumps(
-                {
-                    "theme": "obsidian",
-                    "baseFontSize": 16,
-                    "accentColor": "",
-                },
-                indent=2,
-                ensure_ascii=False,
-            ),
-            encoding="utf-8",
+        atomic_write_json(
+            app_json,
+            {
+                "theme": "obsidian",
+                "baseFontSize": 16,
+                "accentColor": "",
+            },
+            lock_path=state_resource_lock_path(state_dir, app_json),
         )
     start_here = vault_dir / "00_START_HERE.md"
     if not start_here.exists():
-        start_here.write_text(
+        atomic_write_text(
+            start_here,
             "\n".join(
                 [
                     "# Obsidian Vault",
@@ -124,7 +134,7 @@ def build_obsidian_vault_paths(project_dir: Path) -> ObsidianVaultPaths:
                     "- Projects: active notes",
                 ]
             ),
-            encoding="utf-8",
+            lock_path=state_resource_lock_path(state_dir, start_here),
         )
     return paths
 
@@ -147,7 +157,11 @@ class MemoryStore:
         initialize_vault: bool = True,
         persist_on_init: bool = True,
         record_session_start: bool = True,
+        state_lock_timeout_seconds: object = DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
     ) -> None:
+        self.state_lock_timeout_seconds = validate_lock_timeout_seconds(
+            state_lock_timeout_seconds
+        )
         self.paths = build_runtime_paths(project_dir)
         self.vault_dir = runtime_state_dir(project_dir) / "obsidian_vault"
         self.vault_paths: ObsidianVaultPaths | None = None
@@ -160,6 +174,9 @@ class MemoryStore:
         self.reasoning_file = self.paths.memory_dir / "reasoning_trace.jsonl"
         self.browser_log_file = self.paths.browser_logs_dir / f"browser_{session_id}.jsonl"
         self.memory = AgentMemory(session_id=session_id, cwd=str(cwd))
+        # Existing snapshots are validated before a new session can replace
+        # them. A malformed file is never treated as a missing/empty state.
+        self.load()
         if persist_on_init:
             self.save()
         if record_session_start:
@@ -177,10 +194,36 @@ class MemoryStore:
             self.vault_dir = self.vault_paths.vault_dir
         return self.vault_paths
 
-    def save(self) -> None:
-        self.state_file.write_text(
-            json.dumps(asdict(self.memory), indent=2, ensure_ascii=False),
-            encoding="utf-8",
+    def load(self) -> AgentMemory | None:
+        payload = read_json_snapshot(self.state_file)
+        if payload is None:
+            return None
+        if not isinstance(payload, dict):
+            raise StateCorruptionError(
+                "AOIA agent state snapshot must contain one JSON object.",
+                target_path=self.state_file,
+            )
+        try:
+            memory = AgentMemory(**payload)
+            self._validate_loaded_memory(memory)
+            return memory
+        except (TypeError, ValueError) as exc:
+            raise StateCorruptionError(
+                "AOIA agent state snapshot does not match the runtime schema.",
+                target_path=self.state_file,
+            ) from exc
+
+    def save(self, *, lock_timeout_seconds: object | None = None) -> None:
+        timeout = (
+            self.state_lock_timeout_seconds
+            if lock_timeout_seconds is None
+            else validate_lock_timeout_seconds(lock_timeout_seconds)
+        )
+        atomic_write_json(
+            self.state_file,
+            asdict(self.memory),
+            lock_path=self._lock_for(self.state_file),
+            lock_timeout_seconds=timeout,
         )
 
     def append_history(self, kind: str, payload: dict[str, Any]) -> None:
@@ -189,8 +232,12 @@ class MemoryStore:
             "kind": kind,
             "payload": payload,
         }
-        with self.history_file.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        append_json_line(
+            self.history_file,
+            record,
+            lock_path=self._lock_for(self.history_file),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
         self.append_vault_note(kind, payload)
 
     def append_evidence(self, kind: str, payload: dict[str, Any]) -> None:
@@ -201,8 +248,12 @@ class MemoryStore:
             "kind": kind,
             "payload": payload,
         }
-        with self.evidence_file.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        append_json_line(
+            self.evidence_file,
+            record,
+            lock_path=self._lock_for(self.evidence_file),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
         self._append_channel_note(vault_paths.evidence_dir, kind, payload)
 
     def _validate_evidence_payload(self, kind: str, payload: dict[str, Any]) -> None:
@@ -228,22 +279,24 @@ class MemoryStore:
             "kind": kind,
             "payload": payload,
         }
-        with self.reasoning_file.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        append_json_line(
+            self.reasoning_file,
+            record,
+            lock_path=self._lock_for(self.reasoning_file),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
         self._append_channel_note(vault_paths.reasoning_dir, kind, payload)
 
     def append_browser_event(self, payload: dict[str, Any]) -> None:
-        with self.browser_log_file.open("a", encoding="utf-8") as handle:
-            handle.write(
-                json.dumps(
-                    {
-                        "timestamp": dt.datetime.now().isoformat(),
-                        "payload": payload,
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
+        append_json_line(
+            self.browser_log_file,
+            {
+                "timestamp": dt.datetime.now().isoformat(),
+                "payload": payload,
+            },
+            lock_path=self._lock_for(self.browser_log_file),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
         self.append_vault_note("browser_event", payload)
 
     def set_current_task(self, task: str) -> None:
@@ -287,34 +340,68 @@ class MemoryStore:
         note_path = vault_paths.daily_dir / f"{day}.md"
         session_path = vault_paths.sessions_dir / f"{self.memory.session_id}.jsonl"
         block = self._vault_block(kind, payload)
-        note_path.write_text(
-            (note_path.read_text(encoding="utf-8") if note_path.exists() else f"# {day}\n\n")
-            + block,
-            encoding="utf-8",
+        locked_update_text(
+            note_path,
+            lambda current: current + block,
+            default_text=f"# {day}\n\n",
+            lock_path=self._lock_for(note_path),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
         )
-        with session_path.open("a", encoding="utf-8") as handle:
-            handle.write(
-                json.dumps(
-                    {
-                        "timestamp": dt.datetime.now().isoformat(),
-                        "kind": kind,
-                        "payload": payload,
-                        "cwd": self.memory.cwd,
-                        "task": self.memory.current_task,
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
+        append_json_line(
+            session_path,
+            {
+                "timestamp": dt.datetime.now().isoformat(),
+                "kind": kind,
+                "payload": payload,
+                "cwd": self.memory.cwd,
+                "task": self.memory.current_task,
+            },
+            lock_path=self._lock_for(session_path),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
+        )
 
     def _append_channel_note(self, directory: Path, kind: str, payload: dict[str, Any]) -> None:
         note_path = directory / f"{self.memory.session_id}.md"
         header = f"# {directory.name} {self.memory.session_id}\n\n"
-        note_path.write_text(
-            (note_path.read_text(encoding="utf-8") if note_path.exists() else header)
-            + self._vault_block(kind, payload),
-            encoding="utf-8",
+        block = self._vault_block(kind, payload)
+        locked_update_text(
+            note_path,
+            lambda current: current + block,
+            default_text=header,
+            lock_path=self._lock_for(note_path),
+            lock_timeout_seconds=self.state_lock_timeout_seconds,
         )
+
+    def _lock_for(self, resource_path: Path) -> Path:
+        return state_resource_lock_path(self.paths.state_dir, resource_path)
+
+    @staticmethod
+    def _validate_loaded_memory(memory: AgentMemory) -> None:
+        text_fields = (
+            memory.session_id,
+            memory.cwd,
+            memory.current_task,
+            memory.current_browser_page,
+        )
+        if any(not isinstance(value, str) for value in text_fields):
+            raise TypeError("agent state text fields must be strings")
+        string_lists = (
+            memory.previous_commands,
+            memory.open_tabs,
+            memory.screenshots,
+        )
+        if any(
+            not isinstance(values, list)
+            or any(not isinstance(value, str) for value in values)
+            for values in string_lists
+        ):
+            raise TypeError("agent state string-list fields are invalid")
+        if not isinstance(memory.recent_outputs, list) or any(
+            not isinstance(value, dict) for value in memory.recent_outputs
+        ):
+            raise TypeError("agent state recent_outputs must be a list of objects")
+        if not isinstance(memory.browser_active, bool):
+            raise TypeError("agent state browser_active must be boolean")
 
     def _vault_block(self, kind: str, payload: dict[str, Any]) -> str:
         summary = payload.get("message") or payload.get("summary") or payload.get("error") or ""

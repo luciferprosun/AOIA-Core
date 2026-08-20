@@ -9,6 +9,7 @@ from typing import Callable
 from .base import ModelProvider, require_provider_calls_enabled
 from .gemini_provider import GeminiProvider
 from .openai_compatible import OpenAICompatibleProvider
+from runtime.safety.atomic_persistence import atomic_write_json, state_resource_lock_path
 from runtime_paths import runtime_state_dir
 from trace_context import ModelCallContext, TraceContext, TracedModelOutput
 
@@ -95,9 +96,10 @@ class ProviderManager:
 
     def __init__(self, project_dir: Path) -> None:
         self.project_dir = project_dir
-        state_dir = runtime_state_dir(project_dir)
-        self.config_path = state_dir / "state" / "model_config.json"
-        self.providers_path = state_dir / "state" / "providers.json"
+        self.runtime_state_root = runtime_state_dir(project_dir)
+        self.state_dir = self.runtime_state_root / "state"
+        self.config_path = self.state_dir / "model_config.json"
+        self.providers_path = self.state_dir / "providers.json"
         self.provider_chain = self._load_provider_chain()
         self.current_model = self.normalize_model_name(self._load_model_name())
         self.provider: ModelProvider | None = None
@@ -205,10 +207,10 @@ class ProviderManager:
         self.current_model = normalized
         self.last_used_model = ""
         self.provider = None
-        self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        self.config_path.write_text(
-            json.dumps({"model": normalized}, indent=2),
-            encoding="utf-8",
+        atomic_write_json(
+            self.config_path,
+            {"model": normalized},
+            lock_path=state_resource_lock_path(self.state_dir, self.config_path),
         )
         return self.current_model
 

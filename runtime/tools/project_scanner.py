@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 
+from runtime.safety.atomic_persistence import (
+    PersistenceError,
+    atomic_write_json,
+    state_resource_lock_path,
+)
 from runtime_paths import runtime_state_dir
 
 from .filesystem_tools import canonical_project_root, resolve_path
@@ -113,21 +117,30 @@ def scan_project(
         "architecture_summary": architecture,
     }
 
-    report_path = runtime_state_dir(boundary_root) / "state" / "project_scan.json"
+    runtime_root = runtime_state_dir(boundary_root)
+    state_dir = runtime_root / "state"
+    report_path = state_dir / "project_scan.json"
     try:
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(
-            json.dumps(report, indent=2, ensure_ascii=False),
-            encoding="utf-8",
+        atomic_write_json(
+            report_path,
+            report,
+            lock_path=state_resource_lock_path(state_dir, report_path),
         )
-    except OSError:
-        report_path = None
+    except PersistenceError as exc:
+        return {
+            "success": False,
+            "path": str(root),
+            "project_scan": report,
+            "scan_report_path": "",
+            "persistence_reason_code": exc.reason_code,
+            "message": "Project scan completed but its state report could not be persisted.",
+        }
 
     return {
         "success": True,
         "path": str(root),
         "project_scan": report,
-        "scan_report_path": str(report_path) if report_path else "",
+        "scan_report_path": str(report_path),
         "message": f"Scanned {root}. Found {len(entrypoints)} likely entrypoints.",
     }
 
