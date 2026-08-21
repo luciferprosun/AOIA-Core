@@ -45,6 +45,16 @@
             <h2>Human-controlled chat and safe previews</h2>
           </div>
           <div class="topbar-actions">
+            <label class="operator-token-control" for="operator-token">
+              <span>Operator token</span>
+              <input
+                id="operator-token"
+                type="password"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Required for local API"
+              />
+            </label>
             <span class="status-pill">Bot <strong id="top-bot">Default</strong></span>
             <span class="status-pill">Mode <strong id="top-mode">Chat / public dev</strong></span>
             <span class="status-pill">Model <strong id="top-model">loading</strong></span>

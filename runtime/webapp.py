@@ -4,17 +4,25 @@ from __future__ import annotations
 import json
 import os
 import hashlib
+import hmac
+import posixpath
 import sys
-import traceback
+from dataclasses import dataclass, field
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Lock
-from urllib.parse import urlparse
+from typing import Mapping
+from urllib.parse import parse_qsl, unquote, urlparse
 
 from model_catalog import get_static_model_catalog_payload
 from memory_hat_registry import get_memory_hat_payload
 from trace_context import TraceContext
+
+try:
+    from runtime.outcomes import NZOutcome, NZOutcomeStatus, outcome_from_exception
+except ModuleNotFoundError:  # pragma: no cover - script launch path
+    from outcomes import NZOutcome, NZOutcomeStatus, outcome_from_exception
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -24,6 +32,128 @@ if not WEB_DIR.exists():
 HOST = os.getenv("APP2_WEB_HOST", "127.0.0.1")
 PORT = int(os.getenv("APP2_WEB_PORT", "4311"))
 CPT_BALANCED_MODE = "balanced_critic"
+WEB_OPERATOR_TOKEN_ENV = "AOIA_WEB_OPERATOR_TOKEN"
+WEB_ALLOWED_ORIGINS_ENV = "AOIA_WEB_ALLOWED_ORIGINS"
+WEB_MAX_JSON_BYTES_ENV = "AOIA_WEB_MAX_JSON_BYTES"
+DEFAULT_MAX_JSON_BYTES = 64 * 1024
+MAX_CONFIGURED_JSON_BYTES = 1024 * 1024
+MAX_JSON_DEPTH = 32
+_SENSITIVE_QUERY_NAMES = frozenset(
+    {
+        "access_token",
+        "api_key",
+        "auth",
+        "authorization",
+        "aoia_web_operator_token",
+        "bearer",
+        "credential",
+        "jwt",
+        "operator_token",
+        "password",
+        "secret",
+        "token",
+    }
+)
+
+
+class WebBoundaryConfigurationError(RuntimeError):
+    reason_code = "WEB_BOUNDARY_CONFIGURATION_INVALID"
+
+
+@dataclass(frozen=True)
+class WebBoundaryConfig:
+    operator_token: str = field(repr=False)
+    allowed_origins: frozenset[str]
+    max_json_bytes: int = DEFAULT_MAX_JSON_BYTES
+
+    def __post_init__(self) -> None:
+        token = self.operator_token
+        if (
+            not isinstance(token, str)
+            or len(token) < 16
+            or len(token) > 4096
+            or not token.isascii()
+            or any(ord(character) < 33 or ord(character) > 126 for character in token)
+        ):
+            raise WebBoundaryConfigurationError(
+                "AOIA web operator authentication is not safely configured."
+            )
+        if not isinstance(self.allowed_origins, frozenset):
+            raise WebBoundaryConfigurationError("AOIA web origin policy is invalid.")
+        for origin in self.allowed_origins:
+            try:
+                parsed = urlparse(origin)
+                parsed_port = parsed.port
+            except ValueError as error:
+                raise WebBoundaryConfigurationError(
+                    "AOIA web origin policy is invalid."
+                ) from error
+            if (
+                not origin
+                or "*" in origin
+                or parsed.scheme not in {"http", "https"}
+                or not parsed.netloc
+                or parsed.hostname is None
+                or (parsed_port is not None and not 1 <= parsed_port <= 65535)
+                or parsed.username is not None
+                or parsed.password is not None
+                or parsed.path not in {"", "/"}
+                or parsed.params
+                or parsed.query
+                or parsed.fragment
+                or origin != f"{parsed.scheme}://{parsed.netloc}"
+            ):
+                raise WebBoundaryConfigurationError("AOIA web origin policy is invalid.")
+        if (
+            not isinstance(self.max_json_bytes, int)
+            or isinstance(self.max_json_bytes, bool)
+            or self.max_json_bytes < 2
+            or self.max_json_bytes > MAX_CONFIGURED_JSON_BYTES
+        ):
+            raise WebBoundaryConfigurationError("AOIA web request-size policy is invalid.")
+
+
+def load_web_boundary_config(
+    *,
+    host: str = HOST,
+    port: int = PORT,
+    environ: Mapping[str, str] | None = None,
+) -> WebBoundaryConfig:
+    source = os.environ if environ is None else environ
+    token = source.get(WEB_OPERATOR_TOKEN_ENV, "")
+    configured_origins = source.get(WEB_ALLOWED_ORIGINS_ENV, "")
+    if configured_origins.strip():
+        origins = frozenset(
+            item.strip().rstrip("/")
+            for item in configured_origins.split(",")
+            if item.strip()
+        )
+    elif host in {"127.0.0.1", "localhost", "::1"}:
+        origins = frozenset(
+            {
+                f"http://127.0.0.1:{port}",
+                f"http://localhost:{port}",
+                f"http://[::1]:{port}",
+            }
+        )
+    else:
+        # Authentication remains mandatory on every bind.  Non-loopback binds
+        # additionally require an explicit browser-origin allowlist.
+        raise WebBoundaryConfigurationError(
+            "AOIA web allowed origins must be configured for a non-loopback bind."
+        )
+    raw_limit = source.get(WEB_MAX_JSON_BYTES_ENV, str(DEFAULT_MAX_JSON_BYTES))
+    try:
+        limit = int(raw_limit, 10)
+    except (TypeError, ValueError) as error:
+        raise WebBoundaryConfigurationError(
+            "AOIA web request-size policy is invalid."
+        ) from error
+    return WebBoundaryConfig(
+        operator_token=token,
+        allowed_origins=origins,
+        max_json_bytes=limit,
+    )
 
 
 class WebRuntimeService:
@@ -715,6 +845,203 @@ def _load_cpt_transformer():
     return transform_prompt
 
 
+PUBLIC_HEALTH_PATHS = frozenset({"/api/health"})
+AUTHENTICATED_READ_PATHS = frozenset(
+    {
+        "/api/status",
+        "/api/models",
+        "/api/model-catalog",
+        "/api/memory-hats",
+        "/api/provider-config-status",
+        "/api/commits",
+        "/api/operator/status",
+        "/api/boundaries",
+        "/api/router/status",
+        "/api/evidence/sample",
+        "/api/agent-loop/status",
+        "/api/audit/status",
+    }
+)
+AUTHENTICATED_MUTATION_PATHS = frozenset(
+    {
+        "/api/chat",
+        "/api/operator/chat",
+        "/api/router/preview",
+        "/api/cpt/transform",
+        "/api/model",
+        "/api/model-selection/propose",
+    }
+)
+
+
+class AOIAWebServer(ThreadingHTTPServer):
+    """Single-operator local server with immutable auth policy and mutation lock."""
+
+    def __init__(
+        self,
+        server_address: tuple[str, int],
+        handler_class,
+        *,
+        boundary_config: WebBoundaryConfig,
+    ) -> None:
+        self.web_boundary_config = boundary_config
+        self.operator_mutation_lock = Lock()
+        super().__init__(server_address, handler_class)
+
+
+def _safe_http_error_payload(
+    *,
+    outcome_status: NZOutcomeStatus,
+    reason_code: str,
+    message_safe: str,
+    trace_context: TraceContext,
+) -> dict[str, object]:
+    outcome = NZOutcome.build(
+        outcome_status,
+        reason_code,
+        message_safe=message_safe,
+        request_id=trace_context.request_id,
+        trace_id=trace_context.trace_id,
+    ).to_dict()
+    return {
+        "ok": False,
+        "status": outcome["status"],
+        "reason_code": outcome["reason_code"],
+        "message_safe": outcome["message_safe"],
+        # Compatibility alias.  It is always identical to the bounded safe text.
+        "error": outcome["message_safe"],
+        "request_id": trace_context.request_id,
+        "trace_id": trace_context.trace_id,
+        "outcome": outcome,
+    }
+
+
+def _safe_exception_payload(
+    error: BaseException,
+    trace_context: TraceContext,
+) -> dict[str, object]:
+    outcome = outcome_from_exception(
+        error,
+        request_id=trace_context.request_id,
+        trace_id=trace_context.trace_id,
+    ).to_dict()
+    return {
+        "ok": False,
+        "status": outcome["status"],
+        "reason_code": outcome["reason_code"],
+        "message_safe": outcome["message_safe"],
+        "error": outcome["message_safe"],
+        "request_id": trace_context.request_id,
+        "trace_id": trace_context.trace_id,
+        "outcome": outcome,
+    }
+
+
+def _safe_projected_outcome_payload(
+    source: NZOutcome,
+    trace_context: TraceContext,
+) -> dict[str, object]:
+    """Rebuild an error outcome without copying upstream text, data, or identities."""
+
+    outcome = NZOutcome.build(
+        source.status,
+        source.reason_code,
+        request_id=trace_context.request_id,
+        trace_id=trace_context.trace_id,
+        replayed=source.replayed,
+        degraded=source.degraded,
+    ).to_dict()
+    return {
+        "ok": False,
+        "status": outcome["status"],
+        "reason_code": outcome["reason_code"],
+        "message_safe": outcome["message_safe"],
+        "error": outcome["message_safe"],
+        "request_id": trace_context.request_id,
+        "trace_id": trace_context.trace_id,
+        "outcome": outcome,
+    }
+
+
+def _http_status_for_outcome(status: NZOutcomeStatus) -> HTTPStatus:
+    if status in {NZOutcomeStatus.PARTIAL, NZOutcomeStatus.DEGRADED}:
+        return HTTPStatus.OK
+    if status is NZOutcomeStatus.BLOCKED:
+        return HTTPStatus.FORBIDDEN
+    if status is NZOutcomeStatus.TIMEOUT:
+        return HTTPStatus.GATEWAY_TIMEOUT
+    if status is NZOutcomeStatus.FAILED:
+        return HTTPStatus.BAD_GATEWAY
+    return HTTPStatus.CONFLICT
+
+
+def _with_http_identity(
+    payload: Mapping[str, object],
+    trace_context: TraceContext,
+) -> dict[str, object]:
+    response = dict(payload)
+    response.setdefault("request_id", trace_context.request_id)
+    response.setdefault("trace_id", trace_context.trace_id)
+    return response
+
+
+def _strict_json_object(raw_body: bytes) -> dict[str, object]:
+    try:
+        text = raw_body.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as error:
+        raise ValueError("WEB_JSON_INVALID") from error
+
+    def reject_constant(_value: str) -> object:
+        raise ValueError("WEB_JSON_INVALID")
+
+    def unique_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("WEB_JSON_DUPLICATE_FIELD")
+            result[key] = value
+        return result
+
+    try:
+        payload = json.loads(
+            text,
+            object_pairs_hook=unique_pairs,
+            parse_constant=reject_constant,
+        )
+    except (json.JSONDecodeError, ValueError, RecursionError) as error:
+        raise ValueError("WEB_JSON_INVALID") from error
+    if not isinstance(payload, dict):
+        raise ValueError("WEB_JSON_OBJECT_REQUIRED")
+    stack: list[tuple[object, int]] = [(payload, 1)]
+    while stack:
+        value, depth = stack.pop()
+        if depth > MAX_JSON_DEPTH:
+            raise ValueError("WEB_JSON_DEPTH_EXCEEDED")
+        if isinstance(value, dict):
+            stack.extend((item, depth + 1) for item in value.values())
+        elif isinstance(value, list):
+            stack.extend((item, depth + 1) for item in value)
+    return payload
+
+
+def _is_api_path(path: str) -> bool:
+    try:
+        decoded = unquote(path, encoding="utf-8", errors="strict")
+    except UnicodeDecodeError:
+        decoded = path
+    raw_absolute = "/" + path.lstrip("/")
+    decoded_absolute = "/" + decoded.lstrip("/")
+    if (
+        raw_absolute == "/api"
+        or raw_absolute.startswith("/api/")
+        or decoded_absolute == "/api"
+        or decoded_absolute.startswith("/api/")
+    ):
+        return True
+    canonical = posixpath.normpath("/" + decoded.lstrip("/"))
+    return canonical == "/api" or canonical.startswith("/api/")
+
+
 class CodexStyleHandler(SimpleHTTPRequestHandler):
     """Serve the static UI and a small JSON API."""
 
@@ -722,84 +1049,236 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(WEB_DIR), **kwargs)
 
     def do_GET(self) -> None:
-        parsed = urlparse(self.path)
-        if parsed.path == "/api/memory-hats":
-            self._write_json(HTTPStatus.OK, get_memory_hat_payload())
+        trace_context = TraceContext.new_request()
+        try:
+            parsed = urlparse(self.path)
+        except ValueError:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_PATH_INVALID",
+                "The request target is invalid.",
+                trace_context,
+            )
             return
-        routed = route_get_payload(parsed.path)
-        if routed is not None:
-            status, payload = routed
-            self._write_json(status, payload)
+        api_namespace = _is_api_path(parsed.path) or _is_api_path(
+            self.path.split("?", 1)[0]
+        )
+        if self._reject_query(parsed, api_namespace, trace_context):
             return
+
+        if parsed.path in PUBLIC_HEALTH_PATHS:
+            outcome = NZOutcome.build(
+                NZOutcomeStatus.SUCCESS,
+                request_id=trace_context.request_id,
+                trace_id=trace_context.trace_id,
+            ).to_dict()
+            self._write_json(
+                HTTPStatus.OK,
+                {
+                    "ok": True,
+                    "service": "aoia-local-web",
+                    "status": outcome["status"],
+                    "request_id": trace_context.request_id,
+                    "trace_id": trace_context.trace_id,
+                    "outcome": outcome,
+                },
+            )
+            return
+
+        if api_namespace:
+            config = self._resolve_boundary_config(trace_context)
+            if config is None or not self._authenticate(config, trace_context):
+                return
+            if parsed.path not in AUTHENTICATED_READ_PATHS:
+                self._write_error(
+                    HTTPStatus.NOT_FOUND,
+                    NZOutcomeStatus.BLOCKED,
+                    "WEB_ROUTE_NOT_FOUND",
+                    "The requested API route does not exist.",
+                    trace_context,
+                )
+                return
+            try:
+                routed = route_get_payload(parsed.path)
+                if routed is None:
+                    self._write_error(
+                        HTTPStatus.NOT_FOUND,
+                        NZOutcomeStatus.BLOCKED,
+                        "WEB_ROUTE_NOT_FOUND",
+                        "The requested API route does not exist.",
+                        trace_context,
+                    )
+                    return
+                status, payload = routed
+                self._write_routed_json(status, payload, trace_context)
+            except Exception as error:  # safe HTTP boundary; raw details stay local
+                self._write_json(
+                    HTTPStatus.INTERNAL_SERVER_ERROR,
+                    _safe_exception_payload(error, trace_context),
+                )
+            return
+
         if parsed.path in {"/", "/index.html"}:
             self.path = "/index.html"
         return super().do_GET()
 
     def do_POST(self) -> None:
-        parsed = urlparse(self.path)
-        payload = self._read_json_body()
+        trace_context = TraceContext.new_request()
+        try:
+            parsed = urlparse(self.path)
+        except ValueError:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_PATH_INVALID",
+                "The request target is invalid.",
+                trace_context,
+            )
+            return
+        api_namespace = _is_api_path(parsed.path) or _is_api_path(
+            self.path.split("?", 1)[0]
+        )
+        if self._reject_query(parsed, api_namespace, trace_context):
+            return
+        if not api_namespace:
+            self._write_error(
+                HTTPStatus.NOT_FOUND,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_ROUTE_NOT_FOUND",
+                "The requested API route does not exist.",
+                trace_context,
+            )
+            return
+        config = self._resolve_boundary_config(trace_context)
+        if config is None or not self._authenticate(config, trace_context):
+            return
+        if parsed.path not in AUTHENTICATED_MUTATION_PATHS:
+            self._write_error(
+                HTTPStatus.NOT_FOUND,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_ROUTE_NOT_FOUND",
+                "The requested API route does not exist.",
+                trace_context,
+            )
+            return
+        if not self._origin_allowed(config, trace_context):
+            return
+        payload = self._read_json_body(config, trace_context)
         if payload is None:
             return
 
         try:
-            if parsed.path == "/api/router/preview":
-                status, response = route_post_payload(parsed.path, payload)
-                self._write_json(status, response)
-                return
+            mutation_lock = getattr(
+                getattr(self, "server", None),
+                "operator_mutation_lock",
+                None,
+            )
+            if mutation_lock is None:
+                self._dispatch_post(parsed, payload, trace_context)
+            else:
+                with mutation_lock:
+                    self._dispatch_post(parsed, payload, trace_context)
+        except Exception as error:  # raw exception text and tracebacks never cross HTTP
+            self._write_json(
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+                _safe_exception_payload(error, trace_context),
+            )
 
-            if parsed.path == "/api/operator/chat":
-                status, response = route_post_payload(parsed.path, payload)
-                self._write_json(status, response)
-                return
+    def _dispatch_post(
+        self,
+        parsed,
+        payload: dict[str, object],
+        trace_context: TraceContext,
+    ) -> None:
+        path = parsed.path
+        if not self._validate_known_field_types(path, payload, trace_context):
+            return
 
-            if parsed.path == "/api/cpt/transform":
-                prompt = payload.get("prompt", "")
-                mode = payload.get("mode", CPT_BALANCED_MODE)
-                if mode is None:
-                    mode = CPT_BALANCED_MODE
-                try:
-                    response = build_cpt_transform_payload(prompt=prompt, mode=mode)
-                except (TypeError, ValueError) as error:
-                    self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
-                    return
-                self._write_json(HTTPStatus.OK, response)
-                return
+        if path == "/api/router/preview":
+            status, response = route_post_payload(path, payload)
+            self._write_routed_json(status, response, trace_context)
+            return
 
-            if parsed.path == "/api/chat":
-                status, response = route_post_payload(parsed.path, payload)
-                self._write_json(status, response)
-                return
+        if path == "/api/operator/chat":
+            status, response = route_post_payload(path, payload)
+            self._write_routed_json(status, response, trace_context)
+            return
 
-            if parsed.path == "/api/model":
-                model_name = str(payload.get("model", "")).strip()
-                if not model_name:
-                    self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "model is required"})
-                    return
-                self._write_json(HTTPStatus.OK, get_service().switch_model(model_name))
-                return
-
-            if parsed.path == "/api/model-selection/propose":
-                from model_router import create_model_selection_proposal, evaluate_model_selection_policy
-
-                provider_id = str(payload.get("provider_id", "")).strip()
-                model_id = str(payload.get("model_id", "")).strip()
-                task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
-                user_prompt = str(payload.get("user_prompt", ""))
-                if not provider_id or not model_id or not task_sensitivity:
-                    self._write_json(
-                        HTTPStatus.BAD_REQUEST,
-                        {"ok": False, "error": "provider_id, model_id, and task_sensitivity are required"},
-                    )
-                    return
-                proposal = create_model_selection_proposal(
-                    provider_id=provider_id,
-                    model_id=model_id,
-                    task_sensitivity=task_sensitivity,
-                    user_prompt=user_prompt,
+        if parsed.path == "/api/cpt/transform":
+            prompt = payload.get("prompt", "")
+            mode = payload.get("mode", CPT_BALANCED_MODE)
+            if mode is None:
+                mode = CPT_BALANCED_MODE
+            try:
+                response = build_cpt_transform_payload(prompt=prompt, mode=mode)
+            except (TypeError, ValueError) as error:
+                message = str(error)
+                if message not in {"prompt is required", "mode must be balanced_critic"}:
+                    message = "The JSON request is invalid."
+                self._write_error(
+                    HTTPStatus.BAD_REQUEST,
+                    NZOutcomeStatus.BLOCKED,
+                    "WEB_REQUEST_INVALID",
+                    message,
+                    trace_context,
                 )
-                decision = evaluate_model_selection_policy(proposal=proposal)
-                self._write_json(
-                    HTTPStatus.OK,
+                return
+            self._write_json(
+                HTTPStatus.OK,
+                _with_http_identity(response, trace_context),
+            )
+            return
+
+        if parsed.path == "/api/chat":
+            status, response = route_post_payload(path, payload)
+            self._write_routed_json(status, response, trace_context)
+            return
+
+        if path == "/api/model":
+            model_name = str(payload.get("model", "")).strip()
+            if not model_name:
+                self._write_error(
+                    HTTPStatus.BAD_REQUEST,
+                    NZOutcomeStatus.BLOCKED,
+                    "WEB_REQUEST_INVALID",
+                    "model is required",
+                    trace_context,
+                )
+                return
+            response = get_service().switch_model(model_name)
+            self._write_json(
+                HTTPStatus.OK,
+                _with_http_identity(response, trace_context),
+            )
+            return
+
+        if path == "/api/model-selection/propose":
+            from model_router import create_model_selection_proposal, evaluate_model_selection_policy
+
+            provider_id = str(payload.get("provider_id", "")).strip()
+            model_id = str(payload.get("model_id", "")).strip()
+            task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
+            user_prompt = str(payload.get("user_prompt", ""))
+            if not provider_id or not model_id or not task_sensitivity:
+                self._write_error(
+                    HTTPStatus.BAD_REQUEST,
+                    NZOutcomeStatus.BLOCKED,
+                    "WEB_REQUEST_INVALID",
+                    "provider_id, model_id, and task_sensitivity are required",
+                    trace_context,
+                )
+                return
+            proposal = create_model_selection_proposal(
+                provider_id=provider_id,
+                model_id=model_id,
+                task_sensitivity=task_sensitivity,
+                user_prompt=user_prompt,
+            )
+            decision = evaluate_model_selection_policy(proposal=proposal)
+            self._write_json(
+                HTTPStatus.OK,
+                _with_http_identity(
                     {
                         "ok": True,
                         "proposal": proposal,
@@ -808,43 +1287,410 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                         "provider_call_permitted": False,
                         "output_trusted": False,
                     },
-                )
-                return
-
-            self._write_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
-        except Exception as error:  # pragma: no cover - local debugging path
-            self._write_json(
-                HTTPStatus.INTERNAL_SERVER_ERROR,
-                {
-                    "ok": False,
-                    "error": str(error),
-                    "traceback": traceback.format_exc(),
-                },
+                    trace_context,
+                ),
             )
+            return
+
+        self._write_error(
+            HTTPStatus.NOT_FOUND,
+            NZOutcomeStatus.BLOCKED,
+            "WEB_ROUTE_NOT_FOUND",
+            "The requested API route does not exist.",
+            trace_context,
+        )
 
     def log_message(self, format: str, *args) -> None:
         return
 
-    def _read_json_body(self) -> dict | None:
-        length = int(self.headers.get("Content-Length", "0") or 0)
-        raw_body = self.rfile.read(length) if length else b"{}"
+    def _header_values(self, name: str) -> list[str]:
+        get_all = getattr(self.headers, "get_all", None)
+        if callable(get_all):
+            return [str(value) for value in (get_all(name, []) or [])]
+        value = self.headers.get(name)
+        if value is None:
+            return []
+        if isinstance(value, (list, tuple)):
+            return [str(item) for item in value]
+        return [str(value)]
+
+    def _resolve_boundary_config(
+        self,
+        trace_context: TraceContext,
+    ) -> WebBoundaryConfig | None:
+        direct = getattr(self, "web_boundary_config", None)
+        server = getattr(self, "server", None)
+        config = direct or getattr(server, "web_boundary_config", None)
+        if isinstance(config, WebBoundaryConfig):
+            return config
         try:
-            return json.loads(raw_body.decode("utf-8"))
-        except json.JSONDecodeError:
-            self._write_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "Invalid JSON body"})
+            return load_web_boundary_config()
+        except WebBoundaryConfigurationError:
+            self._write_error(
+                HTTPStatus.SERVICE_UNAVAILABLE,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_BOUNDARY_CONFIGURATION_INVALID",
+                "Local operator authentication is unavailable.",
+                trace_context,
+            )
             return None
+
+    def _authenticate(
+        self,
+        config: WebBoundaryConfig,
+        trace_context: TraceContext,
+    ) -> bool:
+        values = self._header_values("Authorization")
+        candidate = ""
+        if len(values) == 1:
+            scheme, separator, supplied = values[0].partition(" ")
+            if separator and scheme.casefold() == "bearer" and supplied and not supplied.isspace():
+                candidate = supplied
+        authenticated = hmac.compare_digest(
+            candidate.encode("utf-8", errors="surrogatepass"),
+            config.operator_token.encode("ascii"),
+        )
+        if authenticated:
+            return True
+        self._write_error(
+            HTTPStatus.UNAUTHORIZED,
+            NZOutcomeStatus.BLOCKED,
+            "WEB_AUTHENTICATION_REQUIRED",
+            "Valid local operator authentication is required.",
+            trace_context,
+        )
+        return False
+
+    def _reject_query(
+        self,
+        parsed,
+        api_namespace: bool,
+        trace_context: TraceContext,
+    ) -> bool:
+        try:
+            fields = parse_qsl(
+                parsed.query,
+                keep_blank_values=True,
+                strict_parsing=False,
+                max_num_fields=64,
+            )
+        except ValueError:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_QUERY_INVALID",
+                "The request query is invalid.",
+                trace_context,
+            )
+            return True
+        if any(name.casefold() in _SENSITIVE_QUERY_NAMES for name, _value in fields):
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_AUTH_QUERY_REJECTED",
+                "Authentication data is not accepted in request URLs.",
+                trace_context,
+            )
+            return True
+        if api_namespace and parsed.query:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_QUERY_UNSUPPORTED",
+                "API query parameters are not supported.",
+                trace_context,
+            )
+            return True
+        return False
+
+    def _origin_allowed(
+        self,
+        config: WebBoundaryConfig,
+        trace_context: TraceContext,
+    ) -> bool:
+        origins = self._header_values("Origin")
+        if not origins:
+            return True  # Non-browser bearer clients do not normally send Origin.
+        if len(origins) == 1 and origins[0] in config.allowed_origins:
+            return True
+        self._write_error(
+            HTTPStatus.FORBIDDEN,
+            NZOutcomeStatus.BLOCKED,
+            "WEB_ORIGIN_REJECTED",
+            "The request origin is not permitted.",
+            trace_context,
+        )
+        return False
+
+    def _read_json_body(
+        self,
+        config: WebBoundaryConfig,
+        trace_context: TraceContext,
+    ) -> dict[str, object] | None:
+        transfer_encoding = self._header_values("Transfer-Encoding")
+        if transfer_encoding:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_TRANSFER_ENCODING_UNSUPPORTED",
+                "Transfer-encoded request bodies are not supported.",
+                trace_context,
+            )
+            return None
+
+        content_types = self._header_values("Content-Type")
+        if len(content_types) != 1 or not self._valid_json_content_type(content_types[0]):
+            self._write_error(
+                HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_CONTENT_TYPE_UNSUPPORTED",
+                "A UTF-8 application/json request body is required.",
+                trace_context,
+            )
+            return None
+
+        lengths = self._header_values("Content-Length")
+        if not lengths:
+            self._write_error(
+                HTTPStatus.LENGTH_REQUIRED,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_CONTENT_LENGTH_REQUIRED",
+                "A bounded Content-Length header is required.",
+                trace_context,
+            )
+            return None
+        if len(lengths) != 1:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_CONTENT_LENGTH_INVALID",
+                "The Content-Length header is invalid.",
+                trace_context,
+            )
+            return None
+        raw_length = lengths[0].strip()
+        if (
+            not raw_length
+            or len(raw_length) > 10
+            or not raw_length.isascii()
+            or not raw_length.isdigit()
+        ):
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_CONTENT_LENGTH_INVALID",
+                "The Content-Length header is invalid.",
+                trace_context,
+            )
+            return None
+        length = int(raw_length, 10)
+        if length <= 0:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_JSON_INVALID",
+                "The JSON request body is invalid.",
+                trace_context,
+            )
+            return None
+        if length > config.max_json_bytes:
+            self._write_error(
+                HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_REQUEST_TOO_LARGE",
+                "The JSON request body exceeds the configured limit.",
+                trace_context,
+            )
+            return None
+
+        try:
+            raw_body = self.rfile.read(length)
+        except (OSError, ValueError):
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_BODY_INCOMPLETE",
+                "The JSON request body is incomplete.",
+                trace_context,
+            )
+            return None
+        if not isinstance(raw_body, bytes) or len(raw_body) != length:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_BODY_INCOMPLETE",
+                "The JSON request body is incomplete.",
+                trace_context,
+            )
+            return None
+        try:
+            return _strict_json_object(raw_body)
+        except ValueError:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_JSON_INVALID",
+                "The JSON request body is invalid.",
+                trace_context,
+            )
+            return None
+
+    @staticmethod
+    def _valid_json_content_type(value: str) -> bool:
+        parts = [part.strip() for part in value.split(";")]
+        if not parts or parts[0].casefold() != "application/json":
+            return False
+        seen_charset = False
+        for parameter in parts[1:]:
+            if not parameter or "=" not in parameter:
+                return False
+            name, raw_value = parameter.split("=", 1)
+            if name.strip().casefold() != "charset" or seen_charset:
+                return False
+            charset = raw_value.strip().strip('"').casefold()
+            if charset not in {"utf-8", "utf8"}:
+                return False
+            seen_charset = True
+        return True
+
+    def _validate_known_field_types(
+        self,
+        path: str,
+        payload: Mapping[str, object],
+        trace_context: TraceContext,
+    ) -> bool:
+        optional_none = {"mode"} if path == "/api/cpt/transform" else set()
+        known_fields = {
+            "/api/chat": ("prompt",),
+            "/api/operator/chat": ("provider_id", "model_id", "prompt"),
+            "/api/router/preview": ("provider_id", "model_id", "task_sensitivity", "user_prompt"),
+            "/api/cpt/transform": ("prompt", "mode"),
+            "/api/model": ("model",),
+            "/api/model-selection/propose": (
+                "provider_id",
+                "model_id",
+                "task_sensitivity",
+                "user_prompt",
+            ),
+        }[path]
+        invalid = any(
+            name in payload
+            and not isinstance(payload[name], str)
+            and not (name in optional_none and payload[name] is None)
+            for name in known_fields
+        )
+        if invalid:
+            self._write_error(
+                HTTPStatus.BAD_REQUEST,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_REQUEST_INVALID",
+                "The JSON request fields are invalid.",
+                trace_context,
+            )
+            return False
+        return True
+
+    def _write_routed_json(
+        self,
+        status: HTTPStatus,
+        payload: Mapping[str, object],
+        trace_context: TraceContext,
+    ) -> None:
+        source_outcome: NZOutcome | None = None
+        if "outcome" in payload:
+            try:
+                source_outcome = NZOutcome.from_dict(payload["outcome"])  # type: ignore[arg-type]
+            except (TypeError, ValueError):
+                self._write_error(
+                    HTTPStatus.BAD_GATEWAY,
+                    NZOutcomeStatus.FAILED,
+                    "WEB_OUTCOME_INVALID",
+                    "The runtime returned an invalid outcome.",
+                    trace_context,
+                )
+                return
+        if source_outcome is not None and source_outcome.status is not NZOutcomeStatus.SUCCESS:
+            self._write_json(
+                _http_status_for_outcome(source_outcome.status),
+                _safe_projected_outcome_payload(source_outcome, trace_context),
+            )
+            return
+        if status >= HTTPStatus.BAD_REQUEST or payload.get("ok") is False:
+            if source_outcome is not None:
+                self._write_error(
+                    HTTPStatus.BAD_GATEWAY,
+                    NZOutcomeStatus.FAILED,
+                    "WEB_OUTCOME_CONFLICT",
+                    "The runtime returned conflicting outcome state.",
+                    trace_context,
+                )
+                return
+            raw_message = payload.get("error")
+            message = (
+                raw_message
+                if raw_message in {"prompt is required", "provider_id and model_id are required"}
+                else "The JSON request is invalid."
+            )
+            if status >= HTTPStatus.INTERNAL_SERVER_ERROR or status < HTTPStatus.BAD_REQUEST:
+                self._write_error(
+                    HTTPStatus.BAD_GATEWAY,
+                    NZOutcomeStatus.FAILED,
+                    "WEB_OPERATION_FAILED",
+                    "The runtime could not complete the operation.",
+                    trace_context,
+                )
+                return
+            self._write_error(
+                status,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_REQUEST_INVALID",
+                str(message),
+                trace_context,
+            )
+            return
+        self._write_json(status, _with_http_identity(payload, trace_context))
+
+    def _write_error(
+        self,
+        http_status: HTTPStatus,
+        outcome_status: NZOutcomeStatus,
+        reason_code: str,
+        message_safe: str,
+        trace_context: TraceContext,
+    ) -> None:
+        self._write_json(
+            http_status,
+            _safe_http_error_payload(
+                outcome_status=outcome_status,
+                reason_code=reason_code,
+                message_safe=message_safe,
+                trace_context=trace_context,
+            ),
+        )
 
     def _write_json(self, status: HTTPStatus, payload: dict) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "no-referrer")
         self.end_headers()
         self.wfile.write(body)
 
 
 def main() -> None:
-    server = ThreadingHTTPServer((HOST, PORT), CodexStyleHandler)
+    try:
+        boundary_config = load_web_boundary_config(host=HOST, port=PORT)
+    except WebBoundaryConfigurationError as error:
+        print(f"AOIA web server refused to start: {error}", file=sys.stderr)
+        raise SystemExit(2) from None
+    server = AOIAWebServer(
+        (HOST, PORT),
+        CodexStyleHandler,
+        boundary_config=boundary_config,
+    )
     print(f"App222 web UI running on http://{HOST}:{PORT}")
     try:
         server.serve_forever()

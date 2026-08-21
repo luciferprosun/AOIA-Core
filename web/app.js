@@ -6,6 +6,7 @@ const state = {
   selectedProvider: "",
   selectedModel: "",
   selectedMode: "PUBLIC_DEV",
+  operatorToken: "",
   running: false,
 };
 
@@ -30,6 +31,7 @@ const MODE_LABELS = {
 const elements = {
   navItems: document.querySelectorAll(".nav-item"),
   views: document.querySelectorAll(".view"),
+  operatorToken: document.querySelector("#operator-token"),
   refreshAll: document.querySelector("#refresh-all"),
   topBot: document.querySelector("#top-bot"),
   topMode: document.querySelector("#top-mode"),
@@ -101,15 +103,23 @@ const elements = {
 };
 
 async function jsonFetch(url, options = {}) {
+  if (!state.operatorToken) {
+    throw new Error("Local operator token required.");
+  }
+  const headers = {
+    ...(options.headers || {}),
+    Authorization: `Bearer ${state.operatorToken}`,
+  };
+  if (options.body !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
   const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-    },
     ...options,
+    headers,
   });
   const payload = await response.json();
   if (!response.ok) {
-    throw new Error(payload.error || `Request failed: ${response.status}`);
+    throw new Error(payload.message_safe || payload.error || `Request failed: ${response.status}`);
   }
   return payload;
 }
@@ -553,6 +563,11 @@ elements.refreshAll.addEventListener("click", async () => {
     setConnectionStatus("error", "error");
     elements.disabledReason.textContent = String(error);
   }
+});
+
+elements.operatorToken.addEventListener("input", () => {
+  state.operatorToken = elements.operatorToken.value;
+  setConnectionStatus(state.operatorToken ? "token ready" : "token required", "warn");
 });
 
 elements.routerProviderSelect.addEventListener("change", hydrateModelSelect);

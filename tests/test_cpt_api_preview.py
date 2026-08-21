@@ -14,6 +14,7 @@ from unittest.mock import patch
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DIR = PROJECT_ROOT / "runtime"
+SYNTHETIC_WEB_TOKEN = "NZ_P012_COMPAT_OPERATOR_TOKEN_001"
 
 
 def import_or_reload_webapp():
@@ -41,8 +42,16 @@ def post_cpt_transform(payload: dict, webapp=None):
     writes: list[tuple[HTTPStatus, dict[str, object]]] = []
     handler = object.__new__(webapp.CodexStyleHandler)
     handler.path = "/api/cpt/transform"
-    handler.headers = {"Content-Length": str(len(body))}
+    handler.headers = {
+        "Authorization": f"Bearer {SYNTHETIC_WEB_TOKEN}",
+        "Content-Type": "application/json",
+        "Content-Length": str(len(body)),
+    }
     handler.rfile = BytesIO(body)
+    handler.web_boundary_config = webapp.WebBoundaryConfig(
+        operator_token=SYNTHETIC_WEB_TOKEN,
+        allowed_origins=frozenset(),
+    )
     handler._write_json = lambda status, response: writes.append((status, response))
 
     webapp.CodexStyleHandler.do_POST(handler)

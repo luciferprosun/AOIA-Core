@@ -13,6 +13,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DIR = PROJECT_ROOT / "runtime"
 REGISTRY_PATH = RUNTIME_DIR / "memory_hat_registry.py"
 WEBAPP_PATH = RUNTIME_DIR / "webapp.py"
+SYNTHETIC_WEB_TOKEN = "NZ_P012_COMPAT_OPERATOR_TOKEN_003"
 
 FORBIDDEN_IMPORTS = {
     "runtime.tools.browser_tools",
@@ -132,7 +133,8 @@ class MemoryHatControlSurfaceTests(unittest.TestCase):
     def test_webapp_exposes_read_only_memory_hats_endpoint(self) -> None:
         source = WEBAPP_PATH.read_text(encoding="utf-8")
 
-        self.assertIn('parsed.path == "/api/memory-hats"', source)
+        self.assertIn('"/api/memory-hats"', source)
+        self.assertIn("AUTHENTICATED_READ_PATHS", source)
         self.assertIn("get_memory_hat_payload()", source)
 
     def test_memory_hats_endpoint_returns_registry_payload_without_server_start(self) -> None:
@@ -142,6 +144,13 @@ class MemoryHatControlSurfaceTests(unittest.TestCase):
         writes: list[tuple[HTTPStatus, dict[str, object]]] = []
         handler = object.__new__(webapp.CodexStyleHandler)
         handler.path = "/api/memory-hats"
+        handler.headers = {
+            "Authorization": f"Bearer {SYNTHETIC_WEB_TOKEN}",
+        }
+        handler.web_boundary_config = webapp.WebBoundaryConfig(
+            operator_token=SYNTHETIC_WEB_TOKEN,
+            allowed_origins=frozenset(),
+        )
         handler._write_json = lambda status, payload: writes.append((status, payload))
 
         webapp.CodexStyleHandler.do_GET(handler)
@@ -150,7 +159,10 @@ class MemoryHatControlSurfaceTests(unittest.TestCase):
         self.assertEqual(1, len(writes))
         status, payload = writes[0]
         self.assertEqual(HTTPStatus.OK, status)
-        self.assertEqual(get_memory_hat_payload(), payload)
+        payload_without_http_identity = dict(payload)
+        payload_without_http_identity.pop("request_id")
+        payload_without_http_identity.pop("trace_id")
+        self.assertEqual(get_memory_hat_payload(), payload_without_http_identity)
 
 
 if __name__ == "__main__":
