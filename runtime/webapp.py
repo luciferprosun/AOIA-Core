@@ -60,8 +60,8 @@ PROJECT_DIR = Path(__file__).resolve().parent
 WEB_DIR = PROJECT_DIR / "web"
 if not WEB_DIR.exists():
     WEB_DIR = PROJECT_DIR.parent / "web"
-HOST = os.getenv("APP2_WEB_HOST", "127.0.0.1")
-PORT = int(os.getenv("APP2_WEB_PORT", "4311"))
+HOST = "127.0.0.1"
+PORT = 4311
 CPT_BALANCED_MODE = "balanced_critic"
 WEB_OPERATOR_TOKEN_ENV = "AOIA_WEB_OPERATOR_TOKEN"
 WEB_ALLOWED_ORIGINS_ENV = "AOIA_WEB_ALLOWED_ORIGINS"
@@ -2361,17 +2361,57 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
 
 def main() -> None:
+    environment = dict(os.environ)
     try:
-        boundary_config = load_web_boundary_config(host=HOST, port=PORT)
-    except WebBoundaryConfigurationError as error:
-        print(f"AOIA web server refused to start: {error}", file=sys.stderr)
+        from runtime.startup_preflight import StartupMode, run_startup_preflight
+
+        startup_report = run_startup_preflight(
+            PROJECT_DIR,
+            mode=StartupMode.WEB,
+            environ=environment,
+            repository_root=PROJECT_DIR.parent,
+        )
+    except Exception:
+        print(
+            '{"reason_codes":["STARTUP_PREFLIGHT_FAILED"],'
+            '"schema_version":"AOIA_STARTUP_PREFLIGHT_1A",'
+            '"status":"BLOCKED_SECURITY_INVARIANT"}',
+            file=sys.stderr,
+        )
+        raise SystemExit(2) from None
+    if not startup_report.capability_enabled("web_listener"):
+        print(
+            json.dumps(startup_report.to_dict(), sort_keys=True, separators=(",", ":")),
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    host = environment.get("APP2_WEB_HOST", HOST)
+    port_value = startup_report.bounded_setting_value("web_port")
+    if isinstance(port_value, bool) or not isinstance(port_value, int):
+        print(
+            '{"reason_codes":["STARTUP_WEB_LIMIT_INVALID"],'
+            '"schema_version":"AOIA_STARTUP_PREFLIGHT_1A",'
+            '"status":"BLOCKED_CONFIGURATION"}',
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    port = port_value
+    try:
+        boundary_config = load_web_boundary_config(host=host, port=port, environ=environment)
+    except WebBoundaryConfigurationError:
+        print(
+            '{"reason_codes":["STARTUP_WEB_BOUNDARY_INVALID"],'
+            '"schema_version":"AOIA_STARTUP_PREFLIGHT_1A",'
+            '"status":"BLOCKED_CONFIGURATION"}',
+            file=sys.stderr,
+        )
         raise SystemExit(2) from None
     server = AOIAWebServer(
-        (HOST, PORT),
+        (host, port),
         CodexStyleHandler,
         boundary_config=boundary_config,
     )
-    print(f"App222 web UI running on http://{HOST}:{PORT}")
+    print(f"App222 web UI running on http://{host}:{port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

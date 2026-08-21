@@ -14,6 +14,7 @@ import io
 import json
 import os
 import re
+import sys
 import time
 import traceback
 from contextlib import contextmanager, redirect_stdout
@@ -3089,6 +3090,30 @@ def print_banner(runtime: AgentRuntime) -> None:
 
 
 def main() -> None:
+    environment = dict(os.environ)
+    try:
+        from runtime.startup_preflight import StartupMode, run_startup_preflight
+
+        startup_report = run_startup_preflight(
+            PROJECT_DIR,
+            mode=StartupMode.CLI,
+            environ=environment,
+            repository_root=PROJECT_DIR.parent,
+        )
+    except Exception:
+        print(
+            '{"reason_codes":["STARTUP_PREFLIGHT_FAILED"],'
+            '"schema_version":"AOIA_STARTUP_PREFLIGHT_1A",'
+            '"status":"BLOCKED_SECURITY_INVARIANT"}',
+            file=sys.stderr,
+        )
+        raise SystemExit(2) from None
+    if not startup_report.state_changing_execution_enabled:
+        print(
+            json.dumps(startup_report.to_dict(), sort_keys=True, separators=(",", ":")),
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
     provider_manager = ProviderManager(PROJECT_DIR)
     prompt_template = load_prompt_template(PROMPT_FILE)
     runtime = AgentRuntime(
