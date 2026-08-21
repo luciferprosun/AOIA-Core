@@ -105,7 +105,7 @@ class ProviderCritic1ATests(unittest.TestCase):
         rendered = str(report.to_dict())
         self.assertNotIn(synthetic, rendered)
         secret_check = next(item for item in report.checks if item.check_id == "secret_like_content")
-        self.assertEqual("[REDACTED_PROVIDER_SECRET]", secret_check.evidence_excerpt)
+        self.assertEqual("[REDACTED]", secret_check.evidence_excerpt)
 
     def test_fallback_or_provider_switch_is_flagged(self) -> None:
         report = critique_provider_result(

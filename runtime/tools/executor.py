@@ -21,6 +21,7 @@ from runtime.safety.atomic_persistence import (
     atomic_write_json,
     state_resource_lock_path,
 )
+from runtime.sensitive_redaction import SensitiveValueRedactor
 from runtime.task_checkpoints import (
     ApprovalState,
     DurableTaskCheckpointStore,
@@ -125,9 +126,11 @@ class ExecutionEngine:
         provenance_store: AppendOnlyProvenanceStore | None = None,
         task_checkpoint_store: DurableTaskCheckpointStore | None = None,
         task_recovery_service: TaskRecoveryService | None = None,
+        redactor: SensitiveValueRedactor | None = None,
     ) -> None:
         self.project_dir = canonical_project_root(project_dir)
         self.memory_store = memory_store
+        self.redactor = redactor or memory_store.redactor
         self.cwd = resolve_path(
             memory_store.memory.cwd,
             self.project_dir,
@@ -235,7 +238,9 @@ class ExecutionEngine:
                     step_reservation=step_reservation,
                     recovery_token=recovery_token,
                 )
-                return self._attach_authoritative_outcome(result, guarded_context)
+                return self._redact_result(
+                    self._attach_authoritative_outcome(result, guarded_context)
+                )
 
             existing_operation = (
                 self.idempotency_store.load(operation_context)
@@ -319,7 +324,9 @@ class ExecutionEngine:
                         step_reservation=step_reservation,
                         recovery_token=live_token,
                     )
-                    return self._attach_authoritative_outcome(result, guarded_context)
+                    return self._redact_result(
+                        self._attach_authoritative_outcome(result, guarded_context)
+                    )
             except RecoveryClaimConflictError:
                 if entered_guard or operation_context is None:
                     raise
@@ -343,7 +350,9 @@ class ExecutionEngine:
                         step_reservation=step_reservation,
                         recovery_token=replay_token,
                     )
-                    return self._attach_authoritative_outcome(result, guarded_context)
+                    return self._redact_result(
+                        self._attach_authoritative_outcome(result, guarded_context)
+                    )
         except PersistenceError as exc:
             raise exc.attach_correlation(
                 authoritative_context.identity_fields()
@@ -785,22 +794,28 @@ class ExecutionEngine:
                 raise RecoveryFencedError(
                     "Existing P0.7 state does not authorize action resume."
                 )
-            return self._attach_recovery_outcome(
-                self.resume_reserved_action(action, recovery_token=recovery_token),
-                checkpoint,
+            return self._redact_result(
+                self._attach_recovery_outcome(
+                    self.resume_reserved_action(action, recovery_token=recovery_token),
+                    checkpoint,
+                )
             )
         if checkpoint.phase is TaskPhase.IDEMPOTENCY_RESERVED:
-            return self._attach_recovery_outcome(
-                self.resume_reserved_action(action, recovery_token=recovery_token),
-                checkpoint,
+            return self._redact_result(
+                self._attach_recovery_outcome(
+                    self.resume_reserved_action(action, recovery_token=recovery_token),
+                    checkpoint,
+                )
             )
         if checkpoint.phase in {
             TaskPhase.WAITING_FOR_APPROVAL,
             TaskPhase.BEFORE_DISPATCH,
         }:
-            return self._attach_recovery_outcome(
-                self.resume_pre_dispatch_action(action, recovery_token=recovery_token),
-                checkpoint,
+            return self._redact_result(
+                self._attach_recovery_outcome(
+                    self.resume_pre_dispatch_action(action, recovery_token=recovery_token),
+                    checkpoint,
+                )
             )
         raise RecoveryFencedError(
             "Task phase is not an explicitly recoverable action boundary."
@@ -868,7 +883,9 @@ class ExecutionEngine:
                 result,
                 recovery_token=recovery_token,
             )
-            return self._attach_recovery_outcome(terminal_result, checkpoint)
+            return self._redact_result(
+                self._attach_recovery_outcome(terminal_result, checkpoint)
+            )
         self._require_pre_dispatch_checkpoint(checkpoint)
         context = self._checkpoint_action_context(checkpoint)
         self._require_pristine_pre_dispatch_provenance(
@@ -886,7 +903,9 @@ class ExecutionEngine:
             result,
             recovery_token=recovery_token,
         )
-        return self._attach_recovery_outcome(cancelled_result, checkpoint)
+        return self._redact_result(
+            self._attach_recovery_outcome(cancelled_result, checkpoint)
+        )
 
     @staticmethod
     def _attach_authoritative_outcome(
@@ -929,6 +948,12 @@ class ExecutionEngine:
             )
             self.task_recovery_service = service
         return service
+
+    def _redact_result(self, result: dict[str, Any]) -> dict[str, Any]:
+        redacted = self.redactor.redact(result)
+        if not isinstance(redacted, dict):
+            raise TypeError("Executor result must remain a dictionary")
+        return redacted
 
     def _execution_context_for_guard(
         self,
@@ -3196,10 +3221,10 @@ class ExecutionEngine:
         print(f"Capability: {decision.capability_class.value}")
         print(f"Runtime policy: {decision.reason_code}")
         if action.get("reason"):
-            print(f"Reason: {action['reason']}")
+            print(f"Reason: {self.redactor.redact_text(action['reason'])}")
         for field in ("command", "path", "src", "dst", "url", "selector", "key"):
             if field in action and action[field]:
-                print(f"{field}: {action[field]}")
+                print(f"{field}: {self.redactor.redact_text(action[field])}")
         answer = input("Press ENTER to approve, or type n/cancel to reject: ").strip().lower()
         return answer not in {"n", "no", "cancel", "reject", "stop"}
 
@@ -3327,6 +3352,7 @@ class ExecutionEngine:
         }
         if operation_context is not None:
             payload["operation_key"] = operation_context.operation_key
+        safe_payload = self._redact_result(payload)
         filename = (
             dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
             + f"_{action_context.action_id}.json"
@@ -3335,18 +3361,21 @@ class ExecutionEngine:
         try:
             atomic_write_json(
                 command_log_path,
-                payload,
+                safe_payload,
                 lock_path=state_resource_lock_path(
                     self.memory_store.paths.state_dir,
                     command_log_path,
                 ),
                 lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
             )
-            self.memory_store.record_result(logged_result)
-            self.memory_store.append_history("action_result", payload)
+            safe_result = safe_payload.get("result", {})
+            if not isinstance(safe_result, dict):
+                raise TypeError("Operational executor result must remain a dictionary")
+            self.memory_store.record_result(safe_result)
+            self.memory_store.append_history("action_result", safe_payload)
             # AOIA Phase 2A containment boundary
             # Runtime operational outputs must NEVER become canonical evidence.
             if str(action.get("action", "")).startswith("browser_"):
-                self.memory_store.append_browser_event(payload)
+                self.memory_store.append_browser_event(safe_payload)
         except PersistenceError as exc:
             raise exc.attach_correlation(identity)

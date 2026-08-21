@@ -33,6 +33,7 @@ class _CanaryProvider:
         self.output_canary = output_canary
         self.calls = 0
         self.saw_raw_request = False
+        self.saw_redaction_marker = False
         self.runtime: main.AgentRuntime | None = None
         self.authorization_directive: RecoveryDirective | None = None
         self.wrong_directive_fenced = False
@@ -41,6 +42,7 @@ class _CanaryProvider:
     def generate(self, prompt: str) -> str:
         self.calls += 1
         self.saw_raw_request = self.request_canary in prompt
+        self.saw_redaction_marker = "[REDACTED]" in prompt
         if self.runtime is not None:
             token = self.runtime._task_execution_token.get()
             if token is None:
@@ -282,7 +284,8 @@ class RecoveryDispatchBoundaryTests(unittest.TestCase):
 
         self.assertIs(RecoveryOperationStatus.COMPLETED, recovered.status)
         self.assertEqual(1, provider.calls)
-        self.assertTrue(provider.saw_raw_request)
+        self.assertFalse(provider.saw_raw_request)
+        self.assertTrue(provider.saw_redaction_marker)
         self.assertIs(
             RecoveryDirective.RESUME_MODEL,
             provider.authorization_directive,

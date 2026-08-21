@@ -1,19 +1,11 @@
 from __future__ import annotations
 
-import re
 from collections.abc import Mapping
 from typing import Any
 
+from runtime.sensitive_redaction import REDACTION_MARKER, build_current_runtime_redactor
 
-REDACTED_PROVIDER_SECRET = "[REDACTED_PROVIDER_SECRET]"
-
-_PROVIDER_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
-    re.compile(r"AIza[0-9A-Za-z_\-]{8,}"),
-    re.compile(r"sk-[0-9A-Za-z_\-]{8,}"),
-    re.compile(r"gsk_[0-9A-Za-z_\-]{8,}"),
-    re.compile(r"xoxb-[0-9A-Za-z\-]{8,}"),
-    re.compile(r"ghp_[0-9A-Za-z_]{8,}"),
-)
+REDACTED_PROVIDER_SECRET = REDACTION_MARKER
 
 
 def _known_secret_values(known_secrets: list[str] | None) -> tuple[str, ...]:
@@ -29,12 +21,9 @@ def redact_provider_secret(text: str | None, known_secrets: list[str] | None = N
     if not isinstance(text, str):
         raise TypeError("text must be a string or None")
 
-    redacted = text
-    for secret in _known_secret_values(known_secrets):
-        redacted = redacted.replace(secret, REDACTED_PROVIDER_SECRET)
-    for pattern in _PROVIDER_SECRET_PATTERNS:
-        redacted = pattern.sub(REDACTED_PROVIDER_SECRET, redacted)
-    return redacted
+    return build_current_runtime_redactor(
+        additional_values=_known_secret_values(known_secrets),
+    ).redact_text(text)
 
 
 def contains_unredacted_provider_secret(
@@ -49,15 +38,9 @@ def contains_unredacted_provider_secret(
 
 
 def _redact_value(value: Any, known_secrets: list[str] | None) -> Any:
-    if isinstance(value, str) or value is None:
-        return redact_provider_secret(value, known_secrets)
-    if isinstance(value, Mapping):
-        return redact_mapping_values(dict(value), known_secrets)
-    if isinstance(value, list):
-        return [_redact_value(item, known_secrets) for item in value]
-    if isinstance(value, tuple):
-        return tuple(_redact_value(item, known_secrets) for item in value)
-    return value
+    return build_current_runtime_redactor(
+        additional_values=_known_secret_values(known_secrets),
+    ).redact(value)
 
 
 def redact_mapping_values(
@@ -68,4 +51,8 @@ def redact_mapping_values(
         return {}
     if not isinstance(data, dict):
         raise TypeError("data must be a dict or None")
-    return {key: _redact_value(value, known_secrets) for key, value in data.items()}
+    redacted = build_current_runtime_redactor(
+        additional_values=_known_secret_values(known_secrets),
+    ).redact(data)
+    assert isinstance(redacted, dict)
+    return redacted

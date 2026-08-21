@@ -50,6 +50,10 @@ from runtime.safety.atomic_persistence import (
     atomic_write_text,
     state_resource_lock_path,
 )
+from runtime.sensitive_redaction import (
+    SensitiveValueRedactor,
+    build_current_runtime_redactor,
+)
 from runtime.task_checkpoints import (
     ApprovalState,
     DurableTaskCheckpointStore,
@@ -220,15 +224,23 @@ class AgentRuntime:
         self.debug_raw = debug_raw
         self.max_steps = max_steps
         self.safeguards = load_epistemic_safeguards()
+        current_redactor = build_current_runtime_redactor()
+        manager_redactor = getattr(provider_manager, "output_redactor", None)
+        self.redactor = (
+            current_redactor.combining(manager_redactor)
+            if isinstance(manager_redactor, SensitiveValueRedactor)
+            else current_redactor
+        )
         self.memory_store = MemoryStore(
             project_dir,
             project_dir,
             initialize_vault=False,
             persist_on_init=False,
             record_session_start=False,
+            redactor=self.redactor,
         )
         self.hat_store = MemoryHatStore(project_dir, initialize_defaults=False)
-        self.worker_memory = GemmaWorkerMemory(project_dir)
+        self.worker_memory = GemmaWorkerMemory(project_dir, redactor=self.redactor)
         self.provenance_store = AppendOnlyProvenanceStore(
             self.memory_store.paths.state_dir,
             lock_timeout_seconds=self.memory_store.state_lock_timeout_seconds,
@@ -244,6 +256,7 @@ class AgentRuntime:
             self.memory_store,
             provenance_store=self.provenance_store,
             task_checkpoint_store=self.task_checkpoint_store,
+            redactor=self.redactor,
         )
         self.task_recovery_service = TaskRecoveryService(
             self.memory_store.paths.state_dir,
@@ -322,8 +335,33 @@ class AgentRuntime:
         payload: Mapping[str, Any],
     ) -> dict[str, Any]:
         if not self._recovery_sensitive_persistence.get():
-            return dict(payload)
+            return self._redact_mapping(payload)
         return self._recovery_sensitive_summary(payload)
+
+    def _sync_sensitive_redactor(self) -> SensitiveValueRedactor:
+        current = build_current_runtime_redactor()
+        manager = getattr(self.provider_manager, "output_redactor", None)
+        redactor = (
+            current.combining(manager)
+            if isinstance(manager, SensitiveValueRedactor)
+            else current
+        )
+        self.redactor = redactor
+        self.memory_store.redactor = redactor
+        self.executor.redactor = redactor
+        self.worker_memory.redactor = redactor
+        if self.orchestrator is not None:
+            self.orchestrator.redactor = redactor
+        return redactor
+
+    def _redact_mapping(self, payload: Mapping[str, Any]) -> dict[str, Any]:
+        redacted = self.redactor.redact(payload)
+        if not isinstance(redacted, dict):
+            raise TypeError("Runtime output must remain a dictionary")
+        return redacted
+
+    def safe_text(self, value: object) -> str:
+        return self.redactor.redact_text(value)
 
     def _recovery_task_marker(self, request_text: str) -> str:
         summary = self._recovery_sensitive_summary(request_text)
@@ -398,7 +436,7 @@ class AgentRuntime:
         }
         for key, value in replacements.items():
             prompt = prompt.replace(key, value)
-        return prompt
+        return self.safe_text(prompt)
 
     def build_model_request(
         self,
@@ -452,23 +490,25 @@ class AgentRuntime:
             ),
         }
 
-        return "\n".join(
+        safe_state = self.redactor.redact(state_payload)
+        safe_request = self.redactor.redact(request_payload)
+        return self.safe_text("\n".join(
             [
                 "SYSTEM PROMPT:",
                 self.render_system_prompt(),
                 "",
                 "RUNTIME STATE JSON:",
-                json.dumps(state_payload, indent=2, ensure_ascii=False),
+                json.dumps(safe_state, indent=2, ensure_ascii=False),
                 "",
                 "REQUEST JSON:",
-                json.dumps(request_payload, indent=2, ensure_ascii=False),
+                json.dumps(safe_request, indent=2, ensure_ascii=False),
             ]
-        )
+        ))
 
     def snapshot_status(self) -> dict[str, Any]:
         """Return the current runtime status for CLI and web callers."""
         memory = self.memory_store.memory
-        return {
+        return self._redact_mapping({
             "session_id": memory.session_id,
             "cwd": memory.cwd,
             "current_task": memory.current_task,
@@ -500,7 +540,7 @@ class AgentRuntime:
                 "reasoning_trace_enabled": self.safeguards.reasoning_trace_enabled,
                 "prefer_unknown": self.safeguards.prefer_unknown,
             },
-        }
+        })
 
     def _provider_fallback_chain(self) -> list[str]:
         method = getattr(self.provider_manager, "active_fallback_chain", None)
@@ -874,6 +914,7 @@ class AgentRuntime:
         if step_reservation is None:
             step_reservation = self._reserve_task_step(trace_context, prompt)
         pending_continuation = model_continuation
+        provider_prompt = self._sync_sensitive_redactor().redact_text(prompt)
 
         def log_attempt(
             status: str,
@@ -908,7 +949,7 @@ class AgentRuntime:
                 traced_generate = getattr(self.provider_manager, "generate_traced", None)
                 if callable(traced_generate):
                     raw_result = traced_generate(
-                        prompt,
+                        provider_prompt,
                         trace_context,
                         on_attempt=lambda status, call, provider, model, provider_attempt: log_attempt(
                             status,
@@ -933,7 +974,7 @@ class AgentRuntime:
                     )
                     try:
                         raw_text = validate_model_response_text(
-                            self.provider_manager.generate(prompt)
+                            self.provider_manager.generate(provider_prompt)
                         )
                     except Exception:
                         log_attempt(
@@ -976,9 +1017,16 @@ class AgentRuntime:
                         "Provider response identity did not match the active request."
                     )
                 validate_model_response_text(raw_result.text)
+                redactor = self._sync_sensitive_redactor()
+                raw_result = TracedModelOutput(
+                    text=redactor.redact_text(raw_result.text),
+                    model_call=raw_result.model_call,
+                    provider=redactor.redact_text(raw_result.provider),
+                    model=redactor.redact_text(raw_result.model),
+                )
                 if self.debug_raw and not self._recovery_sensitive_persistence.get():
                     print("\n[DEBUG] RAW MODEL OUTPUT:")
-                    print(raw_result.text)
+                    print(self.safe_text(raw_result.text))
                 if owns_step_reservation:
                     self._close_task_step(step_reservation)
                     self._finish_task(trace_context, TaskState.COMPLETED)
@@ -1000,13 +1048,16 @@ class AgentRuntime:
                             pass
                 raise
             except Exception as error:
+                self._sync_sensitive_redactor()
                 last_error = error
                 if is_daily_quota_error(error):
                     break
                 if retry_attempt == len(MODEL_RETRY_DELAYS):
                     break
                 print(
-                    f"\n[WARN] Model request failed (attempt {retry_attempt}/{len(MODEL_RETRY_DELAYS)}): {error}"
+                    self.safe_text(
+                        f"\n[WARN] Model request failed (attempt {retry_attempt}/{len(MODEL_RETRY_DELAYS)}): {error}"
+                    )
                 )
                 print(f"[WARN] Retrying in {delay_seconds:.0f}s...")
                 time.sleep(delay_seconds)
@@ -1147,7 +1198,7 @@ class AgentRuntime:
         ):
             result = self.command_registry.execute("/help", self, trace_context)
             if result.handled and result.message:
-                print(f"\nAgent> {result.message}")
+                print(self.safe_text(f"\nAgent> {result.message}"))
             self._finish_task(trace_context, TaskState.COMPLETED)
             return
         if self.safeguards.kill_switch:
@@ -1333,7 +1384,7 @@ class AgentRuntime:
                     model_call=model_output.model_call,
                 )
                 print("\n[ERROR] Invalid action JSON from model.")
-                print(str(error))
+                print(self.safe_text(error))
                 if self.safeguards.prefer_unknown:
                     self.emit_epistemic_unknown(
                         "The model returned invalid structured output.",
@@ -1373,7 +1424,7 @@ class AgentRuntime:
                     action_context=action_context,
                 )
                 print("\n[ERROR] Action execution failed.")
-                print(str(error))
+                print(self.safe_text(error))
                 self._finish_task(
                     trace_context,
                     TaskState.PARTIAL if request_trace else TaskState.FAILED,
@@ -1537,7 +1588,7 @@ class AgentRuntime:
             },
             trace_context=trace_context,
         )
-        print(f"\nAgent> {message}")
+        print(self.safe_text(f"\nAgent> {message}"))
         return True
 
     def enable_orchestrator(self, enabled: bool = True) -> None:
@@ -1550,6 +1601,7 @@ class AgentRuntime:
                 project_dir=self.project_dir,
                 desktop_dir=self.desktop_dir,
                 max_steps=self.max_steps,
+                redactor=self._sync_sensitive_redactor(),
             )
 
     def handle_orchestrated_request(
@@ -1593,7 +1645,7 @@ class AgentRuntime:
                 trace_context=trace_context,
             )
             print("\n[ERROR] Gemini planner failed.")
-            print(str(error))
+            print(self.safe_text(error))
             self._finish_task(trace_context, TaskState.FAILED)
             return
 
@@ -1601,9 +1653,9 @@ class AgentRuntime:
         steps = plan.get("steps", [])
         print("\n[GEMINI PLAN]")
         if strategy:
-            print(strategy)
+            print(self.safe_text(strategy))
         for index, step in enumerate(steps, start=1):
-            print(f"{index}. {step}")
+            print(self.safe_text(f"{index}. {step}"))
         self.log_session_event(
             "orchestrator_plan",
             {
@@ -1708,7 +1760,7 @@ class AgentRuntime:
                     trace_context=trace_context,
                 )
                 print("\n[ERROR] Gemma worker failed to produce a valid action.")
-                print(str(error))
+                print(self.safe_text(error))
                 print("Agent> Worker model is not available or did not return valid JSON. Use /worker status and /setup.")
                 self._finish_task(
                     trace_context,
@@ -1748,7 +1800,7 @@ class AgentRuntime:
                     action_context=action_context,
                 )
                 print("\n[ERROR] Orchestrated action execution failed.")
-                print(str(error))
+                print(self.safe_text(error))
                 self._finish_task(
                     trace_context,
                     TaskState.PARTIAL if previous_results else TaskState.FAILED,
@@ -1962,17 +2014,18 @@ class AgentRuntime:
                 "which tools require human ENTER approval; a model flag can only add approval."
             ),
         }
-        return "\n".join(
+        safe_payload = self.redactor.redact(payload)
+        return self.safe_text("\n".join(
             [
                 "SYSTEM PROMPT:",
                 self.render_system_prompt(),
                 "",
                 "PLANNER REQUEST JSON:",
-                json.dumps(payload, indent=2, ensure_ascii=False),
+                json.dumps(safe_payload, indent=2, ensure_ascii=False),
                 "",
                 'EXPECTED FORMAT: {"plan":[{"action":"respond","message":"...","reason":"..."}]}',
             ]
-        )
+        ))
 
     def execute_planned_actions(
         self,
@@ -2018,7 +2071,7 @@ class AgentRuntime:
                     action_context=action_context,
                 )
                 print("\n[ERROR] Planned action execution failed.")
-                print(str(error))
+                print(self.safe_text(error))
                 self._finish_task(
                     trace_context,
                     TaskState.PARTIAL if request_trace else TaskState.FAILED,
@@ -2388,7 +2441,7 @@ class AgentRuntime:
                 )
                 if command_result.handled:
                     if command_result.message:
-                        print(f"\nAgent> {command_result.message}")
+                        print(self.safe_text(f"\nAgent> {command_result.message}"))
                 else:
                     self.handle_user_request(user_input, trace_context)
         except Exception as request_error:
@@ -2481,13 +2534,13 @@ class AgentRuntime:
                 trace_context,
                 ingress=ingress,
             )
-        transcript = transcript_buffer.getvalue().strip()
-        return {
+        transcript = self.safe_text(transcript_buffer.getvalue().strip())
+        return self._redact_mapping({
             "transcript": transcript,
             "status": self.snapshot_status(),
             "outcome": outcome.to_dict(),
             **trace_context.identity_fields(),
-        }
+        })
 
     def handle_local_route(
         self,
@@ -2501,7 +2554,7 @@ class AgentRuntime:
 
         if not route.actions:
             if route.final_message:
-                print(f"\nAgent> {route.final_message}")
+                print(self.safe_text(f"\nAgent> {route.final_message}"))
             return True
 
         last_result: dict[str, Any] | None = None
@@ -2543,9 +2596,9 @@ class AgentRuntime:
             self._mark_task_between_steps(trace_context)
 
         if route.final_message:
-            print(f"\nAgent> {route.final_message}")
+            print(self.safe_text(f"\nAgent> {route.final_message}"))
         elif last_result and last_result.get("message"):
-            print(f"\nAgent> {last_result['message']}")
+            print(self.safe_text(f"\nAgent> {last_result['message']}"))
         return True
 
     def handle_knowledge_route(
@@ -2613,7 +2666,11 @@ class AgentRuntime:
             )
             return False
 
-        print(f"\nAgent> [CONFIDENCE: {decision.confidence.upper()}] {decision.response}")
+        print(
+            self.safe_text(
+                f"\nAgent> [CONFIDENCE: {decision.confidence.upper()}] {decision.response}"
+            )
+        )
         self.log_session_event(
             "knowledge_route_hit",
             {
@@ -2660,18 +2717,22 @@ class AgentRuntime:
         if request_trace:
             last_result = request_trace[-1]["result"]
             print("\n[WARN] Model became unavailable before the next planning step.")
-            print(f"[WARN] {error}")
+            print(self.safe_text(f"[WARN] {error}"))
             if last_result.get("success"):
                 print("Agent> Część operacji została już wykonana poprawnie.")
                 if last_result.get("message"):
-                    print(f"Agent> Ostatni zakończony krok: {last_result['message']}")
+                    print(
+                        self.safe_text(
+                            f"Agent> Ostatni zakończony krok: {last_result['message']}"
+                        )
+                    )
                 if last_result.get("current_url"):
-                    print(f"Agent> Aktywny URL: {last_result['current_url']}")
+                    print(self.safe_text(f"Agent> Aktywny URL: {last_result['current_url']}"))
                 print("Agent> Uruchom polecenie jeszcze raz, aby dokończyć kolejne kroki.")
                 return
 
         print("\n[ERROR] Model is unavailable right now.")
-        print(str(error))
+        print(self.safe_text(error))
         print("Agent> Configure a working free cloud API with /setup, or switch provider with /model.")
 
     def bootstrap_local_context(
@@ -2698,7 +2759,7 @@ class AgentRuntime:
 
         normalized_url = normalize_external_url(raw_url)
         if normalized_url != raw_url:
-            print(f"\n[INFO] Redirect URL unwrapped to: {normalized_url}")
+            print(self.safe_text(f"\n[INFO] Redirect URL unwrapped to: {normalized_url}"))
 
         start_action = {"action": "browser_start", "reason": "Local URL bootstrap."}
         start_context = trace_context.new_action()
@@ -2772,7 +2833,7 @@ class AgentRuntime:
             snapshot_path = self.save_page_text_snapshot(normalized_url, text_result)
             if snapshot_path is not None:
                 text_result["snapshot_path"] = str(snapshot_path)
-                print(f"Result: Saved text snapshot to {snapshot_path}")
+                print(self.safe_text(f"Result: Saved text snapshot to {snapshot_path}"))
             request_trace.append(
                 {
                     "step": 0,
@@ -2791,12 +2852,15 @@ class AgentRuntime:
         """Persist locally captured page text so quota failures do not lose context."""
         if self._recovery_sensitive_persistence.get():
             return None
-        text = result.get("text", "").strip()
+        text = self.safe_text(result.get("text", "")).strip()
         if not text:
             return None
 
         parsed = urlparse(url)
-        slug = parsed.netloc.replace(".", "_") or "page"
+        safe_hostname = self.safe_text(parsed.hostname or "")
+        slug = re.sub(r"[^A-Za-z0-9_-]+", "_", safe_hostname).strip("_")[:64]
+        if not slug:
+            slug = "page"
         timestamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
         snapshot_path = self.memory_store.paths.memory_dir / f"{slug}_{timestamp}.txt"
         atomic_write_text(
@@ -2828,7 +2892,7 @@ class AgentRuntime:
             payload["html"] = summarize_text(str(payload["html"]), 2500)
         if "matches" in payload:
             payload["matches"] = payload["matches"][:20]
-        return payload
+        return self._redact_mapping(payload)
 
     @staticmethod
     def _event_identity_fields(
@@ -2957,55 +3021,59 @@ class AgentRuntime:
             raise exc.attach_correlation(identity)
 
     def print_action(self, action: dict[str, Any], step: int) -> None:
-        print(f"\n[STEP {step}] action={action['action']}")
-        if action.get("reason"):
-            print(f"Reason: {action['reason']}")
+        safe_action = self._redact_mapping(action)
+        print(self.safe_text(f"\n[STEP {step}] action={safe_action['action']}"))
+        if safe_action.get("reason"):
+            print(self.safe_text(f"Reason: {safe_action['reason']}"))
         for field in ("command", "path", "url", "selector", "key"):
-            if field in action and action[field]:
-                print(f"{field}: {action[field]}")
+            if field in safe_action and safe_action[field]:
+                print(self.safe_text(f"{field}: {safe_action[field]}"))
 
     def print_result(self, result: dict[str, Any]) -> None:
         self._note_result_outcome(result)
-        if result.get("confidence_label"):
-            print(f"[CONFIDENCE: {str(result['confidence_label']).upper()}]")
-        if result.get("manual_review_required"):
+        safe_result = self._redact_mapping(result)
+        if safe_result.get("confidence_label"):
+            print(self.safe_text(f"[CONFIDENCE: {str(safe_result['confidence_label']).upper()}]"))
+        if safe_result.get("manual_review_required"):
             print("[MANUAL REVIEW: REQUIRED]")
-            reasons = result.get("manual_review_reasons") or []
+            reasons = safe_result.get("manual_review_reasons") or []
             if reasons:
-                print(f"Review reasons: {', '.join(str(reason) for reason in reasons)}")
-        if result.get("message"):
-            prefix = "Agent>" if result.get("stop_loop") else "Result:"
-            message = str(result["message"])
-            if result.get("stop_loop"):
+                print(self.safe_text(f"Review reasons: {', '.join(str(reason) for reason in reasons)}"))
+        if safe_result.get("message"):
+            prefix = "Agent>" if safe_result.get("stop_loop") else "Result:"
+            message = str(safe_result["message"])
+            if safe_result.get("stop_loop"):
                 message = inspect_respond_shell_safety(message).sanitized_message
-            print(f"{prefix} {message}")
-        if result.get("epistemic_note"):
-            print(f"Epistemic note: {result['epistemic_note']}")
+            print(self.safe_text(f"{prefix} {message}"))
+        if safe_result.get("epistemic_note"):
+            print(self.safe_text(f"Epistemic note: {safe_result['epistemic_note']}"))
 
-        if "stdout" in result:
+        if "stdout" in safe_result:
             print("\n--- STDOUT ---")
-            print(result["stdout"] if result["stdout"].strip() else "(empty)")
+            stdout = str(safe_result["stdout"])
+            print(self.safe_text(stdout if stdout.strip() else "(empty)"))
 
-        if "stderr" in result:
+        if "stderr" in safe_result:
             print("\n--- STDERR ---")
-            print(result["stderr"] if result["stderr"].strip() else "(empty)")
+            stderr = str(safe_result["stderr"])
+            print(self.safe_text(stderr if stderr.strip() else "(empty)"))
 
-        if "content" in result:
+        if "content" in safe_result:
             print("\n--- FILE CONTENT ---")
-            print(result["content"])
+            print(self.safe_text(safe_result["content"]))
 
-        if "text" in result:
+        if "text" in safe_result:
             print("\n--- PAGE TEXT ---")
-            print(result["text"])
+            print(self.safe_text(safe_result["text"]))
 
-        if "current_url" in result and result["current_url"]:
-            print(f"\nCurrent URL: {result['current_url']}")
+        if "current_url" in safe_result and safe_result["current_url"]:
+            print(self.safe_text(f"\nCurrent URL: {safe_result['current_url']}"))
 
-        if "screenshot_path" in result:
-            print(f"Screenshot: {result['screenshot_path']}")
+        if "screenshot_path" in safe_result:
+            print(self.safe_text(f"Screenshot: {safe_result['screenshot_path']}"))
 
-        if "exit_code" in result:
-            print(f"\nExit code: {result['exit_code']}")
+        if "exit_code" in safe_result:
+            print(self.safe_text(f"\nExit code: {safe_result['exit_code']}"))
 
 
 def print_banner(runtime: AgentRuntime) -> None:
@@ -3013,11 +3081,11 @@ def print_banner(runtime: AgentRuntime) -> None:
     print("###  flAmeBornLLC  |  LLM Academy                   ###")
     print("###  LOCAL AI TERMINAL + BROWSER AGENT              ###")
     print("########################################################")
-    print(f"[INFO] Desktop directory detected: {runtime.desktop_dir}")
-    print(f"[INFO] Current working directory: {runtime.memory_store.memory.cwd}")
-    print(f"[INFO] Active model: {runtime.provider_manager.describe()}")
-    print(f"[INFO] Session log: {runtime.session_log}")
-    print(f"[INFO] Obsidian vault: {runtime.memory_store.vault_dir} (lazy)")
+    print(runtime.safe_text(f"[INFO] Desktop directory detected: {runtime.desktop_dir}"))
+    print(runtime.safe_text(f"[INFO] Current working directory: {runtime.memory_store.memory.cwd}"))
+    print(runtime.safe_text(f"[INFO] Active model: {runtime.provider_manager.describe()}"))
+    print(runtime.safe_text(f"[INFO] Session log: {runtime.session_log}"))
+    print(runtime.safe_text(f"[INFO] Obsidian vault: {runtime.memory_store.vault_dir} (lazy)"))
 
 
 def main() -> None:
@@ -3057,7 +3125,7 @@ def main() -> None:
                 },
                 trace_context=trace_context,
             )
-            print(f"\n[FATAL ERROR] {error}")
+            print(runtime.safe_text(f"\n[FATAL ERROR] {error}"))
             break
 
 

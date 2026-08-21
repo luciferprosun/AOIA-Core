@@ -21,8 +21,13 @@ from trace_context import TraceContext
 
 try:
     from runtime.outcomes import NZOutcome, NZOutcomeStatus, outcome_from_exception
+    from runtime.sensitive_redaction import (
+        SensitiveValueRedactor,
+        build_runtime_redactor,
+    )
 except ModuleNotFoundError:  # pragma: no cover - script launch path
     from outcomes import NZOutcome, NZOutcomeStatus, outcome_from_exception
+    from sensitive_redaction import SensitiveValueRedactor, build_runtime_redactor
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -885,6 +890,10 @@ class AOIAWebServer(ThreadingHTTPServer):
         boundary_config: WebBoundaryConfig,
     ) -> None:
         self.web_boundary_config = boundary_config
+        self.output_redactor = build_runtime_redactor(
+            environ=os.environ,
+            additional_values=(boundary_config.operator_token,),
+        )
         self.operator_mutation_lock = Lock()
         super().__init__(server_address, handler_class)
 
@@ -1669,7 +1678,10 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         )
 
     def _write_json(self, status: HTTPStatus, payload: dict) -> None:
-        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        safe_payload = self._response_redactor().redact(payload)
+        if not isinstance(safe_payload, dict):  # defensive JSON boundary
+            safe_payload = {"ok": False, "message_safe": "The response is unavailable."}
+        body = json.dumps(safe_payload, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -1678,6 +1690,29 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         self.send_header("Referrer-Policy", "no-referrer")
         self.end_headers()
         self.wfile.write(body)
+
+    def _response_redactor(self) -> SensitiveValueRedactor:
+        server = getattr(self, "server", None)
+        configured = getattr(server, "output_redactor", None)
+        boundary = getattr(self, "web_boundary_config", None) or getattr(
+            server,
+            "web_boundary_config",
+            None,
+        )
+        additional_values = (
+            (boundary.operator_token,)
+            if isinstance(boundary, WebBoundaryConfig)
+            else ()
+        )
+        current = build_runtime_redactor(
+            environ=os.environ,
+            additional_values=additional_values,
+        )
+        return (
+            current.combining(configured)
+            if isinstance(configured, SensitiveValueRedactor)
+            else current
+        )
 
 
 def main() -> None:

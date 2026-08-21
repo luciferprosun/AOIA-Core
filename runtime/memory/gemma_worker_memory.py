@@ -3,12 +3,23 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from runtime.sensitive_redaction import (
+    SensitiveValueRedactor,
+    build_current_runtime_redactor,
+)
+
 
 class GemmaWorkerMemory:
     """Small runtime continuity store for the optional Gemma worker path."""
 
-    def __init__(self, project_dir: Path) -> None:
+    def __init__(
+        self,
+        project_dir: Path,
+        *,
+        redactor: SensitiveValueRedactor | None = None,
+    ) -> None:
         self.project_dir = project_dir
+        self.redactor = redactor or build_current_runtime_redactor()
         self.gemini_calls = 0
         self.gemma_calls = 0
         self.steps: list[dict[str, Any]] = []
@@ -27,21 +38,27 @@ class GemmaWorkerMemory:
         result: dict[str, Any] | None,
         gemini_instruction: str,
     ) -> None:
-        self.last_gemini_instruction = gemini_instruction
-        self.steps.append(
+        self.last_gemini_instruction = self.redactor.redact_text(gemini_instruction)
+        safe_step = self.redactor.redact(
             {
                 "delegated_step": delegated_step,
                 "action": action,
                 "result": result,
             }
         )
+        if not isinstance(safe_step, dict):
+            raise TypeError("Worker memory step must remain a dictionary")
+        self.steps.append(safe_step)
         self.steps = self.steps[-20:]
 
     def summarize_worker_state(self) -> dict[str, Any]:
-        return {
+        summary = {
             "gemini_calls": self.gemini_calls,
             "gemma_calls": self.gemma_calls,
             "last_gemini_instruction": self.last_gemini_instruction,
             "recent_steps": self.steps[-5:],
         }
-
+        redacted = self.redactor.redact(summary)
+        if not isinstance(redacted, dict):
+            raise TypeError("Worker memory summary must remain a dictionary")
+        return redacted

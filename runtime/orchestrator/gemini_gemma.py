@@ -14,6 +14,10 @@ from tools.memory_hats import MemoryHatStore
 from tools.validator import extract_json_object, validate_action
 from trace_context import ModelCallContext, TraceContext, TracedModelOutput
 from providers.errors import ModelResponseMalformedError, validate_model_response_text
+from runtime.sensitive_redaction import (
+    SensitiveValueRedactor,
+    build_current_runtime_redactor,
+)
 
 
 ModelAttemptObserver = Callable[
@@ -33,6 +37,7 @@ class GeminiGemmaOrchestrator:
         project_dir: Path,
         desktop_dir: Path,
         max_steps: int = 8,
+        redactor: SensitiveValueRedactor | None = None,
     ) -> None:
         self.provider_manager = provider_manager
         self.worker_memory = worker_memory
@@ -40,12 +45,15 @@ class GeminiGemmaOrchestrator:
         self.project_dir = project_dir
         self.desktop_dir = desktop_dir
         self.max_steps = max_steps
+        self.redactor = redactor or build_current_runtime_redactor()
         self.gemma_provider = None
 
     def create_plan(self, user_request: str, runtime_status: dict[str, Any]) -> dict[str, Any]:
         self.worker_memory.record_gemini_call()
         prompt = self._build_gemini_planner_prompt(user_request, runtime_status)
-        raw = self.provider_manager.generate_with_fallback(prompt)
+        raw = self.redactor.redact_text(
+            self.provider_manager.generate_with_fallback(prompt)
+        )
         return self._parse_plan(raw)
 
     def create_traced_plan(
@@ -78,7 +86,9 @@ class GeminiGemmaOrchestrator:
             raise ModelResponseMalformedError(
                 "Planner response identity did not match the active request."
             )
-        return self._parse_plan(validate_model_response_text(traced.text)), traced.model_call
+        return self._parse_plan(
+            self.redactor.redact_text(validate_model_response_text(traced.text))
+        ), traced.model_call
 
     def _parse_plan(self, raw: str) -> dict[str, Any]:
         try:
@@ -128,7 +138,9 @@ class GeminiGemmaOrchestrator:
             raise RuntimeError("Gemma/Ollama/HuggingFace worker is disabled in this terminal build.")
         self.worker_memory.record_gemma_call()
         prompt = self._build_gemma_worker_prompt(user_request, step, runtime_status, previous_results)
-        raw = validate_model_response_text(self.gemma_provider.generate(prompt))
+        raw = self.redactor.redact_text(
+            validate_model_response_text(self.gemma_provider.generate(prompt))
+        )
         try:
             action = validate_action(extract_json_object(raw))
         except (TypeError, ValueError) as error:
@@ -168,7 +180,9 @@ class GeminiGemmaOrchestrator:
         if on_attempt is not None:
             on_attempt("started", model_call, "gemma", provider_name, 1)
         try:
-            raw = validate_model_response_text(self.gemma_provider.generate(prompt))
+            raw = self.redactor.redact_text(
+                validate_model_response_text(self.gemma_provider.generate(prompt))
+            )
         except Exception:
             if on_attempt is not None:
                 on_attempt("failed", model_call, "gemma", provider_name, 1)
@@ -231,10 +245,15 @@ class GeminiGemmaOrchestrator:
         )
 
     def error_payload(self, error: Exception) -> dict[str, str]:
-        return {
+        payload = self.redactor.redact(
+            {
             "error": str(error),
             "traceback": traceback.format_exc(),
-        }
+            }
+        )
+        if not isinstance(payload, dict):
+            raise TypeError("Orchestrator error must remain a dictionary")
+        return payload
 
     def _build_gemini_planner_prompt(self, user_request: str, runtime_status: dict[str, Any]) -> str:
         hat = self.hat_store.prompt_block()
@@ -254,7 +273,9 @@ class GeminiGemmaOrchestrator:
                 "Gemma worker will convert one step at a time into approved executable actions."
             ),
         }
-        return json.dumps(payload, indent=2, ensure_ascii=False)
+        return self.redactor.redact_text(
+            json.dumps(self.redactor.redact(payload), indent=2, ensure_ascii=False)
+        )
 
     def _build_gemma_worker_prompt(
         self,
@@ -295,4 +316,6 @@ class GeminiGemmaOrchestrator:
                 {"action": "respond", "message": "Task complete.", "reason": "No more actions are required."},
             ],
         }
-        return json.dumps(payload, indent=2, ensure_ascii=False)
+        return self.redactor.redact_text(
+            json.dumps(self.redactor.redact(payload), indent=2, ensure_ascii=False)
+        )

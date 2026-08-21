@@ -11,6 +11,10 @@ from .gemini_provider import GeminiProvider
 from .openai_compatible import OpenAICompatibleProvider
 from .errors import typed_provider_error, validate_model_response_text
 from runtime.safety.atomic_persistence import atomic_write_json, state_resource_lock_path
+from runtime.sensitive_redaction import (
+    RUNTIME_SECRET_ENV_NAMES,
+    build_current_runtime_redactor,
+)
 from runtime_paths import runtime_state_dir
 from trace_context import ModelCallContext, TraceContext, TracedModelOutput
 
@@ -70,12 +74,13 @@ class ProviderConfig:
         return f"{self.name}/{self.model}"
 
 
-def load_api_environment() -> None:
-    """Load private local API env files without exposing secrets."""
+def _read_api_environment_values() -> dict[str, str]:
+    """Parse configured local provider files without logging or activating them."""
+
+    combined: dict[str, str] = {}
     for env_path in API_FILE_CANDIDATES:
         if not env_path.exists():
             continue
-        values: dict[str, str] = {}
         for raw in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
             line = raw.strip()
             if not line or line.startswith("#") or "=" not in line:
@@ -86,10 +91,16 @@ def load_api_environment() -> None:
             name = name.strip()
             value = value.strip().strip('"').strip("'")
             if name and value:
-                values[name] = value
-        for name, value in values.items():
-            if not os.getenv(name):
-                os.environ[name] = value
+                combined[name] = value
+    return combined
+
+
+def load_api_environment() -> None:
+    """Load private local API env files without exposing secrets."""
+
+    for name, value in _read_api_environment_values().items():
+        if not os.getenv(name):
+            os.environ[name] = value
 
 
 class ProviderManager:
@@ -105,6 +116,18 @@ class ProviderManager:
         self.current_model = self.normalize_model_name(self._load_model_name())
         self.provider: ModelProvider | None = None
         self.last_used_model = ""
+        self._refresh_output_redactor()
+
+    def _refresh_output_redactor(self) -> None:
+        configured = _read_api_environment_values()
+        secret_names = frozenset(RUNTIME_SECRET_ENV_NAMES)
+        self.output_redactor = build_current_runtime_redactor(
+            additional_values=(
+                value
+                for name, value in configured.items()
+                if name in secret_names
+            )
+        )
 
     def generate(self, prompt: str) -> str:
         return self.generate_with_fallback(prompt)
@@ -140,8 +163,13 @@ class ProviderManager:
             try:
                 require_provider_calls_enabled(provider_id)
                 load_api_environment()
+                self._refresh_output_redactor()
                 provider = self._build_provider(full_model)
-                response = validate_model_response_text(provider.generate(prompt))
+                response = self.output_redactor.redact_text(
+                    validate_model_response_text(
+                        provider.generate(self.output_redactor.redact_text(prompt))
+                    )
+                )
                 self.provider = provider
                 self.current_model = full_model
                 self.last_used_model = provider.full_name
@@ -164,7 +192,10 @@ class ProviderManager:
                         except AttributeError:  # pragma: no cover
                             pass
                         raise observer_error from error
-                errors.append(f"{full_model}: {error}")
+                self._refresh_output_redactor()
+                errors.append(
+                    self.output_redactor.redact_text(f"{full_model}: {error}")
+                )
                 provider_errors.append(error)
                 continue
             # A terminal observer is a security persistence boundary, not part
@@ -207,14 +238,22 @@ class ProviderManager:
                 provider_id = full_model.split("/", 1)[0]
                 require_provider_calls_enabled(provider_id)
                 load_api_environment()
+                self._refresh_output_redactor()
                 provider = self._build_provider(full_model)
-                response = validate_model_response_text(provider.generate(prompt))
+                response = self.output_redactor.redact_text(
+                    validate_model_response_text(
+                        provider.generate(self.output_redactor.redact_text(prompt))
+                    )
+                )
                 self.provider = provider
                 self.current_model = full_model
                 self.last_used_model = provider.full_name
                 return response
             except Exception as error:
-                errors.append(f"{full_model}: {error}")
+                self._refresh_output_redactor()
+                errors.append(
+                    self.output_redactor.redact_text(f"{full_model}: {error}")
+                )
                 provider_errors.append(error)
 
         if not errors:

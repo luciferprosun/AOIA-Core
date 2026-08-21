@@ -26,7 +26,7 @@ from runtime.providers.errors import (
     provider_reason_code,
     validate_model_response_text,
 )
-from runtime.providers.redaction import redact_provider_text
+from runtime.providers.redaction import redact_provider_data, redact_provider_text
 from runtime.providers.runtime_policy import ProviderRuntimePolicy
 
 
@@ -137,7 +137,14 @@ def _perform_live_http_call(
     api_key: str,
     timeout_seconds: int,
 ) -> str:
-    payload = build_provider_payload(envelope)
+    safe_model_id = redact_provider_text(
+        envelope.model_id,
+        known_secrets=(api_key,),
+    )
+    payload = redact_provider_data(
+        build_provider_payload(envelope),
+        known_secrets=(api_key,),
+    )
     body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
     if envelope.provider_id == "kimi_chat":
         request = Request(
@@ -156,7 +163,7 @@ def _perform_live_http_call(
     elif envelope.provider_id == "gemini_chat":
         endpoint = (
             _GEMINI_ENDPOINT_PREFIX
-            + quote(envelope.model_id, safe="")
+            + quote(safe_model_id, safe="")
             + ":generateContent"
         )
         request = Request(
@@ -202,10 +209,16 @@ def _result(
 ) -> ProviderRuntimeResult:
     return ProviderRuntimeResult(
         provider_id=envelope.provider_id,
-        model_id=envelope.model_id,
+        model_id=redact_provider_text(
+            envelope.model_id,
+            known_secrets=known_secrets,
+        ),
         mode=mode,
         status=status,
-        redacted_request_preview=envelope.payload_preview,
+        redacted_request_preview=redact_provider_text(
+            envelope.payload_preview,
+            known_secrets=known_secrets,
+        ),
         response_text=(
             redact_provider_text(response_text, known_secrets=known_secrets)
             if response_text is not None

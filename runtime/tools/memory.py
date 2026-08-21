@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ from runtime.safety.atomic_persistence import (
     state_resource_lock_path,
     validate_lock_timeout_seconds,
 )
+from runtime.sensitive_redaction import SensitiveValueRedactor, build_runtime_redactor
 from runtime_paths import runtime_state_dir
 
 
@@ -158,7 +160,9 @@ class MemoryStore:
         persist_on_init: bool = True,
         record_session_start: bool = True,
         state_lock_timeout_seconds: object = DEFAULT_STATE_LOCK_TIMEOUT_SECONDS,
+        redactor: SensitiveValueRedactor | None = None,
     ) -> None:
+        self.redactor = redactor or build_runtime_redactor(environ=os.environ)
         self.state_lock_timeout_seconds = validate_lock_timeout_seconds(
             state_lock_timeout_seconds
         )
@@ -221,16 +225,17 @@ class MemoryStore:
         )
         atomic_write_json(
             self.state_file,
-            asdict(self.memory),
+            self.redactor.redact(asdict(self.memory)),
             lock_path=self._lock_for(self.state_file),
             lock_timeout_seconds=timeout,
         )
 
     def append_history(self, kind: str, payload: dict[str, Any]) -> None:
+        safe_payload = self._safe_payload(payload)
         record = {
             "timestamp": dt.datetime.now().isoformat(),
             "kind": kind,
-            "payload": payload,
+            "payload": safe_payload,
         }
         append_json_line(
             self.history_file,
@@ -238,15 +243,16 @@ class MemoryStore:
             lock_path=self._lock_for(self.history_file),
             lock_timeout_seconds=self.state_lock_timeout_seconds,
         )
-        self.append_vault_note(kind, payload)
+        self.append_vault_note(kind, safe_payload)
 
     def append_evidence(self, kind: str, payload: dict[str, Any]) -> None:
         vault_paths = self.ensure_obsidian_vault()
         self._validate_evidence_payload(kind, payload)
+        safe_payload = self._safe_payload(payload)
         record = {
             "timestamp": dt.datetime.now().isoformat(),
             "kind": kind,
-            "payload": payload,
+            "payload": safe_payload,
         }
         append_json_line(
             self.evidence_file,
@@ -254,7 +260,7 @@ class MemoryStore:
             lock_path=self._lock_for(self.evidence_file),
             lock_timeout_seconds=self.state_lock_timeout_seconds,
         )
-        self._append_channel_note(vault_paths.evidence_dir, kind, payload)
+        self._append_channel_note(vault_paths.evidence_dir, kind, safe_payload)
 
     def _validate_evidence_payload(self, kind: str, payload: dict[str, Any]) -> None:
         if kind != self.ALLOWED_EVIDENCE_KIND:
@@ -274,10 +280,11 @@ class MemoryStore:
 
     def append_reasoning(self, kind: str, payload: dict[str, Any]) -> None:
         vault_paths = self.ensure_obsidian_vault()
+        safe_payload = self._safe_payload(payload)
         record = {
             "timestamp": dt.datetime.now().isoformat(),
             "kind": kind,
-            "payload": payload,
+            "payload": safe_payload,
         }
         append_json_line(
             self.reasoning_file,
@@ -285,61 +292,64 @@ class MemoryStore:
             lock_path=self._lock_for(self.reasoning_file),
             lock_timeout_seconds=self.state_lock_timeout_seconds,
         )
-        self._append_channel_note(vault_paths.reasoning_dir, kind, payload)
+        self._append_channel_note(vault_paths.reasoning_dir, kind, safe_payload)
 
     def append_browser_event(self, payload: dict[str, Any]) -> None:
+        safe_payload = self._safe_payload(payload)
         append_json_line(
             self.browser_log_file,
             {
                 "timestamp": dt.datetime.now().isoformat(),
-                "payload": payload,
+                "payload": safe_payload,
             },
             lock_path=self._lock_for(self.browser_log_file),
             lock_timeout_seconds=self.state_lock_timeout_seconds,
         )
-        self.append_vault_note("browser_event", payload)
+        self.append_vault_note("browser_event", safe_payload)
 
     def set_current_task(self, task: str) -> None:
-        self.memory.current_task = task
+        self.memory.current_task = self.redactor.redact_text(task)
         self.save()
 
     def update_cwd(self, cwd: Path) -> None:
-        self.memory.cwd = str(cwd)
+        self.memory.cwd = self.redactor.redact_text(cwd)
         self.save()
 
     def record_command(self, command: str) -> None:
-        self.memory.previous_commands.append(command)
+        self.memory.previous_commands.append(self.redactor.redact_text(command))
         self.memory.previous_commands = self.memory.previous_commands[-20:]
         self.save()
 
     def record_result(self, result: dict[str, Any]) -> None:
+        safe_result = self._safe_payload(result)
         compact = {
-            "success": result.get("success", False),
-            "message": result.get("message", ""),
-            "path": result.get("path"),
-            "current_url": result.get("current_url"),
-            "exit_code": result.get("exit_code"),
+            "success": safe_result.get("success", False),
+            "message": safe_result.get("message", ""),
+            "path": safe_result.get("path"),
+            "current_url": safe_result.get("current_url"),
+            "exit_code": safe_result.get("exit_code"),
         }
         self.memory.recent_outputs.append(compact)
         self.memory.recent_outputs = self.memory.recent_outputs[-20:]
 
-        if "current_url" in result:
-            self.memory.current_browser_page = result.get("current_url", "")
-        if "open_tabs" in result:
-            self.memory.open_tabs = result.get("open_tabs", [])
+        if "current_url" in safe_result:
+            self.memory.current_browser_page = safe_result.get("current_url", "")
+        if "open_tabs" in safe_result:
+            self.memory.open_tabs = safe_result.get("open_tabs", [])
             self.memory.browser_active = bool(self.memory.open_tabs or self.memory.current_browser_page)
-        if "screenshot_path" in result:
-            self.memory.screenshots.append(result["screenshot_path"])
+        if "screenshot_path" in safe_result:
+            self.memory.screenshots.append(safe_result["screenshot_path"])
             self.memory.screenshots = self.memory.screenshots[-20:]
 
         self.save()
 
     def append_vault_note(self, kind: str, payload: dict[str, Any]) -> None:
         vault_paths = self.ensure_obsidian_vault()
+        safe_payload = self._safe_payload(payload)
         day = dt.datetime.now().strftime("%Y-%m-%d")
         note_path = vault_paths.daily_dir / f"{day}.md"
         session_path = vault_paths.sessions_dir / f"{self.memory.session_id}.jsonl"
-        block = self._vault_block(kind, payload)
+        block = self._vault_block(kind, safe_payload)
         locked_update_text(
             note_path,
             lambda current: current + block,
@@ -352,18 +362,19 @@ class MemoryStore:
             {
                 "timestamp": dt.datetime.now().isoformat(),
                 "kind": kind,
-                "payload": payload,
-                "cwd": self.memory.cwd,
-                "task": self.memory.current_task,
+                "payload": safe_payload,
+                "cwd": self.redactor.redact_text(self.memory.cwd),
+                "task": self.redactor.redact_text(self.memory.current_task),
             },
             lock_path=self._lock_for(session_path),
             lock_timeout_seconds=self.state_lock_timeout_seconds,
         )
 
     def _append_channel_note(self, directory: Path, kind: str, payload: dict[str, Any]) -> None:
+        safe_payload = self._safe_payload(payload)
         note_path = directory / f"{self.memory.session_id}.md"
         header = f"# {directory.name} {self.memory.session_id}\n\n"
-        block = self._vault_block(kind, payload)
+        block = self._vault_block(kind, safe_payload)
         locked_update_text(
             note_path,
             lambda current: current + block,
@@ -374,6 +385,12 @@ class MemoryStore:
 
     def _lock_for(self, resource_path: Path) -> Path:
         return state_resource_lock_path(self.paths.state_dir, resource_path)
+
+    def _safe_payload(self, payload: dict[str, Any]) -> dict[str, Any]:
+        redacted = self.redactor.redact(payload)
+        if not isinstance(redacted, dict):  # defensive type boundary
+            raise TypeError("Memory payload must remain a dictionary")
+        return redacted
 
     @staticmethod
     def _validate_loaded_memory(memory: AgentMemory) -> None:
@@ -408,9 +425,9 @@ class MemoryStore:
         return "\n".join(
             [
                 f"## {dt.datetime.now().isoformat()} - {kind}",
-                f"- cwd: {self.memory.cwd}",
-                f"- task: {self.memory.current_task or '(none)'}",
-                f"- note: {str(summary).strip()[:600] or '(empty)'}",
+                f"- cwd: {self.redactor.redact_text(self.memory.cwd)}",
+                f"- task: {self.redactor.redact_text(self.memory.current_task) or '(none)'}",
+                f"- note: {self.redactor.redact_text(summary).strip()[:600] or '(empty)'}",
                 "",
             ]
         )

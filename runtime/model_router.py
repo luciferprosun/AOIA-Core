@@ -8,6 +8,7 @@ try:
     from runtime.provider_audit import make_provider_audit_event
     from runtime.provider_clients import call_selected_provider_once
     from runtime.provider_registry import provider_live_call_allowed
+    from runtime.sensitive_redaction import build_current_runtime_redactor
     from runtime.schemas.model_router import (
         ModelRoutingDecision,
         ModelSelectionProposal,
@@ -22,6 +23,7 @@ except ModuleNotFoundError:  # pragma: no cover - script launch path
     from provider_audit import make_provider_audit_event
     from provider_clients import call_selected_provider_once
     from provider_registry import provider_live_call_allowed
+    from sensitive_redaction import build_current_runtime_redactor
     from schemas.model_router import (
         ModelRoutingDecision,
         ModelSelectionProposal,
@@ -187,6 +189,7 @@ def execute_approved_model_call_once(
     human_approved: bool,
     provider_call_func=call_selected_provider_once,
 ) -> dict[str, object]:
+    output_redactor = build_current_runtime_redactor()
     proposal = create_model_selection_proposal(
         provider_id=provider_id,
         model_id=model_id,
@@ -225,13 +228,18 @@ def execute_approved_model_call_once(
     else:
         call_result = provider_call_func(
             provider_id=provider_id,
-            model_id=model_id,
-            user_prompt=user_prompt,
+            model_id=output_redactor.redact_text(model_id),
+            user_prompt=output_redactor.redact_text(user_prompt),
             human_approved=human_approved,
             provider_call_permitted=bool(approval["provider_call_permitted"]),
             policy_rejected=policy_rejected,
         )
         result = call_result.to_dict() if hasattr(call_result, "to_dict") else dict(call_result)
+
+    safe_result = output_redactor.redact(result)
+    if not isinstance(safe_result, dict):
+        raise TypeError("provider result must project to a dictionary")
+    result = safe_result
 
     audit_event = make_provider_audit_event(
         provider_id=provider_id,
@@ -243,7 +251,7 @@ def execute_approved_model_call_once(
         provider_call_permitted=bool(approval["provider_call_permitted"]),
     )
 
-    return {
+    response = {
         "ok": not bool(result.get("error")),
         "proposal": proposal,
         "decision": decision,
@@ -257,6 +265,10 @@ def execute_approved_model_call_once(
         "execution_triggered": False,
         "canonical_promotion_triggered": False,
     }
+    safe_response = output_redactor.redact(response)
+    if not isinstance(safe_response, dict):
+        raise TypeError("model router response must project to a dictionary")
+    return safe_response
 
 
 def _find_catalog_entry(provider_id: str, model_id: str):

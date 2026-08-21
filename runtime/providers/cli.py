@@ -9,6 +9,7 @@ from runtime.providers.contracts import (
     LIVE_SUCCESS,
     ProviderActivationStatus,
 )
+from runtime.providers.errors import provider_reason_code
 from runtime.providers.payloads import build_provider_envelope
 from runtime.providers.selector import (
     create_provider_selection,
@@ -30,6 +31,12 @@ from runtime.provenance_lifecycle import (
     new_runtime_provenance_event,
 )
 from runtime.trace_context import TraceContext
+from runtime.sensitive_redaction import build_current_runtime_redactor
+
+
+def _emit_json(payload: object) -> None:
+    safe_payload = build_current_runtime_redactor().redact(payload)
+    print(json.dumps(safe_payload, sort_keys=True))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -63,7 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.list:
-        print(json.dumps([item.to_dict() for item in list_available_providers()], sort_keys=True))
+        _emit_json([item.to_dict() for item in list_available_providers()])
         return 0
     provider_id = args.provider or ""
     model_id = args.model or ""
@@ -95,17 +102,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             result = invoke_provider()
         except ValueError as error:
-            print(
-                json.dumps(
-                    {
-                        "status": "invalid",
-                        "error_message": str(error),
-                    },
-                    sort_keys=True,
-                )
+            _emit_json(
+                {
+                    "status": "invalid",
+                    "error_message": str(error),
+                }
             )
             return 2
-        print(json.dumps(result.to_dict(), sort_keys=True))
+        _emit_json(result.to_dict())
         return 0 if result.status in {"dry_run_preview", "live_success"} else 2
 
     try:
@@ -132,11 +136,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             created_at=selection.created_at,
         )
     except ValueError as error:
-        print(
-            json.dumps(
-                {"status": "invalid", "error_message": str(error)},
-                sort_keys=True,
-            )
+        _emit_json(
+            {"status": "invalid", "error_message": str(error)}
         )
         return 2
 
@@ -274,11 +275,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = invoke_provider()
         except ValueError as error:
             terminalize_live_attempt(False)
-            print(
-                json.dumps(
-                    {"status": "invalid", "error_message": str(error)},
-                    sort_keys=True,
-                )
+            _emit_json(
+                {"status": "invalid", "error_message": str(error)}
             )
             return 2
         except Exception as provider_error:
@@ -294,14 +292,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                     pass
             raise
         terminalize_live_attempt(result.status == LIVE_SUCCESS)
-        print(
-            json.dumps(
-                {**result.to_dict(), **model_call.identity_fields()},
-                sort_keys=True,
-            )
+        _emit_json(
+            {**result.to_dict(), **model_call.identity_fields()}
         )
         return 0 if result.status in {"dry_run_preview", "live_success"} else 2
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except Exception as error:
+        _emit_json(
+            {
+                "status": "error",
+                "reason_code": provider_reason_code(error),
+                "message_safe": "The provider request could not be completed.",
+            }
+        )
+        raise SystemExit(2)
