@@ -15,13 +15,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 try:
-    from runtime.safety.bounded_subprocess import run_bounded_subprocess
+    from runtime.safety.bounded_subprocess import SubprocessResourceProfileName, run_bounded_subprocess
     from runtime.safety.subprocess_env import build_subprocess_env
 except ModuleNotFoundError:
     repository_root = Path(__file__).resolve().parents[2]
     if str(repository_root) not in sys.path:
         sys.path.insert(0, str(repository_root))
-    from runtime.safety.bounded_subprocess import run_bounded_subprocess
+    from runtime.safety.bounded_subprocess import SubprocessResourceProfileName, run_bounded_subprocess
     from runtime.safety.subprocess_env import build_subprocess_env
 
 
@@ -53,6 +53,7 @@ def run_git(args: list[str], cwd: Path, *, check: bool = True) -> subprocess.Com
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         timeout=DEVELOPMENT_GIT_HARD_TIMEOUT_SECONDS,
+        resource_profile=SubprocessResourceProfileName.GIT,
         shell=False,
     )
 

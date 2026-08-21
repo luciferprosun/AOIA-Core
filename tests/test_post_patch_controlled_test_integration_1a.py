@@ -76,7 +76,7 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
     def test_ready_plan_can_run_allowlisted_compileall_check(self):
         plan = self.plan_for("runtime/patches/post_patch_verification_plan.py")
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="compile ok", stderr="")
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute_plan(plan, "compileall-runtime-tests")
 
         self.assertEqual(CONTROLLED_VERIFICATION_PASS, result.status)
@@ -90,7 +90,7 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
         plan = self.plan_for("tests/test_post_patch_verification_plan_1a.py")
         check_id = "focused-tests-test_post_patch_verification_plan_1a"
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="focused ok", stderr="")
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute_plan(plan, check_id)
 
         self.assertEqual(CONTROLLED_VERIFICATION_PASS, result.status)
@@ -100,7 +100,7 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
     def test_ready_plan_can_run_allowlisted_full_unittest_discovery_check(self):
         plan = self.plan_for("runtime/patches/post_patch_verification_plan.py")
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="full ok", stderr="")
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute_plan(plan, "full-unittest-discovery")
 
         self.assertEqual(CONTROLLED_VERIFICATION_PASS, result.status)
@@ -110,7 +110,7 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
     def test_run_hash_and_canonical_json_are_deterministic(self):
         plan = self.plan_for("runtime/patches/post_patch_verification_plan.py")
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="stable", stderr="")
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", return_value=completed):
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", return_value=completed):
             first = self.execute_plan(plan, "compileall-runtime-tests")
             second = self.execute_plan(plan, "compileall-runtime-tests")
 
@@ -215,7 +215,7 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
             ),
         }
         for name, (plan, reason_code) in cases.items():
-            with self.subTest(name=name), patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run") as run_mock:
+            with self.subTest(name=name), patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess") as run_mock:
                 result = self.execute_plan(plan, plan.checks[0].check_id)
 
                 self.assertEqual(CONTROLLED_VERIFICATION_BLOCKED, result.status)
@@ -254,12 +254,12 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
     def test_timeout_output_bounds_and_failing_command_are_stable(self):
         plan = self.plan_for("runtime/patches/post_patch_verification_plan.py")
         timeout = subprocess.TimeoutExpired(cmd=(sys.executable,), timeout=1, output="x" * 200, stderr="y" * 200)
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", side_effect=timeout):
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", side_effect=timeout):
             timed_out = run_controlled_post_patch_verification(
                 replace(self.request(plan, "compileall-runtime-tests"), timeout_seconds=1, max_output_bytes=40)
             )
         failed_process = subprocess.CompletedProcess(args=(sys.executable,), returncode=2, stdout="bad", stderr="failed")
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", return_value=failed_process):
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", return_value=failed_process):
             failed = self.execute_plan(plan, "compileall-runtime-tests")
 
         self.assertEqual(CONTROLLED_VERIFICATION_FAIL, timed_out.status)
@@ -274,7 +274,7 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
     def test_result_authority_fields_false_and_pass_cannot_satisfy_future_authority(self):
         plan = self.plan_for("runtime/patches/post_patch_verification_plan.py")
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", return_value=completed):
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", return_value=completed):
             result = self.execute_plan(plan, "compileall-runtime-tests")
 
         self.assertEqual(CONTROLLED_VERIFICATION_PASS, result.status)
@@ -297,7 +297,7 @@ class PostPatchControlledTestIntegration1ATests(unittest.TestCase):
     def test_shell_true_is_never_used(self):
         plan = self.plan_for("runtime/patches/post_patch_verification_plan.py")
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
-        with patch("runtime.patches.post_patch_controlled_test_integration.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.patches.post_patch_controlled_test_integration.run_bounded_subprocess", return_value=completed) as run_mock:
             self.execute_plan(plan, "compileall-runtime-tests")
 
         self.assertIs(run_mock.call_args.kwargs["shell"], False)

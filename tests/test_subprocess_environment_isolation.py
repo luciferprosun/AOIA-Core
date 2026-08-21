@@ -179,8 +179,8 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
             "OPENAI_API_KEY": "NZ_TEST_SECRET_001",
         }
         with patch.dict(os.environ, ambient, clear=False), patch.object(
-            pdf_extract.subprocess,
-            "run",
+            pdf_extract,
+            "run_bounded_subprocess",
             return_value=completed,
         ) as run_mock:
             pages = pdf_extract.read_page_count("pdfinfo", Path("synthetic.pdf"))
@@ -224,9 +224,9 @@ class SubprocessEnvironmentIsolationTests(unittest.TestCase):
                     "check_output",
                 }:
                     discovered_raw[relative] = discovered_raw.get(relative, 0) + 1
-                    if not any(keyword.arg == "env" for keyword in node.keywords):
+                    if relative not in EXPECTED_RAW_PROCESS_BOUNDARY and not any(keyword.arg == "env" for keyword in node.keywords):
                         missing_environment.append(f"{relative}:{node.lineno}")
-                    if not any(keyword.arg == "timeout" for keyword in node.keywords):
+                    if relative not in EXPECTED_RAW_PROCESS_BOUNDARY and not any(keyword.arg == "timeout" for keyword in node.keywords):
                         missing_timeout.append(f"{relative}:{node.lineno}")
                 if (
                     isinstance(owner, ast.Name)

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime.git_ops.git_env import build_hardened_git_env
-from runtime.safety.bounded_subprocess import run_bounded_subprocess
+from runtime.safety.bounded_subprocess import SubprocessResourceProfileName, run_bounded_subprocess
 from runtime.git_ops.git_sanitize import sanitize_git_output
 from runtime.safety.workspace_guard import validate_workspace_root
 
@@ -297,6 +297,7 @@ def run_allowlisted_git_read(
             encoding="utf-8",
             errors="replace",
             timeout=timeout,
+            resource_profile=SubprocessResourceProfileName.GIT,
         )
     except subprocess.TimeoutExpired as exc:
         return GitCommandEvidence(
@@ -307,8 +308,14 @@ def run_allowlisted_git_read(
             timeout_expired=True,
             stdout_preview=_bounded_text(exc.stdout, max_output)[0],
             stderr_preview=_bounded_text(exc.stderr, max_output)[0],
-            stdout_truncated=_bounded_text(exc.stdout, max_output)[1],
-            stderr_truncated=_bounded_text(exc.stderr, max_output)[1],
+            stdout_truncated=(
+                _bounded_text(exc.stdout, max_output)[1]
+                or getattr(exc, "stdout_truncated", False)
+            ),
+            stderr_truncated=(
+                _bounded_text(exc.stderr, max_output)[1]
+                or getattr(exc, "stderr_truncated", False)
+            ),
             command_hash=command_hash,
             subprocess_started=True,
         )
@@ -329,6 +336,8 @@ def run_allowlisted_git_read(
 
     stdout_preview, stdout_truncated = _bounded_text(completed.stdout, max_output)
     stderr_preview, stderr_truncated = _bounded_text(completed.stderr, max_output)
+    stdout_truncated = stdout_truncated or getattr(completed, "stdout_truncated", False)
+    stderr_truncated = stderr_truncated or getattr(completed, "stderr_truncated", False)
     if stdout_truncated or stderr_truncated:
         return GitCommandEvidence(
             command_id=command_id.value,

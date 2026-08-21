@@ -47,6 +47,12 @@ from runtime.schemas.action_proposal import (
     ActionProposalSourceTrust,
     build_action_proposal,
 )
+from runtime.safety.bounded_subprocess import (
+    PROCESS_CONTAINMENT_LOST_REASON_CODE,
+    PROCESS_MEMORY_LIMIT_REASON_CODE,
+    SubprocessContainmentError,
+    SubprocessResourceLimitError,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -262,6 +268,29 @@ class ControlledGitPush1ATests(unittest.TestCase):
             self.assert_blocked(result, CONTROLLED_GIT_PUSH_BLOCKED_TIMEOUT)
             self.assert_no_push_report(result)
             self.assert_remote_unchanged(remote, approved_branch, remote_head)
+
+    def test_mutation_resource_and_containment_failures_remain_uncertain(self):
+        failures = (
+            SubprocessResourceLimitError(
+                125,
+                ["git", "push"],
+                PROCESS_MEMORY_LIMIT_REASON_CODE,
+            ),
+            SubprocessContainmentError(PROCESS_CONTAINMENT_LOST_REASON_CODE),
+        )
+        for failure in failures:
+            with self.subTest(reason=failure.reason_code), TemporaryDirectory() as workspace:
+                repo, _remote, remote_head = self.repo_ahead_of_local_bare_remote(workspace)
+                preview, barrier = self.reviewed_evidence(repo, remote_head)
+                with self.assertRaises(type(failure)) as caught:
+                    controlled_git_push(
+                        repo,
+                        preview,
+                        barrier,
+                        workspace_root=workspace,
+                        runner=PushMutationFailureRunner(failure),
+                    )
+                self.assertEqual(failure.reason_code, caught.exception.reason_code)
 
     def test_inert_metadata_objects_cannot_authorize_push(self):
         with TemporaryDirectory() as workspace:
@@ -534,6 +563,17 @@ class TimeoutRunner:
             b"",
             timeout_expired=True,
         )
+
+
+class PushMutationFailureRunner:
+    def __init__(self, failure: Exception) -> None:
+        self.delegate = _ControlledGitPushRunner()
+        self.failure = failure
+
+    def run(self, command_id, repo_path: Path, **kwargs):
+        if command_id.value == "PUSH_EXACT_REF":
+            raise self.failure
+        return self.delegate.run(command_id, repo_path, **kwargs)
 
 
 def scan_module(path: Path):

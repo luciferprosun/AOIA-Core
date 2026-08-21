@@ -382,7 +382,7 @@ class ControlledPackageInstall1ATests(unittest.TestCase):
                 {"OPENAI_API_KEY": "NZ_VENV_SECRET_MUST_NOT_LEAK"},
                 clear=False,
             ), patch(
-                "runtime.package_ops.controlled_package_install.subprocess.run",
+                "runtime.package_ops.controlled_package_install.run_bounded_subprocess",
                 return_value=completed,
             ) as run_mock:
                 _VenvEnvironmentBuilder(7)._call_new_python(

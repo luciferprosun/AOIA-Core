@@ -43,6 +43,7 @@ from runtime.task_recovery import (
 )
 from runtime.safety.bounded_subprocess import (
     SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    SubprocessResourceProfileName,
     run_bounded_subprocess,
 )
 from runtime.safety.subprocess_env import build_subprocess_env
@@ -484,6 +485,7 @@ print(json.dumps({"result": result, "closed": closed}, sort_keys=True))
                     [sys.executable, "-c", "import time; time.sleep(2)"],
                     env=build_subprocess_env(),
                     timeout=0.1,
+                    resource_profile=SubprocessResourceProfileName.CONTROLLED_TEST,
                     capture_output=True,
                     text=True,
                     check=False,

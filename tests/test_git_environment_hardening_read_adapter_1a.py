@@ -189,7 +189,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
         with git_repo() as repo:
             request = GitReadRequest(workspace_root=str(repo))
             for command in ("status", "COMMIT", "PUSH", "FETCH", "PULL", "ADD"):
-                with self.subTest(command=command), patch("runtime.git_ops.git_read.subprocess.run") as run_mock:
+                with self.subTest(command=command), patch("runtime.git_ops.git_read.run_bounded_subprocess") as run_mock:
                     evidence = run_allowlisted_git_read(request, command)  # type: ignore[arg-type]
 
                     self.assertEqual(GIT_READ_COMMAND_BLOCKED, evidence.status)
@@ -200,7 +200,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
     def test_allowlisted_subprocess_uses_arg_list_shell_false_timeout_cwd_and_hardened_env(self):
         with git_repo() as repo:
             completed = subprocess.CompletedProcess(args=("git",), returncode=0, stdout=str(repo) + "\n", stderr="")
-            with patch("runtime.git_ops.git_read.subprocess.run", return_value=completed) as run_mock:
+            with patch("runtime.git_ops.git_read.run_bounded_subprocess", return_value=completed) as run_mock:
                 evidence = run_allowlisted_git_read(GitReadRequest(workspace_root=str(repo)), GitReadCommand.SHOW_TOPLEVEL)
 
         self.assertEqual("PASS", evidence.status)
@@ -290,7 +290,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
                 stdout="ghp_abcdefghijklmnopqrstuvwxyz123456",
                 stderr="access_token=secret123",
             )
-            with patch("runtime.git_ops.git_read.subprocess.run", return_value=completed):
+            with patch("runtime.git_ops.git_read.run_bounded_subprocess", return_value=completed):
                 evidence = run_allowlisted_git_read(GitReadRequest(workspace_root=str(repo)), GitReadCommand.VERIFY_HEAD)
 
         self.assertNotIn("abcdefghijklmnopqrstuvwxyz123456", evidence.stdout_preview)
@@ -301,7 +301,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
     def test_oversized_output_is_bounded_and_fail_closed(self):
         with git_repo() as repo:
             completed = subprocess.CompletedProcess(args=("git",), returncode=0, stdout="x" * 1000, stderr="")
-            with patch("runtime.git_ops.git_read.subprocess.run", return_value=completed):
+            with patch("runtime.git_ops.git_read.run_bounded_subprocess", return_value=completed):
                 evidence = run_allowlisted_git_read(
                     GitReadRequest(workspace_root=str(repo), max_output_bytes=256),
                     GitReadCommand.STATUS_PORCELAIN,
@@ -315,7 +315,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
     def test_timeout_returns_stable_error_result(self):
         with git_repo() as repo:
             timeout = subprocess.TimeoutExpired(cmd=("git",), timeout=1, output="ghp_abcdefghijklmnopqrstuvwxyz123456", stderr="")
-            with patch("runtime.git_ops.git_read.subprocess.run", side_effect=timeout):
+            with patch("runtime.git_ops.git_read.run_bounded_subprocess", side_effect=timeout):
                 first = run_allowlisted_git_read(GitReadRequest(workspace_root=str(repo)), GitReadCommand.STATUS_PORCELAIN)
                 second = run_allowlisted_git_read(GitReadRequest(workspace_root=str(repo)), GitReadCommand.STATUS_PORCELAIN)
 

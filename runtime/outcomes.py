@@ -77,6 +77,14 @@ class NZReasonCode(str, Enum):
     ACTION_HANDLER_MISSING = "ACTION_HANDLER_MISSING"
     ACTION_FAILED = "ACTION_FAILED"
     PROCESS_TIMEOUT = "PROCESS_TIMEOUT"
+    SUBPROCESS_HARD_TIMEOUT = "SUBPROCESS_HARD_TIMEOUT"
+    PROCESS_CPU_LIMIT = "PROCESS_CPU_LIMIT"
+    PROCESS_MEMORY_LIMIT = "PROCESS_MEMORY_LIMIT"
+    PROCESS_FILE_LIMIT = "PROCESS_FILE_LIMIT"
+    PROCESS_COUNT_LIMIT = "PROCESS_COUNT_LIMIT"
+    PROCESS_TREE_TERMINATED = "PROCESS_TREE_TERMINATED"
+    PROCESS_CONTAINMENT_SETUP_FAILED = "PROCESS_CONTAINMENT_SETUP_FAILED"
+    PROCESS_CONTAINMENT_LOST = "PROCESS_CONTAINMENT_LOST"
     IDEMPOTENCY_CONFLICT = "IDEMPOTENCY_CONFLICT"
     IDEMPOTENCY_IN_PROGRESS = "IDEMPOTENCY_IN_PROGRESS"
     UNKNOWN_OUTCOME = "UNKNOWN_OUTCOME"
@@ -393,7 +401,11 @@ def outcome_from_exception(
         reason = None
     reason = reason or NZReasonCode.RUNTIME_ERROR.value
     if (
-        reason in {NZReasonCode.MODEL_TIMEOUT.value, NZReasonCode.PROCESS_TIMEOUT.value}
+        reason in {
+            NZReasonCode.MODEL_TIMEOUT.value,
+            NZReasonCode.PROCESS_TIMEOUT.value,
+            NZReasonCode.SUBPROCESS_HARD_TIMEOUT.value,
+        }
         or reason == "STATE_LOCK_TIMEOUT"
         or reason.endswith("_LOCK_TIMEOUT")
     ):
@@ -407,7 +419,21 @@ def outcome_from_exception(
         status = NZOutcomeStatus.MANUAL_REVIEW_REQUIRED
     elif "CONFLICT" in reason or "FENCED" in reason:
         status = NZOutcomeStatus.CONFLICT
+    elif reason == NZReasonCode.TASK_CANCELLED.value:
+        status = NZOutcomeStatus.CANCELLED
     elif "UNKNOWN_OUTCOME" in reason or reason.endswith("_UNKNOWN"):
+        status = NZOutcomeStatus.UNKNOWN_OUTCOME
+    elif reason in {
+        NZReasonCode.PROCESS_CPU_LIMIT.value,
+        NZReasonCode.PROCESS_MEMORY_LIMIT.value,
+        NZReasonCode.PROCESS_FILE_LIMIT.value,
+        NZReasonCode.PROCESS_COUNT_LIMIT.value,
+        NZReasonCode.PROCESS_TREE_TERMINATED.value,
+        NZReasonCode.PROCESS_CONTAINMENT_LOST.value,
+    }:
+        # The resource cause is exact, but a mutation-capable child may have
+        # produced partial effects before containment intervened. Canonical P0.7
+        # evidence, not this projection, decides whether reconciliation is safe.
         status = NZOutcomeStatus.UNKNOWN_OUTCOME
     elif reason in {"TASK_BUDGET_EXHAUSTED", "STEP_BUDGET_EXHAUSTED"}:
         status = NZOutcomeStatus.PARTIAL

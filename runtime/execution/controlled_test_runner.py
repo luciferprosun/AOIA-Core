@@ -11,7 +11,12 @@ from pathlib import Path
 from typing import Any
 
 from runtime.safety.subprocess_env import build_subprocess_env
-from runtime.safety.bounded_subprocess import run_bounded_subprocess
+from runtime.safety.bounded_subprocess import (
+    SubprocessContainmentError,
+    SubprocessResourceLimitError,
+    SubprocessResourceProfileName,
+    run_bounded_subprocess,
+)
 
 
 CONTROLLED_TEST_EXECUTION_SCHEMA_VERSION = "AOIA_CONTROLLED_TEST_EXECUTION_1A"
@@ -477,6 +482,7 @@ def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> Cont
                     pycache_root=pycache_root,
                 ),
                 timeout=request_data["timeout_seconds"],
+                resource_profile=SubprocessResourceProfileName.CONTROLLED_TEST,
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -484,6 +490,8 @@ def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> Cont
     except subprocess.TimeoutExpired as exc:
         stdout_preview, stdout_truncated = _bound_output(_timeout_output(exc.stdout), request_data["max_output_bytes"])
         stderr_preview, stderr_truncated = _bound_output(_timeout_output(exc.stderr), request_data["max_output_bytes"])
+        stdout_truncated = stdout_truncated or getattr(exc, "stdout_truncated", False)
+        stderr_truncated = stderr_truncated or getattr(exc, "stderr_truncated", False)
         return _execution_result(
             request_data=request_data,
             status=ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_TIMEOUT,
@@ -497,6 +505,29 @@ def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> Cont
             stderr_truncated=stderr_truncated,
             flags=flags,
             risk_notes=tuple(risk_notes + ["Controlled test execution timed out."]),
+        )
+    except (SubprocessResourceLimitError, SubprocessContainmentError) as exc:
+        stdout_preview, stdout_truncated = _bound_output(
+            getattr(exc, "stdout", None), request_data["max_output_bytes"]
+        )
+        stderr_preview, stderr_truncated = _bound_output(
+            getattr(exc, "stderr", None), request_data["max_output_bytes"]
+        )
+        stdout_truncated = stdout_truncated or getattr(exc, "stdout_truncated", False)
+        stderr_truncated = stderr_truncated or getattr(exc, "stderr_truncated", False)
+        return _execution_result(
+            request_data=request_data,
+            status=ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_FAILED,
+            command_kind=command_kind,
+            executed_args=args,
+            exit_code=getattr(exc, "returncode", None),
+            timeout_expired=False,
+            stdout_preview=stdout_preview,
+            stderr_preview=stderr_preview,
+            stdout_truncated=stdout_truncated,
+            stderr_truncated=stderr_truncated,
+            flags=flags,
+            risk_notes=tuple(risk_notes + [f"Process containment reason: {exc.reason_code}."]),
         )
     except Exception as exc:
         stderr_preview, stderr_truncated = _bound_output(type(exc).__name__, request_data["max_output_bytes"])
@@ -517,6 +548,8 @@ def execute_controlled_test_run(request: ControlledTestExecutionRequest) -> Cont
 
     stdout_preview, stdout_truncated = _bound_output(completed.stdout, request_data["max_output_bytes"])
     stderr_preview, stderr_truncated = _bound_output(completed.stderr, request_data["max_output_bytes"])
+    stdout_truncated = stdout_truncated or getattr(completed, "stdout_truncated", False)
+    stderr_truncated = stderr_truncated or getattr(completed, "stderr_truncated", False)
     status = (
         ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED
         if completed.returncode == 0

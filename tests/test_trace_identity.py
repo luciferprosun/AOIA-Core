@@ -15,6 +15,7 @@ import providers.config as provider_config
 import runtime.webapp as webapp
 from runtime.safety.bounded_subprocess import (
     SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    SubprocessResourceProfileName,
     run_bounded_subprocess,
 )
 from runtime.safety.subprocess_env import build_subprocess_env
@@ -297,6 +298,7 @@ class TraceIdentityTests(unittest.TestCase):
                     [sys.executable, "-c", child_code, str(evidence_path)],
                     env=build_subprocess_env(),
                     timeout=0.25,
+                    resource_profile=SubprocessResourceProfileName.CONTROLLED_TEST,
                     capture_output=True,
                     text=True,
                     check=False,

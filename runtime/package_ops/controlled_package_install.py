@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from runtime.safety.subprocess_env import build_subprocess_env
-from runtime.safety.bounded_subprocess import run_bounded_subprocess
+from runtime.safety.bounded_subprocess import SubprocessResourceProfileName, run_bounded_subprocess
 
 from runtime.package_ops.package_install_proposal import (
     PACKAGE_INSTALL_PROPOSAL_READY_METADATA_ONLY,
@@ -341,6 +341,7 @@ class _SubprocessPackageRunner:
                 cwd=str(cwd),
                 env=build_subprocess_env(inherit_names=(), fixed=env),
                 timeout=timeout_seconds,
+                resource_profile=SubprocessResourceProfileName.PACKAGE,
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -377,6 +378,7 @@ class _VenvEnvironmentBuilder(venv.EnvBuilder):
                 },
             ),
             timeout=self._timeout_seconds,
+            resource_profile=SubprocessResourceProfileName.PACKAGE,
             stdout=subprocess.PIPE,
             check=True,
             shell=False,

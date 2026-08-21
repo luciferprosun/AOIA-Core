@@ -10,6 +10,7 @@ from pathlib import Path
 from runtime.safety.subprocess_env import build_subprocess_env
 from runtime.safety.bounded_subprocess import (
     SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    SubprocessResourceProfileName,
     run_bounded_subprocess,
 )
 
@@ -84,6 +85,7 @@ def extract_pdf(input_path: Path, output_path: Path) -> int:
             check=False,
             env=build_subprocess_env(),
             timeout=PDF_TOOL_HARD_TIMEOUT_SECONDS,
+            resource_profile=SubprocessResourceProfileName.PDF,
             text=True,
             capture_output=True,
             shell=False,
@@ -109,6 +111,7 @@ def read_page_count(pdfinfo: str, input_path: Path) -> int:
             check=False,
             env=build_subprocess_env(),
             timeout=PDF_TOOL_HARD_TIMEOUT_SECONDS,
+            resource_profile=SubprocessResourceProfileName.PDF,
             text=True,
             capture_output=True,
             shell=False,

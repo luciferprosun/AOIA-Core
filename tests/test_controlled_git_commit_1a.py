@@ -31,6 +31,7 @@ from runtime.git_ops.controlled_git_commit import (
     CONTROLLED_GIT_COMMIT_BLOCKED_WORKSPACE_PATH,
     CONTROLLED_GIT_COMMIT_COMMITTED,
     ControlledGitCommitResult,
+    _ControlledGitCommitRunner,
     controlled_git_commit,
 )
 from runtime.git_ops.git_checkpoint import GitStateCheckpointRequest, create_git_state_checkpoint
@@ -44,6 +45,12 @@ from runtime.schemas.action_proposal import (
     ActionProposalRequest,
     ActionProposalSourceTrust,
     build_action_proposal,
+)
+from runtime.safety.bounded_subprocess import (
+    PROCESS_CPU_LIMIT_REASON_CODE,
+    PROCESS_CONTAINMENT_LOST_REASON_CODE,
+    SubprocessContainmentError,
+    SubprocessResourceLimitError,
 )
 
 
@@ -254,6 +261,29 @@ class ControlledGitCommit1ATests(unittest.TestCase):
             self.assert_blocked(result, CONTROLLED_GIT_COMMIT_BLOCKED_TIMEOUT)
             self.assertEqual(old_head, self.git(repo, "rev-parse", "HEAD"))
 
+    def test_mutation_resource_and_containment_failures_remain_uncertain(self):
+        failures = (
+            SubprocessResourceLimitError(
+                -24,
+                ["git", "commit"],
+                PROCESS_CPU_LIMIT_REASON_CODE,
+            ),
+            SubprocessContainmentError(PROCESS_CONTAINMENT_LOST_REASON_CODE),
+        )
+        for failure in failures:
+            with self.subTest(reason=failure.reason_code), TemporaryDirectory() as workspace:
+                repo = self.repo_with_staged_change(workspace)
+                preview, barrier = self.reviewed_evidence(repo)
+                with self.assertRaises(type(failure)) as caught:
+                    controlled_git_commit(
+                        repo,
+                        preview,
+                        barrier,
+                        workspace_root=workspace,
+                        runner=CommitMutationFailureRunner(failure),
+                    )
+                self.assertEqual(failure.reason_code, caught.exception.reason_code)
+
     def test_runner_surface_has_no_push_shell_true_or_broad_execution(self):
         source = CONTROLLED_MODULE.read_text(encoding="utf-8").casefold()
         scan = scan_module(CONTROLLED_MODULE)
@@ -439,6 +469,17 @@ class TimeoutRunner:
                 "timeout_expired": True,
             },
         )()
+
+
+class CommitMutationFailureRunner:
+    def __init__(self, failure: Exception) -> None:
+        self.delegate = _ControlledGitCommitRunner()
+        self.failure = failure
+
+    def run(self, command_id, repo_path: Path, **kwargs):
+        if command_id.value == "COMMIT":
+            raise self.failure
+        return self.delegate.run(command_id, repo_path, **kwargs)
 
 
 def scan_module(path: Path):

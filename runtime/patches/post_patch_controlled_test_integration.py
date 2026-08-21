@@ -9,7 +9,12 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 from runtime.safety.subprocess_env import build_subprocess_env
-from runtime.safety.bounded_subprocess import run_bounded_subprocess
+from runtime.safety.bounded_subprocess import (
+    SubprocessContainmentError,
+    SubprocessResourceLimitError,
+    SubprocessResourceProfileName,
+    run_bounded_subprocess,
+)
 
 from runtime.patches.post_patch_verification_plan import (
     CHECK_KIND_COMPILE,
@@ -307,6 +312,7 @@ def run_controlled_post_patch_verification(
                 cwd=request.workspace_root,
                 env=build_subprocess_env(inherit_names=(), fixed=_MINIMAL_ENV),
                 timeout=timeout_seconds,
+                resource_profile=SubprocessResourceProfileName.CONTROLLED_TEST,
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -314,6 +320,8 @@ def run_controlled_post_patch_verification(
         except subprocess.TimeoutExpired as exc:
             stdout_preview, stdout_truncated = _bound_output(_timeout_output(exc.stdout), max_output_bytes)
             stderr_preview, stderr_truncated = _bound_output(_timeout_output(exc.stderr), max_output_bytes)
+            stdout_truncated = stdout_truncated or getattr(exc, "stdout_truncated", False)
+            stderr_truncated = stderr_truncated or getattr(exc, "stderr_truncated", False)
             check_results.append(
                 ControlledVerificationCheckResult(
                     check_id=check.check_id,
@@ -324,6 +332,30 @@ def run_controlled_post_patch_verification(
                     test_target=check.test_target,
                     exit_code=None,
                     timeout_expired=True,
+                    stdout_preview=stdout_preview,
+                    stderr_preview=stderr_preview,
+                    stdout_truncated=stdout_truncated,
+                    stderr_truncated=stderr_truncated,
+                    execution_attempted=True,
+                    subprocess_started=True,
+                )
+            )
+            continue
+        except (SubprocessResourceLimitError, SubprocessContainmentError) as exc:
+            stdout_preview, stdout_truncated = _bound_output(getattr(exc, "stdout", None), max_output_bytes)
+            stderr_preview, stderr_truncated = _bound_output(getattr(exc, "stderr", None), max_output_bytes)
+            stdout_truncated = stdout_truncated or getattr(exc, "stdout_truncated", False)
+            stderr_truncated = stderr_truncated or getattr(exc, "stderr_truncated", False)
+            check_results.append(
+                ControlledVerificationCheckResult(
+                    check_id=check.check_id,
+                    status=CONTROLLED_VERIFICATION_CHECK_FAIL,
+                    reason_code=exc.reason_code,
+                    reason="controlled verification reached a process containment boundary",
+                    command_kind=allowed.command_kind,
+                    test_target=check.test_target,
+                    exit_code=getattr(exc, "returncode", None),
+                    timeout_expired=False,
                     stdout_preview=stdout_preview,
                     stderr_preview=stderr_preview,
                     stdout_truncated=stdout_truncated,
@@ -357,6 +389,8 @@ def run_controlled_post_patch_verification(
 
         stdout_preview, stdout_truncated = _bound_output(completed.stdout, max_output_bytes)
         stderr_preview, stderr_truncated = _bound_output(completed.stderr, max_output_bytes)
+        stdout_truncated = stdout_truncated or getattr(completed, "stdout_truncated", False)
+        stderr_truncated = stderr_truncated or getattr(completed, "stderr_truncated", False)
         passed = completed.returncode == 0
         check_results.append(
             ControlledVerificationCheckResult(

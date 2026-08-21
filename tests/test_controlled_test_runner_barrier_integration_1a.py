@@ -38,7 +38,7 @@ class ControlledTestRunnerBarrierIntegration1ATests(unittest.TestCase):
 
     def test_valid_hash_bound_barrier_permits_focused_unittest_execution(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute("python -m unittest tests.test_action_proposal_1a -v")
 
         self.assertEqual(ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED, result.status)
@@ -53,7 +53,7 @@ class ControlledTestRunnerBarrierIntegration1ATests(unittest.TestCase):
 
     def test_valid_hash_bound_barrier_permits_unittest_discover_execution(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="discover ok", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute("python -m unittest discover -s tests -v")
 
         self.assertEqual(ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED, result.status)
@@ -65,7 +65,7 @@ class ControlledTestRunnerBarrierIntegration1ATests(unittest.TestCase):
 
     def test_valid_hash_bound_barrier_permits_compileall_execution(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="compile ok", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute("python -m compileall runtime tests")
 
         self.assertEqual(ControlledTestExecutionStatus.CONTROLLED_TEST_EXECUTION_COMPLETED, result.status)
@@ -166,7 +166,7 @@ class ControlledTestRunnerBarrierIntegration1ATests(unittest.TestCase):
         self.assert_blocked_execution_booleans(result)
 
     def test_direct_public_execution_without_barrier_no_longer_executes(self):
-        with patch("runtime.execution.controlled_test_runner.subprocess.run") as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess") as run_mock:
             result = execute_controlled_test_run(
                 ControlledTestExecutionRequest(
                     requested_command="python -m unittest tests.test_action_proposal_1a -v",
@@ -190,7 +190,7 @@ class ControlledTestRunnerBarrierIntegration1ATests(unittest.TestCase):
 
     def test_successful_controlled_execution_sets_only_narrow_execution_booleans_true(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed):
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed):
             result = self.execute()
 
         self.assert_success_execution_booleans(result)

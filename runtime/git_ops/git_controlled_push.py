@@ -9,7 +9,12 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from runtime.git_ops.git_env import build_hardened_git_env
-from runtime.safety.bounded_subprocess import run_bounded_subprocess
+from runtime.safety.bounded_subprocess import (
+    SubprocessContainmentError,
+    SubprocessResourceLimitError,
+    SubprocessResourceProfileName,
+    run_bounded_subprocess,
+)
 from runtime.git_ops.git_push_barrier import (
     GIT_PUSH_BARRIER_ELIGIBLE,
     GitPushBarrierRequest,
@@ -218,6 +223,7 @@ class _ControlledGitPushRunner:
                 shell=False,
                 capture_output=True,
                 timeout=_DEFAULT_TIMEOUT_SECONDS,
+                resource_profile=SubprocessResourceProfileName.GIT,
             )
         except subprocess.TimeoutExpired as exc:
             return _GitRunnerResult(command_id.value, None, _bytes(exc.stdout), _bytes(exc.stderr), timeout_expired=True)
@@ -364,6 +370,10 @@ def controlled_git_push(
             CONTROLLED_GIT_PUSH_BLOCKED_TIMEOUT,
             f"controlled Git process timed out during {exc.command_id}",
         )
+    except (SubprocessResourceLimitError, SubprocessContainmentError):
+        # A push may have reached the remote before local containment truth was
+        # lost.  Keep the typed failure for the idempotency/recovery boundary.
+        raise
     except Exception:
         return _blocked(CONTROLLED_GIT_PUSH_BLOCKED_FAIL_CLOSED, "controlled push failed closed")
 

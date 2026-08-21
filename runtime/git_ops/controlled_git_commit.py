@@ -22,7 +22,12 @@ from runtime.git_ops.git_commit_preview import (
     compute_git_commit_preview_hash,
 )
 from runtime.git_ops.git_env import build_hardened_git_env
-from runtime.safety.bounded_subprocess import run_bounded_subprocess
+from runtime.safety.bounded_subprocess import (
+    SubprocessContainmentError,
+    SubprocessResourceLimitError,
+    SubprocessResourceProfileName,
+    run_bounded_subprocess,
+)
 from runtime.git_ops.git_write_preview import GitWriteIntent
 
 
@@ -192,6 +197,7 @@ class _ControlledGitCommitRunner:
                 shell=False,
                 capture_output=True,
                 timeout=_DEFAULT_TIMEOUT_SECONDS,
+                resource_profile=SubprocessResourceProfileName.GIT,
             )
         except subprocess.TimeoutExpired as exc:
             return _GitRunnerResult(
@@ -342,6 +348,11 @@ def controlled_git_commit(
             CONTROLLED_GIT_COMMIT_BLOCKED_TIMEOUT,
             f"controlled Git process timed out during {exc.command_id}",
         )
+    except (SubprocessResourceLimitError, SubprocessContainmentError):
+        # A mutating Git child may have changed repository state before its
+        # resource/containment terminal.  Preserve the typed exception so the
+        # P0.7 post-DISPATCH boundary records UNKNOWN_OUTCOME and never retries.
+        raise
     except Exception:
         return _blocked(CONTROLLED_GIT_COMMIT_BLOCKED_FAIL_CLOSED, "controlled git commit failed closed")
 

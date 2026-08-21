@@ -50,7 +50,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
 
     def test_unittest_discover_executes_when_confirmed_and_metadata_valid(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="discover ok", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute(
                 "python -m unittest discover -s tests -v",
                 timeout_seconds=120,
@@ -78,7 +78,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
 
     def test_subprocess_run_uses_arg_list_shell_false_minimal_env_and_cwd(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed) as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed) as run_mock:
             result = self.execute("python -m unittest tests.test_action_proposal_1a -v")
 
         _, kwargs = run_mock.call_args
@@ -127,7 +127,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
         )
         for returncode, expected_status in expected_statuses:
             with self.subTest(returncode=returncode), patch(
-                "runtime.execution.controlled_test_runner.subprocess.run",
+                "runtime.execution.controlled_test_runner.run_bounded_subprocess",
                 side_effect=completed(returncode),
             ):
                 result = self.execute()
@@ -137,7 +137,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
     def test_child_environment_is_minimal_and_does_not_inherit_parent_secrets(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
         with patch.dict("os.environ", {"OPENAI_API_KEY": "synthetic-test-secret", "AOIA_UNRELATED": "not-inherited"}), patch(
-            "runtime.execution.controlled_test_runner.subprocess.run",
+            "runtime.execution.controlled_test_runner.run_bounded_subprocess",
             return_value=completed,
         ) as run_mock:
             self.execute()
@@ -164,7 +164,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
 
     def test_repository_local_temporary_parent_fails_closed_before_subprocess(self):
         with patch("runtime.execution.controlled_test_runner.tempfile.gettempdir", return_value=str(REPO_ROOT)), patch(
-            "runtime.execution.controlled_test_runner.subprocess.run"
+            "runtime.execution.controlled_test_runner.run_bounded_subprocess"
         ) as run_mock:
             result = self.execute()
 
@@ -189,7 +189,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
 
     def test_output_is_bounded_and_truncated(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="x" * 200, stderr="y" * 200)
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed):
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed):
             result = self.execute("python -m unittest tests.test_action_proposal_1a -v", max_output_bytes=40)
 
         self.assertTrue(result.stdout_truncated)
@@ -201,7 +201,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
 
     def test_timeout_is_enforced_without_hanging_suite(self):
         timeout = subprocess.TimeoutExpired(cmd=(sys.executable,), timeout=1, output="partial", stderr="late")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", side_effect=timeout) as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", side_effect=timeout) as run_mock:
             result = self.execute("python -m unittest tests.test_action_proposal_1a -v", timeout_seconds=1)
 
         self.assertEqual(1, run_mock.call_args.kwargs["timeout"])
@@ -213,7 +213,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
         self.assert_authority_false(result)
 
     def test_timeout_above_runtime_hard_limit_is_rejected_before_process_creation(self):
-        with patch("runtime.execution.controlled_test_runner.subprocess.run") as run_mock:
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess") as run_mock:
             result = self.execute(
                 "python -m unittest tests.test_action_proposal_1a -v",
                 timeout_seconds=301,
@@ -340,9 +340,9 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
         unsupported = self.execute("python -m pytest tests -v")
         first_completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="one", stderr="")
         second_completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="two", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=first_completed):
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=first_completed):
             first = self.execute("python -m unittest tests.test_action_proposal_1a -v")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=second_completed):
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=second_completed):
             second = self.execute("python -m unittest tests.test_action_proposal_1a -v")
 
         self.assertNotEqual(blocked.execution_result_hash, unsupported.execution_result_hash)
@@ -350,7 +350,7 @@ class ControlledTestRunnerExecution1ATests(unittest.TestCase):
 
     def test_successful_controlled_execution_sets_only_narrow_execution_booleans_true(self):
         completed = subprocess.CompletedProcess(args=(sys.executable,), returncode=0, stdout="ok", stderr="")
-        with patch("runtime.execution.controlled_test_runner.subprocess.run", return_value=completed):
+        with patch("runtime.execution.controlled_test_runner.run_bounded_subprocess", return_value=completed):
             result = self.execute("python -m unittest tests.test_action_proposal_1a -v")
 
         self.assertTrue(result.execution_performed)

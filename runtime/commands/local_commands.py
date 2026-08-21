@@ -20,6 +20,7 @@ from tools.validator import validate_action
 from runtime.safety.subprocess_env import build_subprocess_env
 from runtime.safety.bounded_subprocess import (
     SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    SubprocessResourceProfileName,
     run_bounded_subprocess,
 )
 from trace_context import TraceContext
@@ -464,6 +465,7 @@ def cmd_scemda(args: str, runtime, _trace_context: TraceContext | None = None) -
             cwd=str(runtime.project_dir),
             env=build_subprocess_env(),
             timeout=SCEMDA_HARD_TIMEOUT_SECONDS,
+            resource_profile=SubprocessResourceProfileName.SCEMDA,
             text=True,
             capture_output=True,
             check=False,

@@ -13,6 +13,7 @@ from typing import Any
 from runtime.safety.subprocess_env import build_subprocess_env
 from runtime.safety.bounded_subprocess import (
     SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    SubprocessResourceProfileName,
     run_bounded_subprocess,
 )
 
@@ -917,6 +918,7 @@ def export_single_manpage(command: str) -> str:
                 check=False,
                 env=build_subprocess_env(),
                 timeout=RHCSA_MANPAGE_HARD_TIMEOUT_SECONDS,
+                resource_profile=SubprocessResourceProfileName.INTERNAL_UTILITY,
                 shell=False,
             )
         except subprocess.TimeoutExpired as exc:
@@ -933,6 +935,7 @@ def export_single_manpage(command: str) -> str:
                 check=False,
                 env=build_subprocess_env(),
                 timeout=RHCSA_HELP_HARD_TIMEOUT_SECONDS,
+                resource_profile=SubprocessResourceProfileName.INTERNAL_UTILITY,
                 shell=False,
             )
         except subprocess.TimeoutExpired as exc:

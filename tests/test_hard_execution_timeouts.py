@@ -16,6 +16,7 @@ from runtime.knowledge.tools import pdf_extract
 from runtime.safety.bounded_subprocess import (
     MAX_HARD_TIMEOUT_SECONDS,
     SUBPROCESS_HARD_TIMEOUT_REASON_CODE,
+    SubprocessResourceProfileName,
     SubprocessTimeoutPolicyError,
     run_bounded_subprocess,
     validate_hard_timeout_seconds,
@@ -40,6 +41,8 @@ EXPECTED_BOUNDED_PROCESS_SITES = {
     "scripts/dev/create_ioa_lab_clone.py": 1,
 }
 EXPECTED_RAW_PROCESS_BOUNDARY = {"runtime/safety/bounded_subprocess.py": 1}
+EXPECTED_TRUSTED_FORK_BOUNDARY = {"runtime/safety/subprocess_supervisor.py": 1}
+EXPECTED_TRUSTED_EXEC_BOUNDARY = {"runtime/safety/subprocess_supervisor.py": 1}
 SUBPROCESS_CALLS = {
     "subprocess.run",
     "subprocess.Popen",
@@ -66,7 +69,16 @@ OTHER_PROCESS_CALLS = {
 
 class HardExecutionTimeoutTests(unittest.TestCase):
     def test_timeout_policy_rejects_missing_nonfinite_or_unbounded_values(self) -> None:
-        rejected = (None, True, 0, -1, float("nan"), float("inf"), MAX_HARD_TIMEOUT_SECONDS + 1)
+        rejected = (
+            None,
+            True,
+            0,
+            -1,
+            float("nan"),
+            float("inf"),
+            MAX_HARD_TIMEOUT_SECONDS + 1,
+            10**1000,
+        )
         for value in rejected:
             with self.subTest(value=value), self.assertRaises(SubprocessTimeoutPolicyError):
                 validate_hard_timeout_seconds(value)
@@ -76,6 +88,7 @@ class HardExecutionTimeoutTests(unittest.TestCase):
                 [sys.executable, "-c", "pass"],
                 env=build_subprocess_env(),
                 timeout=1,
+                resource_profile=SubprocessResourceProfileName.CONTROLLED_TEST,
                 shell=True,
             )
 
@@ -84,6 +97,7 @@ class HardExecutionTimeoutTests(unittest.TestCase):
             [sys.executable, "-c", "print('NZ_BOUNDED_OK')"],
             env=build_subprocess_env(),
             timeout=5,
+            resource_profile=SubprocessResourceProfileName.CONTROLLED_TEST,
             capture_output=True,
             text=True,
             check=False,
@@ -107,6 +121,7 @@ class HardExecutionTimeoutTests(unittest.TestCase):
                     [sys.executable, "-c", child_code, str(pid_path)],
                     env=build_subprocess_env(),
                     timeout=0.25,
+                    resource_profile=SubprocessResourceProfileName.CONTROLLED_TEST,
                     capture_output=True,
                     text=True,
                     check=False,
@@ -199,7 +214,7 @@ class HardExecutionTimeoutTests(unittest.TestCase):
             os.environ,
             {"AOIA_SHELL_EXECUTION_ENABLED": "1"},
             clear=False,
-        ), patch("runtime.safety.bounded_subprocess.subprocess.run") as run_mock:
+        ), patch("runtime.safety.bounded_subprocess.subprocess.Popen") as run_mock:
             result = shell_tools.shell_execute(
                 "printf SHOULD_NOT_RUN",
                 Path(raw_tmp),
@@ -218,8 +233,8 @@ class HardExecutionTimeoutTests(unittest.TestCase):
             "which",
             return_value="/synthetic/tool",
         ), patch.object(
-            build_rhcsa_library.subprocess,
-            "run",
+            build_rhcsa_library,
+            "run_bounded_subprocess",
             side_effect=timeout,
         ) as run_mock, self.assertRaises(
             build_rhcsa_library.RhcsaUtilityHardTimeoutError
@@ -232,6 +247,8 @@ class HardExecutionTimeoutTests(unittest.TestCase):
     def test_all_active_process_sites_use_the_bounded_child_boundary(self) -> None:
         bounded: dict[str, int] = {}
         raw: dict[str, int] = {}
+        trusted_forks: dict[str, int] = {}
+        trusted_execs: dict[str, int] = {}
         unbounded: list[str] = []
         unsafe_shell: list[str] = []
         forbidden: list[str] = []
@@ -253,13 +270,21 @@ class HardExecutionTimeoutTests(unittest.TestCase):
                         unsafe_shell.append(f"{relative}:{node.lineno}")
                 elif call_name in SUBPROCESS_CALLS:
                     raw[relative] = raw.get(relative, 0) + 1
-                    if not self.has_keyword(node, "env") or not self.has_keyword(node, "timeout"):
+                    if relative not in EXPECTED_RAW_PROCESS_BOUNDARY and (
+                        not self.has_keyword(node, "env") or not self.has_keyword(node, "timeout")
+                    ):
                         unbounded.append(f"{relative}:{node.lineno}")
+                elif call_name == "os.fork":
+                    trusted_forks[relative] = trusted_forks.get(relative, 0) + 1
+                elif call_name == "os.execvpe":
+                    trusted_execs[relative] = trusted_execs.get(relative, 0) + 1
                 elif self.is_forbidden_process_call(call_name):
                     forbidden.append(f"{relative}:{node.lineno}:{call_name}")
 
         self.assertEqual(EXPECTED_BOUNDED_PROCESS_SITES, bounded)
         self.assertEqual(EXPECTED_RAW_PROCESS_BOUNDARY, raw)
+        self.assertEqual(EXPECTED_TRUSTED_FORK_BOUNDARY, trusted_forks)
+        self.assertEqual(EXPECTED_TRUSTED_EXEC_BOUNDARY, trusted_execs)
         self.assertEqual([], unbounded)
         self.assertEqual([], unsafe_shell)
         self.assertEqual([], forbidden)
