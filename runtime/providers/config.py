@@ -122,6 +122,7 @@ class ProviderManager:
         configured = _read_api_environment_values()
         secret_names = frozenset(RUNTIME_SECRET_ENV_NAMES)
         self.output_redactor = build_current_runtime_redactor(
+            environ=os.environ,
             additional_values=(
                 value
                 for name, value in configured.items()

@@ -224,7 +224,7 @@ class AgentRuntime:
         self.debug_raw = debug_raw
         self.max_steps = max_steps
         self.safeguards = load_epistemic_safeguards()
-        current_redactor = build_current_runtime_redactor()
+        current_redactor = build_current_runtime_redactor(environ=os.environ)
         manager_redactor = getattr(provider_manager, "output_redactor", None)
         self.redactor = (
             current_redactor.combining(manager_redactor)
@@ -339,7 +339,7 @@ class AgentRuntime:
         return self._recovery_sensitive_summary(payload)
 
     def _sync_sensitive_redactor(self) -> SensitiveValueRedactor:
-        current = build_current_runtime_redactor()
+        current = build_current_runtime_redactor(environ=os.environ)
         manager = getattr(self.provider_manager, "output_redactor", None)
         redactor = (
             current.combining(manager)

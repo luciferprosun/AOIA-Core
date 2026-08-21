@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import asdict
 from uuid import uuid4
 
@@ -189,7 +190,7 @@ def execute_approved_model_call_once(
     human_approved: bool,
     provider_call_func=call_selected_provider_once,
 ) -> dict[str, object]:
-    output_redactor = build_current_runtime_redactor()
+    output_redactor = build_current_runtime_redactor(environ=os.environ)
     proposal = create_model_selection_proposal(
         provider_id=provider_id,
         model_id=model_id,

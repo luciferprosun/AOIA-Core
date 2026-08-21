@@ -206,7 +206,7 @@ class SensitiveOutputIntegrationTests(unittest.TestCase):
 
             class ProviderManager:
                 def __init__(self):
-                    self.output_redactor = build_current_runtime_redactor()
+                    self.output_redactor = build_current_runtime_redactor(environ=os.environ)
                 def describe(self):
                     return "synthetic/no-call"
                 def active_fallback_chain(self):
@@ -553,20 +553,33 @@ class SensitiveOutputIntegrationTests(unittest.TestCase):
                 assert secret_two not in error_text
                 assert json.loads(error_text)["status"] == "invalid"
 
+                mock_envelope = build_provider_envelope(
+                    provider_id="mock_chat",
+                    model_id="mock-model",
+                    prompt="dry-run=" + secret_one + "/" + secret_two,
+                    params={"max_tokens": 32},
+                    created_at="synthetic-p013",
+                )
+                mock_result = provider_gateway.run_provider_request(mock_envelope)
+                mock_rendered = json.dumps(mock_result.to_dict(), sort_keys=True)
+                assert secret_one not in mock_rendered
+                assert secret_two not in mock_rendered
+                assert "[REDACTED]" in mock_result.redacted_request_preview
+
                 # A file-only gateway key is learned after the envelope was
                 # constructed.  It must be removed from both the actual model
                 # payload and the result preview once the gateway reads it.
                 os.environ.pop("OPENAI_API_KEY", None)
-                os.environ.pop("SOME_PRIVATE_TOKEN", None)
                 os.environ.pop("KIMI_API_KEY", None)
                 os.environ.pop("MOONSHOT_API_KEY", None)
+                os.environ["SOME_PRIVATE_TOKEN"] = secret_two
                 gateway_key_file = root / "kimi.key"
                 gateway_key_file.write_text(secret_one, encoding="utf-8")
                 os.environ["KIMI_API_KEY_FILE"] = str(gateway_key_file)
                 envelope = build_provider_envelope(
                     provider_id="kimi_chat",
                     model_id="moonshot-v1-8k",
-                    prompt="gateway-prompt=" + secret_one,
+                    prompt="gateway-prompt=" + secret_one + "/" + secret_two,
                     params={"max_tokens": 32},
                     dry_run=False,
                     created_at="synthetic-p013",
@@ -608,8 +621,10 @@ class SensitiveOutputIntegrationTests(unittest.TestCase):
                 )
                 assert gateway_result.status == "live_success"
                 assert secret_one not in captured_request["body"]
+                assert secret_two not in captured_request["body"]
                 assert "[REDACTED]" in captured_request["body"]
                 assert secret_one not in gateway_rendered
+                assert secret_two not in gateway_rendered
                 assert "[REDACTED]" in gateway_result.redacted_request_preview
 
                 os.environ["GEMINI_API_KEY"] = secret_two

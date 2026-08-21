@@ -10,6 +10,7 @@ from runtime.providers.contracts import (
     ProviderActivationStatus,
 )
 from runtime.providers.errors import provider_reason_code
+from runtime.providers.gateway import build_provider_output_redactor
 from runtime.providers.payloads import build_provider_envelope
 from runtime.providers.selector import (
     create_provider_selection,
@@ -31,11 +32,8 @@ from runtime.provenance_lifecycle import (
     new_runtime_provenance_event,
 )
 from runtime.trace_context import TraceContext
-from runtime.sensitive_redaction import build_current_runtime_redactor
-
-
 def _emit_json(payload: object) -> None:
-    safe_payload = build_current_runtime_redactor().redact(payload)
+    safe_payload = build_provider_output_redactor().redact(payload)
     print(json.dumps(safe_payload, sort_keys=True))
 
 

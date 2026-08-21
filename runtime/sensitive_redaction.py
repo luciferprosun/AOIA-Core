@@ -3,7 +3,6 @@ from __future__ import annotations
 """Bounded, in-memory redaction for non-authoritative runtime output."""
 
 import re
-import os
 from collections.abc import Iterable, Mapping
 from typing import Any
 
@@ -240,11 +239,12 @@ def build_runtime_redactor(
 
 def build_current_runtime_redactor(
     *,
+    environ: Mapping[str, str],
     additional_values: Iterable[object] = (),
 ) -> SensitiveValueRedactor:
-    """Snapshot only the explicit secret allowlist from the current process."""
+    """Snapshot only the explicit secret allowlist supplied by an active caller."""
 
     return build_runtime_redactor(
-        environ=os.environ,
+        environ=environ,
         additional_values=additional_values,
     )

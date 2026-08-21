@@ -11,6 +11,7 @@ REDACTED = REDACTION_MARKER
 
 def redact_provider_text(text: object, *, known_secrets: Sequence[str] = ()) -> str:
     return build_current_runtime_redactor(
+        environ={},
         additional_values=known_secrets,
     ).redact_text(text)
 
@@ -25,5 +26,6 @@ def redact_provider_data(
     if not isinstance(value, (Mapping, list, tuple, str, bytes, int, float, bool, type(None))):
         return REDACTED
     return build_current_runtime_redactor(
+        environ={},
         additional_values=known_secrets,
     ).redact(value)

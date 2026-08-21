@@ -26,14 +26,28 @@ from runtime.providers.errors import (
     provider_reason_code,
     validate_model_response_text,
 )
-from runtime.providers.redaction import redact_provider_data, redact_provider_text
 from runtime.providers.runtime_policy import ProviderRuntimePolicy
+from runtime.sensitive_redaction import (
+    SensitiveValueRedactor,
+    build_current_runtime_redactor,
+)
 
 
 _OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 _KIMI_ENDPOINT = "https://api.moonshot.ai/v1/chat/completions"
 _GEMINI_ENDPOINT_PREFIX = "https://generativelanguage.googleapis.com/v1beta/models/"
 _DEFAULT_KIMI_KEY_FILE_PARTS = ("Desktop", "API TOKENy", "kimi kodex")
+
+
+def build_provider_output_redactor(
+    *additional_values: object,
+) -> SensitiveValueRedactor:
+    """Build the provider boundary redactor at the approved env-aware gateway."""
+
+    return build_current_runtime_redactor(
+        environ=os.environ,
+        additional_values=additional_values,
+    )
 
 
 def run_provider_request(
@@ -44,6 +58,7 @@ def run_provider_request(
     activation_status: ProviderActivationStatus | str = ProviderActivationStatus.DRY_RUN_ONLY,
     timeout_seconds: int = 30,
 ) -> ProviderRuntimeResult:
+    output_redactor = build_provider_output_redactor()
     decision = ProviderRuntimePolicy.evaluate(
         envelope,
         live=live,
@@ -52,7 +67,13 @@ def run_provider_request(
     )
     mode = "live" if live else "dry_run"
     if not decision.allowed:
-        return _result(envelope, mode=mode, status=BLOCKED, error_message=decision.reason)
+        return _result(
+            envelope,
+            mode=mode,
+            status=BLOCKED,
+            error_message=decision.reason,
+            redactor=output_redactor,
+        )
     if not live:
         response = (
             build_deterministic_mock_response(envelope)
@@ -64,9 +85,11 @@ def run_provider_request(
             mode="dry_run",
             status=DRY_RUN_PREVIEW,
             response_text=response,
+            redactor=output_redactor,
         )
 
     api_key = _read_api_key(envelope.provider_id)
+    output_redactor = build_provider_output_redactor(api_key)
     key_decision = ProviderRuntimePolicy.evaluate(
         envelope,
         live=True,
@@ -75,28 +98,35 @@ def run_provider_request(
         api_key_present=bool(api_key),
     )
     if not key_decision.allowed:
-        return _result(envelope, mode="live", status=BLOCKED, error_message=key_decision.reason)
+        return _result(
+            envelope,
+            mode="live",
+            status=BLOCKED,
+            error_message=key_decision.reason,
+            redactor=output_redactor,
+        )
     try:
         response_text = _perform_live_http_call(
             envelope,
             api_key=api_key,
             timeout_seconds=_validated_timeout(timeout_seconds),
+            redactor=output_redactor,
         )
         return _result(
             envelope,
             mode="live",
             status=LIVE_SUCCESS,
             response_text=response_text,
-            known_secrets=(api_key,),
+            redactor=output_redactor,
         )
     except (ModelProviderError, HTTPError, URLError, TimeoutError, ValueError, OSError) as error:
         return _result(
             envelope,
             mode="live",
             status=ERROR,
-            error_message=redact_provider_text(error, known_secrets=(api_key,)),
+            error_message=str(error),
             reason_code=provider_reason_code(error),
-            known_secrets=(api_key,),
+            redactor=output_redactor,
         )
 
 
@@ -136,15 +166,12 @@ def _perform_live_http_call(
     *,
     api_key: str,
     timeout_seconds: int,
+    redactor: SensitiveValueRedactor,
 ) -> str:
-    safe_model_id = redact_provider_text(
-        envelope.model_id,
-        known_secrets=(api_key,),
-    )
-    payload = redact_provider_data(
-        build_provider_payload(envelope),
-        known_secrets=(api_key,),
-    )
+    safe_model_id = redactor.redact_text(envelope.model_id)
+    payload = redactor.redact(build_provider_payload(envelope))
+    if not isinstance(payload, dict):
+        raise TypeError("Provider payload must remain a dictionary")
     body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
     if envelope.provider_id == "kimi_chat":
         request = Request(
@@ -194,7 +221,7 @@ def _extract_response_text(provider_id: str, payload: object) -> str:
         raise ModelResponseMalformedError(
             "Provider response did not match the expected schema."
         ) from error
-    return redact_provider_text(validate_model_response_text(value))
+    return validate_model_response_text(value)
 
 
 def _result(
@@ -205,27 +232,21 @@ def _result(
     response_text: str | None = None,
     error_message: str | None = None,
     reason_code: str | None = None,
-    known_secrets: tuple[str, ...] = (),
+    redactor: SensitiveValueRedactor,
 ) -> ProviderRuntimeResult:
     return ProviderRuntimeResult(
         provider_id=envelope.provider_id,
-        model_id=redact_provider_text(
-            envelope.model_id,
-            known_secrets=known_secrets,
-        ),
+        model_id=redactor.redact_text(envelope.model_id),
         mode=mode,
         status=status,
-        redacted_request_preview=redact_provider_text(
-            envelope.payload_preview,
-            known_secrets=known_secrets,
-        ),
+        redacted_request_preview=redactor.redact_text(envelope.payload_preview),
         response_text=(
-            redact_provider_text(response_text, known_secrets=known_secrets)
+            redactor.redact_text(response_text)
             if response_text is not None
             else None
         ),
         error_message=(
-            redact_provider_text(error_message, known_secrets=known_secrets)
+            redactor.redact_text(error_message)
             if error_message is not None
             else None
         ),

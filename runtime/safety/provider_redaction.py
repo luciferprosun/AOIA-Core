@@ -22,6 +22,7 @@ def redact_provider_secret(text: str | None, known_secrets: list[str] | None = N
         raise TypeError("text must be a string or None")
 
     return build_current_runtime_redactor(
+        environ={},
         additional_values=_known_secret_values(known_secrets),
     ).redact_text(text)
 
@@ -39,6 +40,7 @@ def contains_unredacted_provider_secret(
 
 def _redact_value(value: Any, known_secrets: list[str] | None) -> Any:
     return build_current_runtime_redactor(
+        environ={},
         additional_values=_known_secret_values(known_secrets),
     ).redact(value)
 
@@ -52,6 +54,7 @@ def redact_mapping_values(
     if not isinstance(data, dict):
         raise TypeError("data must be a dict or None")
     redacted = build_current_runtime_redactor(
+        environ={},
         additional_values=_known_secret_values(known_secrets),
     ).redact(data)
     assert isinstance(redacted, dict)

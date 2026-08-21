@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -19,7 +20,7 @@ class GemmaWorkerMemory:
         redactor: SensitiveValueRedactor | None = None,
     ) -> None:
         self.project_dir = project_dir
-        self.redactor = redactor or build_current_runtime_redactor()
+        self.redactor = redactor or build_current_runtime_redactor(environ=os.environ)
         self.gemini_calls = 0
         self.gemma_calls = 0
         self.steps: list[dict[str, Any]] = []

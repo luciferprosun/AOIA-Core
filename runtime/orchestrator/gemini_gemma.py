@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import traceback
 from pathlib import Path
 from typing import Any, Callable
@@ -45,7 +46,7 @@ class GeminiGemmaOrchestrator:
         self.project_dir = project_dir
         self.desktop_dir = desktop_dir
         self.max_steps = max_steps
-        self.redactor = redactor or build_current_runtime_redactor()
+        self.redactor = redactor or build_current_runtime_redactor(environ=os.environ)
         self.gemma_provider = None
 
     def create_plan(self, user_request: str, runtime_status: dict[str, Any]) -> dict[str, Any]:
