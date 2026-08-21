@@ -156,8 +156,8 @@ class M2B3CPTNoAutoSendBoundaryTests(unittest.TestCase):
 
     def test_runtime_cpt_endpoint_returns_transform_only(self) -> None:
         source = RUNTIME_WEBAPP_PATH.read_text(encoding="utf-8")
-        start = source.index('if parsed.path == "/api/cpt/transform"')
-        end = source.index('if parsed.path == "/api/chat"', start)
+        start = source.index('if path == "/api/cpt/transform"')
+        end = source.index('if path == "/api/chat"', start)
         cpt_endpoint_body = source[start:end]
 
         self.assertIn("build_cpt_transform_payload", cpt_endpoint_body)
