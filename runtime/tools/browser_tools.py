@@ -12,6 +12,8 @@ import time
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+from runtime.outcomes import NZOutcome, NZOutcomeStatus, NZReasonCode
+
 LEGACY_BROWSER_SURFACE = True
 APPROVED_RUNTIME_BROWSER_FLOW = False
 H4_APPROVED_BROWSER_FLOW = False
@@ -231,6 +233,7 @@ class BrowserBridge:
     def browser_close(self) -> dict:
         """Close the persistent browser session cleanly."""
         _require_legacy_browser_enabled()
+        was_fallback = self.fallback_active
         if self.context is not None:
             self.context.close()
         if self.playwright is not None:
@@ -244,12 +247,27 @@ class BrowserBridge:
         self.fallback_html = ""
         self.fallback_text = ""
         self.fallback_typed_text = ""
-        return {
+        result = {
             "success": True,
             "message": "Browser session closed.",
             "current_url": "",
             "open_tabs": [],
         }
+        if was_fallback:
+            result.update(
+                {
+                    "success": False,
+                    "degraded": True,
+                    "browser_mode": "fallback",
+                    "result_reason_code": NZReasonCode.BROWSER_FALLBACK_UNVERIFIED.value,
+                    "outcome": NZOutcome.build(
+                        NZOutcomeStatus.DEGRADED,
+                        NZReasonCode.BROWSER_FALLBACK_UNVERIFIED,
+                        degraded=True,
+                    ).to_dict(),
+                }
+            )
+        return result
 
     # -----------------------------------------------------
     # Internal helpers
@@ -350,11 +368,18 @@ class BrowserBridge:
 
     def _fallback_state(self, message: str) -> dict:
         return {
-            "success": True,
+            "success": False,
+            "degraded": True,
             "message": message,
             "current_url": self.fallback_url,
             "open_tabs": [self.fallback_url],
             "browser_mode": "fallback",
+            "result_reason_code": NZReasonCode.BROWSER_FALLBACK_UNVERIFIED.value,
+            "outcome": NZOutcome.build(
+                NZOutcomeStatus.DEGRADED,
+                NZReasonCode.BROWSER_FALLBACK_UNVERIFIED,
+                degraded=True,
+            ).to_dict(),
         }
 
     def _merge_visible_text(self, line: str) -> str:

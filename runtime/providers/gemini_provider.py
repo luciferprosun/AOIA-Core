@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 
 from .base import ModelProvider, require_provider_calls_enabled
+from .errors import ModelResponseMalformedError, validate_model_response_text
 
 
 PROVIDER_NETWORK_SURFACE = True
@@ -32,4 +33,10 @@ class GeminiProvider(ModelProvider):
             model=self.model,
             contents=prompt,
         )
-        return (response.text or "").strip()
+        try:
+            text = response.text
+        except Exception as error:
+            raise ModelResponseMalformedError(
+                "Provider response did not expose response text."
+            ) from error
+        return validate_model_response_text(text).strip()

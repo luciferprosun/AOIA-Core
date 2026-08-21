@@ -9,6 +9,7 @@ from typing import Callable
 from .base import ModelProvider, require_provider_calls_enabled
 from .gemini_provider import GeminiProvider
 from .openai_compatible import OpenAICompatibleProvider
+from .errors import typed_provider_error, validate_model_response_text
 from runtime.safety.atomic_persistence import atomic_write_json, state_resource_lock_path
 from runtime_paths import runtime_state_dir
 from trace_context import ModelCallContext, TraceContext, TracedModelOutput
@@ -118,6 +119,7 @@ class ProviderManager:
         """Invoke fallback providers while identifying every actual call attempt."""
 
         errors: list[str] = []
+        provider_errors: list[BaseException] = []
         tried: set[str] = set()
         provider_attempt = 0
         for full_model in self._fallback_candidates():
@@ -139,7 +141,7 @@ class ProviderManager:
                 require_provider_calls_enabled(provider_id)
                 load_api_environment()
                 provider = self._build_provider(full_model)
-                response = provider.generate(prompt)
+                response = validate_model_response_text(provider.generate(prompt))
                 self.provider = provider
                 self.current_model = full_model
                 self.last_used_model = provider.full_name
@@ -163,6 +165,7 @@ class ProviderManager:
                             pass
                         raise observer_error from error
                 errors.append(f"{full_model}: {error}")
+                provider_errors.append(error)
                 continue
             # A terminal observer is a security persistence boundary, not part
             # of the provider call. Its failure must not be misclassified as a
@@ -185,12 +188,16 @@ class ProviderManager:
         if not errors:
             raise RuntimeError("No enabled cloud providers are configured.")
 
-        raise RuntimeError(
-            "No configured cloud provider succeeded. Checked:\n- " + "\n- ".join(errors)
+        terminal_error = typed_provider_error(provider_errors[-1])
+        terminal_error.args = (
+            "No configured cloud provider succeeded. Checked:\n- "
+            + "\n- ".join(errors),
         )
+        raise terminal_error from provider_errors[-1]
 
     def generate_with_fallback(self, prompt: str) -> str:
         errors: list[str] = []
+        provider_errors: list[BaseException] = []
         tried: set[str] = set()
         for full_model in self._fallback_candidates():
             if full_model in tried:
@@ -201,20 +208,24 @@ class ProviderManager:
                 require_provider_calls_enabled(provider_id)
                 load_api_environment()
                 provider = self._build_provider(full_model)
-                response = provider.generate(prompt)
+                response = validate_model_response_text(provider.generate(prompt))
                 self.provider = provider
                 self.current_model = full_model
                 self.last_used_model = provider.full_name
                 return response
             except Exception as error:
                 errors.append(f"{full_model}: {error}")
+                provider_errors.append(error)
 
         if not errors:
             raise RuntimeError("No enabled cloud providers are configured.")
 
-        raise RuntimeError(
-            "No configured cloud provider succeeded. Checked:\n- " + "\n- ".join(errors)
+        terminal_error = typed_provider_error(provider_errors[-1])
+        terminal_error.args = (
+            "No configured cloud provider succeeded. Checked:\n- "
+            + "\n- ".join(errors),
         )
+        raise terminal_error from provider_errors[-1]
 
     def switch_model(self, model_name: str) -> str:
         normalized = self.normalize_model_name(model_name)

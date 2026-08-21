@@ -4,6 +4,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from runtime.outcomes import (
+    NZOutcome,
+    NZOutcomeStatus,
+    NZReasonCode,
+    normalize_reason_code,
+)
+
 
 UNTRUSTED = "UNTRUSTED"
 DRY_RUN_PREVIEW = "dry_run_preview"
@@ -121,6 +128,7 @@ class ProviderRuntimeResult:
     response_text: str | None = None
     error_message: str | None = None
     trust_status: str = UNTRUSTED
+    reason_code: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "provider_id", normalize_provider_id(self.provider_id))
@@ -130,6 +138,22 @@ class ProviderRuntimeResult:
             raise ValueError("unsupported provider runtime result status")
         if self.trust_status != UNTRUSTED:
             raise ValueError("provider runtime output must remain UNTRUSTED")
+        if self.status == LIVE_SUCCESS:
+            if not isinstance(self.response_text, str) or not self.response_text.strip():
+                raise ValueError("live provider success requires non-empty response_text")
+            if self.reason_code is not None:
+                raise ValueError("live provider success cannot carry a failure reason_code")
+        else:
+            reason_code = (
+                self._default_reason_code()
+                if self.reason_code is None
+                else self.reason_code
+            )
+            object.__setattr__(
+                self,
+                "reason_code",
+                normalize_reason_code(reason_code, required=True),
+            )
         object.__setattr__(self, "model_id", str(self.model_id).strip())
         object.__setattr__(
             self,
@@ -147,7 +171,42 @@ class ProviderRuntimeResult:
             "response_text": self.response_text,
             "error_message": self.error_message,
             "trust_status": UNTRUSTED,
+            "reason_code": self.reason_code,
+            "outcome": self.outcome.to_dict(),
         }
+
+    @property
+    def outcome(self) -> NZOutcome:
+        if (
+            self.status == ERROR
+            and self.reason_code == NZReasonCode.MODEL_TIMEOUT.value
+        ):
+            status = NZOutcomeStatus.TIMEOUT
+        else:
+            status = {
+                LIVE_SUCCESS: NZOutcomeStatus.SUCCESS,
+                DRY_RUN_PREVIEW: NZOutcomeStatus.DEGRADED,
+                BLOCKED: NZOutcomeStatus.BLOCKED,
+                ERROR: NZOutcomeStatus.FAILED,
+            }[self.status]
+        return NZOutcome.build(
+            status,
+            self.reason_code,
+            degraded=status is NZOutcomeStatus.DEGRADED,
+            metadata={
+                "provider_id": self.provider_id,
+                "model_id": self.model_id,
+                "mode": self.mode,
+                "trust_status": UNTRUSTED,
+            },
+        )
+
+    def _default_reason_code(self) -> str:
+        return {
+            DRY_RUN_PREVIEW: NZReasonCode.PROVIDER_DRY_RUN_PREVIEW.value,
+            BLOCKED: NZReasonCode.PROVIDER_POLICY_BLOCKED.value,
+            ERROR: NZReasonCode.MODEL_PROVIDER_ERROR.value,
+        }[self.status]
 
 
 def normalize_provider_id(value: object) -> str:

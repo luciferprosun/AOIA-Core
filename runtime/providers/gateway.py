@@ -20,6 +20,12 @@ from runtime.providers.payloads import (
     build_deterministic_mock_response,
     build_provider_payload,
 )
+from runtime.providers.errors import (
+    ModelProviderError,
+    ModelResponseMalformedError,
+    provider_reason_code,
+    validate_model_response_text,
+)
 from runtime.providers.redaction import redact_provider_text
 from runtime.providers.runtime_policy import ProviderRuntimePolicy
 
@@ -83,12 +89,13 @@ def run_provider_request(
             response_text=response_text,
             known_secrets=(api_key,),
         )
-    except (HTTPError, URLError, TimeoutError, ValueError, OSError) as error:
+    except (ModelProviderError, HTTPError, URLError, TimeoutError, ValueError, OSError) as error:
         return _result(
             envelope,
             mode="live",
             status=ERROR,
             error_message=redact_provider_text(error, known_secrets=(api_key,)),
+            reason_code=provider_reason_code(error),
             known_secrets=(api_key,),
         )
 
@@ -161,7 +168,12 @@ def _perform_live_http_call(
     else:
         raise ValueError("provider has no live Runtime 1A gateway")
     with urlopen(request, timeout=timeout_seconds) as response:
-        response_data = json.loads(response.read().decode("utf-8"))
+        try:
+            response_data = json.loads(response.read().decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise ModelResponseMalformedError(
+                "Provider response was not valid JSON."
+            ) from error
     return _extract_response_text(envelope.provider_id, response_data)
 
 
@@ -172,10 +184,10 @@ def _extract_response_text(provider_id: str, payload: object) -> str:
         else:
             value = payload["candidates"][0]["content"]["parts"][0]["text"]  # type: ignore[index]
     except (KeyError, IndexError, TypeError) as error:
-        raise ValueError("provider response did not match the expected schema") from error
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError("provider response text is missing")
-    return redact_provider_text(value)
+        raise ModelResponseMalformedError(
+            "Provider response did not match the expected schema."
+        ) from error
+    return redact_provider_text(validate_model_response_text(value))
 
 
 def _result(
@@ -185,6 +197,7 @@ def _result(
     status: str,
     response_text: str | None = None,
     error_message: str | None = None,
+    reason_code: str | None = None,
     known_secrets: tuple[str, ...] = (),
 ) -> ProviderRuntimeResult:
     return ProviderRuntimeResult(
@@ -203,6 +216,7 @@ def _result(
             if error_message is not None
             else None
         ),
+        reason_code=reason_code,
     )
 
 

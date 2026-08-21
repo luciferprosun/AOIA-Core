@@ -6,6 +6,7 @@ import urllib.error
 import urllib.request
 
 from .base import ModelProvider, require_provider_calls_enabled
+from .errors import ModelResponseMalformedError, validate_model_response_text
 from .openai_compatible import OpenAICompatibleProvider
 
 
@@ -28,17 +29,20 @@ class GemmaProvider(ModelProvider):
     def generate(self, prompt: str) -> str:
         require_provider_calls_enabled(self.provider)
         errors: list[str] = []
+        provider_errors: list[BaseException] = []
 
         try:
-            return self._generate_ollama(prompt)
+            return validate_model_response_text(self._generate_ollama(prompt)).strip()
         except Exception as error:
             errors.append(f"ollama: {error}")
+            provider_errors.append(error)
 
         if self.hf_token:
             try:
-                return self._generate_huggingface(prompt)
+                return validate_model_response_text(self._generate_huggingface(prompt)).strip()
             except Exception as error:
                 errors.append(f"huggingface: {error}")
+                provider_errors.append(error)
 
         if self.openai_base_url:
             try:
@@ -48,9 +52,18 @@ class GemmaProvider(ModelProvider):
                     model=self.model,
                     base_url=self.openai_base_url,
                 )
-                return provider.generate(prompt)
+                return validate_model_response_text(provider.generate(prompt)).strip()
             except Exception as error:
                 errors.append(f"openai-compatible: {error}")
+                provider_errors.append(error)
+
+        if provider_errors and all(
+            isinstance(error, ModelResponseMalformedError)
+            for error in provider_errors
+        ):
+            raise ModelResponseMalformedError(
+                "Every configured Gemma backend returned a malformed response."
+            ) from provider_errors[-1]
 
         raise RuntimeError(
             "Gemma worker provider is not configured or reachable. Checked:\n- "
@@ -71,8 +84,17 @@ class GemmaProvider(ModelProvider):
             method="POST",
         )
         with urllib.request.urlopen(request, timeout=45) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-        return str(payload.get("response", "")).strip()
+            try:
+                payload = json.loads(response.read().decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise ModelResponseMalformedError(
+                    "Ollama response was not valid JSON."
+                ) from error
+        if not isinstance(payload, dict) or "response" not in payload:
+            raise ModelResponseMalformedError(
+                "Ollama response did not match the expected schema."
+            )
+        return validate_model_response_text(payload["response"]).strip()
 
     def _generate_huggingface(self, prompt: str) -> str:
         require_provider_calls_enabled(self.provider)
@@ -95,7 +117,12 @@ class GemmaProvider(ModelProvider):
         )
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
-                payload = json.loads(response.read().decode("utf-8"))
+                try:
+                    payload = json.loads(response.read().decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                    raise ModelResponseMalformedError(
+                        "Hugging Face response was not valid JSON."
+                    ) from error
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"HF inference HTTP {error.code}: {detail}") from error
@@ -103,7 +130,11 @@ class GemmaProvider(ModelProvider):
         if isinstance(payload, list) and payload:
             first = payload[0]
             if isinstance(first, dict):
-                return str(first.get("generated_text", "")).strip()
+                return validate_model_response_text(first.get("generated_text")).strip()
         if isinstance(payload, dict):
-            return str(payload.get("generated_text", "") or payload.get("text", "")).strip()
-        raise RuntimeError(f"Unexpected HF inference payload: {payload}")
+            return validate_model_response_text(
+                payload.get("generated_text") or payload.get("text")
+            ).strip()
+        raise ModelResponseMalformedError(
+            "Hugging Face response did not match the expected schema."
+        )

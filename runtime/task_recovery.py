@@ -46,6 +46,12 @@ from runtime.task_checkpoints import (
     TERMINAL_TASK_STATES,
 )
 from runtime.trace_context import TaskContext, TraceContext, strip_untrusted_identity_fields
+from runtime.outcomes import (
+    NZOutcome,
+    NZOutcomeStatus,
+    NZReasonCode,
+    outcome_from_task_state,
+)
 
 
 RECOVERY_CLAIM_SCHEMA_VERSION = "AOIA_RECOVERY_CLAIM_1A"
@@ -480,6 +486,75 @@ class RecoveryOperationResult:
             raise RecoveryCorruptionError("Recovery receipt checkpoint version is invalid.")
         if self.success is not (self.status is RecoveryOperationStatus.COMPLETED):
             raise RecoveryCorruptionError("Recovery receipt status contradicts success.")
+
+    @property
+    def outcome(self) -> NZOutcome:
+        """Noncanonical projection of task truth; controller success is unchanged."""
+
+        if self.classification is RecoveryClassification.CONFLICT:
+            return NZOutcome.build(
+                NZOutcomeStatus.CONFLICT,
+                "RECOVERY_CONFLICT",
+                request_id=self.request_id,
+                trace_id=self.trace_id,
+                task_id=self.task_id,
+                recovery_attempt_id=self.recovery_attempt_id,
+            )
+        if self.classification is RecoveryClassification.UNKNOWN_OUTCOME:
+            return NZOutcome.build(
+                NZOutcomeStatus.UNKNOWN_OUTCOME,
+                NZReasonCode.UNKNOWN_OUTCOME,
+                request_id=self.request_id,
+                trace_id=self.trace_id,
+                task_id=self.task_id,
+                recovery_attempt_id=self.recovery_attempt_id,
+            )
+        if self.classification in {
+            RecoveryClassification.MANUAL_REVIEW_REQUIRED,
+            RecoveryClassification.CORRUPT_CHECKPOINT,
+            RecoveryClassification.UNSUPPORTED_SCHEMA,
+            RecoveryClassification.RECOVERY_IN_PROGRESS,
+        }:
+            reason = {
+                RecoveryClassification.CORRUPT_CHECKPOINT: "STATE_CORRUPT",
+                RecoveryClassification.UNSUPPORTED_SCHEMA: "STATE_SCHEMA_UNSUPPORTED",
+                RecoveryClassification.RECOVERY_IN_PROGRESS: "RECOVERY_IN_PROGRESS",
+            }.get(
+                self.classification,
+                NZReasonCode.MANUAL_REVIEW_REQUIRED.value,
+            )
+            return NZOutcome.build(
+                NZOutcomeStatus.MANUAL_REVIEW_REQUIRED,
+                reason,
+                request_id=self.request_id,
+                trace_id=self.trace_id,
+                task_id=self.task_id,
+                recovery_attempt_id=self.recovery_attempt_id,
+            )
+        return outcome_from_task_state(
+            self.task_state,
+            request_id=self.request_id,
+            trace_id=self.trace_id,
+            task_id=self.task_id,
+            recovery_attempt_id=self.recovery_attempt_id,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "task_id": self.task_id,
+            "recovery_attempt_id": self.recovery_attempt_id,
+            "request_id": self.request_id,
+            "trace_id": self.trace_id,
+            "classification": self.classification.value,
+            "directive": self.directive.value,
+            "status": self.status.value,
+            "success": self.success,
+            "task_state": self.task_state,
+            "task_phase": self.task_phase,
+            "checkpoint_version": self.checkpoint_version,
+            "checkpoint_hash": self.checkpoint_hash,
+            "outcome": self.outcome.to_dict(),
+        }
 
 
 @runtime_checkable

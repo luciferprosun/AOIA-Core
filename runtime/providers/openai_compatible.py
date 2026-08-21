@@ -6,6 +6,14 @@ import urllib.error
 import urllib.request
 
 from .base import ModelProvider, require_provider_calls_enabled
+from .errors import (
+    ModelNetworkError,
+    ModelProviderError,
+    ModelQuotaError,
+    ModelResponseMalformedError,
+    ModelTimeoutError,
+    validate_model_response_text,
+)
 
 
 PROVIDER_NETWORK_SURFACE = True
@@ -50,9 +58,34 @@ class OpenAICompatibleProvider(ModelProvider):
         )
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
-                payload = json.loads(response.read().decode("utf-8"))
+                try:
+                    payload = json.loads(response.read().decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                    raise ModelResponseMalformedError(
+                        "Provider response was not valid JSON."
+                    ) from error
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"{self.provider} HTTP {error.code}: {detail}") from error
+            error_type: type[ModelProviderError]
+            if error.code == 429:
+                error_type = ModelQuotaError
+            elif error.code in {408, 504}:
+                error_type = ModelTimeoutError
+            else:
+                error_type = ModelProviderError
+            raise error_type(f"{self.provider} HTTP {error.code}: {detail}") from error
+        except urllib.error.URLError as error:
+            if isinstance(error.reason, TimeoutError):
+                raise ModelTimeoutError("Model provider request timed out.") from error
+            raise ModelNetworkError("Model provider network request failed.") from error
+        except TimeoutError as error:
+            raise ModelTimeoutError("Model provider request timed out.") from error
 
-        return payload["choices"][0]["message"]["content"].strip()
+        try:
+            value = payload["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError) as error:
+            raise ModelResponseMalformedError(
+                "Provider response did not match the expected schema."
+            ) from error
+
+        return validate_model_response_text(value).strip()

@@ -29,7 +29,20 @@ from memory.rhcsa_context import inject_linux_context
 from orchestrator import GeminiGemmaOrchestrator
 from orchestrator.knowledge_router import KnowledgeRouter
 from providers import ProviderManager
+from providers.errors import (
+    ModelResponseMalformedError,
+    provider_reason_code,
+    typed_provider_error,
+    validate_model_response_text,
+)
 from router import LocalRouter
+from runtime.outcomes import (
+    NZOutcome,
+    NZOutcomeStatus,
+    NZReasonCode,
+    outcome_from_task_state,
+    without_outcome_identities,
+)
 from runtime.safety.atomic_persistence import (
     PersistenceError,
     append_json_line,
@@ -178,6 +191,8 @@ def classify_external_review_request(user_input: str) -> str | None:
 
 def is_quota_exhausted_error(error: Exception) -> bool:
     """Detect provider quota exhaustion to avoid useless retries."""
+    if getattr(error, "reason_code", None) == NZReasonCode.MODEL_QUOTA.value:
+        return True
     text = str(error)
     return "RESOURCE_EXHAUSTED" in text or "quota exceeded" in text.lower()
 
@@ -255,6 +270,12 @@ class AgentRuntime:
         self._recovery_sensitive_persistence: ContextVar[bool] = ContextVar(
             f"aoia_recovery_sensitive_persistence_{id(self)}",
             default=False,
+        )
+        self._request_outcome_hint: ContextVar[
+            tuple[NZOutcomeStatus, str] | None
+        ] = ContextVar(
+            f"aoia_request_outcome_hint_{id(self)}",
+            default=None,
         )
         # Startup recovery discovery is deliberately bounded and read-only.
         # Decisions are exposed to local operator surfaces; startup never
@@ -501,6 +522,97 @@ class AgentRuntime:
     def _task_retry_budget(self) -> int:
         provider_count = max(1, len(self._provider_fallback_chain()))
         return self._task_step_budget() * len(MODEL_RETRY_DELAYS) * provider_count
+
+    def _set_outcome_hint(
+        self,
+        status: NZOutcomeStatus,
+        reason_code: str,
+    ) -> None:
+        """Retain the strongest process-local degradation for this request."""
+
+        priority = {
+            NZOutcomeStatus.SUCCESS: 0,
+            NZOutcomeStatus.DEGRADED: 10,
+            NZOutcomeStatus.PARTIAL: 20,
+            NZOutcomeStatus.MANUAL_REVIEW_REQUIRED: 30,
+            NZOutcomeStatus.BLOCKED: 40,
+            NZOutcomeStatus.CANCELLED: 50,
+            NZOutcomeStatus.FAILED: 60,
+            NZOutcomeStatus.TIMEOUT: 70,
+            NZOutcomeStatus.CONFLICT: 80,
+            NZOutcomeStatus.UNKNOWN_OUTCOME: 90,
+        }
+        current = self._request_outcome_hint.get()
+        if current is None or priority[status] >= priority[current[0]]:
+            self._request_outcome_hint.set((status, reason_code))
+
+    def _note_result_outcome(self, result: Mapping[str, Any]) -> None:
+        raw_outcome = result.get("outcome")
+        if not isinstance(raw_outcome, Mapping):
+            return
+        try:
+            projected = NZOutcome.from_dict(raw_outcome)
+        except (TypeError, ValueError):
+            return
+        if projected.status is NZOutcomeStatus.SUCCESS:
+            return
+        reason_code = projected.reason_code or NZReasonCode.ACTION_FAILED.value
+        self._set_outcome_hint(projected.status, reason_code)
+
+    def _outcome_for_checkpoint(
+        self,
+        checkpoint: TaskCheckpoint,
+        trace_context: TraceContext,
+    ) -> NZOutcome:
+        reason: str | None = None
+        if checkpoint.state is TaskState.BLOCKED:
+            reason = (
+                checkpoint.current_policy_reason_code
+                or NZReasonCode.TASK_BLOCKED.value
+            )
+        elif checkpoint.state is TaskState.CANCELLED:
+            reason = (
+                NZReasonCode.HUMAN_APPROVAL_DECLINED.value
+                if checkpoint.approval_state is ApprovalState.DENIED
+                else NZReasonCode.TASK_CANCELLED.value
+            )
+        base = outcome_from_task_state(
+            checkpoint.state.value,
+            reason_code=reason,
+            request_id=trace_context.request_id,
+            trace_id=trace_context.trace_id,
+            task_id=trace_context.task_id,
+        )
+        hint = self._request_outcome_hint.get()
+        if hint is None:
+            return base
+        hint_status, hint_reason = hint
+        # Durable non-success truth normally dominates process-local hints.  A
+        # fresh, observed hard timeout remains TIMEOUT even though P0.7 keeps the
+        # underlying effect record conservative for restart reconciliation.
+        if base.status is NZOutcomeStatus.UNKNOWN_OUTCOME:
+            if hint_status is not NZOutcomeStatus.TIMEOUT:
+                return base
+        elif (
+            base.status is NZOutcomeStatus.FAILED
+            and hint_status is NZOutcomeStatus.DEGRADED
+            and hint_reason == NZReasonCode.BROWSER_FALLBACK_UNVERIFIED.value
+        ):
+            # The legacy fallback explicitly performed no verified browser
+            # interaction.  Its legacy ``success=False`` is not an independent
+            # execution failure and must project as DEGRADED, never SUCCESS.
+            pass
+        elif base.status is not NZOutcomeStatus.SUCCESS:
+            if base.status is not hint_status:
+                return base
+        return NZOutcome.build(
+            hint_status,
+            hint_reason,
+            request_id=trace_context.request_id,
+            trace_id=trace_context.trace_id,
+            task_id=trace_context.task_id,
+            degraded=hint_status is NZOutcomeStatus.DEGRADED,
+        )
 
     def _validate_task_execution_token(
         self,
@@ -820,7 +932,9 @@ class AgentRuntime:
                         1,
                     )
                     try:
-                        raw_text = self.provider_manager.generate(prompt)
+                        raw_text = validate_model_response_text(
+                            self.provider_manager.generate(prompt)
+                        )
                     except Exception:
                         log_attempt(
                             "failed",
@@ -845,6 +959,23 @@ class AgentRuntime:
                         provider=provider_name,
                         model=model_name,
                     )
+                if not isinstance(raw_result, TracedModelOutput):
+                    raise ModelResponseMalformedError(
+                        "Provider manager returned an invalid traced response."
+                    )
+                if not isinstance(raw_result.model_call, ModelCallContext):
+                    raise ModelResponseMalformedError(
+                        "Provider response lacked a valid model-call identity."
+                    )
+                if (
+                    raw_result.model_call.request_id != trace_context.request_id
+                    or raw_result.model_call.trace_id != trace_context.trace_id
+                    or raw_result.model_call.task_id != trace_context.task_id
+                ):
+                    raise ModelResponseMalformedError(
+                        "Provider response identity did not match the active request."
+                    )
+                validate_model_response_text(raw_result.text)
                 if self.debug_raw and not self._recovery_sensitive_persistence.get():
                     print("\n[DEBUG] RAW MODEL OUTPUT:")
                     print(raw_result.text)
@@ -900,7 +1031,9 @@ class AgentRuntime:
             self._finish_task(trace_context, TaskState.FAILED)
         if isinstance(last_error, PersistenceError):
             raise last_error
-        raise RuntimeError(f"Model request failed after retries: {last_error}")
+        terminal_error = typed_provider_error(last_error)
+        terminal_error.args = ("Model request failed after retries.",)
+        raise terminal_error from last_error
 
     def _log_model_attempt(
         self,
@@ -1146,6 +1279,10 @@ class AgentRuntime:
                 raise
             except Exception as error:
                 self._close_task_step(step_reservation)
+                self._set_outcome_hint(
+                    NZOutcomeStatus.PARTIAL if request_trace else NZOutcomeStatus.FAILED,
+                    provider_reason_code(error),
+                )
                 self.log_error(
                     {
                         "step": step,
@@ -1181,6 +1318,10 @@ class AgentRuntime:
                 raise
             except Exception as error:
                 self._close_task_step(step_reservation)
+                self._set_outcome_hint(
+                    NZOutcomeStatus.PARTIAL if request_trace else NZOutcomeStatus.FAILED,
+                    NZReasonCode.MODEL_RESPONSE_MALFORMED.value,
+                )
                 self.log_error(
                     {
                         "step": step,
@@ -1284,6 +1425,10 @@ class AgentRuntime:
             self._mark_task_between_steps(trace_context)
 
         print("\nAgent> Agent stopped after reaching the maximum step limit.")
+        self._set_outcome_hint(
+            NZOutcomeStatus.PARTIAL,
+            NZReasonCode.STEP_BUDGET_EXHAUSTED.value,
+        )
         self._finish_task(trace_context, TaskState.PARTIAL)
 
     def handle_external_review_route(
@@ -1436,6 +1581,10 @@ class AgentRuntime:
             raise
         except Exception as error:
             self._close_task_step(planner_reservation)
+            self._set_outcome_hint(
+                NZOutcomeStatus.FAILED,
+                provider_reason_code(error),
+            )
             self.log_error(
                 {
                     "kind": "orchestrator_planner_error",
@@ -1546,6 +1695,10 @@ class AgentRuntime:
             except Exception as error:
                 close_unused_worker_continuation(error)
                 self._close_task_step(step_reservation)
+                self._set_outcome_hint(
+                    NZOutcomeStatus.PARTIAL if previous_results else NZOutcomeStatus.FAILED,
+                    provider_reason_code(error),
+                )
                 self.log_error(
                     {
                         "kind": "gemma_worker_error",
@@ -1578,6 +1731,10 @@ class AgentRuntime:
                 raise
             except Exception as error:
                 self._close_task_step(step_reservation)
+                self._set_outcome_hint(
+                    NZOutcomeStatus.PARTIAL if previous_results else NZOutcomeStatus.FAILED,
+                    NZReasonCode.ACTION_FAILED.value,
+                )
                 self.log_error(
                     {
                         "kind": "orchestrated_execution_error",
@@ -1631,6 +1788,14 @@ class AgentRuntime:
                 self._finish_task(trace_context, TaskState.COMPLETED)
                 return
             self._mark_task_between_steps(trace_context)
+        self._set_outcome_hint(
+            NZOutcomeStatus.PARTIAL,
+            (
+                NZReasonCode.STEP_BUDGET_EXHAUSTED.value
+                if len(steps) >= self.max_steps
+                else NZReasonCode.TASK_PARTIAL.value
+            ),
+        )
         self._finish_task(trace_context, TaskState.PARTIAL)
 
     def create_plan(
@@ -1663,6 +1828,12 @@ class AgentRuntime:
         except PersistenceError:
             raise
         except Exception as error:
+            reason_code = (
+                NZReasonCode.MODEL_RESPONSE_MALFORMED.value
+                if model_output is not None
+                else provider_reason_code(error)
+            )
+            self._set_outcome_hint(NZOutcomeStatus.DEGRADED, reason_code)
             self.log_error(
                 {
                     "kind": "planner_error",
@@ -1676,6 +1847,21 @@ class AgentRuntime:
                 model_output.model_call if model_output is not None else None
             )
 
+        if "plan" not in payload and "action" not in payload:
+            self._set_outcome_hint(
+                NZOutcomeStatus.DEGRADED,
+                NZReasonCode.MODEL_RESPONSE_MALFORMED.value,
+            )
+            self.log_error(
+                {
+                    "kind": "planner_action_error",
+                    "error": "Planner output omitted both plan and action.",
+                },
+                trace_context=trace_context,
+                model_call=model_output.model_call,
+            )
+            return [], model_output.model_call
+
         raw_plan = payload.get("plan", [])
         if "plan" not in payload and "action" in payload:
             try:
@@ -1685,6 +1871,10 @@ class AgentRuntime:
             except PersistenceError:
                 raise
             except Exception as error:
+                self._set_outcome_hint(
+                    NZOutcomeStatus.DEGRADED,
+                    NZReasonCode.MODEL_RESPONSE_MALFORMED.value,
+                )
                 self.log_error(
                     {
                         "kind": "planner_action_error",
@@ -1695,6 +1885,10 @@ class AgentRuntime:
                 )
                 return [], model_output.model_call
         if not isinstance(raw_plan, list):
+            self._set_outcome_hint(
+                NZOutcomeStatus.DEGRADED,
+                NZReasonCode.MODEL_RESPONSE_MALFORMED.value,
+            )
             self.log_error(
                 {
                     "kind": "planner_action_error",
@@ -1714,6 +1908,10 @@ class AgentRuntime:
             except PersistenceError:
                 raise
             except Exception as error:
+                self._set_outcome_hint(
+                    NZOutcomeStatus.DEGRADED,
+                    NZReasonCode.MODEL_RESPONSE_MALFORMED.value,
+                )
                 self.log_error(
                     {
                         "kind": "planner_action_error",
@@ -1864,6 +2062,14 @@ class AgentRuntime:
             self._mark_task_between_steps(trace_context)
         if last_result and last_result.get("success"):
             print("Agent> Część operacji została już wykonana poprawnie.")
+            self._set_outcome_hint(
+                NZOutcomeStatus.PARTIAL,
+                (
+                    NZReasonCode.STEP_BUDGET_EXHAUSTED.value
+                    if len(planned_actions) >= self.max_steps
+                    else NZReasonCode.TASK_PARTIAL.value
+                ),
+            )
             self._finish_task(trace_context, TaskState.PARTIAL)
 
     def execute_action(
@@ -1920,18 +2126,22 @@ class AgentRuntime:
             raise RecoveryFencedError(
                 "Recovered step reservation does not match the recovery claim."
             )
-        with self._recovery_dispatch_scope(
-            trace_context,
-            recovery_token,
-            allowed_directives=frozenset({RecoveryDirective.RESUME_MODEL}),
-            step_reservation=step_reservation,
-        ):
-            self._dispatch_text_request_guarded(
-                request_text,
+        hint_binding = self._request_outcome_hint.set(None)
+        try:
+            with self._recovery_dispatch_scope(
                 trace_context,
-                ingress="OPERATOR_API",
-                resume_before_model_call=reminted_attempt is not None,
-            )
+                recovery_token,
+                allowed_directives=frozenset({RecoveryDirective.RESUME_MODEL}),
+                step_reservation=step_reservation,
+            ):
+                self._dispatch_text_request_guarded(
+                    request_text,
+                    trace_context,
+                    ingress="OPERATOR_API",
+                    resume_before_model_call=reminted_attempt is not None,
+                )
+        finally:
+            self._request_outcome_hint.reset(hint_binding)
         checkpoint = self.task_checkpoint_store.load(trace_context.task_id)
         if checkpoint is None:
             raise TaskCheckpointError(
@@ -1942,6 +2152,13 @@ class AgentRuntime:
             "success": True,
             "task_state": checkpoint.state.value,
             "task_phase": checkpoint.phase.value,
+            "outcome": outcome_from_task_state(
+                checkpoint.state.value,
+                request_id=trace_context.request_id,
+                trace_id=trace_context.trace_id,
+                task_id=trace_context.task_id,
+                recovery_attempt_id=recovery_token.recovery_attempt_id,
+            ).to_dict(),
         }
 
     def resume_reserved_action(
@@ -1976,6 +2193,13 @@ class AgentRuntime:
             "success": True,
             "task_state": checkpoint.state.value,
             "task_phase": checkpoint.phase.value,
+            "outcome": outcome_from_task_state(
+                checkpoint.state.value,
+                request_id=trace_context.request_id,
+                trace_id=trace_context.trace_id,
+                task_id=trace_context.task_id,
+                recovery_attempt_id=recovery_token.recovery_attempt_id,
+            ).to_dict(),
         }
 
     def resume_waiting_action(
@@ -2010,6 +2234,13 @@ class AgentRuntime:
             "success": True,
             "task_state": checkpoint.state.value,
             "task_phase": checkpoint.phase.value,
+            "outcome": outcome_from_task_state(
+                checkpoint.state.value,
+                request_id=trace_context.request_id,
+                trace_id=trace_context.trace_id,
+                task_id=trace_context.task_id,
+                recovery_attempt_id=recovery_token.recovery_attempt_id,
+            ).to_dict(),
         }
 
     def _terminalize_recovered_action(
@@ -2083,6 +2314,13 @@ class AgentRuntime:
             "success": True,
             "task_state": checkpoint.state.value,
             "task_phase": checkpoint.phase.value,
+            "outcome": outcome_from_task_state(
+                checkpoint.state.value,
+                request_id=trace_context.request_id,
+                trace_id=trace_context.trace_id,
+                task_id=trace_context.task_id,
+                recovery_attempt_id=recovery_token.recovery_attempt_id,
+            ).to_dict(),
         }
 
     def dispatch_text_request(
@@ -2091,15 +2329,19 @@ class AgentRuntime:
         trace_context: TraceContext,
         *,
         ingress: str = "RUNTIME",
-    ) -> None:
+    ) -> NZOutcome:
         """Dispatch one already-identified CLI, TUI, or web request."""
 
-        with self._live_task_execution_guard(trace_context, user_input):
-            self._dispatch_text_request_guarded(
-                user_input,
-                trace_context,
-                ingress=ingress,
-            )
+        hint_binding = self._request_outcome_hint.set(None)
+        try:
+            with self._live_task_execution_guard(trace_context, user_input):
+                return self._dispatch_text_request_guarded(
+                    user_input,
+                    trace_context,
+                    ingress=ingress,
+                )
+        finally:
+            self._request_outcome_hint.reset(hint_binding)
 
     def _dispatch_text_request_guarded(
         self,
@@ -2108,7 +2350,7 @@ class AgentRuntime:
         *,
         ingress: str,
         resume_before_model_call: bool = False,
-    ) -> None:
+    ) -> NZOutcome:
         """Run a request while its one live execution claim remains held."""
 
         # The checkpoint preparation/snapshot/checkpointed triplet is durable
@@ -2185,7 +2427,8 @@ class AgentRuntime:
             )
             raise
         checkpoint = self._finish_task(trace_context, TaskState.COMPLETED)
-        request_succeeded = checkpoint.state is TaskState.COMPLETED
+        request_outcome = self._outcome_for_checkpoint(checkpoint, trace_context)
+        request_succeeded = request_outcome.status is NZOutcomeStatus.SUCCESS
         if checkpoint.state is TaskState.RECOVERY_REQUIRED:
             self.provenance_store.append_terminal(
                 new_runtime_provenance_event(
@@ -2217,9 +2460,10 @@ class AgentRuntime:
         )
         self.log_session_event(
             "request_completed",
-            {"status": "completed" if request_succeeded else "failed"},
+            {"status": request_outcome.status.value.lower()},
             trace_context=trace_context,
         )
+        return request_outcome
 
     def run_text_request(
         self,
@@ -2232,7 +2476,7 @@ class AgentRuntime:
         trace_context = trace_context or TraceContext.new_request()
         transcript_buffer = io.StringIO()
         with redirect_stdout(transcript_buffer):
-            self.dispatch_text_request(
+            outcome = self.dispatch_text_request(
                 user_input,
                 trace_context,
                 ingress=ingress,
@@ -2241,6 +2485,7 @@ class AgentRuntime:
         return {
             "transcript": transcript,
             "status": self.snapshot_status(),
+            "outcome": outcome.to_dict(),
             **trace_context.identity_fields(),
         }
 
@@ -2569,6 +2814,8 @@ class AgentRuntime:
         payload = dict(result)
         for field in ("request_id", "trace_id", "task_id", "model_call_id", "action_id"):
             payload.pop(field, None)
+        if isinstance(payload.get("outcome"), Mapping):
+            payload["outcome"] = without_outcome_identities(payload["outcome"])
         if "stdout" in payload:
             payload["stdout"] = summarize_text(str(payload["stdout"]), 2500)
         if "stderr" in payload:
@@ -2718,6 +2965,7 @@ class AgentRuntime:
                 print(f"{field}: {action[field]}")
 
     def print_result(self, result: dict[str, Any]) -> None:
+        self._note_result_outcome(result)
         if result.get("confidence_label"):
             print(f"[CONFIDENCE: {str(result['confidence_label']).upper()}]")
         if result.get("manual_review_required"):

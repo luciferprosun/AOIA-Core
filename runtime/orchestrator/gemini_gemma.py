@@ -12,7 +12,8 @@ from memory.rhcsa_context import (
 )
 from tools.memory_hats import MemoryHatStore
 from tools.validator import extract_json_object, validate_action
-from trace_context import ModelCallContext, TraceContext
+from trace_context import ModelCallContext, TraceContext, TracedModelOutput
+from providers.errors import ModelResponseMalformedError, validate_model_response_text
 
 
 ModelAttemptObserver = Callable[
@@ -63,20 +64,57 @@ class GeminiGemmaOrchestrator:
             trace_context,
             on_attempt=on_attempt,
         )
-        return self._parse_plan(traced.text), traced.model_call
+        if not isinstance(traced, TracedModelOutput) or not isinstance(
+            traced.model_call, ModelCallContext
+        ):
+            raise ModelResponseMalformedError(
+                "Planner provider returned an invalid traced response."
+            )
+        if (
+            traced.model_call.request_id != trace_context.request_id
+            or traced.model_call.trace_id != trace_context.trace_id
+            or traced.model_call.task_id != trace_context.task_id
+        ):
+            raise ModelResponseMalformedError(
+                "Planner response identity did not match the active request."
+            )
+        return self._parse_plan(validate_model_response_text(traced.text)), traced.model_call
 
     def _parse_plan(self, raw: str) -> dict[str, Any]:
-        payload = extract_json_object(raw)
-        raw_steps = payload.get("steps", payload.get("plan", []))
-        if not isinstance(raw_steps, list):
+        try:
+            payload = extract_json_object(validate_model_response_text(raw))
+        except (TypeError, ValueError) as error:
+            raise ModelResponseMalformedError(
+                "Planner response did not contain valid JSON."
+            ) from error
+        has_steps = "steps" in payload or "plan" in payload
+        raw_steps = payload.get("steps", payload.get("plan"))
+        if has_steps and not isinstance(raw_steps, list):
+            raise ModelResponseMalformedError(
+                "Planner response steps were not a list."
+            )
+        if not has_steps:
             raw_steps = []
-        steps = [str(step).strip() for step in raw_steps if str(step).strip()][: self.max_steps]
+        if not all(isinstance(step, str) for step in raw_steps):
+            raise ModelResponseMalformedError(
+                "Planner response contained an invalid step."
+            )
+        steps = [step.strip() for step in raw_steps if step.strip()][: self.max_steps]
         if not steps and payload.get("message"):
-            steps = [f"respond to user: {payload['message']}"]
+            if not isinstance(payload["message"], str) or not payload["message"].strip():
+                raise ModelResponseMalformedError(
+                    "Planner response message was invalid."
+                )
+            steps = [f"respond to user: {payload['message'].strip()}"]
+        if not steps:
+            raise ModelResponseMalformedError(
+                "Planner response omitted usable steps or a response message."
+            )
         return {
             "strategy": str(payload.get("strategy", "")).strip(),
             "steps": steps,
             "raw": raw,
+            "step_budget_exhausted": len(raw_steps) > self.max_steps,
         }
 
     def action_for_step(
@@ -90,8 +128,13 @@ class GeminiGemmaOrchestrator:
             raise RuntimeError("Gemma/Ollama/HuggingFace worker is disabled in this terminal build.")
         self.worker_memory.record_gemma_call()
         prompt = self._build_gemma_worker_prompt(user_request, step, runtime_status, previous_results)
-        raw = self.gemma_provider.generate(prompt)
-        action = validate_action(extract_json_object(raw))
+        raw = validate_model_response_text(self.gemma_provider.generate(prompt))
+        try:
+            action = validate_action(extract_json_object(raw))
+        except (TypeError, ValueError) as error:
+            raise ModelResponseMalformedError(
+                "Worker response did not contain a valid action."
+            ) from error
         self.worker_memory.remember_step(
             delegated_step=step,
             action=action,
@@ -125,14 +168,19 @@ class GeminiGemmaOrchestrator:
         if on_attempt is not None:
             on_attempt("started", model_call, "gemma", provider_name, 1)
         try:
-            raw = self.gemma_provider.generate(prompt)
+            raw = validate_model_response_text(self.gemma_provider.generate(prompt))
         except Exception:
             if on_attempt is not None:
                 on_attempt("failed", model_call, "gemma", provider_name, 1)
             raise
         if on_attempt is not None:
             on_attempt("succeeded", model_call, "gemma", provider_name, 1)
-        action = validate_action(extract_json_object(raw))
+        try:
+            action = validate_action(extract_json_object(raw))
+        except (TypeError, ValueError) as error:
+            raise ModelResponseMalformedError(
+                "Worker response did not contain a valid action."
+            ) from error
         self.worker_memory.remember_step(
             delegated_step=step,
             action=action,

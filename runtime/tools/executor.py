@@ -40,6 +40,7 @@ from runtime.task_recovery import (
     RecoveryPurpose,
     TaskRecoveryService,
 )
+from runtime.outcomes import attach_outcome
 
 from .browser_tools import (
     browser_click,
@@ -226,7 +227,7 @@ class ExecutionEngine:
                         recovery_token,
                         frozenset({RecoveryDirective.RESUME_MODEL}),
                     )
-                return self._execute(
+                result = self._execute(
                     action,
                     require_approval=require_approval,
                     action_context=authoritative_context,
@@ -234,6 +235,7 @@ class ExecutionEngine:
                     step_reservation=step_reservation,
                     recovery_token=recovery_token,
                 )
+                return self._attach_authoritative_outcome(result, guarded_context)
 
             existing_operation = (
                 self.idempotency_store.load(operation_context)
@@ -309,7 +311,7 @@ class ExecutionEngine:
                                 raise RecoveryFencedError(
                                     "The live step reservation no longer proves a safe task phase."
                                 )
-                    return self._execute(
+                    result = self._execute(
                         action,
                         require_approval=require_approval,
                         action_context=authoritative_context,
@@ -317,6 +319,7 @@ class ExecutionEngine:
                         step_reservation=step_reservation,
                         recovery_token=live_token,
                     )
+                    return self._attach_authoritative_outcome(result, guarded_context)
             except RecoveryClaimConflictError:
                 if entered_guard or operation_context is None:
                     raise
@@ -332,7 +335,7 @@ class ExecutionEngine:
                     purpose=RecoveryPurpose.LIVE,
                     expected_checkpoint_hash=None,
                 ) as replay_token:
-                    return self._execute(
+                    result = self._execute(
                         action,
                         require_approval=require_approval,
                         action_context=authoritative_context,
@@ -340,6 +343,7 @@ class ExecutionEngine:
                         step_reservation=step_reservation,
                         recovery_token=replay_token,
                     )
+                    return self._attach_authoritative_outcome(result, guarded_context)
         except PersistenceError as exc:
             raise exc.attach_correlation(
                 authoritative_context.identity_fields()
@@ -781,19 +785,22 @@ class ExecutionEngine:
                 raise RecoveryFencedError(
                     "Existing P0.7 state does not authorize action resume."
                 )
-            return self.resume_reserved_action(
-                action, recovery_token=recovery_token
+            return self._attach_recovery_outcome(
+                self.resume_reserved_action(action, recovery_token=recovery_token),
+                checkpoint,
             )
         if checkpoint.phase is TaskPhase.IDEMPOTENCY_RESERVED:
-            return self.resume_reserved_action(
-                action, recovery_token=recovery_token
+            return self._attach_recovery_outcome(
+                self.resume_reserved_action(action, recovery_token=recovery_token),
+                checkpoint,
             )
         if checkpoint.phase in {
             TaskPhase.WAITING_FOR_APPROVAL,
             TaskPhase.BEFORE_DISPATCH,
         }:
-            return self.resume_pre_dispatch_action(
-                action, recovery_token=recovery_token
+            return self._attach_recovery_outcome(
+                self.resume_pre_dispatch_action(action, recovery_token=recovery_token),
+                checkpoint,
             )
         raise RecoveryFencedError(
             "Task phase is not an explicitly recoverable action boundary."
@@ -850,7 +857,7 @@ class ExecutionEngine:
                 action_id=record.action_id,
                 model_call_id=record.model_call_id,
             )
-            return self._terminalize_existing_reservation(
+            terminal_result = self._terminalize_existing_reservation(
                 {},
                 decision,
                 context,
@@ -861,6 +868,7 @@ class ExecutionEngine:
                 result,
                 recovery_token=recovery_token,
             )
+            return self._attach_recovery_outcome(terminal_result, checkpoint)
         self._require_pre_dispatch_checkpoint(checkpoint)
         context = self._checkpoint_action_context(checkpoint)
         self._require_pristine_pre_dispatch_provenance(
@@ -870,13 +878,42 @@ class ExecutionEngine:
             raise RecoveryFencedError(
                 "Pre-dispatch cancellation found unexpected P0.7 state."
             )
-        return self._cancel_new_pre_dispatch_operation(
+        cancelled_result = self._cancel_new_pre_dispatch_operation(
             checkpoint,
             context,
             operation,
             decision,
             result,
             recovery_token=recovery_token,
+        )
+        return self._attach_recovery_outcome(cancelled_result, checkpoint)
+
+    @staticmethod
+    def _attach_authoritative_outcome(
+        result: dict[str, Any],
+        action_context: ActionContext,
+    ) -> dict[str, Any]:
+        return attach_outcome(
+            result,
+            request_id=action_context.request_id,
+            trace_id=action_context.trace_id,
+            task_id=action_context.task_id,
+            model_call_id=action_context.model_call_id,
+            action_id=action_context.action_id,
+        )
+
+    @staticmethod
+    def _attach_recovery_outcome(
+        result: dict[str, Any],
+        checkpoint: TaskCheckpoint,
+    ) -> dict[str, Any]:
+        return attach_outcome(
+            result,
+            request_id=checkpoint.latest_request_id,
+            trace_id=checkpoint.latest_trace_id,
+            task_id=checkpoint.task_id,
+            model_call_id=checkpoint.current_model_call_id,
+            action_id=checkpoint.current_action_id,
         )
 
     def _get_task_recovery_service(self) -> TaskRecoveryService:

@@ -64,10 +64,12 @@ class WebRuntimeService:
     def run_prompt(self, prompt: str) -> dict:
         with self.lock:
             result = self.runtime.run_text_request(prompt, ingress="WEB")
+            outcome = result["outcome"]
             return {
-                "ok": True,
+                "ok": outcome["status"] == "SUCCESS",
                 "transcript": result["transcript"],
                 "status": result["status"],
+                "outcome": outcome,
                 "task_id": result["task_id"],
                 "request_id": result["request_id"],
                 "trace_id": result["trace_id"],
@@ -644,6 +646,8 @@ def build_operator_chat_payload(payload: dict[str, object]) -> dict[str, object]
             "execution_triggered": False,
             "dispatch_triggered": False,
             "trust_status": result_payload["trust_status"],
+            "reason_code": result.reason_code,
+            "outcome": result_payload["outcome"],
             **model_call.identity_fields(),
         }
 
