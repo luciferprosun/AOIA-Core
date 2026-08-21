@@ -5,13 +5,17 @@ import json
 import os
 import hashlib
 import hmac
+import io
 import posixpath
+import socket
 import sys
+import time
+from concurrent.futures import TimeoutError as FutureTimeoutError
 from dataclasses import dataclass, field
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from threading import Lock
+from threading import Lock, local
 from typing import Mapping
 from urllib.parse import parse_qsl, unquote, urlparse
 
@@ -25,9 +29,31 @@ try:
         SensitiveValueRedactor,
         build_runtime_redactor,
     )
+    from runtime.web_resource_governance import (
+        BoundedExecutor,
+        BoundedRateLimiter,
+        ClientActivityLimiter,
+        DeadlineReadTimeout,
+        DeadlineSocketReader,
+        DeadlineSocketWriter,
+        WebResourceLimits,
+        client_key,
+        load_web_resource_limits,
+    )
 except ModuleNotFoundError:  # pragma: no cover - script launch path
     from outcomes import NZOutcome, NZOutcomeStatus, outcome_from_exception
     from sensitive_redaction import SensitiveValueRedactor, build_runtime_redactor
+    from web_resource_governance import (
+        BoundedExecutor,
+        BoundedRateLimiter,
+        ClientActivityLimiter,
+        DeadlineReadTimeout,
+        DeadlineSocketReader,
+        DeadlineSocketWriter,
+        WebResourceLimits,
+        client_key,
+        load_web_resource_limits,
+    )
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -70,6 +96,7 @@ class WebBoundaryConfig:
     operator_token: str = field(repr=False)
     allowed_origins: frozenset[str]
     max_json_bytes: int = DEFAULT_MAX_JSON_BYTES
+    resource_limits: WebResourceLimits = field(default_factory=WebResourceLimits)
 
     def __post_init__(self) -> None:
         token = self.operator_token
@@ -116,6 +143,8 @@ class WebBoundaryConfig:
             or self.max_json_bytes > MAX_CONFIGURED_JSON_BYTES
         ):
             raise WebBoundaryConfigurationError("AOIA web request-size policy is invalid.")
+        if not isinstance(self.resource_limits, WebResourceLimits):
+            raise WebBoundaryConfigurationError("AOIA web resource policy is invalid.")
 
 
 def load_web_boundary_config(
@@ -154,11 +183,18 @@ def load_web_boundary_config(
         raise WebBoundaryConfigurationError(
             "AOIA web request-size policy is invalid."
         ) from error
-    return WebBoundaryConfig(
-        operator_token=token,
-        allowed_origins=origins,
-        max_json_bytes=limit,
-    )
+    try:
+        resources = load_web_resource_limits(source)
+        return WebBoundaryConfig(
+            operator_token=token,
+            allowed_origins=origins,
+            max_json_bytes=limit,
+            resource_limits=resources,
+        )
+    except ValueError as error:
+        raise WebBoundaryConfigurationError(
+            "AOIA web resource policy is invalid."
+        ) from error
 
 
 class WebRuntimeService:
@@ -878,9 +914,59 @@ AUTHENTICATED_MUTATION_PATHS = frozenset(
     }
 )
 
+# The authentication source remains the process environment.  Changing a
+# parent shell's environment cannot atomically update a running process, so
+# P1.1 deliberately retains restart-only rotation instead of adding a second
+# secret source or an HTTP credential mutation endpoint.
+WEB_TOKEN_ROTATION_MODE = "restart_required"
+
+
+@dataclass(frozen=True)
+class _PendingWebResponse:
+    writer: str
+    status: HTTPStatus
+    payload: Mapping[str, object]
+
+
+class _RequestDeadlineBeforeDispatch(TimeoutError):
+    pass
+
+
+_OPERATION_REJECTED = object()
+_WEB_DEADLINE_ENVELOPE_REASONS = frozenset(
+    {
+        "WEB_HEADER_TIMEOUT",
+        "WEB_BODY_TIMEOUT",
+        "WEB_REQUEST_DEADLINE_EXCEEDED",
+        "WEB_REQUEST_DEADLINE_UNKNOWN",
+    }
+)
+
+
+class _DispatchGate:
+    """Atomically fence deadline cancellation against mutation dispatch."""
+
+    def __init__(self) -> None:
+        self._lock = Lock()
+        self._state = "pending"
+
+    def begin(self, *, now: float, deadline: float) -> bool:
+        with self._lock:
+            if self._state != "pending" or now >= deadline:
+                return False
+            self._state = "started"
+            return True
+
+    def cancel_if_pending(self) -> bool:
+        with self._lock:
+            if self._state != "pending":
+                return False
+            self._state = "cancelled"
+            return True
+
 
 class AOIAWebServer(ThreadingHTTPServer):
-    """Single-operator local server with immutable auth policy and mutation lock."""
+    """Single-operator server with bounded admission and route execution."""
 
     def __init__(
         self,
@@ -888,14 +974,144 @@ class AOIAWebServer(ThreadingHTTPServer):
         handler_class,
         *,
         boundary_config: WebBoundaryConfig,
+        monotonic_clock=time.monotonic,
     ) -> None:
         self.web_boundary_config = boundary_config
+        limits = boundary_config.resource_limits
+        # TCPServer.server_activate reads this instance value during super().
+        # Setting it first makes the kernel accept backlog explicit and finite.
+        self.request_queue_size = limits.listen_backlog
+        self.monotonic_clock = monotonic_clock
         self.output_redactor = build_runtime_redactor(
             environ=os.environ,
             additional_values=(boundary_config.operator_token,),
         )
         self.operator_mutation_lock = Lock()
-        super().__init__(server_address, handler_class)
+        self.request_executor = BoundedExecutor(
+            max_workers=limits.max_concurrent_requests,
+            max_queue=limits.max_queued_requests,
+            thread_name_prefix="aoia-web-request",
+        )
+        self.operation_executor = BoundedExecutor(
+            max_workers=limits.max_concurrent_requests,
+            max_queue=limits.max_queued_requests,
+            thread_name_prefix="aoia-web-operation",
+        )
+        total_capacity = limits.max_concurrent_requests + limits.max_queued_requests
+        self.client_activity = ClientActivityLimiter(
+            max_clients=max(1, total_capacity),
+            max_per_client=limits.max_client_requests,
+        )
+        self.rate_limiter = BoundedRateLimiter(
+            max_entries=limits.rate_max_entries,
+            ttl_seconds=limits.rate_ttl_seconds,
+            clock=monotonic_clock,
+        )
+        self._resource_close_lock = Lock()
+        self._resources_closed = False
+        self._request_timing = local()
+        try:
+            super().__init__(server_address, handler_class)
+        except BaseException:
+            self.request_executor.shutdown(wait=False)
+            self.operation_executor.shutdown(wait=False)
+            raise
+
+    def process_request(self, request, client_address) -> None:
+        accepted_at = float(self.monotonic_clock())
+        key = client_key(client_address)
+        if not self.client_activity.acquire(key):
+            self._reject_busy(request)
+            return
+        try:
+            future = self.request_executor.submit(
+                self._run_request,
+                request,
+                client_address,
+                key,
+                accepted_at,
+                accepted_at
+                + self.web_boundary_config.resource_limits.request_deadline_seconds,
+            )
+        except BaseException:
+            self.client_activity.release(key)
+            self._reject_busy(request)
+            return
+        if future is None:
+            self.client_activity.release(key)
+            self._reject_busy(request)
+
+    def _run_request(
+        self,
+        request,
+        client_address,
+        key: bytes,
+        accepted_at: float,
+        deadline: float,
+    ) -> None:
+        self._request_timing.value = (accepted_at, deadline)
+        try:
+            self.process_request_thread(request, client_address)
+        finally:
+            self._request_timing.value = None
+            self.client_activity.release(key)
+
+    def current_request_timing(self) -> tuple[float, float] | None:
+        value = getattr(self._request_timing, "value", None)
+        return value if isinstance(value, tuple) and len(value) == 2 else None
+
+    def submit_operation(self, function):
+        return self.operation_executor.submit(function)
+
+    def handle_error(self, request, client_address) -> None:
+        # Expected disconnects and bounded client timeouts must not emit raw
+        # tracebacks, filesystem paths, request data, or addresses to stderr.
+        return
+
+    def _reject_busy(self, request) -> None:
+        trace_context = TraceContext.new_request()
+        payload = _safe_http_error_payload(
+            outcome_status=NZOutcomeStatus.BLOCKED,
+            reason_code="WEB_SERVER_BUSY",
+            message_safe="The local operator service is at its resource limit.",
+            trace_context=trace_context,
+        )
+        safe_payload = self.output_redactor.redact(payload)
+        if not isinstance(safe_payload, dict):
+            safe_payload = {"ok": False, "message_safe": "The response is unavailable."}
+        body = json.dumps(safe_payload, ensure_ascii=False).encode("utf-8")
+        response = (
+            b"HTTP/1.1 503 Service Unavailable\r\n"
+            b"Content-Type: application/json; charset=utf-8\r\n"
+            + f"Content-Length: {len(body)}\r\n".encode("ascii")
+            + b"Cache-Control: no-store\r\n"
+            + b"X-Content-Type-Options: nosniff\r\n"
+            + b"Referrer-Policy: no-referrer\r\n"
+            + b"Connection: close\r\n\r\n"
+            + body
+        )
+        try:
+            request.settimeout(
+                min(0.25, self.web_boundary_config.resource_limits.write_timeout_seconds)
+            )
+            request.sendall(response)
+        except (OSError, TimeoutError, ValueError):
+            pass
+        finally:
+            self.shutdown_request(request)
+
+    def server_close(self) -> None:
+        with self._resource_close_lock:
+            if self._resources_closed:
+                return
+            self._resources_closed = True
+        super().server_close()
+        # Header/body/write stages are bounded, so request workers can drain.
+        self.request_executor.shutdown(wait=True)
+        # Route work may have crossed an HTTP deadline.  It remains bounded by
+        # P0 task/provider controls, but closing the listener must not claim to
+        # terminate or synchronously wait for that already-running work.
+        self.operation_executor.shutdown(wait=False)
 
 
 def _safe_http_error_payload(
@@ -1054,11 +1270,99 @@ def _is_api_path(path: str) -> bool:
 class CodexStyleHandler(SimpleHTTPRequestHandler):
     """Serve the static UI and a small JSON API."""
 
+    def setup(self) -> None:
+        self.connection = self.request
+        server = getattr(self, "server", None)
+        config = getattr(server, "web_boundary_config", None)
+        limits = (
+            config.resource_limits
+            if isinstance(config, WebBoundaryConfig)
+            else WebResourceLimits()
+        )
+        clock = getattr(server, "monotonic_clock", time.monotonic)
+        timing_getter = getattr(server, "current_request_timing", None)
+        timing = timing_getter() if callable(timing_getter) else None
+        if timing is None:
+            self._request_started_at = float(clock())
+            self._request_deadline = (
+                self._request_started_at + limits.request_deadline_seconds
+            )
+        else:
+            self._request_started_at, self._request_deadline = timing
+        remaining_request_time = max(
+            0.000001,
+            self._request_deadline - float(clock()),
+        )
+        if self.disable_nagle_algorithm:
+            self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
+        self._deadline_reader = DeadlineSocketReader(
+            self.connection,
+            timeout_seconds=min(
+                limits.header_timeout_seconds,
+                remaining_request_time,
+            ),
+            clock=clock,
+        )
+        self.rfile = io.BufferedReader(self._deadline_reader, buffer_size=8192)
+        self._deadline_writer = DeadlineSocketWriter(
+            self.connection,
+            timeout_seconds=limits.write_timeout_seconds,
+            deadline=self._request_deadline,
+            clock=clock,
+        )
+        self.wfile = io.BufferedWriter(self._deadline_writer, buffer_size=8192)
+        self._response_started = False
+
+    def handle_one_request(self) -> None:
+        """Stdlib request handling with an explicit safe slow-client result."""
+
+        try:
+            self.raw_requestline = self.rfile.readline(65537)
+            if len(self.raw_requestline) > 65536:
+                self.requestline = ""
+                self.request_version = ""
+                self.command = ""
+                self.send_error(HTTPStatus.REQUEST_URI_TOO_LONG)
+                return
+            if not self.raw_requestline:
+                self.close_connection = True
+                return
+            if not self.parse_request():
+                return
+            method_name = "do_" + self.command
+            if not hasattr(self, method_name):
+                self.send_error(
+                    HTTPStatus.NOT_IMPLEMENTED,
+                    "Unsupported method (%r)" % self.command,
+                )
+                return
+            getattr(self, method_name)()
+            self.wfile.flush()
+        except TimeoutError:
+            self.close_connection = True
+            if not getattr(self, "_response_started", False):
+                self.requestline = getattr(self, "requestline", "")
+                self.request_version = getattr(self, "request_version", "")
+                self.command = getattr(self, "command", "")
+                try:
+                    self._write_error(
+                        HTTPStatus.REQUEST_TIMEOUT,
+                        NZOutcomeStatus.TIMEOUT,
+                        "WEB_HEADER_TIMEOUT",
+                        "The request headers exceeded the enforced deadline.",
+                        TraceContext.new_request(),
+                    )
+                except (OSError, TimeoutError, ValueError):
+                    pass
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(WEB_DIR), **kwargs)
 
     def do_GET(self) -> None:
         trace_context = TraceContext.new_request()
+        if self._request_deadline_expired():
+            self._write_request_deadline(trace_context, uncertain=False)
+            return
         try:
             parsed = urlparse(self.path)
         except ValueError:
@@ -1077,6 +1381,8 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             return
 
         if parsed.path in PUBLIC_HEALTH_PATHS:
+            if not self._rate_allowed("health", trace_context):
+                return
             outcome = NZOutcome.build(
                 NZOutcomeStatus.SUCCESS,
                 request_id=trace_context.request_id,
@@ -1096,8 +1402,12 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             return
 
         if api_namespace:
+            if not self._rate_allowed("auth", trace_context):
+                return
             config = self._resolve_boundary_config(trace_context)
             if config is None or not self._authenticate(config, trace_context):
+                return
+            if not self._rate_allowed("read", trace_context):
                 return
             if parsed.path not in AUTHENTICATED_READ_PATHS:
                 self._write_error(
@@ -1109,7 +1419,13 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 )
                 return
             try:
-                routed = route_get_payload(parsed.path)
+                routed = self._execute_operation(
+                    lambda: route_get_payload(parsed.path),
+                    trace_context,
+                    mutation=False,
+                )
+                if routed is _OPERATION_REJECTED:
+                    return
                 if routed is None:
                     self._write_error(
                         HTTPStatus.NOT_FOUND,
@@ -1130,10 +1446,28 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
 
         if parsed.path in {"/", "/index.html"}:
             self.path = "/index.html"
+        if self._request_deadline_expired():
+            self._write_request_deadline(trace_context, uncertain=False)
+            return
+        server = getattr(self, "server", None)
+        config = getattr(server, "web_boundary_config", None)
+        connection = getattr(self, "connection", None)
+        if isinstance(config, WebBoundaryConfig) and connection is not None:
+            if not self._prepare_response_writer(
+                config,
+                allow_expired_grace=False,
+            ):
+                self._write_request_deadline(trace_context, uncertain=False)
+                return
+        self._response_started = True
+        self.close_connection = True
         return super().do_GET()
 
     def do_POST(self) -> None:
         trace_context = TraceContext.new_request()
+        if self._request_deadline_expired():
+            self._write_request_deadline(trace_context, uncertain=False)
+            return
         try:
             parsed = urlparse(self.path)
         except ValueError:
@@ -1160,6 +1494,8 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             )
             return
         config = self._resolve_boundary_config(trace_context)
+        if not self._rate_allowed("auth", trace_context):
+            return
         if config is None or not self._authenticate(config, trace_context):
             return
         if parsed.path not in AUTHENTICATED_MUTATION_PATHS:
@@ -1173,21 +1509,23 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             return
         if not self._origin_allowed(config, trace_context):
             return
+        if not self._rate_allowed("mutation", trace_context):
+            return
         payload = self._read_json_body(config, trace_context)
         if payload is None:
             return
+        if not self._validate_known_field_types(parsed.path, payload, trace_context):
+            return
 
         try:
-            mutation_lock = getattr(
-                getattr(self, "server", None),
-                "operator_mutation_lock",
-                None,
+            pending = self._execute_operation(
+                lambda: self._build_pending_post(parsed.path, payload),
+                trace_context,
+                mutation=True,
             )
-            if mutation_lock is None:
-                self._dispatch_post(parsed, payload, trace_context)
-            else:
-                with mutation_lock:
-                    self._dispatch_post(parsed, payload, trace_context)
+            if pending is _OPERATION_REJECTED:
+                return
+            self._emit_pending_response(pending, trace_context)
         except Exception as error:  # raw exception text and tracebacks never cross HTTP
             self._write_json(
                 HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -1203,18 +1541,32 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         path = parsed.path
         if not self._validate_known_field_types(path, payload, trace_context):
             return
+        self._emit_pending_response(
+            self._build_pending_post(path, payload),
+            trace_context,
+        )
+
+    def _build_pending_post(
+        self,
+        path: str,
+        payload: dict[str, object],
+    ) -> _PendingWebResponse:
+        """Execute route logic without writing to the client socket.
+
+        Real servers run this function in the bounded operation executor.  A
+        deadline response can therefore close the HTTP lifecycle without a
+        late worker ever writing a second response to the same socket.
+        """
 
         if path == "/api/router/preview":
             status, response = route_post_payload(path, payload)
-            self._write_routed_json(status, response, trace_context)
-            return
+            return _PendingWebResponse("routed", status, response)
 
         if path == "/api/operator/chat":
             status, response = route_post_payload(path, payload)
-            self._write_routed_json(status, response, trace_context)
-            return
+            return _PendingWebResponse("routed", status, response)
 
-        if parsed.path == "/api/cpt/transform":
+        if path == "/api/cpt/transform":
             prompt = payload.get("prompt", "")
             mode = payload.get("mode", CPT_BALANCED_MODE)
             if mode is None:
@@ -1225,42 +1577,35 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 message = str(error)
                 if message not in {"prompt is required", "mode must be balanced_critic"}:
                     message = "The JSON request is invalid."
-                self._write_error(
+                return _PendingWebResponse(
+                    "error",
                     HTTPStatus.BAD_REQUEST,
-                    NZOutcomeStatus.BLOCKED,
-                    "WEB_REQUEST_INVALID",
-                    message,
-                    trace_context,
+                    {
+                        "outcome_status": NZOutcomeStatus.BLOCKED,
+                        "reason_code": "WEB_REQUEST_INVALID",
+                        "message_safe": message,
+                    },
                 )
-                return
-            self._write_json(
-                HTTPStatus.OK,
-                _with_http_identity(response, trace_context),
-            )
-            return
+            return _PendingWebResponse("json", HTTPStatus.OK, response)
 
-        if parsed.path == "/api/chat":
+        if path == "/api/chat":
             status, response = route_post_payload(path, payload)
-            self._write_routed_json(status, response, trace_context)
-            return
+            return _PendingWebResponse("routed", status, response)
 
         if path == "/api/model":
             model_name = str(payload.get("model", "")).strip()
             if not model_name:
-                self._write_error(
+                return _PendingWebResponse(
+                    "error",
                     HTTPStatus.BAD_REQUEST,
-                    NZOutcomeStatus.BLOCKED,
-                    "WEB_REQUEST_INVALID",
-                    "model is required",
-                    trace_context,
+                    {
+                        "outcome_status": NZOutcomeStatus.BLOCKED,
+                        "reason_code": "WEB_REQUEST_INVALID",
+                        "message_safe": "model is required",
+                    },
                 )
-                return
             response = get_service().switch_model(model_name)
-            self._write_json(
-                HTTPStatus.OK,
-                _with_http_identity(response, trace_context),
-            )
-            return
+            return _PendingWebResponse("json", HTTPStatus.OK, response)
 
         if path == "/api/model-selection/propose":
             from model_router import create_model_selection_proposal, evaluate_model_selection_policy
@@ -1270,14 +1615,15 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             task_sensitivity = str(payload.get("task_sensitivity", "")).strip()
             user_prompt = str(payload.get("user_prompt", ""))
             if not provider_id or not model_id or not task_sensitivity:
-                self._write_error(
+                return _PendingWebResponse(
+                    "error",
                     HTTPStatus.BAD_REQUEST,
-                    NZOutcomeStatus.BLOCKED,
-                    "WEB_REQUEST_INVALID",
-                    "provider_id, model_id, and task_sensitivity are required",
-                    trace_context,
+                    {
+                        "outcome_status": NZOutcomeStatus.BLOCKED,
+                        "reason_code": "WEB_REQUEST_INVALID",
+                        "message_safe": "provider_id, model_id, and task_sensitivity are required",
+                    },
                 )
-                return
             proposal = create_model_selection_proposal(
                 provider_id=provider_id,
                 model_id=model_id,
@@ -1285,32 +1631,194 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
                 user_prompt=user_prompt,
             )
             decision = evaluate_model_selection_policy(proposal=proposal)
-            self._write_json(
+            return _PendingWebResponse(
+                "json",
                 HTTPStatus.OK,
-                _with_http_identity(
-                    {
-                        "ok": True,
-                        "proposal": proposal,
-                        "decision": decision,
-                        "human_approval_required": True,
-                        "provider_call_permitted": False,
-                        "output_trusted": False,
-                    },
-                    trace_context,
-                ),
+                {
+                    "ok": True,
+                    "proposal": proposal,
+                    "decision": decision,
+                    "human_approval_required": True,
+                    "provider_call_permitted": False,
+                    "output_trusted": False,
+                },
+            )
+
+        return _PendingWebResponse(
+            "error",
+            HTTPStatus.NOT_FOUND,
+            {
+                "outcome_status": NZOutcomeStatus.BLOCKED,
+                "reason_code": "WEB_ROUTE_NOT_FOUND",
+                "message_safe": "The requested API route does not exist.",
+            },
+        )
+
+    def _emit_pending_response(
+        self,
+        pending: _PendingWebResponse,
+        trace_context: TraceContext,
+    ) -> None:
+        if pending.writer == "routed":
+            self._write_routed_json(pending.status, pending.payload, trace_context)
+            return
+        if pending.writer == "json":
+            self._write_json(
+                pending.status,
+                _with_http_identity(pending.payload, trace_context),
             )
             return
-
-        self._write_error(
-            HTTPStatus.NOT_FOUND,
-            NZOutcomeStatus.BLOCKED,
-            "WEB_ROUTE_NOT_FOUND",
-            "The requested API route does not exist.",
-            trace_context,
-        )
+        if pending.writer == "error":
+            self._write_error(
+                pending.status,
+                pending.payload["outcome_status"],  # type: ignore[arg-type]
+                str(pending.payload["reason_code"]),
+                str(pending.payload["message_safe"]),
+                trace_context,
+            )
+            return
+        raise RuntimeError("unsupported internal web response writer")
 
     def log_message(self, format: str, *args) -> None:
         return
+
+    def _rate_allowed(self, scope: str, trace_context: TraceContext) -> bool:
+        server = getattr(self, "server", None)
+        limiter = getattr(server, "rate_limiter", None)
+        config = getattr(server, "web_boundary_config", None)
+        address = getattr(self, "client_address", None)
+        if (
+            not isinstance(limiter, BoundedRateLimiter)
+            or not isinstance(config, WebBoundaryConfig)
+            or address is None
+        ):
+            # Direct unit-boundary invocation has no socket/server resource to
+            # consume; real HTTP requests always take the governed path.
+            return True
+        limits = config.resource_limits
+        capacity = {
+            "auth": limits.read_rate_limit,
+            "health": limits.health_rate_limit,
+            "read": limits.read_rate_limit,
+            "mutation": limits.mutation_rate_limit,
+        }[scope]
+        if limiter.allow(
+            scope,
+            client_key(address),
+            capacity=capacity,
+            window_seconds=limits.rate_window_seconds,
+        ):
+            return True
+        self._write_error(
+            HTTPStatus.TOO_MANY_REQUESTS,
+            NZOutcomeStatus.BLOCKED,
+            "WEB_RATE_LIMITED",
+            "The local request rate limit has been reached.",
+            trace_context,
+        )
+        return False
+
+    def _execute_operation(
+        self,
+        function,
+        trace_context: TraceContext,
+        *,
+        mutation: bool,
+    ):
+        server = getattr(self, "server", None)
+        submit = getattr(server, "submit_operation", None)
+        if not callable(submit):
+            return function()
+
+        clock = getattr(server, "monotonic_clock", time.monotonic)
+        config = getattr(server, "web_boundary_config", None)
+        if not isinstance(config, WebBoundaryConfig):
+            return function()
+        deadline = getattr(
+            self,
+            "_request_deadline",
+            float(clock()) + config.resource_limits.request_deadline_seconds,
+        )
+        dispatch_gate = _DispatchGate()
+
+        def governed_operation():
+            if not mutation:
+                if not dispatch_gate.begin(now=float(clock()), deadline=deadline):
+                    raise _RequestDeadlineBeforeDispatch()
+                return function()
+            mutation_lock = getattr(server, "operator_mutation_lock", None)
+            if mutation_lock is None:
+                raise _RequestDeadlineBeforeDispatch()
+            remaining = deadline - float(clock())
+            if remaining <= 0 or not mutation_lock.acquire(timeout=remaining):
+                raise _RequestDeadlineBeforeDispatch()
+            try:
+                if not dispatch_gate.begin(now=float(clock()), deadline=deadline):
+                    raise _RequestDeadlineBeforeDispatch()
+                return function()
+            finally:
+                mutation_lock.release()
+
+        remaining = deadline - float(clock())
+        if remaining <= 0:
+            self._write_request_deadline(trace_context, uncertain=False)
+            return _OPERATION_REJECTED
+        future = submit(governed_operation)
+        if future is None:
+            self._write_error(
+                HTTPStatus.SERVICE_UNAVAILABLE,
+                NZOutcomeStatus.BLOCKED,
+                "WEB_SERVER_BUSY",
+                "The local operator service is at its resource limit.",
+                trace_context,
+            )
+            return _OPERATION_REJECTED
+        try:
+            result = future.result(timeout=max(0.001, deadline - float(clock())))
+            if float(clock()) >= deadline:
+                self._write_request_deadline(trace_context, uncertain=False)
+                return _OPERATION_REJECTED
+            return result
+        except _RequestDeadlineBeforeDispatch:
+            self._write_request_deadline(trace_context, uncertain=False)
+            return _OPERATION_REJECTED
+        except FutureTimeoutError:
+            if future.done():
+                result = future.result()
+                if float(clock()) >= deadline:
+                    self._write_request_deadline(trace_context, uncertain=False)
+                    return _OPERATION_REJECTED
+                return result
+            prevented_dispatch = dispatch_gate.cancel_if_pending()
+            future.cancel()
+            self._write_request_deadline(
+                trace_context,
+                uncertain=mutation and not prevented_dispatch,
+            )
+            return _OPERATION_REJECTED
+
+    def _write_request_deadline(
+        self,
+        trace_context: TraceContext,
+        *,
+        uncertain: bool,
+    ) -> None:
+        if uncertain:
+            self._write_error(
+                HTTPStatus.GATEWAY_TIMEOUT,
+                NZOutcomeStatus.UNKNOWN_OUTCOME,
+                "WEB_REQUEST_DEADLINE_UNKNOWN",
+                "The HTTP deadline expired after work began; completion is not claimed.",
+                trace_context,
+            )
+            return
+        self._write_error(
+            HTTPStatus.GATEWAY_TIMEOUT,
+            NZOutcomeStatus.TIMEOUT,
+            "WEB_REQUEST_DEADLINE_EXCEEDED",
+            "The request exceeded its enforced execution deadline.",
+            trace_context,
+        )
 
     def _header_values(self, name: str) -> list[str]:
         get_all = getattr(self.headers, "get_all", None)
@@ -1512,8 +2020,30 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             )
             return None
 
+        reader = getattr(self, "_deadline_reader", None)
+        if isinstance(reader, DeadlineSocketReader):
+            server = getattr(self, "server", None)
+            clock = getattr(server, "monotonic_clock", time.monotonic)
+            request_deadline = getattr(self, "_request_deadline", None)
+            phase_timeout = config.resource_limits.body_timeout_seconds
+            if isinstance(request_deadline, (int, float)):
+                remaining = float(request_deadline) - float(clock())
+                if remaining <= 0:
+                    self._write_request_deadline(trace_context, uncertain=False)
+                    return None
+                phase_timeout = min(phase_timeout, remaining)
+            reader.set_phase_timeout(phase_timeout)
         try:
             raw_body = self.rfile.read(length)
+        except DeadlineReadTimeout:
+            self._write_error(
+                HTTPStatus.REQUEST_TIMEOUT,
+                NZOutcomeStatus.TIMEOUT,
+                "WEB_BODY_TIMEOUT",
+                "The JSON request body exceeded the enforced read deadline.",
+                trace_context,
+            )
+            return None
         except (OSError, ValueError):
             self._write_error(
                 HTTPStatus.BAD_REQUEST,
@@ -1609,7 +2139,7 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         if "outcome" in payload:
             try:
                 source_outcome = NZOutcome.from_dict(payload["outcome"])  # type: ignore[arg-type]
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, RuntimeError):
                 self._write_error(
                     HTTPStatus.BAD_GATEWAY,
                     NZOutcomeStatus.FAILED,
@@ -1667,29 +2197,104 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
         message_safe: str,
         trace_context: TraceContext,
     ) -> None:
-        self._write_json(
-            http_status,
-            _safe_http_error_payload(
-                outcome_status=outcome_status,
-                reason_code=reason_code,
-                message_safe=message_safe,
-                trace_context=trace_context,
-            ),
+        previous_authorization = getattr(
+            self,
+            "_deadline_envelope_authorized",
+            False,
         )
+        self._deadline_envelope_authorized = (
+            reason_code in _WEB_DEADLINE_ENVELOPE_REASONS
+        )
+        try:
+            self._write_json(
+                http_status,
+                _safe_http_error_payload(
+                    outcome_status=outcome_status,
+                    reason_code=reason_code,
+                    message_safe=message_safe,
+                    trace_context=trace_context,
+                ),
+            )
+        finally:
+            self._deadline_envelope_authorized = previous_authorization
 
     def _write_json(self, status: HTTPStatus, payload: dict) -> None:
+        deadline_envelope = getattr(
+            self,
+            "_deadline_envelope_authorized",
+            False,
+        ) is True
+        if not deadline_envelope and self._request_deadline_expired():
+            trace_context = self._trace_from_http_payload(payload)
+            status = HTTPStatus.GATEWAY_TIMEOUT
+            payload = _safe_http_error_payload(
+                outcome_status=NZOutcomeStatus.TIMEOUT,
+                reason_code="WEB_REQUEST_DEADLINE_EXCEEDED",
+                message_safe="The request exceeded its enforced execution deadline.",
+                trace_context=trace_context,
+            )
+            deadline_envelope = True
         safe_payload = self._response_redactor().redact(payload)
         if not isinstance(safe_payload, dict):  # defensive JSON boundary
             safe_payload = {"ok": False, "message_safe": "The response is unavailable."}
         body = json.dumps(safe_payload, ensure_ascii=False).encode("utf-8")
+        server = getattr(self, "server", None)
+        config = getattr(server, "web_boundary_config", None)
+        connection = getattr(self, "connection", None)
+        if isinstance(config, WebBoundaryConfig) and connection is not None:
+            prepared = self._prepare_response_writer(
+                config,
+                allow_expired_grace=deadline_envelope,
+            )
+            if not prepared:
+                trace_context = self._trace_from_http_payload(payload)
+                status = HTTPStatus.GATEWAY_TIMEOUT
+                payload = _safe_http_error_payload(
+                    outcome_status=NZOutcomeStatus.TIMEOUT,
+                    reason_code="WEB_REQUEST_DEADLINE_EXCEEDED",
+                    message_safe="The request exceeded its enforced execution deadline.",
+                    trace_context=trace_context,
+                )
+                safe_payload = self._response_redactor().redact(payload)
+                if not isinstance(safe_payload, dict):
+                    safe_payload = {
+                        "ok": False,
+                        "message_safe": "The response is unavailable.",
+                    }
+                body = json.dumps(safe_payload, ensure_ascii=False).encode("utf-8")
+                self._prepare_response_writer(
+                    config,
+                    allow_expired_grace=True,
+                )
+        self._response_started = True
+        self.close_connection = True
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Connection", "close")
         self.end_headers()
         self.wfile.write(body)
+
+    def _request_deadline_expired(self) -> bool:
+        deadline = getattr(self, "_request_deadline", None)
+        if not isinstance(deadline, (int, float)):
+            return False
+        server = getattr(self, "server", None)
+        clock = getattr(server, "monotonic_clock", time.monotonic)
+        return float(clock()) >= float(deadline)
+
+    @staticmethod
+    def _trace_from_http_payload(payload: Mapping[str, object]) -> TraceContext:
+        try:
+            return TraceContext(
+                request_id=str(payload.get("request_id")),
+                trace_id=str(payload.get("trace_id")),
+            )
+        except (TypeError, ValueError, RuntimeError):
+            return TraceContext.new_request()
 
     def _response_redactor(self) -> SensitiveValueRedactor:
         server = getattr(self, "server", None)
@@ -1713,6 +2318,46 @@ class CodexStyleHandler(SimpleHTTPRequestHandler):
             if isinstance(configured, SensitiveValueRedactor)
             else current
         )
+
+    def _response_write_timeout(self, config: WebBoundaryConfig) -> float:
+        timeout = config.resource_limits.write_timeout_seconds
+        server = getattr(self, "server", None)
+        clock = getattr(server, "monotonic_clock", time.monotonic)
+        deadline = getattr(self, "_request_deadline", None)
+        if isinstance(deadline, (int, float)):
+            remaining = float(deadline) - float(clock())
+            if remaining > 0:
+                return max(0.000001, min(timeout, remaining))
+            # A bounded grace allows the explicit 408/504 envelope itself to
+            # be emitted after the deadline fired without holding a worker.
+            return min(0.25, timeout)
+        return timeout
+
+    def _prepare_response_writer(
+        self,
+        config: WebBoundaryConfig,
+        *,
+        allow_expired_grace: bool,
+    ) -> bool:
+        timeout = self._response_write_timeout(config)
+        server = getattr(self, "server", None)
+        clock = getattr(server, "monotonic_clock", time.monotonic)
+        now = float(clock())
+        request_deadline = getattr(self, "_request_deadline", now + timeout)
+        if float(request_deadline) <= now and not allow_expired_grace:
+            return False
+        deadline = (
+            float(request_deadline)
+            if float(request_deadline) > now
+            else now + timeout
+        )
+        writer = getattr(self, "_deadline_writer", None)
+        if isinstance(writer, DeadlineSocketWriter):
+            writer.set_deadline(deadline=deadline, timeout_seconds=timeout)
+        connection = getattr(self, "connection", None)
+        if connection is not None:
+            connection.settimeout(timeout)
+        return True
 
 
 def main() -> None:
