@@ -111,6 +111,7 @@ _DEPENDENCY_DECLARATION_PATHS = (
 _BLOCKED_COMPONENTS = frozenset(
     {
         ".aoia_state",
+        ".azure",
         ".aws",
         ".cache",
         ".docker",
@@ -121,6 +122,7 @@ _BLOCKED_COMPONENTS = frozenset(
         ".history",
         ".hypothesis",
         ".idea",
+        ".kube",
         ".local-secrets",
         ".local-history",
         ".mypy_cache",
@@ -166,6 +168,7 @@ _BLOCKED_COMPONENTS = frozenset(
         "wheelhouse",
     }
 )
+_BLOCKED_CONFIG_STORE_COMPONENTS = frozenset({"gcloud", "gh", "pip", "pypoetry"})
 _BLOCKED_FILENAMES = frozenset(
     {
         "client_secret.json",
@@ -179,7 +182,9 @@ _BLOCKED_FILENAMES = frozenset(
         ".my.cnf",
         ".pgpass",
         ".pypirc",
+        ".sentryclirc",
         ".testmondata",
+        ".vault-token",
         "application_default_credentials.json",
         "auth.json",
         "coverage.xml",
@@ -627,6 +632,12 @@ def _safe_relative_path(value: object) -> str:
         for part in folded
     ):
         raise _ReleasePathExcluded("release path is an excluded runtime resource")
+    if any(
+        folded[index] == ".config"
+        and folded[index + 1] in _BLOCKED_CONFIG_STORE_COMPONENTS
+        for index in range(len(folded) - 1)
+    ):
+        raise _ReleasePathExcluded("release path is an excluded credential store")
     if len(folded) >= 2 and folded[0] == "runtime" and folded[1] in {
         "logs",
         "screenshots",

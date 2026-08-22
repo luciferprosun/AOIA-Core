@@ -311,7 +311,18 @@ build-backend = "synthetic"
         )
 
     def test_served_web_policy_exclusions_fail_closed_tracked_and_untracked(self) -> None:
-        for path in ("web/.env", "web/cache/hidden.js"):
+        for path in (
+            "web/.env",
+            "web/cache/hidden.js",
+            "web/.kube/config",
+            "web/.azure/accessTokens.json",
+            "web/.config/gcloud/credentials.db",
+            "web/.config/gh/hosts.yml",
+            "web/.config/pip/pip.conf",
+            "web/.config/pypoetry/auth.toml",
+            "web/.vault-token",
+            "web/.sentryclirc",
+        ):
             with self.subTest(path=path, state="untracked"):
                 target = self._write(path, "synthetic served exclusion canary\n")
                 with self.assertRaises(ReleaseSourceError):
@@ -443,6 +454,14 @@ build-backend = "synthetic"
             "runtime/operator.token": "synthetic token canary\n",
             "runtime/operator.secret": "synthetic secret canary\n",
             "runtime/operator.credentials": "synthetic credential canary\n",
+            "apps/demo/.kube/config": "synthetic kube credential canary\n",
+            "apps/demo/.azure/accessTokens.json": "synthetic azure credential canary\n",
+            "apps/demo/.config/gcloud/credentials.db": "synthetic gcloud credential canary\n",
+            "apps/demo/.config/gh/hosts.yml": "synthetic gh credential canary\n",
+            "apps/demo/.config/pip/pip.conf": "synthetic pip credential canary\n",
+            "apps/demo/.config/pypoetry/auth.toml": "synthetic poetry credential canary\n",
+            "runtime/.vault-token": "synthetic vault token canary\n",
+            "runtime/.sentryclirc": "synthetic sentry credential canary\n",
         }
         for path, value in excluded.items():
             self._write(path, value)
@@ -477,9 +496,20 @@ build-backend = "synthetic"
             "runtime/operator.token": "synthetic token canary\n",
             "runtime/operator.secret": "synthetic secret canary\n",
             "runtime/operator.credentials": "synthetic credential canary\n",
+            "apps/demo/.kube/config": "synthetic kube credential canary\n",
+            "apps/demo/.azure/accessTokens.json": "synthetic azure credential canary\n",
+            "apps/demo/.config/gcloud/credentials.db": "synthetic gcloud credential canary\n",
+            "apps/demo/.config/gh/hosts.yml": "synthetic gh credential canary\n",
+            "apps/demo/.config/pip/pip.conf": "synthetic pip credential canary\n",
+            "apps/demo/.config/pypoetry/auth.toml": "synthetic poetry credential canary\n",
+            "runtime/.vault-token": "synthetic vault token canary\n",
+            "runtime/.sentryclirc": "synthetic sentry credential canary\n",
         }
+        legitimate_path = "apps/demo/.config/ui/theme.json"
+        legitimate_body = "{\"theme\":\"synthetic-safe\"}\n"
         for path, value in excluded.items():
             self._write(path, value)
+        self._write(legitimate_path, legitimate_body)
         self.git("add", "--all")
         self.git(
             "-c",
@@ -498,6 +528,18 @@ build-backend = "synthetic"
             self.assertNotIn(path, paths)
             self.assertNotIn(path.encode(), encoded)
             self.assertNotIn(canary.strip().encode(), encoded)
+        rows = {
+            row["path"]: row
+            for row in result.manifest["core"]["critical_files"]
+        }
+        self.assertEqual(
+            ReleaseFileClassification.APPLICATION_SOURCE.value,
+            rows[legitimate_path]["classification"],
+        )
+        self.assertEqual(
+            _digest(legitimate_body.encode()),
+            rows[legitimate_path]["sha256"],
+        )
 
     def test_exclusion_policy_covers_local_credentials_caches_and_outputs(self) -> None:
         excluded_paths = (
@@ -506,6 +548,12 @@ build-backend = "synthetic"
             "runtime/.pgpass",
             "runtime/.my.cnf",
             "apps/demo/.aws/credentials",
+            "apps/demo/.azure/accessTokens.json",
+            "apps/demo/.kube/config",
+            "apps/demo/.config/gcloud/credentials.db",
+            "apps/demo/.config/gh/hosts.yml",
+            "apps/demo/.config/pip/pip.conf",
+            "apps/demo/.config/pypoetry/auth.toml",
             "apps/demo/application_default_credentials.json",
             "apps/demo/kubeconfig",
             "apps/demo/id_ecdsa_sk",
@@ -515,6 +563,8 @@ build-backend = "synthetic"
             "runtime/operator.token",
             "runtime/operator.secret",
             "runtime/operator.credentials",
+            "runtime/.vault-token",
+            "runtime/.sentryclirc",
             "apps/demo/.cache/value.json",
             "apps/demo/.gradle/state.json",
             "apps/demo/.parcel-cache/state.json",
@@ -549,6 +599,7 @@ build-backend = "synthetic"
             "apps/demo/state/auth.py",
             "runtime/security/secret_redaction.py",
             "tests/test_auth_boundary.py",
+            "apps/demo/.config/ui/theme.json",
         ):
             with self.subTest(source_path=source_path):
                 self.assertEqual(
