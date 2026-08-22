@@ -359,6 +359,7 @@ class GitEnvironmentHardeningReadAdapter1ATests(unittest.TestCase):
             REPO_ROOT / "runtime" / "git_ops" / "git_controlled_push.py",
             REPO_ROOT / "runtime" / "execution" / "controlled_test_runner.py",
             REPO_ROOT / "runtime" / "commands" / "local_commands.py",
+            REPO_ROOT / "runtime" / "release_attestation.py",
             REPO_ROOT / "runtime" / "tools" / "build_rhcsa_library.py",
             REPO_ROOT / "runtime" / "safety" / "bounded_subprocess.py",
             CONTROLLED_PACKAGE_INSTALL_MODULE,

@@ -37,6 +37,7 @@ EXPECTED_BOUNDED_PROCESS_SITES = {
     "runtime/knowledge/tools/pdf_extract.py": 2,
     "runtime/package_ops/controlled_package_install.py": 2,
     "runtime/patches/post_patch_controlled_test_integration.py": 1,
+    "runtime/release_attestation.py": 1,
     "runtime/tools/build_rhcsa_library.py": 2,
     "scripts/dev/create_ioa_lab_clone.py": 1,
 }
