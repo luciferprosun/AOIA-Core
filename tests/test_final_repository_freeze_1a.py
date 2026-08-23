@@ -69,7 +69,7 @@ class FinalRepositoryFreeze1ATests(unittest.TestCase):
             self.assertIs(self.freeze[field], False)
 
     def test_freeze_binds_handoff_unix_freeze_and_all_four_hats(self) -> None:
-        self.assertEqual("9f5020095eb5d7d083ed837928198b9a05371766254a1e3ca61f2ff765d102e5", self.freeze["unix_r1_freeze_hash"])
+        self.assertEqual("af5dcbb661fa7c48e1dc787f2ca556f09175e02a3a48911b6ced8b19c1405b00", self.freeze["unix_r1_freeze_hash"])
         self.assertEqual("unix-knowledge-hat-1a", self.freeze["unix_hat_identity"]["hat_id"])
         self.assertEqual({"bash", "linux", "python"}, set(self.freeze["hat_identities"]))
         self.assertEqual(64, len(self.freeze["architect_handoff_manifest_hash"]))

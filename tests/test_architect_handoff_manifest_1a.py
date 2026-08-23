@@ -96,7 +96,7 @@ class ArchitectHandoffManifest1ATests(unittest.TestCase):
     def test_r1_supersession_and_complete_r0_physical_evidence_are_retained(self) -> None:
         self.assertEqual("aoia-unix-unit-1a-r1", self.manifest["current_freeze_id"])
         self.assertEqual(
-            "9f5020095eb5d7d083ed837928198b9a05371766254a1e3ca61f2ff765d102e5",
+            "af5dcbb661fa7c48e1dc787f2ca556f09175e02a3a48911b6ced8b19c1405b00",
             self.manifest["current_freeze_manifest_hash"],
         )
         self.assertEqual(
