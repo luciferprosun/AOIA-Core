@@ -1,440 +1,212 @@
 # AOIA-Core
 
-AOIA-Core is a local-first runtime for AI-assisted engineering workflows with explicit evidence, provenance, and model-output boundaries. It separates evidence, provenance, contradictions, logs, memory traces, and runtime state from raw model output.
+AOIA-Core is one local-first runtime for AI-assisted engineering and evidence-aware review. It keeps model output, tool results, evidence, provenance, contradictions, runtime state, and human authority separate instead of treating them as interchangeable forms of truth.
 
-Grant reviewers: start with [Quick Start for Grant Reviewers](docs/reviewer/QUICK_START_FOR_GRANT_REVIEWERS.md) and [AOIA/NMS Reviewer Glossary](docs/nms/GLOSSARY.md).
+AOIA means **Adaptive Oceanic Intelligence Architecture**. In this repository the name describes a bounded routing and control architecture; it does not imply AGI, autonomous authority, or a self-modifying system.
 
-AOIA-Core exists because AI-assisted workflows often blur the line between what a model said, what a tool produced, what was logged, and what can actually be trusted or replayed. AOIA-Core makes those layers explicit.
+## What is implemented
 
-## What AOIA-Core Controls
+- deterministic local routing before provider use
+- optional external model providers behind one `ProviderManager`
+- structured shell, filesystem, browser, and project-inspection actions
+- explicit operator approval for non-response actions
+- local Linux/RHCSA retrieval with provenance and refusal boundaries
+- append-only provenance support and contradiction tracking
+- local CLI, web console, and optional Textual TUI over the same runtime
+- deterministic dated-evidence review with source hashes and a mandatory human-review result
 
-- evidence boundaries
-- provenance verification
-- contradiction tracking
-- retrieval boundaries
-- runtime state
-- deterministic operator workflows
-- human-approved execution
+The dated-evidence capability is a module of AOIA-Core, not a second application. Its CLI command, JSON endpoints, browser workbench, tests, and documentation all live in this repository and use the same launch surface.
 
-## What AOIA-Core Is Not
+## Quick start
 
-- not a chatbot
-- not a generic AI agent
-- not a truth engine
-- not a RAG wrapper
-- not GUI-first
-- not cloud-first
-- not a self-modifying/autonomous swarm
+Requirements: Python 3.11 or newer. The deterministic evidence-review path uses only the Python standard library and needs no API key.
 
-## Project Layers
-
-1. AOIA-Core: the final practical engineering project and main repository deliverable.
-2. MHLM / MDLH: AI-safety research background about multi-model hallucination, recursive consensus, and provenance drift.
-3. LSC: scientific case-study background and stress-test context, not the core deliverable of AOIA-Core.
-
-## Current Technical Status
-
-- GT6 authority audit complete
-- GT6B full manifest complete
-- GT7 cleanup complete through Batch 3
-- latest pushed feature savepoint before this docs clarification pass: `78ab538`
-- validation at current savepoint: `146` tests run, `4` skipped
-- see [Implemented Capabilities](docs/governance/IMPLEMENTED_CAPABILITIES.md) for a conservative status table separating implemented, partial, planned, and documentation-only items.
-
-## For External Reviewers
-
-Start here:
-
-- [Project Overview for Reviewers](docs/reviewer/PROJECT_OVERVIEW_FOR_REVIEWERS.md)
-- [Implemented Capabilities](docs/governance/IMPLEMENTED_CAPABILITIES.md)
-- [One Concrete Example](docs/reviewer/ONE_CONCRETE_EXAMPLE.md)
-- [External Model Output Policy](docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md)
-- [Stress-Test Documentation](docs/stress_tests/README.md)
-
-AOIA-Core should be read as a local-first boundary-enforcement runtime for AI-assisted engineering workflows. It is not AGI, not autonomous, not a truth engine, not validated science, and not production-ready.
-
-Evidence Memory Phase 1A is not active unless explicitly approved later through ADR/operator decision.
-
-Reviewer boundary note: deterministic/local-first claims apply to local retrieval and epistemic gating, not to external LLM output. Provenance records local lineage and integrity; it does not validate factual correctness, scientific claims, external source authenticity, or model-output truth. Optional provider/UI features such as xAI/Grok, the model selector, web UI, and TUI surfaces do not change runtime authority, evidence boundaries, or provenance semantics.
-
-## License
-
-AOIA-Core is released under the MIT License. See [LICENSE](LICENSE).
-
-If future documentation-specific licensing is desired, it can be clarified later.
-
-## External Model Output Policy
-
-AOIA-Core preserves some model-assisted reviews, forensic exports, and audit packets as historical context. These files are not canonical source, not evidence, and not runtime authority. They must not be ingested into Evidence Memory or used to override governance contracts or ADRs. See [docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md](docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md).
-
-## Reviewer / Stress-Test Documentation
-
-AOIA-Core GT8 includes additional documentation to aid reviewers. See:
-
-- [docs/stress_tests/README.md](docs/stress_tests/README.md)
-- [docs/stress_tests/AOIA_NMS_STRESS_TEST_PROTOCOL.md](docs/stress_tests/AOIA_NMS_STRESS_TEST_PROTOCOL.md)
-- [docs/stress_tests/FAILURE_MODES.md](docs/stress_tests/FAILURE_MODES.md)
-- [docs/stress_tests/LSC_CASE_STUDY_PROTOCOL.md](docs/stress_tests/LSC_CASE_STUDY_PROTOCOL.md)
-- [docs/stress_tests/MODEL_AUDIT_MATRIX.md](docs/stress_tests/MODEL_AUDIT_MATRIX.md)
-- [docs/ROADMAP_4_MONTHS.md](docs/ROADMAP_4_MONTHS.md)
-
-These documents formalize the reviewer credibility pass for GT8. They clarify that stress-test contexts and scientific case studies are not part of the AOIA-Core deliverable.
-
-## Existing Runtime Notes
-
-This repository publishes the functional project code and architecture work
-without private API secrets, browser state, local session memory, or machine-
-specific runtime artifacts.
-
-## AOIA
-
-AOIA stands for Adaptive Oceanic Intelligence Architecture.
-
-In this repository, AOIA is used narrowly:
-
-- deterministic routing
-- local-first execution
-- token and energy conservation
-- biologically inspired scheduling research
-
-It is not an AGI system, autonomous swarm, or self-modifying runtime.
-
-## Runtime architecture
-
-```text
-USER
-  -> Local router first
-  -> Aureon provider
-  -> Gemini provider when selected
-  -> fallback API providers
-  -> JSON action
-  -> executor
-  -> shell / filesystem / browser tools
-  -> result
-  -> next action or final response
-```
-
-The runtime can:
-
-- execute shell commands
-- create and edit files
-- keep lightweight agent state
-- launch and reuse a persistent Playwright browser session
-- inspect live webpages
-- capture screenshots
-- switch models from inside the app with `/model`
-
-External model providers are optional and non-deterministic. They can assist operator workflows, but their output is not evidence, provenance, or runtime authority by default.
-
-## AOIA and DVM references
-
-The repository contains current AOIA foundation work and related background references. The AOIA name draws on biological layering concepts as historical routing inspiration. This background is not part of the AOIA-Core runtime authority or reviewer deliverable.
-
-## Application catalog
-
-The repository also contains sibling application directories under `apps/`.
-
-The `apps/` directory may contain sibling or imported application material and should not be treated as the AOIA-Core runtime deliverable unless explicitly documented.
-
-Current imported subproject:
-
-- `apps/flameborn-academy-codex-sparrow/`
-  - `flAmeBornLLC / LLM Academy`
-  - package identifier: `codexprosparrow`
-
-## Project structure
-
-```text
-flAmeBorbLLC-AIOA-LiGaLu/
-├── main.py
-├── requirements.txt
-├── run.sh
-├── prompts/
-│   └── system_prompt.txt
-├── tools/
-│   ├── browser_tools.py
-│   ├── executor.py
-│   ├── filesystem_tools.py
-│   ├── memory.py
-│   ├── shell_tools.py
-│   ├── system_info.py
-│   └── validator.py
-├── adaptive_routing/
-├── docs/
-├── knowledge/
-├── orchestrator/
-├── providers/
-├── router/
-├── state/
-└── tests/
-```
-
-Private runtime directories such as local logs, browser profile data, session
-memory, checkpoints, and virtual environments are intentionally not published.
-
-## Setup
-
-### 1. API key
-
-Set one of:
-
-- `AUREON_API_BASE_URL` and `AUREON_API_KEY` for a live Aureon-compatible endpoint
-- `OPENROUTER_API_KEY` for OpenRouter fallback
-- `GEMINI_API_KEY` if you want to switch to Gemini with `/model gemini`
-
-Inside the CLI:
-
-- `/model` shows the current model and presets
-- `/model aureon` switches to the local-first Aureon preset
-- `/model gemini` switches to Gemini
-- `/model provider/model` accepts explicit provider and model names
-
-### 2. Runtime bootstrap
-
-`run.sh` now bootstraps `.venv` automatically if it does not exist:
+Run the terminal interface:
 
 ```bash
-cd /path/to/flAmeBorbLLC-AIOA-LiGaLu
-./run.sh
+./runtime/run.sh
 ```
 
-If `.venv` is missing, `run.sh` now falls back to system `python3` so the runtime can still start on a low-spec machine without pulling new packages first.
-
-### 2b. Web UI
-
-The project now also ships with a local web shell that keeps the same runtime
-and model switching logic but presents it through a Codex-style interface.
+Run the unified local web console:
 
 ```bash
-cd /path/to/flAmeBorbLLC-AIOA-LiGaLu
-./run_web.sh
+./runtime/run_web.sh
 ```
 
-Default URL:
+Open <http://127.0.0.1:4311>. The server accepts loopback bindings only. The **Assistant** and **Evidence review** views are modules of the same AOIA-Core process.
 
-```text
-http://127.0.0.1:4311
-```
-
-### 2c. Terminal operator console
-
-The minimal Textual TUI wraps the existing runtime without replacing routing,
-provider, provenance, retrieval, or approval semantics.
+Install optional provider/browser dependencies into a local virtual environment:
 
 ```bash
-cd /path/to/flAmeBorbLLC-AIOA-LiGaLu
+./runtime/install.sh
+```
+
+The optional Textual interface starts with:
+
+```bash
 ./scripts/start_tui.sh
 ```
 
-Controls:
+## Dated evidence review
 
-- Enter a normal request to run it through `AgentRuntime.run_text_request()`.
-- `/model` lists configured model presets.
-- `/model gemini`, `/model openrouter`, `/model deepseek`, or `/model aureon` uses the existing provider switch path.
-- `/status` prints the current runtime status into the transcript.
-- `/clear` clears the visible transcript.
-- `Ctrl+A` approves a pending risky action.
-- `Ctrl+X` rejects a pending risky action.
-- `Ctrl+P` / `Ctrl+N` navigate command history.
-- `Ctrl+R` refreshes runtime status.
-- `Ctrl+C` or `q` exits.
+The bundled scenario demonstrates a common high-stakes failure: a fluent answer repeats Germany's 2025 statutory minimum-wage value for a July 2026 question. AOIA-Core compares the answer with three dated official records, identifies stale or conflicting values, checks temporal/source attribution, and hashes both the evidence set and answer snapshot.
 
-The TUI shows only operator-visible transcript output and replay-safe
-operational telemetry. It intentionally does not display hidden reasoning,
-raw provider internals, prompts, or chain-of-thought traces.
+Run the bundled stale example in the CLI:
 
-### 3. Playwright
-
-Required Python dependency:
-
-```bash
-pip install -r requirements.txt
+```text
+/review
 ```
 
-Browser binaries:
+Run the corrected example or supply your own candidate text:
 
-```bash
-source .venv/bin/activate
-playwright install
+```text
+/review corrected
+/review Seit Januar 2026 gelten laut BMAS 13,90 Euro brutto je Zeitstunde.
 ```
 
-## Deterministic knowledge pipeline
+The web API exposes the same engine:
 
-The project includes a static RHCSA knowledge workflow:
+```text
+GET  /api/review/scenario
+POST /api/review
+```
 
-- raw PDF extraction
-- section parsing
-- canonical command generation
-- deterministic keyword index
-- deterministic context pack generation
-- static context injection
-
-Artifacts live under `knowledge/`.
-
-## JSON actions
-
-The model must return one JSON object per step.
-
-Examples:
+Example request:
 
 ```json
 {
-  "action": "shell_execute",
-  "command": "curl --version",
-  "reason": "Check curl availability.",
-  "requires_confirmation": false
+  "candidate_answer": "Der Mindestlohn beträgt 12,82 Euro brutto pro Stunde."
 }
 ```
+
+Every successful comparison retains these authority boundaries:
 
 ```json
 {
-  "action": "write_file",
-  "path": "/home/l/Desktop/AI_TEST/note.txt",
-  "content": "hello",
-  "reason": "Write a text file safely."
+  "decision_state": "HUMAN_REVIEW_REQUIRED",
+  "authority": "METADATA_ONLY_NO_AUTHORITY",
+  "legal_advice": false,
+  "network_used": false
 }
 ```
 
-```json
-{
-  "action": "browser_open",
-  "url": "https://www.google.com",
-  "reason": "Open Google in the persistent local browser."
-}
+The module is intentionally bounded. A matching number corroborates one registry value; it does not prove that an entire answer is correct, decide whether a rule applies to a person, or replace current official sources or qualified advice. The bundled records were rechecked on 2026-08-25 against [BMAS guidance](https://www.bmas.de/DE/Arbeit/Arbeitsrecht/Mindestlohn/Informationen-zum-Mindestlohn/informationen-zum-mindestlohn-deutsch.html), the [official rate history](https://www.bmas.de/DE/Arbeit/Arbeitsrecht/Mindestlohn/Glossar/G/Gesetzlicher-Mindestlohn.html), and [MiLoV5](https://www.gesetze-im-internet.de/milov5/MiLoV5.pdf).
+
+See [Dated Evidence Review](docs/modules/DATED_EVIDENCE_REVIEW.md) for the contract and extension rules.
+
+## Runtime flow
+
+```text
+Operator
+  ├─ /review or evidence-review UI
+  │    -> bounded input validation
+  │    -> immutable dated registry
+  │    -> deterministic comparison + SHA-256
+  │    -> HUMAN_REVIEW_REQUIRED
+  │
+  └─ normal request
+       -> slash commands / local router
+       -> epistemic and knowledge gates
+       -> optional provider planning
+       -> structured action validation
+       -> operator approval when required
+       -> local executor
+       -> result, state, and provenance boundaries
 ```
 
-## Tool capabilities
+External providers are optional and non-deterministic. Their output may assist an operator, but it is not evidence, provenance, or runtime authority by default. The evidence-review module never calls a provider.
 
-### Shell
+## Useful commands
 
-- `shell_execute`
-- supports quoted strings, pipes, redirects, `&&`, `;`
-- confirmations for `sudo`, `apt install`, `pip install`, `npm install`
-
-### Filesystem
-
-- `create_folder`
-- `create_file`
-- `write_file`
-- `append_file`
-- `read_file`
-- `move_file`
-- `delete_file`
-- `search_in_project`
-
-### Browser
-
-- `browser_start`
-- `browser_open`
-- `browser_click`
-- `browser_type`
-- `browser_press`
-- `browser_read_html`
-- `browser_get_visible_text`
-- `browser_screenshot`
-- `browser_current_url`
-- `browser_close`
-
-Browser state is persistent for the lifetime of the runtime process.
-
-## Local URL bootstrap
-
-Requests that already contain a URL now avoid wasting model quota on trivial
-browser setup. The runtime can locally:
-- unwrap common redirect links such as `l.facebook.com/...?...u=<target>`
-- start the browser
-- open the target URL
-- capture visible page text before the first model step
-
-This means the model is used for interpretation, not for obvious setup work.
-
-## Memory and state
-
-The runtime remembers:
-- current working directory
-- current task
-- previous commands
-- recent outputs
-- current browser page
-- open tabs
-- screenshots
-- Obsidian vault notes in `obsidian_vault/`
-
-Stored runtime state is local and intentionally excluded from the public repo.
-
-## Orchestration MVP
-
-The runtime is now structured as a small AI-agent orchestration layer rather
-than an offline chatbot wrapper.
-
-Current layers:
-- Planner: asks the active cloud model for a short JSON plan before falling back to single-step action mode.
-- Model router: tries the configured fallback chain in `state/providers.json`.
-- Provider support: Gemini, OpenRouter, DeepSeek-compatible API, HuggingFace, and live Aureon endpoints.
-- Command proposal: models return structured actions only; they do not execute directly.
-- Human approval: every non-`respond` action requires ENTER approval before execution.
-- Executor: runs approved shell, filesystem, browser, and project scan actions.
-- Memory hats: modular context overlays stored in `memory/hats/`.
-- Project scanner: `/scan PATH` maps files, entrypoints, file types, and writes `project_scan.json`.
-- Logging: actions, results, sessions, errors, and vault notes remain persistent.
-
-Useful commands:
-
-```bash
-/setup
+```text
+/status
+/model
+/model gemini
 /providers
+/setup
+/review
 /hat list
-/hat load coding
 /scan /path/to/project
+/rhcsa status
+/tools
+/help
 ```
 
-Provider configuration:
-- `state/providers.json` controls fallback order.
-- API keys are loaded from standard `~/.config/*/api.env` files and the known USB FlameBorn `.env` offload.
-- There is no fake offline model response. If all cloud providers fail, the runtime reports the real provider errors.
+`/model` changes the assistant provider/model selection. It does not change the deterministic review engine or its authority state.
 
-## Safety model
+## Provider configuration
 
-Blocked patterns include:
-- `rm -rf /`
-- fork bombs
-- dangerous `chmod` / `chown` on system paths
-- `curl | bash`
-- command substitution and heredocs
+Provider credentials must remain outside the repository. Depending on the selected provider, AOIA-Core can read environment variables such as:
 
-Human approval is required for every non-final action. Press ENTER to approve
-or type `n`, `no`, `cancel`, `reject`, or `stop` to reject.
+- `AUREON_API_BASE_URL` and `AUREON_API_KEY`
+- `OPENROUTER_API_KEY`
+- `GEMINI_API_KEY`
+- `XAI_API_KEY`
+- `DEEPSEEK_API_KEY`
+
+Use `/setup` for the local configuration checklist and `/providers` for availability. Never commit keys, browser profiles, session logs, or machine-specific state.
+
+## Repository structure
+
+```text
+AOIA-Core/
+├── runtime/
+│   ├── main.py                 # canonical AgentRuntime and CLI
+│   ├── webapp.py               # one local HTTP server and JSON API
+│   ├── evidence_review/        # dated registry and deterministic review engine
+│   ├── adaptive_routing/       # local classifiers and epistemic kernel
+│   ├── commands/               # slash-command registry
+│   ├── knowledge/              # local Linux/RHCSA corpus and validators
+│   ├── providers/              # optional model-provider adapters
+│   ├── retrieval/              # canonical retrieval facade
+│   ├── tools/                  # controlled local tools and provenance helpers
+│   ├── run.sh
+│   └── run_web.sh
+├── web/                        # unified browser console
+├── tui/                        # optional Textual console
+├── tests/                      # deterministic, boundary, API, and runtime tests
+├── docs/                       # architecture, governance, reports, and module docs
+└── state/                      # public-safe provider/model defaults only
+```
+
+Mutable runtime state is stored outside the checkout under `~/.local/state/aoia` by default. Set `AOIA_HOME` to use another local state root.
+
+## Safety and authority
+
+AOIA-Core is designed around explicit boundaries:
+
+- risky local actions require operator confirmation where gates are implemented
+- model output cannot silently become evidence
+- provenance verifies recorded lineage/integrity, not factual truth
+- unresolved local retrieval can refuse instead of fabricating an answer
+- evidence review is read-only, deterministic, size-bounded, and human-gated
+- the local web server rejects non-loopback bindings and applies restrictive browser headers
+
+AOIA-Core is not a truth engine, legal adviser, generic autonomous agent, production security certification, or scientific validation system.
 
 ## Tests
 
-Run:
+Run the complete suite from the repository root:
 
 ```bash
-cd /home/l/APP2/codex_clone
-. .venv/bin/activate
-python -m unittest discover -s tests -v
+PYTHONPATH=runtime PYTHONDONTWRITEBYTECODE=1 \
+  python3 -m unittest discover -s tests -v
 ```
 
-Covered:
-1. create folder on desktop
-2. create txt file inside folder
-3. write content into txt file
-4. install-command confirmation path
-5. run `curl --version`
-6. browser open
-7. browser search interaction on local page
-8. screenshot capture
-9. visible text extraction
-10. page navigation
+The suite covers routing determinism, execution containment, evidence/provenance contracts, retrieval refusal, provider selection, CLI commands, the dated-evidence engine, its static no-provider/no-write boundaries, and the integrated local web API. Browser and TUI tests skip cleanly when their optional dependencies are not installed.
 
-## Live browser notes
+## Reviewer and governance entry points
 
-Real public websites may still present anti-bot or consent pages.
+- [Project overview](docs/reviewer/PROJECT_OVERVIEW_FOR_REVIEWERS.md)
+- [Implemented capabilities](docs/governance/IMPLEMENTED_CAPABILITIES.md)
+- [Authority scope](AUTHORITY_SCOPE.md)
+- [External model output policy](docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Runtime map](AOIA_RUNTIME_MAP.md)
+- [Stress-test documentation](docs/stress_tests/README.md)
 
-Observed during smoke tests:
-- opening `https://www.google.com` works
-- screenshots and visible text extraction work on live pages
-- direct Google search URLs may trigger `sorry` anti-bot pages depending on IP and traffic history
-- facebook redirect links can be unwrapped locally to their real target URLs
+Research material under `MHLM_MHSR/` and LSC case-study documentation provide background and stress-test context. They are not a second runtime and do not override AOIA-Core's authority contracts.
 
-That is a site-side constraint, not a local executor failure.
+## License
+
+AOIA-Core is released under the [MIT License](LICENSE). Linked official sources remain subject to their respective terms.

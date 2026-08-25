@@ -27,7 +27,7 @@ AOIA-Core is not:
 - validated science
 - a production-ready deployment
 - a generic chatbot or agent
-- a model output validation engine
+- a general model-output validation or fact-checking engine
 
 It is not intended to make model consensus equivalent to evidence. It is not a mechanism for automatic contradiction resolution or production-grade governance enforcement.
 
@@ -40,6 +40,8 @@ Implemented capabilities include:
 - contradiction tracking and registry ideas
 - deterministic local retrieval and controlled provider switching
 - human approval gates for risky actions
+- one bounded, deterministic dated-evidence review module
+- one local web console exposing assistant and evidence-review views
 - external model output policy as historical/reviewer context
 - core documentation and reviewer-focused status materials
 
@@ -52,7 +54,8 @@ These are implemented at the documentation and runtime-design level. Some capabi
 - The evidence boundary is a controlled write path and audit-support mechanism, not a complete immutable content-addressed evidence store.
 - Runtime safety contracts are strong design/governance contracts with partial runtime enforcement today; full enforcement is roadmap work.
 - xAI/Grok and the model selector are optional convenience/demo features. They do not change runtime authority, evidence/provenance boundaries, or local retrieval determinism.
-- Web and TUI surfaces are optional visualization, debug, and operator interfaces. Generated `state/`, `memory/`, `logs/`, and `obsidian_vault/` artifacts are not canonical source authority.
+- The dated-evidence module compares one curated scenario, uses no provider or write path, and always returns `HUMAN_REVIEW_REQUIRED`. It is not a general validation engine or legal adviser.
+- The web console is an implemented loopback-only operator interface. The TUI remains optional. Neither surface changes runtime authority. Generated state artifacts are not canonical source authority.
 
 ## What Is Planned / Inactive
 
@@ -72,7 +75,7 @@ Out of scope for this deliverable:
 - LSC/MHLM/MDLH/DVM theory as runtime authority
 - external provider trustworthiness or model correctness claims
 - production readiness guarantees
-- TUI Phase 3 implementation and final GUI delivery
+- TUI Phase 3 implementation or a production frontend claim
 - autonomous or self-modifying runtime behavior
 
 ## How to Verify the Repo
@@ -84,6 +87,7 @@ Reviewers can verify the repository by checking:
 - `docs/governance/IMPLEMENTED_CAPABILITIES.md` for conservative capability status
 - `docs/reviewer/ONE_CONCRETE_EXAMPLE.md` for an example workflow and authority boundaries
 - `docs/governance/EXTERNAL_MODEL_OUTPUT_POLICY.md` for external model output policy
+- `docs/modules/DATED_EVIDENCE_REVIEW.md` for the bounded review contract
 - `docs/stress_tests/README.md` for clarity on stress-test research context
 - `LICENSE` for licensing status
 - `MHLM_MHSR/README.md` for research background context if present

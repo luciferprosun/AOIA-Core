@@ -21,7 +21,7 @@ AOIA-Core is not:
 - a truth engine
 - a scientific validation system
 - an LSC or neutrino validation project
-- a GUI, mobile, or frontend product
+- a production GUI, mobile, or frontend product
 
 ## 3. What to inspect first
 
@@ -37,6 +37,8 @@ Then inspect representative runtime files:
 
 - `runtime/tools/provenance.py`
 - `runtime/retrieval/facade.py`
+- `runtime/evidence_review/engine.py`
+- `runtime/webapp.py`
 
 ## 4. How to run validation
 
@@ -54,7 +56,7 @@ security, scientific validity, or production readiness.
 
 The known current savepoint result is:
 
-- `146` tests run
+- `163` tests run
 - `4` optional UI/Textual tests skipped
 - `OK`
 
@@ -86,9 +88,13 @@ runtime enforcement today. Full enforcement remains roadmap work.
 `AOIAEpistemicKernel` is the canonical epistemic gate. `KnowledgeRouter` is a
 legacy/compatibility transition surface, not a second canonical authority.
 
-Web/TUI surfaces are optional visualization, debug, and operator interfaces.
-Generated `state/`, `memory/`, `logs/`, and `obsidian_vault/` artifacts are
-runtime artifacts, not canonical source authority.
+The loopback-only web console is an implemented operator surface over the same
+runtime. The TUI is optional. Neither changes authority semantics. Generated
+state artifacts are runtime data, not canonical source authority.
+
+The dated-evidence module is deterministic and provider-independent, but it is
+bounded to one curated scenario. Its findings and hashes are metadata only and
+always require human review; they are not legal advice or proof of truth.
 
 ## 8. Recommended reading order
 
@@ -97,4 +103,5 @@ runtime artifacts, not canonical source authority.
 3. `docs/reviewer/PROJECT_OVERVIEW_FOR_REVIEWERS.md`
 4. `docs/governance/IMPLEMENTED_CAPABILITIES.md`
 5. `docs/reviewer/ONE_CONCRETE_EXAMPLE.md`
-6. `docs/nms/ROADMAP_4_MONTHS.md`
+6. `docs/modules/DATED_EVIDENCE_REVIEW.md`
+7. `docs/nms/ROADMAP_4_MONTHS.md`

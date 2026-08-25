@@ -6,3 +6,5 @@ Files:
 - `LINEAGE_MAP.md`
 - `GIT_HISTORY_CONTINUATION_PLAN.md`
 - `RUNTIME_BOUNDARY.md`
+- `modules/DATED_EVIDENCE_REVIEW.md`
+- `ADR/ADR-006-integrated-dated-evidence-review.md`

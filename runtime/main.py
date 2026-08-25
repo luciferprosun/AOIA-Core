@@ -1078,8 +1078,8 @@ class AgentRuntime:
 
 def print_banner(runtime: AgentRuntime) -> None:
     print("########################################################")
-    print("###  flAmeBornLLC  |  LLM Academy                   ###")
-    print("###  LOCAL AI TERMINAL + BROWSER AGENT              ###")
+    print("###  AOIA-Core                                      ###")
+    print("###  LOCAL ASSISTANT + DATED EVIDENCE REVIEW        ###")
     print("########################################################")
     print(f"[INFO] Desktop directory detected: {runtime.desktop_dir}")
     print(f"[INFO] Current working directory: {runtime.memory_store.memory.cwd}")

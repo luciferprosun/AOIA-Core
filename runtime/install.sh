@@ -5,7 +5,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$PROJECT_DIR/.venv"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
-echo "flAmeBornLLC AIOA LiGaLu installer"
+echo "AOIA-Core installer"
 echo "project_dir=$PROJECT_DIR"
 
 if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
@@ -50,6 +50,8 @@ echo "Compiling core Python files..."
 "$VENV_DIR/bin/python" -m py_compile \
   "$PROJECT_DIR/main.py" \
   "$PROJECT_DIR/webapp.py" \
+  "$PROJECT_DIR/evidence_review/engine.py" \
+  "$PROJECT_DIR/evidence_review/scenario.py" \
   "$PROJECT_DIR/knowledge/tools/pdf_extract.py" \
   "$PROJECT_DIR/knowledge/tools/section_parser.py" \
   "$PROJECT_DIR/knowledge/tools/canonical_builder.py" \

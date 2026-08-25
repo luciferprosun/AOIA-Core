@@ -3,33 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>App222 Operator Console</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
+    <meta
+      name="description"
+      content="Local AOIA-Core operator console with deterministic dated-evidence review."
     />
+    <title>AOIA-Core Operator Console</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="shell">
       <aside class="sidebar">
         <div class="brand">
-          <p class="eyebrow">flAmeBornLLC</p>
-          <h1>App222</h1>
-          <p class="subtitle">Codex-style operator shell for your local runtime.</p>
+          <p class="eyebrow">Adaptive Oceanic Intelligence Architecture</p>
+          <h1>AOIA-Core</h1>
+          <p class="subtitle">One local runtime for assisted work and evidence-aware review.</p>
         </div>
+
+        <nav class="view-nav" aria-label="AOIA-Core modules" role="tablist">
+          <button
+            class="view-tab view-tab-active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="assistant-view"
+            data-view="assistant"
+          >
+            Assistant
+          </button>
+          <button
+            class="view-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="review-view"
+            data-view="review"
+          >
+            Evidence review
+          </button>
+        </nav>
 
         <section class="panel">
           <div class="panel-head">
             <h2>Model</h2>
             <span id="current-model-badge" class="badge">loading</span>
           </div>
-          <label class="label" for="model-select">Active model</label>
+          <label class="label" for="model-select">Active assistant model</label>
           <select id="model-select" class="select"></select>
-          <button id="switch-model" class="button button-primary">Switch model</button>
-          <p id="model-note" class="note"></p>
+          <button id="switch-model" class="button button-primary" type="button">Switch model</button>
+          <p id="model-note" class="note">
+            The evidence-review module is deterministic and does not call this provider.
+          </p>
           <div id="model-picker" class="model-picker" aria-label="Model shortcuts"></div>
         </section>
 
@@ -38,10 +61,10 @@
             <h2>Quick commands</h2>
           </div>
           <div class="quick-actions">
-            <button class="button button-ghost quick-action" data-prompt="/status">/status</button>
-            <button class="button button-ghost quick-action" data-prompt="/tools">/tools</button>
-            <button class="button button-ghost quick-action" data-prompt="/help">/help</button>
-            <button class="button button-ghost quick-action" data-prompt="open https://example.com">Open URL</button>
+            <button class="button button-ghost quick-action" type="button" data-prompt="/status">/status</button>
+            <button class="button button-ghost quick-action" type="button" data-prompt="/tools">/tools</button>
+            <button class="button button-ghost quick-action" type="button" data-prompt="/review">/review</button>
+            <button class="button button-ghost quick-action" type="button" data-prompt="/help">/help</button>
           </div>
         </section>
 
@@ -73,59 +96,143 @@
       <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Operator Console</p>
-            <h2>Codex-shaped control surface</h2>
+            <p class="eyebrow">AOIA-Core Operator Console</p>
+            <h2 id="view-title">Assistant runtime</h2>
           </div>
-          <button id="refresh-status" class="button button-ghost">Refresh status</button>
+          <button id="refresh-status" class="button button-ghost" type="button">Refresh status</button>
         </header>
 
-        <section class="hero">
-          <div class="hero-card">
-            <p class="eyebrow">Session</p>
-            <h3 id="session-model">loading</h3>
-            <p id="session-summary" class="hero-copy">
-              Waiting for runtime status.
-            </p>
-          </div>
-          <div class="hero-grid">
-            <article class="metric-card">
-              <span>Tools</span>
-              <strong id="metric-tools">0</strong>
-            </article>
-            <article class="metric-card">
-              <span>Commands</span>
-              <strong id="metric-commands">0</strong>
-            </article>
-            <article class="metric-card">
-              <span>Recent outputs</span>
-              <strong id="metric-outputs">0</strong>
-            </article>
-          </div>
+        <section id="assistant-view" class="workspace-view" role="tabpanel">
+          <section class="hero">
+            <div class="hero-card">
+              <p class="eyebrow">Session</p>
+              <h3 id="session-model">loading</h3>
+              <p id="session-summary" class="hero-copy">Waiting for runtime status.</p>
+            </div>
+            <div class="hero-grid">
+              <article class="metric-card">
+                <span>Tools</span>
+                <strong id="metric-tools">0</strong>
+              </article>
+              <article class="metric-card">
+                <span>Commands</span>
+                <strong id="metric-commands">0</strong>
+              </article>
+              <article class="metric-card">
+                <span>Recent outputs</span>
+                <strong id="metric-outputs">0</strong>
+              </article>
+            </div>
+          </section>
+
+          <section id="chat-log" class="chat-log" aria-live="polite"></section>
+
+          <form id="composer" class="composer">
+            <label class="label" for="prompt-input">Message</label>
+            <textarea
+              id="prompt-input"
+              rows="4"
+              placeholder="Ask the runtime to inspect, browse, or operate within its approval boundaries."
+            ></textarea>
+            <div class="composer-actions">
+              <span class="hint">Enter sends. Shift+Enter adds a newline.</span>
+              <button type="submit" class="button button-primary">Send</button>
+            </div>
+          </form>
         </section>
 
-        <section id="chat-log" class="chat-log" aria-live="polite"></section>
+        <section id="review-view" class="workspace-view" role="tabpanel" hidden>
+          <section class="review-intro hero-card">
+            <div>
+              <p class="eyebrow">Dated evidence review</p>
+              <h3 id="review-scenario-title">Loading scenario…</h3>
+              <p id="review-scenario-meta" class="hero-copy"></p>
+            </div>
+            <div class="boundary-badges" aria-label="Review boundaries">
+              <span class="badge badge-safe">No provider call</span>
+              <span class="badge badge-safe">No write path</span>
+              <span class="badge badge-warning">Human review required</span>
+            </div>
+          </section>
 
-        <form id="composer" class="composer">
-          <label class="label" for="prompt-input">Message</label>
-          <textarea
-            id="prompt-input"
-            rows="4"
-            placeholder="Ask the runtime to browse, write files, run tools, or switch context."
-          ></textarea>
-          <div class="composer-actions">
-            <span class="hint">Enter sends. Shift+Enter adds a newline.</span>
-            <button type="submit" class="button button-primary">Send</button>
+          <div class="review-grid">
+            <form id="review-form" class="review-card">
+              <p class="eyebrow">Candidate answer</p>
+              <p id="review-prompt" class="review-prompt"></p>
+              <label class="label" for="review-input">Text to compare with the dated registry</label>
+              <textarea id="review-input" rows="10" maxlength="20000"></textarea>
+              <div class="review-actions">
+                <button id="load-stale" class="button button-ghost" type="button">Load bundled example</button>
+                <button id="load-corrected" class="button button-ghost" type="button">Load corrected example</button>
+                <button id="run-review" class="button button-primary" type="submit">Run review</button>
+              </div>
+              <p id="review-request-status" class="note" aria-live="polite"></p>
+            </form>
+
+            <section id="review-result" class="review-card" aria-live="polite">
+              <div class="review-result-head">
+                <div>
+                  <p class="eyebrow">Review result</p>
+                  <h3 id="review-value-status">Not run</h3>
+                </div>
+                <span id="review-decision" class="badge">Waiting</span>
+              </div>
+              <div class="review-metrics">
+                <div><strong id="review-critical-count">0</strong><span>critical</span></div>
+                <div><strong id="review-warning-count">0</strong><span>warnings</span></div>
+                <div><strong id="review-info-count">0</strong><span>info</span></div>
+              </div>
+              <div id="review-findings" class="finding-list">
+                <p class="empty-state">Run the review to see bounded findings and source links.</p>
+              </div>
+              <dl class="hash-list">
+                <div><dt>Evidence digest</dt><dd id="review-evidence-digest">-</dd></div>
+                <div><dt>Snapshot hash</dt><dd id="review-snapshot-hash">-</dd></div>
+              </dl>
+              <p id="review-next-step" class="review-next-step"></p>
+            </section>
           </div>
-        </form>
+
+          <section class="review-card">
+            <div class="review-result-head">
+              <div>
+                <p class="eyebrow">Bundled registry</p>
+                <h3>Official dated sources</h3>
+              </div>
+              <span id="review-as-of" class="badge">-</span>
+            </div>
+            <div id="review-evidence" class="evidence-list"></div>
+            <p class="legal-boundary">
+              A matching value is corroboration only. AOIA-Core does not determine legal applicability,
+              approve the answer, or replace current official sources or qualified advice.
+            </p>
+          </section>
+        </section>
       </main>
     </div>
 
     <template id="message-template">
       <article class="message">
-        <div class="message-meta">
-          <span class="message-role"></span>
-        </div>
+        <div class="message-meta"><span class="message-role"></span></div>
         <pre class="message-body"></pre>
+      </article>
+    </template>
+
+    <template id="finding-template">
+      <article class="finding">
+        <span class="finding-severity"></span>
+        <div><h4 class="finding-title"></h4><p class="finding-detail"></p></div>
+      </article>
+    </template>
+
+    <template id="evidence-template">
+      <article class="evidence-item">
+        <div>
+          <h4 class="evidence-title"></h4>
+          <p class="evidence-meta"></p>
+          <p class="evidence-fact"></p>
+        </div>
+        <a class="button button-ghost evidence-link" target="_blank" rel="noreferrer">Official source</a>
       </article>
     </template>
 

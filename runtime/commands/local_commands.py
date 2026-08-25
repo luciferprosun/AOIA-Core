@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from .base import CommandRegistry, CommandResult
+from evidence_review import bundled_scenario, format_review_summary, review_candidate
 from runtime_paths import runtime_state_dir
 from retrieval.facade import (
     linux_filter_by_topic,
@@ -31,6 +32,7 @@ def build_command_registry() -> CommandRegistry:
     registry.register("providers", cmd_providers)
     registry.register("setup", cmd_setup)
     registry.register("hat", cmd_hat)
+    registry.register("review", cmd_review)
     registry.register("scan", cmd_scan)
     registry.register("orchestrator", cmd_orchestrator)
     registry.register("worker", cmd_worker)
@@ -52,6 +54,9 @@ def cmd_help(_args: str, runtime) -> CommandResult:
                 "  /providers       show cloud provider fallback status",
                 "  /setup           show free API setup checklist",
                 "  /hat             list/load/show/clear memory hats",
+                "  /review          review the bundled dated-evidence example without a model call",
+                "  /review corrected  review the bundled corrected example",
+                "  /review TEXT     review supplied text against the bundled dated evidence",
                 "  /scan PATH       scan a project tree after ENTER approval",
                 "  /orchestrator on|off|status",
                 "  /worker status|memory|clear",
@@ -81,6 +86,7 @@ def cmd_status(_args: str, runtime) -> CommandResult:
                 f"  browser_active: {memory.browser_active}",
                 f"  current_url: {memory.current_browser_page or '(none)'}",
                 "  local URL bootstrap: enabled",
+                "  dated evidence review: enabled (deterministic, no provider call)",
             ]
         ),
     )
@@ -123,6 +129,21 @@ def cmd_model(args: str, runtime) -> CommandResult:
 def cmd_tools(_args: str, runtime) -> CommandResult:
     tools = runtime.executor.tool_names()
     return CommandResult(True, "Registered tools:\n  " + "\n  ".join(tools))
+
+
+def cmd_review(args: str, runtime) -> CommandResult:
+    """Run the bounded evidence review without invoking a model provider."""
+
+    _ = runtime
+    scenario = bundled_scenario()
+    text = args.strip()
+    if not text or text.lower() in {"bundled", "example", "stale"}:
+        candidate = str(scenario["candidate_answer"])
+    elif text.lower() == "corrected":
+        candidate = str(scenario["corrected_example"])
+    else:
+        candidate = text
+    return CommandResult(True, format_review_summary(review_candidate(candidate)))
 
 
 def cmd_vault(_args: str, runtime) -> CommandResult:
